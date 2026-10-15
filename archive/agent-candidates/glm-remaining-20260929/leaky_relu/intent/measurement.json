@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.007783999899402261,
+  "reference_ms": 0.007712000049650669,
+  "ratio": 1.0093360800425375,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/leaky_relu/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 1.3895328040234745,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "leaky_relu_out_of_place": "/home/kingdom/.cache/intentdsl/compiler/d8b18b582bc1492f9f6d3f9e889a7b88",
+    "leaky_relu_in_place": "/home/kingdom/.cache/intentdsl/compiler/97b38264424546f0ad58a711e3c4101c"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 24,
+      "seconds": 0.13057208061218262,
+      "winner": "FRAGMENT_D1: 2048, num_warps: 2, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 2.058363425079733
+}

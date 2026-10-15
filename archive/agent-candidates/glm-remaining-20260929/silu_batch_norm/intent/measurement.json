@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.015263999812304974,
+  "reference_ms": 0.042023999616503716,
+  "ratio": 0.3632210154102152,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/silu_batch_norm/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 11.384710610844195,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "silu_batch_norm_eval_f32": "/home/kingdom/.cache/intentdsl/compiler/567f541c6cca43c2851e1a47972c8988",
+    "batch_stats_and_running_update_f32": "/home/kingdom/.cache/intentdsl/compiler/42bb8a12592d46b996e78288df126c9c",
+    "silu_batch_norm_apply_f32": "/home/kingdom/.cache/intentdsl/compiler/8d9f67c670954263ad6ad3c40e548232"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 84,
+      "seconds": 0.6730847358703613,
+      "winner": "FRAGMENT_S9_A0: 1, FRAGMENT_S9_A1: 1, FRAGMENT_S9_A2: 16, FRAGMENT_S9_A3: 128, num_warps: 2, num_ctas: 1, num_stages: 5, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 180,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 12.663209932856262
+}

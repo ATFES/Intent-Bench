@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.005352000007405877,
+  "reference_ms": 0.007648000027984381,
+  "ratio": 0.6997907933868548,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/sigmoid_adaptive_avg_pool2d/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.6509194551035762,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.9751968691125512
+}

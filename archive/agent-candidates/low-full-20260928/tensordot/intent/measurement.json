@@ -1,0 +1,31 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.006392000010237098,
+  "reference_ms": 0.0066720000468194485,
+  "ratio": 0.9580335679530118,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/tensordot/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.01,
+    "rtol": 0.01
+  },
+  "precompile_seconds": 6.691277072997764,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "tensordot_1024x64x1024": "/home/kingdom/.cache/intentdsl/compiler/99b17396b77c41238a8df2438e749e0c"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 62,
+      "measured": 62,
+      "seconds": 0.319995641708374,
+      "winner": "BLOCK_K_5_0_0_7_0_0_7_0_0_8_0_0_3_0: 32, BLOCK_M_5_0_0_7_0_0_7_0_0_8_0_0_3_0: 128, BLOCK_N_5_0_0_7_0_0_7_0_0_8_0_0_3_0: 64, GROUP_SIZE_M: 8, USE_TENSOR_DESCRIPTOR: 0, num_warps: 4, num_ctas: 1, num_stages: 4, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 7.40936200809665
+}

@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.08740000426769257,
+  "reference_ms": 0.08578399941325188,
+  "ratio": 1.0188380684684077,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/symmetric_mm_and_abs_sum/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 23.084590902086347,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "symmetric_mm_and_abs_sum_gemm": "/home/kingdom/.cache/intentdsl/compiler/c71e3c029b8444bd90da1854c4211c2a",
+    "symmetric_mm_and_abs_sum_abs_sum": "/home/kingdom/.cache/intentdsl/compiler/fb5c896412f14715a5924b573a4471aa"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 98,
+      "measured": 98,
+      "seconds": 1.161689043045044,
+      "winner": "BLOCK_K_7_0_0_10_0_0_10_0_0_8_0_0_3_0: 32, BLOCK_M_7_0_0_10_0_0_10_0_0_8_0_0_3_0: 32, BLOCK_N_7_0_0_10_0_0_10_0_0_8_0_0_3_0: 128, GROUP_SIZE_M: 8, USE_TENSOR_DESCRIPTOR: 0, num_warps: 4, num_ctas: 1, num_stages: 4, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 80,
+      "measured": 56,
+      "seconds": 1.8570566177368164,
+      "winner": "NUM_STAGES: 2, REDUCE_CHUNK_1_A0: 16, REDUCE_CHUNK_1_A1_INNER: 1024, num_warps: 32, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 26.596107749035582
+}

@@ -1,0 +1,24 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/symmetric_mm_and_abs_sum/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.8315340878907591,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=176320.0, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=268206544.0, source=268382864.0, abs_error=176320.0, limit=2683.82861328125",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=176320.0, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=268206544.0, source=268382864.0, abs_error=176320.0, limit=2683.82861328125\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.2264137179590762
+}

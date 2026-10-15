@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.16148000210523605,
+  "reference_ms": 0.03417599946260452,
+  "ratio": 4.72495331941727,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/conv2d/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.8299906889442354,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.5452977961394936
+}

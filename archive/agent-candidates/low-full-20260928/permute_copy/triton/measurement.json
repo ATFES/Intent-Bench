@@ -1,0 +1,24 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/permute_copy/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0,
+    "rtol": 0
+  },
+  "precompile_seconds": 0.6535948079545051,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=0.9992826581001282, atol=0, rtol=0; first_failure=1; largest tolerance excess has generated=0.00016427040100097656, source=0.9994469285011292, abs_error=0.9992826581001282, limit=0.0",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.9992826581001282, atol=0, rtol=0; first_failure=1; largest tolerance excess has generated=0.00016427040100097656, source=0.9994469285011292, abs_error=0.9992826581001282, limit=0.0\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.7930816700682044
+}

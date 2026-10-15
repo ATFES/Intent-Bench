@@ -1,0 +1,24 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/grid_sample/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.7645798011217266,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "CUDA error: an illegal memory access was encountered\nSearch for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 462, in evaluate\n    _synchronize(comparison)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 401, in _synchronize\n    torch.cuda.synchronize()\n  File \"/home/kingdom/.venvs/intentdsl-mlir20/lib/python3.10/site-packages/torch/cuda/__init__.py\", line 1108, in synchronize\n    return torch._C._cuda_synchronize()\ntorch.AcceleratorError: CUDA error: an illegal memory access was encountered\nSearch for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 146, in gpu_execution\n    yield\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 464, in evaluate\n    raise PipelineStageError(\"generated_launch\", str(error)) from error\nexperiments._common.measurement.PipelineStageError: CUDA error: an illegal memory access was encountered\nSearch for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 153, in run\n    with gpu_execution(arguments.gpu_lock, providers={arguments.target}):\n  File \"/usr/lib/python3.10/contextlib.py\", line 153, in __exit__\n    self.gen.throw(typ, value, traceback)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 149, in gpu_execution\n    window.release()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 82, in release\n    torch.cuda.synchronize()\n  File \"/home/kingdom/.venvs/intentdsl-mlir20/lib/python3.10/site-packages/torch/cuda/__init__.py\", line 1108, in synchronize\n    return torch._C._cuda_synchronize()\ntorch.AcceleratorError: CUDA error: an illegal memory access was encountered\nSearch for `cudaErrorIllegalAddress' in https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__TYPES.html for more information.\nCUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.\nFor debugging consider passing CUDA_LAUNCH_BLOCKING=1\nCompile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.\n\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.1846087649464607
+}

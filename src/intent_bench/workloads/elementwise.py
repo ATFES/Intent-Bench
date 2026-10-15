@@ -1,0 +1,75 @@
+from __future__ import annotations
+
+import numpy as np
+
+from ..model import Case, Implementation, PreparedCall, Workload, ExpressionGap, EnvironmentUnavailable
+from ..loading import intent_environment
+
+
+def _numpy(name, x):
+    if name == "softmax":
+        value = x.astype(np.float32)
+        exp = np.exp(value - value.max(axis=-1, keepdims=True))
+        return (exp / exp.sum(axis=-1, keepdims=True)).astype(x.dtype)
+    if name == "relu":
+        return np.maximum(x, 0)
+    raise ValueError(name)
+
+
+def _prepare(name, implementation, case, inputs, env):
+    x, = inputs
+    if implementation == "numpy":
+        state = {}
+        def run():
+            state["output"] = _numpy(name, x)
+        return PreparedCall(run, lambda: state["output"],scopes=("prepared_call","host_call"))
+    import torch
+    target = implementation.partition(":")[2]
+    gpu = implementation in {"triton", "cutile"} or target in {"triton", "cutile"}
+    device = env.device
+    if device == "auto":
+        device = "cuda:0" if gpu or (implementation == "torch" and torch.cuda.is_available()) else "cpu"
+    if gpu and not device.startswith("cuda"):
+        raise EnvironmentUnavailable(f"{implementation} requires --device cuda:N")
+    x = torch.from_numpy(x).to(device)
+    if implementation == "torch":
+        state = {}
+        def run():
+            state["output"] = torch.softmax(x, dim=-1) if name == "softmax" else torch.relu(x)
+        return PreparedCall(run, lambda: state["output"], device=device,scopes=("prepared_call","host_call"))
+    if implementation in {"triton", "cutile"}:
+        from ..implementations.gpu import prepare
+        return prepare(name, implementation, x)
+    intent = intent_environment(env)
+    if name == "softmax":
+        from kernels.normalization.softmax import stable_softmax, stable_softmax_f16
+        definition = stable_softmax if x.dtype == torch.float32 else stable_softmax_f16
+    else:
+        if x.dtype != torch.float16:
+            raise ExpressionGap("the mainline relu_forward example currently declares f16 input")
+        from kernels.activation.pointwise import relu_forward
+        definition = relu_forward
+    target_type = {"triton": intent.TritonTarget, "cutile": intent.CuTileTarget, "mojo": intent.MojoTarget}[target]
+    target_options = {"device": x.device.index or 0} if gpu else {"workers": env.threads}
+    program = intent.generate(definition, target=target_type(**target_options), compiler=env.compiler)
+    artifact = program.materialize()
+    call = artifact.prepare(x)
+    host_state={}
+    def host_run():host_state['output']=artifact.run(x)
+    return PreparedCall(call.launch, call.result, compile=call.compile, device=device,
+                        metadata={"artifact": str(program.directory) if hasattr(program, "directory") else str(program.cache_directory)},
+                        host_run=host_run,host_result=lambda:host_state['output'])
+
+
+def build(name="softmax"):
+    cases = [Case(f"{m}x{n}-{dtype}", {"rows":m,"columns":n,"dtype":dtype})
+             for m,n in ((1,128),(64,1024),(512,4096)) for dtype in ("float16", "float32")]
+    def inputs(case, seed):
+        p = case.parameters
+        return (np.random.default_rng(seed).normal(size=(p["rows"],p["columns"])).astype(p["dtype"]),)
+    impls = {}
+    for impl in ("numpy", "torch", "triton", "cutile", "intent:triton", "intent:cutile", "intent:mojo"):
+        impls[impl] = Implementation(impl, lambda case, args, env, impl=impl: _prepare(name, impl, case, args, env))
+    return Workload(name, cases, inputs, impls, oracle=lambda case,args: _numpy(name,*args),
+                    atol=2e-3, rtol=2e-3, family="reduction" if name=="softmax" else "elementwise",
+                    work=lambda case: {"bytes":2*case.parameters["rows"]*case.parameters["columns"]*np.dtype(case.parameters["dtype"]).itemsize})

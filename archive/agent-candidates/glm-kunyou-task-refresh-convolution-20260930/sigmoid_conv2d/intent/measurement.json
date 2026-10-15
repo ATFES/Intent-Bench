@@ -1,0 +1,5 @@
+{
+  "status": "benchmark_timeout",
+  "failure_stage": "candidate_precompile",
+  "error": "preparation/execution exceeded the benchmark limit, excluding GPU queue time"
+}

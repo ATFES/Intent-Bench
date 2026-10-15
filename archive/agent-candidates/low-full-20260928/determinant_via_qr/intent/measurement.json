@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.07354399934411049,
+  "reference_ms": 0.202224001288414,
+  "ratio": 0.3636759181677019,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/determinant_via_qr/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 38.665579116903245,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "determinant_qr": "/home/kingdom/.cache/intentdsl/compiler/0a1d43dd18fa4e2e9e982f0e0b55df0e",
+    "determinant_finish": "/home/kingdom/.cache/intentdsl/compiler/08cd4675e36248fc9b452a0e01265027"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 160,
+      "seconds": 1.1566081047058105,
+      "winner": "ITERATION_69: 16, MATERIALIZE_AXIS_VIEW_2: 64, num_warps: 4, num_ctas: 1, num_stages: 5, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 120,
+      "measured": 120,
+      "seconds": 0.5195400714874268,
+      "winner": "NUM_STAGES: 5, REDUCE_CHUNK_5_A0: 128, num_warps: 2, num_ctas: 1, num_stages: 5, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 47.44419599883258
+}

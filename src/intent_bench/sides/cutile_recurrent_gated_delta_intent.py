@@ -1,0 +1,18 @@
+from __future__ import annotations
+from intent_bench.sides import Side
+import math
+import torch
+from kernels.streaming.gated_delta import recurrent_gated_delta_fwd
+from intent_bench.corpus._common.measurement import compile_single
+from intent_bench.corpus._common.model import Tolerance
+
+def prepare(context):
+    (batch, sequence, heads, key_dimension, value_dimension) = (2, 2048, 8, 128, 128)
+    query = torch.randn((batch, sequence, heads, key_dimension), device='cuda', dtype=torch.bfloat16) * 0.1
+    key = torch.randn_like(query) * 0.1
+    value = torch.randn((batch, sequence, heads, value_dimension), device='cuda', dtype=torch.bfloat16) * 0.1
+    gate = -torch.rand((batch, sequence, heads), device='cuda', dtype=torch.bfloat16) * 0.5
+    beta = torch.sigmoid(torch.randn_like(gate))
+    scale = 1.0 / math.sqrt(key_dimension)
+    (_, generated) = compile_single(context, recurrent_gated_delta_fwd, (query, key, value, gate, beta, scale), constexprs={'HEAD_GROUP': 1})
+    return Side(generated, (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, owners=locals())

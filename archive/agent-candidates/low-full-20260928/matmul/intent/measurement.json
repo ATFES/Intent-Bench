@@ -1,0 +1,31 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.009727999567985535,
+  "reference_ms": 0.009519999846816063,
+  "ratio": 1.0218487105584395,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/matmul/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.01,
+    "rtol": 0.01
+  },
+  "precompile_seconds": 11.826705622021109,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "matmul_fp16": "/home/kingdom/.cache/intentdsl/compiler/5c5eb4d5cad2409a838fdf4819cac3c3"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 62,
+      "measured": 62,
+      "seconds": 0.3272719383239746,
+      "winner": "BLOCK_K_5_0_0_9_0_0_9_0_0_7_0_0_3_0: 128, BLOCK_M_5_0_0_9_0_0_9_0_0_7_0_0_3_0: 64, BLOCK_N_5_0_0_9_0_0_9_0_0_7_0_0_3_0: 128, GROUP_SIZE_M: 8, USE_TENSOR_DESCRIPTOR: 1, num_warps: 4, num_ctas: 1, num_stages: 4, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 12.571487447014078
+}

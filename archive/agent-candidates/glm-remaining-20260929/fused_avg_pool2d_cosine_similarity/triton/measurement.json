@@ -1,0 +1,24 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_avg_pool2d_cosine_similarity/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.800987346097827,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=0.14238211512565613, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=0.007103771902620792, source=0.14948588609695435, abs_error=0.14238211512565613, limit=0.00010149485751753673",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 158, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.14238211512565613, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=0.007103771902620792, source=0.14948588609695435, abs_error=0.14238211512565613, limit=0.00010149485751753673\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.3223950727842748
+}

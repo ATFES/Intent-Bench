@@ -1,0 +1,42 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_silu_layer_norm_conv2d/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 50.8858230561018,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=0.07797670364379883, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=4.770771026611328, source=4.692794322967529, abs_error=0.07797670364379883, limit=0.00014692793774884194",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.07797670364379883, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=4.770771026611328, source=4.692794322967529, abs_error=0.07797670364379883, limit=0.00014692793774884194\n",
+  "compiler_artifacts": {
+    "fused_conv2d": "/home/kingdom/.cache/intentdsl/compiler/f0dcbdcddf4a4621a20d7c9420059ea0",
+    "fused_layernorm_silu": "/home/kingdom/.cache/intentdsl/compiler/8c51d1df3c4d49159fe3033b7187a0c9"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 96,
+      "measured": 96,
+      "seconds": 1.5140743255615234,
+      "winner": "FRAGMENT_S10_A0: 16, FRAGMENT_S11_A0: 64, FRAGMENT_S6_A0: 1, FRAGMENT_S8_A0: 1, NUM_STAGES: 1, num_warps: 4, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 96,
+      "measured": 96,
+      "seconds": 1.961812973022461,
+      "winner": "FRAGMENT_S33_A0: 64, FRAGMENT_S37_A0: 64, NUM_STAGES: 1, REDUCE_CHUNK_11_A0_E64: 4, REDUCE_CHUNK_9_A0_E64: 4, num_warps: 32, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 54.852563122985885
+}

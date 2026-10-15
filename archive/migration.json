@@ -1,0 +1,3092 @@
+[
+  {
+    "original": "experiments/README.md",
+    "destination": "archive/experiments/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/__init__.py",
+    "destination": "src/intent_bench/corpus/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/_common/__init__.py",
+    "destination": "src/intent_bench/corpus/_common/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/_common/loading.py",
+    "destination": "src/intent_bench/corpus/_common/loading.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/_common/measurement.py",
+    "destination": "src/intent_bench/corpus/_common/measurement.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/_common/model.py",
+    "destination": "src/intent_bench/corpus/_common/model.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/_common/providers.py",
+    "destination": "archive/legacy-tools/_common/providers.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/_common/registry.py",
+    "destination": "archive/legacy-tools/_common/registry.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/_common/runner.py",
+    "destination": "archive/legacy-tools/_common/runner.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/_common/support.py",
+    "destination": "archive/legacy-tools/_common/support.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/agent_tritonbench/README.md",
+    "destination": "archive/experiments/agent_tritonbench/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/__init__.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/__main__.py",
+    "destination": "archive/legacy-tools/agent_tritonbench/__main__.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/agent_tritonbench/agent.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/agent.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/agent_tritonbench/benchmark.py",
+    "destination": "archive/legacy-tools/agent_tritonbench/benchmark.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/agent_tritonbench/instructions.md",
+    "destination": "archive/experiments/agent_tritonbench/instructions.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/materials/triton/vector_add.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/materials/triton/vector_add.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/program.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/program.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/agent_tritonbench/reports/intent-tritonbench-correctness-and-jit.md",
+    "destination": "archive/experiments/agent_tritonbench/reports/intent-tritonbench-correctness-and-jit.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/reports/intent-tritonbench-first-stage-macro-analysis.md",
+    "destination": "archive/experiments/agent_tritonbench/reports/intent-tritonbench-first-stage-macro-analysis.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/reports/intent-tritonbench-reset-and-manual-mcp.md",
+    "destination": "archive/experiments/agent_tritonbench/reports/intent-tritonbench-reset-and-manual-mcp.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-deepseek-v4-pro.csv",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-deepseek-v4-pro.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-glm.csv",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-glm.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/abs/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/abs/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/abs/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/abs/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_gelu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_gelu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_gelu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_gelu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/add_mean/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/addmm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/addmm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/addmm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/addmm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/argmax/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/asin/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/asin/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/asin/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/asin/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/batch_norm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/batch_norm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/batch_norm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/batch_norm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/bitwise_and/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/bitwise_and/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/bitwise_and/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/bitwise_and/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/chebyshev_polynomial_t/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/chebyshev_polynomial_t/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/chebyshev_polynomial_t/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/chebyshev_polynomial_t/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/combined_activation/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/combined_activation/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/combined_activation/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/combined_activation/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/conv2d_add/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos_avg_pool1d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos_avg_pool1d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos_avg_pool1d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/cos_avg_pool1d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/determinant_via_qr/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/determinant_via_qr/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/determinant_via_qr/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/determinant_via_qr/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/div/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/div/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/div/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/div/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/environment.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/environment.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/erfc_sqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/erfc_sqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/erfc_sqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/erfc_sqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_mean/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_sqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_sqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_sqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/exp_sqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/floor/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/floor/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/floor/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/floor/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_add_mul_groupnorm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_add_mul_groupnorm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_add_mul_groupnorm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_add_mul_groupnorm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_avg_pool2d_cosine_similarity/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_avg_pool2d_cosine_similarity/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_avg_pool2d_cosine_similarity/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_avg_pool2d_cosine_similarity/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cholesky_solve/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cosine_embedding_loss_with_normalization/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_log_softmax/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_log_softmax/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_log_softmax/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_log_softmax/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_softmax_layernorm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_softmax_layernorm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_softmax_layernorm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_cross_entropy_softmax_layernorm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_embedding_add_tanh/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_embedding_add_tanh/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_embedding_add_tanh/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_embedding_add_tanh/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_gather_masked_fill/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_gather_masked_fill/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_gather_masked_fill/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_gather_masked_fill/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_hardsigmoid_batch_norm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_hardsigmoid_batch_norm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_hardsigmoid_batch_norm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_hardsigmoid_batch_norm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_index_select_eq/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_index_select_eq/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_index_select_eq/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_index_select_eq/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_instance_norm_selu_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_instance_norm_selu_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_instance_norm_selu_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_instance_norm_selu_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_layer_norm_relu_linear/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_layer_norm_relu_linear/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_layer_norm_relu_linear/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_layer_norm_relu_linear/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_lu_solve/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_masked_select_add_gelu/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_mv_sigmoid_sub/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_mv_sigmoid_sub/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_mv_sigmoid_sub/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_mv_sigmoid_sub/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_pairwise_distance_adaptive_avg_pool2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_pairwise_distance_adaptive_avg_pool2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_pairwise_distance_adaptive_avg_pool2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_pairwise_distance_adaptive_avg_pool2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_qr_solve/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_silu_layer_norm_conv2d/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_svd_reconstruct/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_svd_reconstruct/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_svd_reconstruct/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_svd_reconstruct/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_tile_exp/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_tile_exp/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_tile_exp/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/fused_tile_exp/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gammaln/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gammaln/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gammaln/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gammaln/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/gelu_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/grid_sample/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/grid_sample/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/grid_sample/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/grid_sample/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/i0/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/i0/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/i0/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/i0/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/ifftshift/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/ifftshift/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/ifftshift/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/ifftshift/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/leaky_relu_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/least_squares_qr/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log1p/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log1p/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log1p/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log1p/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_softmax_linear/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_softmax_linear/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_softmax_linear/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_softmax_linear/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_tanh/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_tanh/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_tanh/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/log_tanh/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logit/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logit/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logit/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logit/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/logsumexp/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matmul/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matrix_power_eig/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matrix_power_eig/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/matrix_power_eig/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/matrix_power_eig/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/max/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mean/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/min/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/min/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/min/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/min/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_relu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_relu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_relu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_relu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_sub/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_sub/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_sub/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/mul_sub/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalize_pairwise_distance/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalize_pairwise_distance/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalize_pairwise_distance/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalize_pairwise_distance/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalized_cosine_similarity/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalized_cosine_similarity/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalized_cosine_similarity/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/normalized_cosine_similarity/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/permute_copy/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/permute_copy/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/permute_copy/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/permute_copy/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_batch_norm_conv2d/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_sqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_sqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_sqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/relu_sqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/results.csv",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/results.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/rsqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/rsqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/rsqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/rsqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/selu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/selu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/selu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/selu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_adaptive_avg_pool2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_adaptive_avg_pool2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_adaptive_avg_pool2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_adaptive_avg_pool2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_argmax/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_argmax/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_argmax/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_argmax/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_batch_norm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_batch_norm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_batch_norm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_batch_norm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_conv2d/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_conv2d/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_conv2d/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sigmoid_conv2d/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/silu_batch_norm/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/silu_batch_norm/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/silu_batch_norm/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/silu_batch_norm/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax_log/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax_log/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax_log/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softmax_log/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softplus_linear/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softplus_linear/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/softplus_linear/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/softplus_linear/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/cutile-tuning.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/cutile-tuning.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_multiple_lu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_multiple_lu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_multiple_lu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_multiple_lu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_symmetric_ldl/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_symmetric_ldl/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_symmetric_ldl/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/solve_symmetric_ldl/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_exp/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_exp/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_exp/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_exp/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_tanh/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_tanh/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_tanh/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sqrt_tanh/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/std/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub_gelu/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub_gelu/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub_gelu/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sub_gelu/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum_std/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum_std/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum_std/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/sum_std/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/performance.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/symmetric_mm_and_abs_sum/intent/performance.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tanh/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tanh/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tanh/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tanh/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot_rsqrt/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot_rsqrt/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot_rsqrt/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/tensordot_rsqrt/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/trunc/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/trunc/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/trunc/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/trunc/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/agent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/agent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/candidate.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/candidate.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/development.py",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-high-refresh-20260923/zeta/intent/development.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-low.csv",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-low.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-selected.csv",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-selected.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/h100-selected.json",
+    "destination": "archive/experiments/agent_tritonbench/results/h100-selected.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/results/integration/abs-intent.json",
+    "destination": "archive/experiments/agent_tritonbench/results/integration/abs-intent.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/retrieval.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/retrieval.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/suite-100.json",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/suite-100.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/suite.json",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/suite.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/agent_tritonbench/tasks.py",
+    "destination": "src/intent_bench/corpus/agent_tritonbench/tasks.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/README.md",
+    "destination": "archive/experiments/cpu/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/__main__.py",
+    "destination": "archive/legacy-tools/cpu/__main__.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/attention/causal/causal.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal.mojo",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/attention/linear/linear.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear.mojo",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/contraction/gemm/gemm.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/contraction/gemm/gemm.mojo",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/contraction/gemm/gemm_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/contraction/gemm/gemm_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/normalization/rms_norm/rms_norm.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/normalization/rms_norm/rms_norm.mojo",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/normalization/rms_norm/rms_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/normalization/rms_norm/rms_norm_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/pointwise/batched_affine/batched_affine.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/pointwise/batched_affine/batched_affine.mojo",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/intentdsl/pointwise/batched_affine/batched_affine_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/intentdsl/pointwise/batched_affine/batched_affine_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/contraction/gemm/gemm.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/contraction/gemm/gemm.mojo",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/contraction/gemm/gemm_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/contraction/gemm/gemm_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm.mojo",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm.mojo",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/softmax/softmax.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/softmax/softmax.mojo",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/normalization/softmax/softmax_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/normalization/softmax/softmax_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine.mojo",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine.mojo",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/mojo/source.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/mojo/source.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/pytorch/cpu_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/intentdsl/attention/attention_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/intentdsl/attention/attention_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/intentdsl/attention/causal/causal.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/intentdsl/attention/causal/causal.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/intentdsl/attention/linear/linear.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/intentdsl/attention/linear/linear.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/intentdsl/contraction/i8/i8.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/intentdsl/contraction/i8/i8.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/intentdsl/contraction/i8/i8_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/intentdsl/contraction/i8/i8_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection_runtime.py",
+    "destination": "src/intent_bench/corpus/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/__init__.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/activation.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/activation.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/atomics.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/atomics.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/attention.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/attention.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/backward.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/backward.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/cache.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/cache.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/common.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/common.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/compaction.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/compaction.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/contraction.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/contraction.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/convolution.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/convolution.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/dynamic_programming.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/dynamic_programming.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/factorization.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/factorization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/indexing.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/indexing.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/layout.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/layout.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/loss.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/loss.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/misc.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/misc.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/mla.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/mla.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/normalization.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/normalization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/optimization.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/optimization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/pointwise.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/pointwise.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/position.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/position.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/quantization.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/quantization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/ragged.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/ragged.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/regularization.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/regularization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/routing.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/routing.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/scan.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/scan.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/sorting.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/sorting.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/sparse.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/sparse.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/spectral.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/spectral.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/statistics.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/statistics.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/streaming.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/streaming.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/variants.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/variants.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/mojo/vision.py",
+    "destination": "archive/legacy-tools/cpu/providers/mojo/vision.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/__init__.py",
+    "destination": "archive/legacy-tools/cpu/providers/weft/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/attention.py",
+    "destination": "archive/legacy-tools/cpu/providers/weft/attention.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/contraction.py",
+    "destination": "archive/legacy-tools/cpu/providers/weft/contraction.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/ime.json",
+    "destination": "archive/legacy-tools/cpu/providers/weft/ime.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/matrix.py",
+    "destination": "archive/legacy-tools/cpu/providers/weft/matrix.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/providers/weft/rvv.json",
+    "destination": "archive/legacy-tools/cpu/providers/weft/rvv.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/registry.py",
+    "destination": "src/intent_bench/corpus/cpu/registry.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/cpu/reports/cpu-compiler-progress-and-ime.md",
+    "destination": "archive/experiments/cpu/reports/cpu-compiler-progress-and-ime.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/reports/cpu-implementation-and-example-coverage.md",
+    "destination": "archive/experiments/cpu/reports/cpu-implementation-and-example-coverage.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/reports/cpu-programmable-lowering-reassessment.md",
+    "destination": "archive/experiments/cpu/reports/cpu-programmable-lowering-reassessment.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/results/mojo-x86.csv",
+    "destination": "archive/experiments/cpu/results/mojo-x86.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/cpu/results/weft-rvv.csv",
+    "destination": "archive/experiments/cpu/results/weft-rvv.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/README.md",
+    "destination": "archive/experiments/gpu/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/__main__.py",
+    "destination": "archive/legacy-tools/gpu/__main__.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/causal-conv1d/convolution/causal/causal_conv1d.cpp",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/causal-conv1d/convolution/causal/causal_conv1d.cpp",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-library-samples/sparse/csr_spmv/spmv_csr_example.c",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-library-samples/sparse/csr_spmv/spmv_csr_example.c",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_common.h",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_common.h",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_kernel.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_kernel.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_reduction.cuh",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/simulation/monte_carlo/MonteCarlo_reduction.cuh",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/sorting/bitonic/bitonicSort.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/sorting/bitonic/bitonicSort.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/sorting/bitonic/sortingNetworks_common.cuh",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/sorting/bitonic/sortingNetworks_common.cuh",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/statistics/histogram/histogram256.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/statistics/histogram/histogram256.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cuda-samples/statistics/histogram/histogram_common.h",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cuda-samples/statistics/histogram/histogram_common.h",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/cudasw4/dynamic_programming/smith_waterman/dpx_s16_kernels.cuh",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/cudasw4/dynamic_programming/smith_waterman/dpx_s16_kernels.cuh",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/faiss/clustering/kmeans_assignment/Distance.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/faiss/clustering/kmeans_assignment/Distance.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/flashlight/dynamic_programming/viterbi/ViterbiPath.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/flashlight/dynamic_programming/viterbi/ViterbiPath.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/flashlight/dynamic_programming/viterbi/ViterbiPath.cuh",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/flashlight/dynamic_programming/viterbi/ViterbiPath.cuh",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/magma/factorization/householder_qr/testing_zgeqrf_batched.cpp",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/magma/factorization/householder_qr/testing_zgeqrf_batched.cpp",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/magma/factorization/householder_qr/zgeqr2_batched.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/magma/factorization/householder_qr/zgeqr2_batched.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/magma/factorization/householder_qr/zgeqrf_batched.cpp",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/magma/factorization/householder_qr/zgeqrf_batched.cpp",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/torchvision/vision/nms/nms_kernel.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/torchvision/vision/nms/nms_kernel.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/torchvision/vision/roi_align/roi_align_kernel.cu",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/torchvision/vision/roi_align/roi_align_kernel.cu",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/vkfft/spectral/fft/vkFFT_RadixKernels.h",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/vkfft/spectral/fft/vkFFT_RadixKernels.h",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cuda/vkfft/spectral/fft/vkFFT_RadixStage.h",
+    "destination": "archive/legacy-tools/gpu/baselines/cuda/vkfft/spectral/fft/vkFFT_RadixStage.h",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/README.md",
+    "destination": "archive/experiments/gpu/baselines/cutile/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/attention/fmha/AttentionFMHA.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/attention/fmha/AttentionFMHA.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/attention/fmha/AttentionFMHA_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/attention/fmha/AttentionFMHA_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/gemm/dense/MatMul.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/gemm/dense/MatMul.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/gemm/dense/MatMul_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/gemm/dense/MatMul_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/moe/fused/MoE.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/moe/fused/MoE.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/moe/fused/MoE_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/moe/fused/MoE_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/normalization/layer_norm/LayerNorm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/normalization/layer_norm/LayerNorm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/cutile-python/normalization/layer_norm/LayerNorm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/cutile-python/normalization/layer_norm/LayerNorm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/fused/geglu.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/fused/geglu.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/fused/geglu_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/fused/geglu_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/fused/gelu.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/fused/gelu.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/fused/gelu_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/fused/gelu_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/relu/relu.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/relu/relu.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/relu/relu_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/relu/relu_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/silu_and_mul/silu_and_mul.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/silu_and_mul/silu_and_mul.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/silu_and_mul/silu_and_mul_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/silu_and_mul/silu_and_mul_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/swiglu/swiglu.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/swiglu/swiglu.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/activation/swiglu/swiglu_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/activation/swiglu/swiglu_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/dense/attention.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/dense/attention.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/dense/attention_backward_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/dense/attention_backward_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/dense/attention_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/dense/attention_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/flash_decode/flash_decode.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/flash_decode.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/flash_decode/flash_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/flash_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/flash_decode/splitk_reduce.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/splitk_reduce.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/flash_decode/splitk_reduce_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/splitk_reduce_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/gemma_decode/gemma_attention_decode.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/gemma_decode/gemma_attention_decode.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/gemma_decode/gemma_attention_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/gemma_decode/gemma_attention_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/gemma_prefill/gemma_attention.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/gemma_prefill/gemma_attention.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/gemma_prefill/gemma_attention_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/gemma_prefill/gemma_attention_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla/mla.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla/mla.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla/mla_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla/mla_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla_decode_split/mla_decoding_split_kv.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla_decode_split/mla_decoding_split_kv.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/mla_decode_split/mla_decoding_split_kv_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/mla_decode_split/mla_decoding_split_kv_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sink_decode/attention_sink_decode.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sink_decode/attention_sink_decode.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sink_decode/attention_sink_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sink_decode/attention_sink_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sink_prefill/attention_sink.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sink_prefill/attention_sink.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sink_prefill/attention_sink_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sink_prefill/attention_sink_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sliding_window/swa_attention.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sliding_window/swa_attention.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sliding_window/swa_attention_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sliding_window/swa_attention_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sparse_mla/sparse_mla.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sparse_mla/sparse_mla.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/attention/sparse_mla/sparse_mla_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/attention/sparse_mla/sparse_mla_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/batched/bmm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/batched/bmm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/batched/bmm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/batched/bmm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/dense/matmul.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/dense/matmul.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/dense/matmul_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/dense/matmul_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/grouped/group_gemm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/grouped/group_gemm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/gemm/grouped/group_gemm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/gemm/grouped/group_gemm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/mhc/fused/mhc.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/mhc/fused/mhc_apply_residual_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_apply_residual_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/mhc/fused/mhc_gemm_rms_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_gemm_rms_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/mhc/fused/mhc_sinkhorn_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_sinkhorn_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/moe/alignment/moe_align_block.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/moe/alignment/moe_align_block.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/moe/alignment/moe_align_block_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/moe/alignment/moe_align_block_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/moe/fused/moe.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/moe/fused/moe.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/moe/fused/moe_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/moe/fused/moe_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/normalization/rms_norm/rms_norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/normalization/rms_norm/rms_norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/normalization/rms_norm/rms_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/normalization/rms_norm/rms_norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/normalization/softmax/softmax.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/normalization/softmax/softmax.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/normalization/softmax/softmax_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/normalization/softmax/softmax_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/position/rope/rope.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/position/rope/rope.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/position/rope/rope_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/position/rope/rope_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/quantization/nvfp4/nvfp4_quantize.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/quantization/nvfp4/nvfp4_quantize.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/quantization/nvfp4/nvfp4_quantize_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/quantization/nvfp4/nvfp4_quantize_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/regularization/dropout/dropout.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/regularization/dropout/dropout.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/regularization/dropout/dropout_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/regularization/dropout/dropout_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/support/runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/support/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/support/runtime_cases.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/support/runtime_cases.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/cutile/tilegym/support/utils.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/cutile/tilegym/support/utils.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/README.md",
+    "destination": "archive/experiments/gpu/baselines/triton/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/fla/conv/causal1d/causal_conv_update_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/fla/conv/causal1d/causal_conv_update_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/fla/conv/causal1d/causal_conv_varlen_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/fla/conv/causal1d/causal_conv_varlen_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/fla/conv/causal1d/kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/fla/conv/causal1d/kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/fla/conv/causal1d/ops.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/fla/conv/causal1d/ops.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/fla/support/runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/fla/support/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv2d.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv2d.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/indexing/embedding/embedding.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/indexing/roll/roll.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/layout/copy/copy.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/layout/copy/copy.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/softmax/softmax.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/optimization/adamw/_fused_adam.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/optimization/adamw/_fused_adam.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/statistics/histogram/histc.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/loss/cross_entropy/cross_entropy.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/loss/cross_entropy/cross_entropy.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/loss/cross_entropy/cross_entropy_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/loss/cross_entropy/cross_entropy_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/normalization/layer_norm/layer_norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/normalization/layer_norm/layer_norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/normalization/layer_norm/layer_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/normalization/layer_norm/layer_norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/normalization/layer_norm/support/library.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/normalization/layer_norm/support/library.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/normalization/layer_norm/support/torch.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/normalization/layer_norm/support/torch.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/position/rotary/rotary.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/position/rotary/rotary.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/flash-attention/position/rotary/rotary_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flash-attention/position/rotary/rotary_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/activation/swiglu/swiglu.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/activation/swiglu/swiglu.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/activation/swiglu/swiglu_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/activation/swiglu/swiglu_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/embedding/lookup/embedding.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/embedding/lookup/embedding.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/embedding/lookup/embedding_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/embedding/lookup/embedding_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/loss/cross_entropy/cross_entropy.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/loss/cross_entropy/cross_entropy.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/loss/cross_entropy/cross_entropy_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/loss/cross_entropy/cross_entropy_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/normalization/fused_add_rms_norm/fused_add_rms_norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/normalization/fused_add_rms_norm/fused_add_rms_norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/normalization/fused_add_rms_norm/fused_add_rms_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/normalization/fused_add_rms_norm/fused_add_rms_norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/normalization/rms_norm/rms_norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/normalization/rms_norm/rms_norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/normalization/rms_norm/rms_norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/normalization/rms_norm/rms_norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/position/rope/rope.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/position/rope/rope.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/position/rope/rope_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/position/rope/rope_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/support/liger_kernel/__init__.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/support/liger_kernel/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/support/liger_kernel/ops/utils.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/support/liger_kernel/ops/utils.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/liger-kernel/support/liger_kernel/utils.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/liger-kernel/support/liger_kernel/utils.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_forward_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_forward_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/convolution/causal_conv1d/causal_1d_conv.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/convolution/causal_conv1d/causal_1d_conv.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/convolution/causal_conv1d/causal_1d_conv_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/convolution/causal_conv1d/causal_1d_conv_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/gemm/fp8_scaled/scaled_fp8_gemm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/gemm/fp8_scaled/scaled_fp8_gemm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/gemm/fp8_scaled/scaled_fp8_gemm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/gemm/fp8_scaled/scaled_fp8_gemm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/moe/grouped/v0_moe_fused.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/moe/grouped/v0_moe_fused.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/moe/grouped/v0_moe_fused_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/moe/grouped/v0_moe_fused_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/moe/splitk/v1_moe_fused.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/moe/splitk/v1_moe_fused.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/moe/splitk/v1_moe_fused_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/moe/splitk/v1_moe_fused_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/moe/support/projection_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/moe/support/projection_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/quantization/fp8_groupwise/float8_groupwise_quant.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/quantization/fp8_groupwise/float8_groupwise_quant.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/quantization/fp8_groupwise/float8_groupwise_quant_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/quantization/fp8_groupwise/float8_groupwise_quant_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/meta-applied-ai/support/runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/meta-applied-ai/support/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_fwd.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_fwd.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_fwd_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_fwd_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_step.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_step.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_step_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_step_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/utils.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/utils.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/softplus.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/softplus.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_bmm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_bmm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/utils/determinism.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/utils/determinism.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/state-spaces-mamba/support/runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/state-spaces-mamba/support/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/attention/fused/06-fused-attention.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/attention/fused/06-fused-attention.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/attention/fused/06-fused-attention_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/attention/fused/06-fused-attention_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/gemm/grouped/08-grouped-gemm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/gemm/grouped/08-grouped-gemm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/gemm/grouped/08-grouped-gemm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/gemm/grouped/08-grouped-gemm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/normalization/layer_norm/05-layer-norm.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/normalization/layer_norm/05-layer-norm.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/normalization/layer_norm/05-layer-norm_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/normalization/layer_norm/05-layer-norm_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/normalization/softmax/02-fused-softmax.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/normalization/softmax/02-fused-softmax.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/triton/normalization/softmax/02-fused-softmax_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/triton/normalization/softmax/02-fused-softmax_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/tritonbench/ragged/jagged_mean/jagged_mean_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/tritonbench/ragged/jagged_mean/jagged_mean_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/tritonbench/ragged/jagged_mean/kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/tritonbench/ragged/jagged_mean/kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/attention/minimax_m3/sparse_attn.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/attention/minimax_m3/sparse_attn.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/attention/minimax_m3/sparse_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/attention/minimax_m3/sparse_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/attention/paged_decode/paged_gqa_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_gqa_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/attention/paged_decode/paged_mla_decode_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_mla_decode_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/attention/paged_decode/triton_decode_attention.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/attention/paged_decode/triton_decode_attention.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/vllm/support/runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/vllm/support/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/gemm/tiled/matmul_perf_model.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/gemm/tiled/matmul_perf_model.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/gemm/tiled/tiled_matmul_kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/gemm/tiled/tiled_matmul_kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/gemm/tiled/tiled_matmul_kernels_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/gemm/tiled/tiled_matmul_kernels_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/indexing/index_select_cat/k_index_select_cat.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/indexing/index_select_cat/k_index_select_cat.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/indexing/index_select_cat/k_index_select_cat_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/indexing/index_select_cat/k_index_select_cat_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/indexing/scaled_index_add/k_scaled_index_add.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/indexing/scaled_index_add/k_scaled_index_add.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/indexing/scaled_index_add/k_scaled_index_add_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/indexing/scaled_index_add/k_scaled_index_add_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/normalization/rms_norm/rmsnorm_kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/normalization/rms_norm/rmsnorm_kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/normalization/rms_norm/rmsnorm_kernels_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/normalization/rms_norm/rmsnorm_kernels_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/position/rope_padded/rope_padded_kernels.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/position/rope_padded/rope_padded_kernels.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/position/rope_padded/rope_padded_kernels_runtime.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/position/rope_padded/rope_padded_kernels_runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/support/triton/importing.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/support/triton/importing.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/baselines/triton/xformers/support/triton/vararg_kernel.py",
+    "destination": "src/intent_bench/corpus/gpu/baselines/triton/xformers/support/triton/vararg_kernel.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/h100-cutile-analysis.md",
+    "destination": "archive/experiments/gpu/h100-cutile-analysis.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/__init__.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/activation.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/activation.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/attention.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/attention.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/common.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/common.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/contraction.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/contraction.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/moe.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/moe.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/normalization.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/normalization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/position.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/position.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/quantization.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/quantization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/regularization.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/regularization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/routing.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/routing.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/scan.py",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/scan.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/cutile/tuning.json",
+    "destination": "archive/legacy-tools/gpu/providers/cutile/tuning.json",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/__init__.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/__init__.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/attention.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/attention.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/contraction.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/contraction.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/convolution.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/convolution.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/factorization.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/factorization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/indexing.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/indexing.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/loss.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/loss.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/mamba.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/mamba.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/normalization.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/normalization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/optimization.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/optimization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/pointwise.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/pointwise.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/position.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/position.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/quantization.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/quantization.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/ragged.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/ragged.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/scan.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/scan.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/statistics.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/statistics.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/providers/triton/vision.py",
+    "destination": "archive/legacy-tools/gpu/providers/triton/vision.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/registry.py",
+    "destination": "src/intent_bench/corpus/gpu/registry.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/gpu/results/cutile-5090.csv",
+    "destination": "archive/experiments/gpu/results/cutile-5090.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/results/cutile-h100.csv",
+    "destination": "archive/experiments/gpu/results/cutile-h100.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/results/cutile-source-intent-triton-5090.csv",
+    "destination": "archive/experiments/gpu/results/cutile-source-intent-triton-5090.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/results/triton-5090.csv",
+    "destination": "archive/experiments/gpu/results/triton-5090.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/results/triton-h100.csv",
+    "destination": "archive/experiments/gpu/results/triton-h100.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/gpu/results/triton-source-intent-cutile-5090.csv",
+    "destination": "archive/experiments/gpu/results/triton-source-intent-cutile-5090.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/mlu/README.md",
+    "destination": "archive/experiments/mlu/README.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/mlu/__main__.py",
+    "destination": "archive/legacy-tools/mlu/__main__.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/baselines/cnnl/operators.cpp",
+    "destination": "src/intent_bench/corpus/mlu/baselines/cnnl/operators.cpp",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/mlu/baselines/cnnl/runtime.py",
+    "destination": "src/intent_bench/corpus/mlu/baselines/cnnl/runtime.py",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/__init__.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/__init__.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/attention.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/attention.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/common.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/common.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/indexed.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/indexed.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/mamba.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/mamba.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/providers/bangc/streaming.py",
+    "destination": "archive/legacy-tools/mlu/providers/bangc/streaming.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/registry.py",
+    "destination": "src/intent_bench/corpus/mlu/registry.py",
+    "content": "refactored"
+  },
+  {
+    "original": "experiments/mlu/results/bangc-mlu370.csv",
+    "destination": "archive/experiments/mlu/results/bangc-mlu370.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/mlu/results/integration-bangc.csv",
+    "destination": "archive/experiments/mlu/results/integration-bangc.csv",
+    "content": "unchanged"
+  },
+  {
+    "original": "experiments/run.sh",
+    "destination": "archive/experiments/run.sh",
+    "content": "unchanged"
+  },
+  {
+    "original": "report/compiler-foundations-reassessment.md",
+    "destination": "archive/reports/compiler-foundations-reassessment.md",
+    "content": "unchanged"
+  },
+  {
+    "original": "report/open-source-readiness-and-compiler-roadmap.md",
+    "destination": "archive/reports/open-source-readiness-and-compiler-roadmap.md",
+    "content": "unchanged"
+  }
+]

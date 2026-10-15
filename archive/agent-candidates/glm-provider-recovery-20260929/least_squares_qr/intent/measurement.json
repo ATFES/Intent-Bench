@@ -1,0 +1,23 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/least_squares_qr/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "failure_stage": "physical_program_verification",
+  "error": "Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":2:3): error: native contraction axis has no exact physical coverage; axis=1; source='!intent_gpu.fragment<f32, [#intent_gpu.expr<1, 0, \"FULL_D3\", []>, #intent_gpu.expr<0, 1, \"\", []>], [#intent_gpu.axis_map<5, 0, 3, 0, false>, #intent_gpu.axis_map<52, 1, 4, 1, true>], 1, 1>'; construction_seed=0\nloc(\"<stdin>\":63:13): error: 'intent_gpu.contract' op native contraction reduction coverage is not representable\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: realize-contractions\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/f1e32473e3134ee98daffcc9b55e878f",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 133, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/least_squares_qr/intent/candidate.py\", line 82, in build\n    kernel = context.compile(\"least_squares_qr_householder\", _least_squares_qr_kernel)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 46, in generate\n    return _generate_source(kernel_mlir, resolved, compiler, tuning_config)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 62, in _generate_source\n    source, realized_mlir, metadata, cache_directory = run_compiler(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/toolchain.py\", line 105, in run_compiler\n    return _compile(executable_path, module_text, options, role, shared=False)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/toolchain.py\", line 83, in _compile\n    raise CompilationStageError(\nintent.compiler.toolchain.CompilationStageError: Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":2:3): error: native contraction axis has no exact physical coverage; axis=1; source='!intent_gpu.fragment<f32, [#intent_gpu.expr<1, 0, \"FULL_D3\", []>, #intent_gpu.expr<0, 1, \"\", []>], [#intent_gpu.axis_map<5, 0, 3, 0, false>, #intent_gpu.axis_map<52, 1, 4, 1, true>], 1, 1>'; construction_seed=0\nloc(\"<stdin>\":63:13): error: 'intent_gpu.contract' op native contraction reduction coverage is not representable\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: realize-contractions\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/f1e32473e3134ee98daffcc9b55e878f\n",
+  "failed_compiler_artifact": "/home/kingdom/.cache/intentdsl/compiler/f1e32473e3134ee98daffcc9b55e878f",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.15672133793123066
+}

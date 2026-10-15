@@ -1,0 +1,32 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/sigmoid_adaptive_avg_pool2d/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_precompile",
+  "error": "'torch.dtype' object has no attribute 'name'",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 147, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/sigmoid_adaptive_avg_pool2d/intent/candidate.py\", line 44, in sigmoid_adaptive_avg_pool2d\n    if input.dtype.name != \"float32\":\nAttributeError: 'torch.dtype' object has no attribute 'name'\n",
+  "compiler_artifacts": {
+    "sigmoid_adaptive_avg_pool2d": "/home/kingdom/.cache/intentdsl/compiler/bc577d14afdf45a688b6c08bb068655c"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 156,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 0.15893053403124213
+}

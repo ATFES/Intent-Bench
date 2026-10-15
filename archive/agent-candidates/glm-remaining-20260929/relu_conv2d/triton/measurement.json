@@ -1,0 +1,22 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/relu_conv2d/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_precompile",
+  "error": "can only concatenate tuple (not \"int\") to tuple",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 148, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/relu_conv2d/triton/candidate.py\", line 192, in relu_conv2d\n    kernel_extent_h = dilation_pair[0] * (kernel_height - 1) + 1\nTypeError: can only concatenate tuple (not \"int\") to tuple\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.10250385291874409
+}

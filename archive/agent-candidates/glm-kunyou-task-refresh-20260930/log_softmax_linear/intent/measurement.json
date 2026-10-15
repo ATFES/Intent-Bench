@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.010991999879479408,
+  "reference_ms": 0.01500799972563982,
+  "ratio": 0.7324093870218137,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-task-refresh-20260930/log_softmax_linear/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 49.42183351912536,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "logsoftmax_linear_bias": "/home/kingdom/.cache/intentdsl/compiler/75a11d4608ae43f29296518237c6a79f",
+    "logsoftmax_linear_nobias": "/home/kingdom/.cache/intentdsl/compiler/88247e0d41914e96b72a71e7e6cd09af"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 112,
+      "seconds": 1.162677526473999,
+      "winner": "BLOCK_K_1_2: 32, FRAGMENT_S4_A0: 4, USE_TENSOR_DESCRIPTOR: 0, num_warps: 8, num_ctas: 1, num_stages: 3, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 51.018576505128294
+}

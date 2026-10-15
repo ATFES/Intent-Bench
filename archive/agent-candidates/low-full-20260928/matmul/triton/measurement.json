@@ -1,0 +1,29 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.014063999988138676,
+  "reference_ms": 0.009519999846816063,
+  "ratio": 1.477310946894851,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/matmul/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.01,
+    "rtol": 0.01
+  },
+  "precompile_seconds": 0.9697239459492266,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_matmul_kernel",
+      "declared": 3,
+      "measured": 3,
+      "seconds": 0.03689312934875488,
+      "winner": "BLOCK_M: 64, BLOCK_N: 128, BLOCK_K: 32, num_warps: 4, num_ctas: 1, num_stages: 4, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 1.310899268835783
+}

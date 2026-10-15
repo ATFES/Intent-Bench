@@ -1,0 +1,61 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.1738239973783493,
+  "reference_ms": 0.07758399844169617,
+  "ratio": 2.2404619621271107,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 7.115135374944657,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "precompile_failures": [
+    {
+      "kernel": "_intent_kernel",
+      "error": "out of resource: shared memory, Required: 114688, Hardware limit: 101376. Reducing block sizes or `num_stages` may help."
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D1: tl.constexpr, S0_0: tl.constexpr, S0_1: tl.constexpr, REDUCE_CHUNK_5_A0_INNER: tl.constexpr, REDUCE_CHUNK_4_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v2: tl.constexpr = ((1 * REDUCE_CHUNK_4_A0) * REDUCE_CHUNK_5_A0_INNER)\n    v3: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v4: tl.constexpr = (v2 <= v3)\n    tl.static_assert(v4, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    }
+  ],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 42,
+      "measured": 16,
+      "seconds": 0.39124083518981934,
+      "winner": "BLOCK_K_1_0_0_1_1_0_1_1_0_1_0_0_3_0: 32, BLOCK_M_1_0_0_1_1_0_1_1_0_1_0_0_3_0: 64, BLOCK_N_1_0_0_1_1_0_1_1_0_1_0_0_3_0: 64, GROUP_SIZE_M: 8, num_warps: 4, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 16,
+      "seconds": 0.3214833736419678,
+      "winner": "REDUCE_CHUNK_4_A0: 64, REDUCE_CHUNK_5_A0_INNER: 256, num_warps: 32, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 8.686269542202353
+}

@@ -1,0 +1,4 @@
+{
+  "status": "agent_timeout",
+  "error": "Agent stopped without a submission"
+}

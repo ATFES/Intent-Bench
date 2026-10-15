@@ -1,0 +1,22 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/conv2d_add/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_load",
+  "error": "Torch is available only through allocation, tensor metadata and dtype APIs",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 129, in run\n    module = load_program(arguments.program, language=arguments.language)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 326, in load_program\n    validate_program(path, language=language)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 310, in validate_program\n    raise ValueError(\"Torch is available only through allocation, tensor metadata and dtype APIs\")\nValueError: Torch is available only through allocation, tensor metadata and dtype APIs\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.015475186053663492
+}

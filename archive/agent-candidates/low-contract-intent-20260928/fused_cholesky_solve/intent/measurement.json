@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "candidate_ms": 28.510519981384277,
+  "reference_ms": 1.1786800026893616,
+  "ratio": 24.188515896029976,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-contract-intent-20260928/fused_cholesky_solve/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 1.08734748698771,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "fused_cholesky_solve_cholesky": "/home/kingdom/.cache/intentdsl/compiler/67b24f1985e0411cab8f1c4b465a92e1",
+    "fused_cholesky_solve_forward": "/home/kingdom/.cache/intentdsl/compiler/34552569349f40c2bffb4f701f6cc7a6",
+    "fused_cholesky_solve_backward": "/home/kingdom/.cache/intentdsl/compiler/e99c57a9261d4d2283cb97f930ac781e"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 4,
+      "measured": 4,
+      "seconds": 1.1425678730010986,
+      "winner": "num_warps: 2, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 4,
+      "measured": 4,
+      "seconds": 0.1730334758758545,
+      "winner": "num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 4,
+      "measured": 4,
+      "seconds": 0.11533236503601074,
+      "winner": "num_warps: 2, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 3.4550292768981308
+}

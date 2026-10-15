@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.006991999922320247,
+  "reference_ms": 0.04673600010573864,
+  "ratio": 0.14960629721202243,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/normalized_cosine_similarity/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.6865717410109937,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.0737342440988868
+}

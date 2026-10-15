@@ -1,0 +1,630 @@
+{
+  "corpus/triton/flash_attention_forward": {
+    "source": "intent_bench.sides.triton_flash_attention_forward_source:prepare",
+    "intent": "intent_bench.sides.triton_flash_attention_forward_intent:prepare"
+  },
+  "corpus/triton/modern_flash_attention_forward": {
+    "source": "intent_bench.sides.triton_modern_flash_attention_forward_source:prepare",
+    "intent": "intent_bench.sides.triton_modern_flash_attention_forward_intent:prepare"
+  },
+  "corpus/triton/legacy_flash_attention_bias": {
+    "source": "intent_bench.sides.triton_legacy_flash_attention_bias_source:prepare",
+    "intent": "intent_bench.sides.triton_legacy_flash_attention_bias_intent:prepare"
+  },
+  "corpus/triton/flaggems_fp8_mqa_logits": {
+    "source": "intent_bench.sides.triton_flaggems_fp8_mqa_logits_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_fp8_mqa_logits_intent:prepare"
+  },
+  "corpus/triton/paged_gqa_decode": {
+    "source": "intent_bench.sides.triton_paged_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.triton_paged_gqa_decode_intent:prepare"
+  },
+  "corpus/triton/splitk_paged_attention": {
+    "source": "intent_bench.sides.triton_splitk_paged_attention_source:prepare",
+    "intent": "intent_bench.sides.triton_splitk_paged_attention_intent:prepare"
+  },
+  "corpus/triton/paged_mla_decode": {
+    "source": "intent_bench.sides.triton_paged_mla_decode_source:prepare",
+    "intent": "intent_bench.sides.triton_paged_mla_decode_intent:prepare"
+  },
+  "corpus/triton/block_sparse_gqa_decode": {
+    "source": "intent_bench.sides.triton_block_sparse_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.triton_block_sparse_gqa_decode_intent:prepare"
+  },
+  "corpus/triton/flash_attention_backward": {
+    "source": "intent_bench.sides.triton_flash_attention_backward_source:prepare",
+    "intent": "intent_bench.sides.triton_flash_attention_backward_intent:prepare"
+  },
+  "corpus/triton/dense_gemm": {
+    "source": "intent_bench.sides.triton_dense_gemm_source:prepare",
+    "intent": "intent_bench.sides.triton_dense_gemm_intent:prepare"
+  },
+  "corpus/triton/grouped_gemm": {
+    "source": "intent_bench.sides.triton_grouped_gemm_source:prepare",
+    "intent": "intent_bench.sides.triton_grouped_gemm_intent:prepare"
+  },
+  "corpus/triton/qkv_projection_pipeline": {
+    "source": "intent_bench.sides.triton_qkv_projection_pipeline_source:prepare",
+    "intent": "intent_bench.sides.triton_qkv_projection_pipeline_intent:prepare"
+  },
+  "corpus/triton/scaled_fp8_splitk_gemm": {
+    "source": "intent_bench.sides.triton_scaled_fp8_splitk_gemm_source:prepare",
+    "intent": "intent_bench.sides.triton_scaled_fp8_splitk_gemm_intent:prepare"
+  },
+  "corpus/triton/flaggems_conv1d": {
+    "source": "intent_bench.sides.triton_flaggems_conv1d_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_conv1d_intent:prepare"
+  },
+  "corpus/triton/causal_conv1d": {
+    "source": "intent_bench.sides.triton_causal_conv1d_source:prepare",
+    "intent": "intent_bench.sides.triton_causal_conv1d_intent:prepare"
+  },
+  "corpus/triton/varlen_causal_conv1d": {
+    "source": "intent_bench.sides.triton_varlen_causal_conv1d_source:prepare",
+    "intent": "intent_bench.sides.triton_varlen_causal_conv1d_intent:prepare"
+  },
+  "corpus/triton/causal_conv1d_update": {
+    "source": "intent_bench.sides.triton_causal_conv1d_update_source:prepare",
+    "intent": "intent_bench.sides.triton_causal_conv1d_update_intent:prepare"
+  },
+  "corpus/triton/flaggems_triangular_solve": {
+    "source": "intent_bench.sides.triton_flaggems_triangular_solve_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_triangular_solve_intent:prepare"
+  },
+  "corpus/triton/embedding_lookup": {
+    "source": "intent_bench.sides.triton_embedding_lookup_source:prepare",
+    "intent": "intent_bench.sides.triton_embedding_lookup_intent:prepare"
+  },
+  "corpus/triton/flaggems_embedding_lookup": {
+    "source": "intent_bench.sides.triton_flaggems_embedding_lookup_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_embedding_lookup_intent:prepare"
+  },
+  "corpus/triton/flaggems_roll": {
+    "source": "intent_bench.sides.triton_flaggems_roll_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_roll_intent:prepare"
+  },
+  "corpus/triton/flaggems_transpose_copy": {
+    "source": "intent_bench.sides.triton_flaggems_transpose_copy_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_transpose_copy_intent:prepare"
+  },
+  "corpus/triton/index_select": {
+    "source": "intent_bench.sides.triton_index_select_source:prepare",
+    "intent": "intent_bench.sides.triton_index_select_intent:prepare"
+  },
+  "corpus/triton/scaled_index_add": {
+    "source": "intent_bench.sides.triton_scaled_index_add_source:prepare",
+    "intent": "intent_bench.sides.triton_scaled_index_add_intent:prepare"
+  },
+  "corpus/triton/cross_entropy": {
+    "source": "intent_bench.sides.triton_cross_entropy_source:prepare",
+    "intent": "intent_bench.sides.triton_cross_entropy_intent:prepare"
+  },
+  "corpus/triton/flash_cross_entropy": {
+    "source": "intent_bench.sides.triton_flash_cross_entropy_source:prepare",
+    "intent": "intent_bench.sides.triton_flash_cross_entropy_intent:prepare"
+  },
+  "corpus/triton/mamba3_siso_step": {
+    "source": "intent_bench.sides.triton_mamba3_siso_step_source:prepare",
+    "intent": "intent_bench.sides.triton_mamba3_siso_step_intent:prepare"
+  },
+  "corpus/triton/mamba3_siso_forward": {
+    "source": "intent_bench.sides.triton_mamba3_siso_forward_source:prepare",
+    "intent": "intent_bench.sides.triton_mamba3_siso_forward_intent:prepare"
+  },
+  "corpus/triton/mamba_chunk_state": {
+    "source": "intent_bench.sides.triton_mamba_chunk_state_source:prepare",
+    "intent": "intent_bench.sides.triton_mamba_chunk_state_intent:prepare"
+  },
+  "corpus/triton/mamba_state_passing": {
+    "source": "intent_bench.sides.triton_mamba_state_passing_source:prepare",
+    "intent": "intent_bench.sides.triton_mamba_state_passing_intent:prepare"
+  },
+  "corpus/triton/mamba_chunk_scan": {
+    "source": "intent_bench.sides.triton_mamba_chunk_scan_source:prepare",
+    "intent": "intent_bench.sides.triton_mamba_chunk_scan_intent:prepare"
+  },
+  "corpus/triton/fused_softmax": {
+    "source": "intent_bench.sides.triton_fused_softmax_source:prepare",
+    "intent": "intent_bench.sides.triton_fused_softmax_intent:prepare"
+  },
+  "corpus/triton/layer_norm": {
+    "source": "intent_bench.sides.triton_layer_norm_source:prepare",
+    "intent": "intent_bench.sides.triton_layer_norm_intent:prepare"
+  },
+  "corpus/triton/flash_layer_norm": {
+    "source": "intent_bench.sides.triton_flash_layer_norm_source:prepare",
+    "intent": "intent_bench.sides.triton_flash_layer_norm_intent:prepare"
+  },
+  "corpus/triton/swiglu": {
+    "source": "intent_bench.sides.triton_swiglu_source:prepare",
+    "intent": "intent_bench.sides.triton_swiglu_intent:prepare"
+  },
+  "corpus/triton/fused_add_rms_norm": {
+    "source": "intent_bench.sides.triton_fused_add_rms_norm_source:prepare",
+    "intent": "intent_bench.sides.triton_fused_add_rms_norm_intent:prepare"
+  },
+  "corpus/triton/rms_norm": {
+    "source": "intent_bench.sides.triton_rms_norm_source:prepare",
+    "intent": "intent_bench.sides.triton_rms_norm_intent:prepare"
+  },
+  "corpus/triton/xformers_rms_norm": {
+    "source": "intent_bench.sides.triton_xformers_rms_norm_source:prepare",
+    "intent": "intent_bench.sides.triton_xformers_rms_norm_intent:prepare"
+  },
+  "corpus/triton/flaggems_batch_norm_training": {
+    "source": "intent_bench.sides.triton_flaggems_batch_norm_training_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_batch_norm_training_intent:prepare"
+  },
+  "corpus/triton/flaggems_group_norm_backward": {
+    "source": "intent_bench.sides.triton_flaggems_group_norm_backward_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_group_norm_backward_intent:prepare"
+  },
+  "corpus/triton/flaggems_logsumexp": {
+    "source": "intent_bench.sides.triton_flaggems_logsumexp_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_logsumexp_intent:prepare"
+  },
+  "corpus/triton/flaggems_softmax_backward": {
+    "source": "intent_bench.sides.triton_flaggems_softmax_backward_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_softmax_backward_intent:prepare"
+  },
+  "corpus/triton/flaggems_fused_adamw": {
+    "source": "intent_bench.sides.triton_flaggems_fused_adamw_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_fused_adamw_intent:prepare"
+  },
+  "corpus/triton/flaggems_addcmul": {
+    "source": "intent_bench.sides.triton_flaggems_addcmul_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_addcmul_intent:prepare"
+  },
+  "corpus/triton/rotary_embedding": {
+    "source": "intent_bench.sides.triton_rotary_embedding_source:prepare",
+    "intent": "intent_bench.sides.triton_rotary_embedding_intent:prepare"
+  },
+  "corpus/triton/padded_rope_cache_update": {
+    "source": "intent_bench.sides.triton_padded_rope_cache_update_source:prepare",
+    "intent": "intent_bench.sides.triton_padded_rope_cache_update_intent:prepare"
+  },
+  "corpus/triton/rope_qk": {
+    "source": "intent_bench.sides.triton_rope_qk_source:prepare",
+    "intent": "intent_bench.sides.triton_rope_qk_intent:prepare"
+  },
+  "corpus/triton/fp8_groupwise_quantize": {
+    "source": "intent_bench.sides.triton_fp8_groupwise_quantize_source:prepare",
+    "intent": "intent_bench.sides.triton_fp8_groupwise_quantize_intent:prepare"
+  },
+  "corpus/triton/jagged_mean": {
+    "source": "intent_bench.sides.triton_jagged_mean_source:prepare",
+    "intent": "intent_bench.sides.triton_jagged_mean_intent:prepare"
+  },
+  "corpus/triton/moe_expert_projection": {
+    "source": "intent_bench.sides.triton_moe_expert_projection_source:prepare",
+    "intent": "intent_bench.sides.triton_moe_expert_projection_intent:prepare"
+  },
+  "corpus/triton/moe_splitk_expert_projection": {
+    "source": "intent_bench.sides.triton_moe_splitk_expert_projection_source:prepare",
+    "intent": "intent_bench.sides.triton_moe_splitk_expert_projection_intent:prepare"
+  },
+  "corpus/triton/flaggems_cumsum": {
+    "source": "intent_bench.sides.triton_flaggems_cumsum_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_cumsum_intent:prepare"
+  },
+  "corpus/triton/flaggems_histogram": {
+    "source": "intent_bench.sides.triton_flaggems_histogram_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_histogram_intent:prepare"
+  },
+  "corpus/triton/flaggems_max_pool2d_with_indices": {
+    "source": "intent_bench.sides.triton_flaggems_max_pool2d_with_indices_source:prepare",
+    "intent": "intent_bench.sides.triton_flaggems_max_pool2d_with_indices_intent:prepare"
+  },
+  "corpus/cutile/silu_and_mul": {
+    "source": "intent_bench.sides.cutile_silu_and_mul_source:prepare",
+    "intent": "intent_bench.sides.cutile_silu_and_mul_intent:prepare"
+  },
+  "corpus/cutile/swiglu": {
+    "source": "intent_bench.sides.cutile_swiglu_source:prepare",
+    "intent": "intent_bench.sides.cutile_swiglu_intent:prepare"
+  },
+  "corpus/cutile/gelu": {
+    "source": "intent_bench.sides.cutile_gelu_source:prepare",
+    "intent": "intent_bench.sides.cutile_gelu_intent:prepare"
+  },
+  "corpus/cutile/geglu": {
+    "source": "intent_bench.sides.cutile_geglu_source:prepare",
+    "intent": "intent_bench.sides.cutile_geglu_intent:prepare"
+  },
+  "corpus/cutile/relu": {
+    "source": "intent_bench.sides.cutile_relu_source:prepare",
+    "intent": "intent_bench.sides.cutile_relu_intent:prepare"
+  },
+  "corpus/cutile/official_fmha": {
+    "source": "intent_bench.sides.cutile_official_fmha_source:prepare",
+    "intent": "intent_bench.sides.cutile_official_fmha_intent:prepare"
+  },
+  "corpus/cutile/dense_attention_forward": {
+    "source": "intent_bench.sides.cutile_dense_attention_forward_source:prepare",
+    "intent": "intent_bench.sides.cutile_dense_attention_forward_intent:prepare"
+  },
+  "corpus/cutile/grouped_flash_decode": {
+    "source": "intent_bench.sides.cutile_grouped_flash_decode_source:prepare",
+    "intent": "intent_bench.sides.cutile_grouped_flash_decode_intent:prepare"
+  },
+  "corpus/cutile/splitk_attention_reduce": {
+    "source": "intent_bench.sides.cutile_splitk_attention_reduce_source:prepare",
+    "intent": "intent_bench.sides.cutile_splitk_attention_reduce_intent:prepare"
+  },
+  "corpus/cutile/mla_prefill": {
+    "source": "intent_bench.sides.cutile_mla_prefill_source:prepare",
+    "intent": "intent_bench.sides.cutile_mla_prefill_intent:prepare"
+  },
+  "corpus/cutile/attention_sink_prefill": {
+    "source": "intent_bench.sides.cutile_attention_sink_prefill_source:prepare",
+    "intent": "intent_bench.sides.cutile_attention_sink_prefill_intent:prepare"
+  },
+  "corpus/cutile/attention_sink_decode": {
+    "source": "intent_bench.sides.cutile_attention_sink_decode_source:prepare",
+    "intent": "intent_bench.sides.cutile_attention_sink_decode_intent:prepare"
+  },
+  "corpus/cutile/gemma_prefill": {
+    "source": "intent_bench.sides.cutile_gemma_prefill_source:prepare",
+    "intent": "intent_bench.sides.cutile_gemma_prefill_intent:prepare"
+  },
+  "corpus/cutile/gemma_decode": {
+    "source": "intent_bench.sides.cutile_gemma_decode_source:prepare",
+    "intent": "intent_bench.sides.cutile_gemma_decode_intent:prepare"
+  },
+  "corpus/cutile/absorbed_mla_decode": {
+    "source": "intent_bench.sides.cutile_absorbed_mla_decode_source:prepare",
+    "intent": "intent_bench.sides.cutile_absorbed_mla_decode_intent:prepare"
+  },
+  "corpus/cutile/sliding_window_attention": {
+    "source": "intent_bench.sides.cutile_sliding_window_attention_source:prepare",
+    "intent": "intent_bench.sides.cutile_sliding_window_attention_intent:prepare"
+  },
+  "corpus/cutile/attention_backward": {
+    "source": "intent_bench.sides.cutile_attention_backward_source:prepare",
+    "intent": "intent_bench.sides.cutile_attention_backward_intent:prepare"
+  },
+  "corpus/cutile/sparse_mla_prefill": {
+    "source": "intent_bench.sides.cutile_sparse_mla_prefill_source:prepare",
+    "intent": "intent_bench.sides.cutile_sparse_mla_prefill_intent:prepare"
+  },
+  "corpus/cutile/splitk_mla_decode": {
+    "source": "intent_bench.sides.cutile_splitk_mla_decode_source:prepare",
+    "intent": "intent_bench.sides.cutile_splitk_mla_decode_intent:prepare"
+  },
+  "corpus/cutile/block_scaled_gemm": {
+    "source": "intent_bench.sides.cutile_block_scaled_gemm_source:prepare",
+    "intent": "intent_bench.sides.cutile_block_scaled_gemm_intent:prepare"
+  },
+  "corpus/cutile/dense_gemm": {
+    "source": "intent_bench.sides.cutile_dense_gemm_source:prepare",
+    "intent": "intent_bench.sides.cutile_dense_gemm_intent:prepare"
+  },
+  "corpus/cutile/tilegym_dense_gemm": {
+    "source": "intent_bench.sides.cutile_tilegym_dense_gemm_source:prepare",
+    "intent": "intent_bench.sides.cutile_tilegym_dense_gemm_intent:prepare"
+  },
+  "corpus/cutile/batched_gemm": {
+    "source": "intent_bench.sides.cutile_batched_gemm_source:prepare",
+    "intent": "intent_bench.sides.cutile_batched_gemm_intent:prepare"
+  },
+  "corpus/cutile/grouped_gemm": {
+    "source": "intent_bench.sides.cutile_grouped_gemm_source:prepare",
+    "intent": "intent_bench.sides.cutile_grouped_gemm_intent:prepare"
+  },
+  "corpus/cutile/layer_norm": {
+    "source": "intent_bench.sides.cutile_layer_norm_source:prepare",
+    "intent": "intent_bench.sides.cutile_layer_norm_intent:prepare"
+  },
+  "corpus/cutile/chunked_softmax": {
+    "source": "intent_bench.sides.cutile_chunked_softmax_source:prepare",
+    "intent": "intent_bench.sides.cutile_chunked_softmax_intent:prepare"
+  },
+  "corpus/cutile/rms_norm": {
+    "source": "intent_bench.sides.cutile_rms_norm_source:prepare",
+    "intent": "intent_bench.sides.cutile_rms_norm_intent:prepare"
+  },
+  "corpus/cutile/moe_expert_projection": {
+    "source": "intent_bench.sides.cutile_moe_expert_projection_source:prepare",
+    "intent": "intent_bench.sides.cutile_moe_expert_projection_intent:prepare"
+  },
+  "corpus/cutile/moe_alignment": {
+    "source": "intent_bench.sides.cutile_moe_alignment_source:prepare",
+    "intent": "intent_bench.sides.cutile_moe_alignment_intent:prepare"
+  },
+  "corpus/cutile/rope_qk": {
+    "source": "intent_bench.sides.cutile_rope_qk_source:prepare",
+    "intent": "intent_bench.sides.cutile_rope_qk_intent:prepare"
+  },
+  "corpus/cutile/dropout": {
+    "source": "intent_bench.sides.cutile_dropout_source:prepare",
+    "intent": "intent_bench.sides.cutile_dropout_intent:prepare"
+  },
+  "corpus/cutile/mhc_gemm_rms_scale": {
+    "source": "intent_bench.sides.cutile_mhc_gemm_rms_scale_source:prepare",
+    "intent": "intent_bench.sides.cutile_mhc_gemm_rms_scale_intent:prepare"
+  },
+  "corpus/cutile/mhc_apply_residual": {
+    "source": "intent_bench.sides.cutile_mhc_apply_residual_source:prepare",
+    "intent": "intent_bench.sides.cutile_mhc_apply_residual_intent:prepare"
+  },
+  "corpus/cutile/mhc_sinkhorn": {
+    "source": "intent_bench.sides.cutile_mhc_sinkhorn_source:prepare",
+    "intent": "intent_bench.sides.cutile_mhc_sinkhorn_intent:prepare"
+  },
+  "corpus/cutile/recurrent_gated_delta": {
+    "source": "intent_bench.sides.cutile_recurrent_gated_delta_source:prepare",
+    "intent": "intent_bench.sides.cutile_recurrent_gated_delta_intent:prepare"
+  },
+  "corpus/cutile/chunk_gated_delta": {
+    "source": "intent_bench.sides.cutile_chunk_gated_delta_source:prepare",
+    "intent": "intent_bench.sides.cutile_chunk_gated_delta_intent:prepare"
+  },
+  "corpus/cutile/nvfp4_quantize": {
+    "source": "intent_bench.sides.cutile_nvfp4_quantize_source:prepare",
+    "intent": "intent_bench.sides.cutile_nvfp4_quantize_intent:prepare"
+  },
+  "corpus/mojo/batch_norm_training": {
+    "source": "intent_bench.sides.mojo_batch_norm_training_source:prepare",
+    "intent": "intent_bench.sides.mojo_batch_norm_training_intent:prepare"
+  },
+  "corpus/mojo/scaled_fp8_splitk_gemm": {
+    "source": "intent_bench.sides.mojo_scaled_fp8_splitk_gemm_source:prepare",
+    "intent": "intent_bench.sides.mojo_scaled_fp8_splitk_gemm_intent:prepare"
+  },
+  "corpus/mojo/attention_sink_decode": {
+    "source": "intent_bench.sides.mojo_attention_sink_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_attention_sink_decode_intent:prepare"
+  },
+  "corpus/mojo/grouped_flash_decode": {
+    "source": "intent_bench.sides.mojo_grouped_flash_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_grouped_flash_decode_intent:prepare"
+  },
+  "corpus/mojo/splitk_paged_gqa_decode": {
+    "source": "intent_bench.sides.mojo_splitk_paged_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_splitk_paged_gqa_decode_intent:prepare"
+  },
+  "corpus/mojo/paged_gqa_f16_reduction": {
+    "source": "intent_bench.sides.mojo_paged_gqa_f16_reduction_source:prepare",
+    "intent": "intent_bench.sides.mojo_paged_gqa_f16_reduction_intent:prepare"
+  },
+  "corpus/mojo/gemma_decode": {
+    "source": "intent_bench.sides.mojo_gemma_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_gemma_decode_intent:prepare"
+  },
+  "corpus/mojo/paged_gqa_decode": {
+    "source": "intent_bench.sides.mojo_paged_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_paged_gqa_decode_intent:prepare"
+  },
+  "corpus/mojo/block_sparse_gqa_decode": {
+    "source": "intent_bench.sides.mojo_block_sparse_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_block_sparse_gqa_decode_intent:prepare"
+  },
+  "corpus/mojo/geglu_tanh": {
+    "source": "intent_bench.sides.mojo_geglu_tanh_source:prepare",
+    "intent": "intent_bench.sides.mojo_geglu_tanh_intent:prepare"
+  },
+  "corpus/mojo/flaggems_fused_adamw": {
+    "source": "intent_bench.sides.mojo_flaggems_fused_adamw_source:prepare",
+    "intent": "intent_bench.sides.mojo_flaggems_fused_adamw_intent:prepare"
+  },
+  "corpus/mojo/adafactor": {
+    "source": "intent_bench.sides.mojo_adafactor_source:prepare",
+    "intent": "intent_bench.sides.mojo_adafactor_intent:prepare"
+  },
+  "corpus/mojo/adamw_split": {
+    "source": "intent_bench.sides.mojo_adamw_split_source:prepare",
+    "intent": "intent_bench.sides.mojo_adamw_split_intent:prepare"
+  },
+  "corpus/mojo/adafactor_scalar_product": {
+    "source": "intent_bench.sides.mojo_adafactor_scalar_product_source:prepare",
+    "intent": "intent_bench.sides.mojo_adafactor_scalar_product_intent:prepare"
+  },
+  "corpus/mojo/scaled_index_add": {
+    "source": "intent_bench.sides.mojo_scaled_index_add_source:prepare",
+    "intent": "intent_bench.sides.mojo_scaled_index_add_intent:prepare"
+  },
+  "corpus/mojo/rope_qk": {
+    "source": "intent_bench.sides.mojo_rope_qk_source:prepare",
+    "intent": "intent_bench.sides.mojo_rope_qk_intent:prepare"
+  },
+  "corpus/mojo/rope_qk_partial": {
+    "source": "intent_bench.sides.mojo_rope_qk_partial_source:prepare",
+    "intent": "intent_bench.sides.mojo_rope_qk_partial_intent:prepare"
+  },
+  "corpus/mojo/rope_qk_bf16_inplace": {
+    "source": "intent_bench.sides.mojo_rope_qk_bf16_inplace_source:prepare",
+    "intent": "intent_bench.sides.mojo_rope_qk_bf16_inplace_intent:prepare"
+  },
+  "corpus/mojo/padded_rope_cache_update": {
+    "source": "intent_bench.sides.mojo_padded_rope_cache_update_source:prepare",
+    "intent": "intent_bench.sides.mojo_padded_rope_cache_update_intent:prepare"
+  },
+  "corpus/mojo/causal_conv1d_backward": {
+    "source": "intent_bench.sides.mojo_causal_conv1d_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_causal_conv1d_backward_intent:prepare"
+  },
+  "corpus/mojo/varlen_causal_conv1d": {
+    "source": "intent_bench.sides.mojo_varlen_causal_conv1d_source:prepare",
+    "intent": "intent_bench.sides.mojo_varlen_causal_conv1d_intent:prepare"
+  },
+  "corpus/mojo/causal_conv_update": {
+    "source": "intent_bench.sides.mojo_causal_conv_update_source:prepare",
+    "intent": "intent_bench.sides.mojo_causal_conv_update_intent:prepare"
+  },
+  "corpus/mojo/causal_conv_update_bf16": {
+    "source": "intent_bench.sides.mojo_causal_conv_update_bf16_source:prepare",
+    "intent": "intent_bench.sides.mojo_causal_conv_update_bf16_intent:prepare"
+  },
+  "corpus/mojo/flaggems_triangular_solve": {
+    "source": "intent_bench.sides.mojo_flaggems_triangular_solve_source:prepare",
+    "intent": "intent_bench.sides.mojo_flaggems_triangular_solve_intent:prepare"
+  },
+  "corpus/mojo/cholesky": {
+    "source": "intent_bench.sides.mojo_cholesky_source:prepare",
+    "intent": "intent_bench.sides.mojo_cholesky_intent:prepare"
+  },
+  "corpus/mojo/householder_qr": {
+    "source": "intent_bench.sides.mojo_householder_qr_source:prepare",
+    "intent": "intent_bench.sides.mojo_householder_qr_intent:prepare"
+  },
+  "corpus/mojo/embedding_backward_atomic": {
+    "source": "intent_bench.sides.mojo_embedding_backward_atomic_source:prepare",
+    "intent": "intent_bench.sides.mojo_embedding_backward_atomic_intent:prepare"
+  },
+  "corpus/mojo/atomic_compare_exchange": {
+    "source": "intent_bench.sides.mojo_atomic_compare_exchange_source:prepare",
+    "intent": "intent_bench.sides.mojo_atomic_compare_exchange_intent:prepare"
+  },
+  "corpus/mojo/fused_cross_entropy": {
+    "source": "intent_bench.sides.mojo_fused_cross_entropy_source:prepare",
+    "intent": "intent_bench.sides.mojo_fused_cross_entropy_intent:prepare"
+  },
+  "corpus/mojo/fused_linear_cross_entropy": {
+    "source": "intent_bench.sides.mojo_fused_linear_cross_entropy_source:prepare",
+    "intent": "intent_bench.sides.mojo_fused_linear_cross_entropy_intent:prepare"
+  },
+  "corpus/mojo/fused_cross_entropy_bf16": {
+    "source": "intent_bench.sides.mojo_fused_cross_entropy_bf16_source:prepare",
+    "intent": "intent_bench.sides.mojo_fused_cross_entropy_bf16_intent:prepare"
+  },
+  "corpus/mojo/group_norm_silu_backward": {
+    "source": "intent_bench.sides.mojo_group_norm_silu_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_group_norm_silu_backward_intent:prepare"
+  },
+  "corpus/mojo/layer_norm_backward": {
+    "source": "intent_bench.sides.mojo_layer_norm_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_layer_norm_backward_intent:prepare"
+  },
+  "corpus/mojo/group_norm_backward": {
+    "source": "intent_bench.sides.mojo_group_norm_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_group_norm_backward_intent:prepare"
+  },
+  "corpus/mojo/attention_backward": {
+    "source": "intent_bench.sides.mojo_attention_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_attention_backward_intent:prepare"
+  },
+  "corpus/mojo/sparse_mla_backward": {
+    "source": "intent_bench.sides.mojo_sparse_mla_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_sparse_mla_backward_intent:prepare"
+  },
+  "corpus/mojo/dropout_residual_rms_norm": {
+    "source": "intent_bench.sides.mojo_dropout_residual_rms_norm_source:prepare",
+    "intent": "intent_bench.sides.mojo_dropout_residual_rms_norm_intent:prepare"
+  },
+  "corpus/mojo/partitioned_two_pass_max": {
+    "source": "intent_bench.sides.mojo_partitioned_two_pass_max_source:prepare",
+    "intent": "intent_bench.sides.mojo_partitioned_two_pass_max_intent:prepare"
+  },
+  "corpus/mojo/fp8_groupwise_quantize": {
+    "source": "intent_bench.sides.mojo_fp8_groupwise_quantize_source:prepare",
+    "intent": "intent_bench.sides.mojo_fp8_groupwise_quantize_intent:prepare"
+  },
+  "corpus/mojo/per_token_fp8": {
+    "source": "intent_bench.sides.mojo_per_token_fp8_source:prepare",
+    "intent": "intent_bench.sides.mojo_per_token_fp8_intent:prepare"
+  },
+  "corpus/mojo/nvfp4_quantize": {
+    "source": "intent_bench.sides.mojo_nvfp4_quantize_source:prepare",
+    "intent": "intent_bench.sides.mojo_nvfp4_quantize_intent:prepare"
+  },
+  "corpus/mojo/grouped_gemm_backward": {
+    "source": "intent_bench.sides.mojo_grouped_gemm_backward_source:prepare",
+    "intent": "intent_bench.sides.mojo_grouped_gemm_backward_intent:prepare"
+  },
+  "corpus/mojo/nested_jagged_mean_pool_split": {
+    "source": "intent_bench.sides.mojo_nested_jagged_mean_pool_split_source:prepare",
+    "intent": "intent_bench.sides.mojo_nested_jagged_mean_pool_split_intent:prepare"
+  },
+  "corpus/mojo/moe_expert_ffn": {
+    "source": "intent_bench.sides.mojo_moe_expert_ffn_source:prepare",
+    "intent": "intent_bench.sides.mojo_moe_expert_ffn_intent:prepare"
+  },
+  "corpus/mojo/chunk_gated_delta": {
+    "source": "intent_bench.sides.mojo_chunk_gated_delta_source:prepare",
+    "intent": "intent_bench.sides.mojo_chunk_gated_delta_intent:prepare"
+  },
+  "corpus/mojo/unique_consecutive": {
+    "source": "intent_bench.sides.mojo_unique_consecutive_source:prepare",
+    "intent": "intent_bench.sides.mojo_unique_consecutive_intent:prepare"
+  },
+  "corpus/mojo/moe_alignment": {
+    "source": "intent_bench.sides.mojo_moe_alignment_source:prepare",
+    "intent": "intent_bench.sides.mojo_moe_alignment_intent:prepare"
+  },
+  "corpus/mojo/mhc_gemm_rms_scale": {
+    "source": "intent_bench.sides.mojo_mhc_gemm_rms_scale_source:prepare",
+    "intent": "intent_bench.sides.mojo_mhc_gemm_rms_scale_intent:prepare"
+  },
+  "corpus/mojo/mhc_pre": {
+    "source": "intent_bench.sides.mojo_mhc_pre_source:prepare",
+    "intent": "intent_bench.sides.mojo_mhc_pre_intent:prepare"
+  },
+  "corpus/mojo/mhc_sinkhorn": {
+    "source": "intent_bench.sides.mojo_mhc_sinkhorn_source:prepare",
+    "intent": "intent_bench.sides.mojo_mhc_sinkhorn_intent:prepare"
+  },
+  "corpus/mojo/moe_count_routes_product_domain": {
+    "source": "intent_bench.sides.mojo_moe_count_routes_product_domain_source:prepare",
+    "intent": "intent_bench.sides.mojo_moe_count_routes_product_domain_intent:prepare"
+  },
+  "corpus/mojo/batched_cholesky_right_looking": {
+    "source": "intent_bench.sides.mojo_batched_cholesky_right_looking_source:prepare",
+    "intent": "intent_bench.sides.mojo_batched_cholesky_right_looking_intent:prepare"
+  },
+  "corpus/mojo/reshape_and_cache": {
+    "source": "intent_bench.sides.mojo_reshape_and_cache_source:prepare",
+    "intent": "intent_bench.sides.mojo_reshape_and_cache_intent:prepare"
+  },
+  "corpus/mojo/reshape_and_cache_split": {
+    "source": "intent_bench.sides.mojo_reshape_and_cache_split_source:prepare",
+    "intent": "intent_bench.sides.mojo_reshape_and_cache_split_intent:prepare"
+  },
+  "corpus/mojo/splitk_mla_decode": {
+    "source": "intent_bench.sides.mojo_splitk_mla_decode_source:prepare",
+    "intent": "intent_bench.sides.mojo_splitk_mla_decode_intent:prepare"
+  },
+  "corpus/mojo/paged_mla_decode_partials": {
+    "source": "intent_bench.sides.mojo_paged_mla_decode_partials_source:prepare",
+    "intent": "intent_bench.sides.mojo_paged_mla_decode_partials_intent:prepare"
+  },
+  "corpus/bangc/causal_attention_f32": {
+    "source": "intent_bench.sides.bangc_causal_attention_f32_source:prepare",
+    "intent": "intent_bench.sides.bangc_causal_attention_f32_intent:prepare"
+  },
+  "corpus/bangc/causal_linear_attention_f32": {
+    "source": "intent_bench.sides.bangc_causal_linear_attention_f32_source:prepare",
+    "intent": "intent_bench.sides.bangc_causal_linear_attention_f32_intent:prepare"
+  },
+  "corpus/bangc/chunk_gated_delta": {
+    "source": "intent_bench.sides.bangc_chunk_gated_delta_source:prepare",
+    "intent": "intent_bench.sides.bangc_chunk_gated_delta_intent:prepare"
+  },
+  "corpus/bangc/recurrent_gated_delta": {
+    "source": "intent_bench.sides.bangc_recurrent_gated_delta_source:prepare",
+    "intent": "intent_bench.sides.bangc_recurrent_gated_delta_intent:prepare"
+  },
+  "corpus/bangc/jagged_mean": {
+    "source": "intent_bench.sides.bangc_jagged_mean_source:prepare",
+    "intent": "intent_bench.sides.bangc_jagged_mean_intent:prepare"
+  },
+  "corpus/bangc/flaggems_triangular_solve": {
+    "source": "intent_bench.sides.bangc_flaggems_triangular_solve_source:prepare",
+    "intent": "intent_bench.sides.bangc_flaggems_triangular_solve_intent:prepare"
+  },
+  "corpus/bangc/mamba_chunk_state": {
+    "source": "intent_bench.sides.bangc_mamba_chunk_state_source:prepare",
+    "intent": "intent_bench.sides.bangc_mamba_chunk_state_intent:prepare"
+  },
+  "corpus/bangc/mamba_state_passing": {
+    "source": "intent_bench.sides.bangc_mamba_state_passing_source:prepare",
+    "intent": "intent_bench.sides.bangc_mamba_state_passing_intent:prepare"
+  },
+  "corpus/bangc/mamba_chunk_scan": {
+    "source": "intent_bench.sides.bangc_mamba_chunk_scan_source:prepare",
+    "intent": "intent_bench.sides.bangc_mamba_chunk_scan_intent:prepare"
+  },
+  "corpus/bangc/paged_gqa_decode": {
+    "source": "intent_bench.sides.bangc_paged_gqa_decode_source:prepare",
+    "intent": "intent_bench.sides.bangc_paged_gqa_decode_intent:prepare"
+  }
+}

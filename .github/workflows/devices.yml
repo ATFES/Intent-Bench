@@ -1,0 +1,51 @@
+name: device checks
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        type: choice
+        options: [gpu, cpu, rvv, mlu]
+        required: true
+      implementations:
+        description: Comma-separated implementations (empty uses each suite target)
+        default: ''
+      options:
+        description: Environment options as a JSON object
+        default: '{}'
+      python:
+        description: Python executable with the selected device SDKs
+        default: python3
+
+jobs:
+  check:
+    runs-on: [self-hosted, intent-bench]
+    env:
+      BENCH_SUITE: ${{ inputs.suite }}
+      BENCH_IMPLS: ${{ inputs.implementations }}
+      BENCH_OPTIONS: ${{ inputs.options }}
+      BENCH_PYTHON: ${{ inputs.python }}
+      INTENT_ROOT: ${{ vars.INTENT_ROOT }}
+      INTENT_COMPILER: ${{ vars.INTENT_COMPILER }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install in the job's temporary directory
+        run: '"$BENCH_PYTHON" -m pip install --no-deps --target "$RUNNER_TEMP/intent-bench-package" .'
+      - name: Run explicit device checks
+        run: |
+          export PYTHONPATH="$RUNNER_TEMP/intent-bench-package"
+          "$BENCH_PYTHON" - <<'PY'
+          import json, os
+          from intent_bench.cli import main
+          args=['run','--suite',os.environ['BENCH_SUITE'],'--check-only','--threads','8',
+                '--output',os.environ['RUNNER_TEMP']+'/intent-bench-results']
+          for option,key in [('--impl','BENCH_IMPLS'),('--intent-root','INTENT_ROOT'),('--compiler','INTENT_COMPILER')]:
+              if os.environ[key]:args.extend([option,os.environ[key]])
+          for key,value in json.loads(os.environ['BENCH_OPTIONS']).items():
+              args.extend(['--option',key+'='+json.dumps(value)])
+          raise SystemExit(main(args))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: device-check-results
+          path: ${{ runner.temp }}/intent-bench-results

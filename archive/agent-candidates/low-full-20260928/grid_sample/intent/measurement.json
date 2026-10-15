@@ -1,0 +1,23 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/grid_sample/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "physical_program",
+  "error": "Intent Triton compiler failed with exit code 3:\nloc(\"<stdin>\":80:19): error: 'intent_gpu.gather' op source access validity/fill cannot follow scalar composed coordinates\nIntent KIR-to-GPU construction failed\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/d28a28327be044278dedadd3b861043d",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/grid_sample/intent/candidate.py\", line 44, in build\n    sample = context.compile(\"grid_sample_bilinear\", _sample)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 46, in generate\n    return _generate_source(kernel_mlir, resolved, compiler, tuning_config)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 62, in _generate_source\n    source, realized_mlir, metadata, cache_directory = run_compiler(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 105, in run_compiler\n    return _compile(executable_path, module_text, options, role, shared=False)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 83, in _compile\n    raise CompilationStageError(\nintent.compiler.toolchain.CompilationStageError: Intent Triton compiler failed with exit code 3:\nloc(\"<stdin>\":80:19): error: 'intent_gpu.gather' op source access validity/fill cannot follow scalar composed coordinates\nIntent KIR-to-GPU construction failed\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/d28a28327be044278dedadd3b861043d\n",
+  "failed_compiler_artifact": "/home/kingdom/.cache/intentdsl/compiler/d28a28327be044278dedadd3b861043d",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.17408160283230245
+}

@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.011584000196307898,
+  "reference_ms": 0.012480000033974648,
+  "ratio": 0.9282051414080493,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/softmax_log/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 6.846310592023656,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "softmax_log_log": "/home/kingdom/.cache/intentdsl/compiler/b68ce3d9ca0c4c758dd8ad0ddad8141f",
+    "softmax_log_softmax": "/home/kingdom/.cache/intentdsl/compiler/9e330b4ee2874876abf52717091e846d"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 30,
+      "measured": 30,
+      "seconds": 0.1605539321899414,
+      "winner": "FRAGMENT_D1: 1, FRAGMENT_D2: 256, num_warps: 4, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 42,
+      "measured": 26,
+      "seconds": 0.11920404434204102,
+      "winner": "FRAGMENT_D1: 1, num_warps: 4, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 7.48192159505561
+}

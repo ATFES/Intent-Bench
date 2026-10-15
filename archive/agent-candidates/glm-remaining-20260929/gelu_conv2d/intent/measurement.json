@@ -1,0 +1,64 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/gelu_conv2d/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_precompile",
+  "error": "weight must have rank 2, got 4",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 147, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/gelu_conv2d/intent/candidate.py\", line 228, in gelu_conv2d\n    variants[(bias is not None, approximate == \"tanh\")](\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/runtime/artifact.py\", line 88, in __call__\n    compiled_kernel = self._invoke(self._launcher, arguments)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/runtime/artifact.py\", line 113, in _invoke\n    return function(*arguments)\n  File \"<intent.generated.triton._conv_gelu.1>\", line 457, in launch\n    raise ValueError(f\"weight must have rank 2, got {_intent_view_1.ndim}\")\nValueError: weight must have rank 2, got 4\n",
+  "compiler_artifacts": {
+    "gelu_conv2d_im2col": "/home/kingdom/.cache/intentdsl/compiler/03c8dbe0c09c465aa88c443a5f1d9c04",
+    "gelu_conv2d_gemm_no_bias_erf": "/home/kingdom/.cache/intentdsl/compiler/99beef7ef32a40fbb07aeefb66113d32",
+    "gelu_conv2d_gemm_no_bias_tanh": "/home/kingdom/.cache/intentdsl/compiler/d8319f219b154ae0895cf3c17f35e46f",
+    "gelu_conv2d_gemm_bias_erf": "/home/kingdom/.cache/intentdsl/compiler/175b62c117844ebf9210f016d298729a",
+    "gelu_conv2d_gemm_bias_tanh": "/home/kingdom/.cache/intentdsl/compiler/94f90fd590294968bd87c9bcb38cca6d"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 30,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 4.178252205019817
+}

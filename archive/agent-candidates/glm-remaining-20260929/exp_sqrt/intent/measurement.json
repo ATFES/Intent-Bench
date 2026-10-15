@@ -1,0 +1,32 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/exp_sqrt/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_precompile",
+  "error": "'function' object has no attribute 'run'",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 147, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/exp_sqrt/intent/candidate.py\", line 19, in exp_sqrt\n    return exp_sqrt.run(input)\nAttributeError: 'function' object has no attribute 'run'\n",
+  "compiler_artifacts": {
+    "exp_sqrt_elementwise": "/home/kingdom/.cache/intentdsl/compiler/b5d26d677225462badf8d8cc32645703"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 0.1475028300192207
+}

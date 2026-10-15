@@ -1,0 +1,34 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/symmetric_mm_and_abs_sum/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 79.00819088798016,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 2 differs: max_abs=374.1505432128906, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=375.0516052246094, source=0.9010621309280396, abs_error=374.1505432128906, limit=0.00010901061614276841",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 2 differs: max_abs=374.1505432128906, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=375.0516052246094, source=0.9010621309280396, abs_error=374.1505432128906, limit=0.00010901061614276841\n",
+  "compiler_artifacts": {
+    "symmetric_mm_and_abs_sum": "/home/kingdom/.cache/intentdsl/compiler/cfac705d8c8841d9a1c6a2a8ef20ce54"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 98,
+      "measured": 7,
+      "seconds": 1.8132340908050537,
+      "winner": "BLOCK_K_1_1: 32, BLOCK_M_CACHE_1_0_0_D1: 32, BLOCK_N_CACHE_1_0_0_D1: 128, USE_TENSOR_DESCRIPTOR: 0, num_warps: 32, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 81.23628347599879
+}

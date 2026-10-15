@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.009583999868482351,
+  "reference_ms": 0.011727999895811081,
+  "ratio": 0.8171896276964917,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-public-contract-20260930/mean/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 2.3291274160146713,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "mean_partial_sums": "/home/kingdom/.cache/intentdsl/compiler/86a4860359bb446bba20f309dfa35377",
+    "mean_finalize": "/home/kingdom/.cache/intentdsl/compiler/dfa00fa7ba744999b8e15144432149f7"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 33,
+      "measured": 33,
+      "seconds": 0.16884350776672363,
+      "winner": "FRAGMENT_S2_A0: 1, num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 6,
+      "measured": 6,
+      "seconds": 0.03027176856994629,
+      "winner": "num_warps: 32, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 2.871049263048917
+}

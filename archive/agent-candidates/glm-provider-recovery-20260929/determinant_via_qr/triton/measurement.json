@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.016095999628305435,
+  "reference_ms": 0.202224001288414,
+  "ratio": 0.07959490231502812,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/determinant_via_qr/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 2.450287657091394,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 2.7646273330319673
+}

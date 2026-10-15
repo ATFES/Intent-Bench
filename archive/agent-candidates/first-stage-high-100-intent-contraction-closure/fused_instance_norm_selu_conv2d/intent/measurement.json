@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.030432000756263733,
+  "reference_ms": 0.026367999613285065,
+  "ratio": 1.154126259199848,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 15.894535313826054,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 28,
+      "measured": 16,
+      "seconds": 0.34605836868286133,
+      "winner": "FRAGMENT_S10_A0: 1, FRAGMENT_S11_A0: 64, FRAGMENT_S6_A0: 1, FRAGMENT_S8_A0: 1, REDUCE_CHUNK_13_A0_E16: 4, REDUCE_CHUNK_15_A0_E4: 4, num_warps: 4, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 28,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 32,
+      "measured": 16,
+      "seconds": 0.17810297012329102,
+      "winner": "FRAGMENT_S5_A0: 1, FRAGMENT_S7_A0: 1, POINTWISE_CHUNK_S10_A0: 64, REDUCE_CHUNK_9_A0_E64: 64, num_warps: 32, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 17.38123441999778
+}

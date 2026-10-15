@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.01756799966096878,
+  "reference_ms": 0.022559999488294125,
+  "ratio": 0.7787234068903424,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_gather_masked_fill/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0,
+    "rtol": 0
+  },
+  "precompile_seconds": 0.6671998489182442,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 1.1144925570115447
+}

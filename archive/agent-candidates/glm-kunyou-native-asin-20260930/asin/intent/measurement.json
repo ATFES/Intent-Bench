@@ -1,0 +1,31 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.006912000011652708,
+  "reference_ms": 0.006392000010237098,
+  "ratio": 1.0813516897031923,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-native-asin-20260930/asin/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.01,
+    "rtol": 0.01
+  },
+  "precompile_seconds": 1.6857010419480503,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "asin_kernel": "/home/kingdom/.cache/intentdsl/compiler/dc52600721bb4ff6bfadb6108d35c8b4"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 16,
+      "measured": 16,
+      "seconds": 0.09921407699584961,
+      "winner": "FRAGMENT_S2_A0: 512, num_warps: 1, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 2.0682288059033453
+}

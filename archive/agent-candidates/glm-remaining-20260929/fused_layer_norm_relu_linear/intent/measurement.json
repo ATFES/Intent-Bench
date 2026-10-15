@@ -1,0 +1,23 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_layer_norm_relu_linear/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "physical_program_verification",
+  "error": "Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":8:10): error: 'intent_gpu.make_range' op dynamic pointwise range has no physical tile coordinate; axis=1 : i64, source_id=1, ownership=0, internal=0, parameter_name=FRAGMENT_D1, parameter_role=1, has_coverage=0, launch_extents=[#intent_gpu.expr<6, 0, \"\", [#intent_gpu.expr<2, 2, \"D2\", []>, #intent_gpu.expr<1, 0, \"FRAGMENT_S2_A0\", []>]>]\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: form-pointwise-blocking\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/b5c0c2661f974d79bdafb562d29d3ee3",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_layer_norm_relu_linear/intent/candidate.py\", line 58, in build\n    linear_with_bias = context.compile(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 46, in generate\n    return _generate_source(kernel_mlir, resolved, compiler, tuning_config)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 62, in _generate_source\n    source, realized_mlir, metadata, cache_directory = run_compiler(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/toolchain.py\", line 105, in run_compiler\n    return _compile(executable_path, module_text, options, role, shared=False)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/toolchain.py\", line 83, in _compile\n    raise CompilationStageError(\nintent.compiler.toolchain.CompilationStageError: Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":8:10): error: 'intent_gpu.make_range' op dynamic pointwise range has no physical tile coordinate; axis=1 : i64, source_id=1, ownership=0, internal=0, parameter_name=FRAGMENT_D1, parameter_role=1, has_coverage=0, launch_extents=[#intent_gpu.expr<6, 0, \"\", [#intent_gpu.expr<2, 2, \"D2\", []>, #intent_gpu.expr<1, 0, \"FRAGMENT_S2_A0\", []>]>]\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: form-pointwise-blocking\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/b5c0c2661f974d79bdafb562d29d3ee3\n",
+  "failed_compiler_artifact": "/home/kingdom/.cache/intentdsl/compiler/b5c0c2661f974d79bdafb562d29d3ee3",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.22182128601707518
+}

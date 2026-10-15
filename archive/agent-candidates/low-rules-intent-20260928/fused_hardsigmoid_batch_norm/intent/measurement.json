@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.007999999914318323,
+  "reference_ms": 0.022559999488294125,
+  "ratio": 0.3546099333233293,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-rules-intent-20260928/fused_hardsigmoid_batch_norm/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 10.360783779993653,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "fused_hardsigmoid_bn_0_0": "/home/kingdom/.cache/intentdsl/compiler/4bc008ccf1464c0d91276b2789c61ee3",
+    "fused_hardsigmoid_bn_0_1": "/home/kingdom/.cache/intentdsl/compiler/61d83da767124619a7e823f73f7d460d",
+    "fused_hardsigmoid_bn_1_0": "/home/kingdom/.cache/intentdsl/compiler/c726f6847ad84aaca5ae3884733298c8",
+    "fused_hardsigmoid_bn_1_1": "/home/kingdom/.cache/intentdsl/compiler/324feec333de4867a2a016a4e626d80d"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 84,
+      "measured": 84,
+      "seconds": 0.4712536334991455,
+      "winner": "FRAGMENT_S6_A0: 1, FRAGMENT_S6_A1: 1, FRAGMENT_S6_A2: 16, FRAGMENT_S6_A3: 128, num_warps: 2, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 11.465923198033124
+}

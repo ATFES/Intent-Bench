@@ -1,0 +1,22 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/sub_gelu/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_build",
+  "error": "only Intent generation may invoke the Intent compiler",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/sub_gelu/triton/candidate.py\", line 22, in build\n    exact_kernel = context.compile(\"sub_gelu_exact\", _sub_gelu_kernel,\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 43, in compile\n    raise ValueError(\"only Intent generation may invoke the Intent compiler\")\nValueError: only Intent generation may invoke the Intent compiler\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.03302657697349787
+}

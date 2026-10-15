@@ -1,0 +1,22 @@
+{
+  "status": "agent_program_error",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/symmetric_mm_and_abs_sum/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "candidate_precompile",
+  "error": "at 66:33:\n    )\n    upper_d = alpha * accumulator + beta * upper_c\n    if tile_m < tile_n:\n        lower_c = tl.load(\n            c_ptr + cols[:, None] * stride_cm + rows[None, :] * stride_cn,\n            mask=tile_mask,\n            other=0.0,\n        )\n        lower_d = alpha * tl.trans(accumulator) + beta * lower_c\n    partial = tl.sum(tl.abs(upper_d), dtype=tl.float32)\n    if tile_m < tile_n:\n        partial += tl.sum(tl.abs(lower_d), dtype=tl.float32)\n                                 ^\nNameError('lower_d is not defined')",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 148, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/symmetric_mm_and_abs_sum/triton/candidate.py\", line 115, in symmetric_mm_and_abs_sum\n    _symmetric_mm_abs_partial_kernel[(num_row_tiles, num_col_tiles)](\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/h100-full-20260919/python-triton-reduction-tree-fma/triton/runtime/jit.py\", line 370, in <lambda>\n    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/program.py\", line 144, in compile_kernel\n    return compiled.result()\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/h100-full-20260919/python-triton-reduction-tree-fma/triton/runtime/_async_compile.py\", line 21, in result\n    kernel = self.future.result()\n  File \"/usr/lib/python3.10/concurrent/futures/_base.py\", line 458, in result\n    return self.__get_result()\n  File \"/usr/lib/python3.10/concurrent/futures/_base.py\", line 403, in __get_result\n    raise self._exception\n  File \"/usr/lib/python3.10/concurrent/futures/thread.py\", line 58, in run\n    result = self.fn(*self.args, **self.kwargs)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/program.py\", line 135, in compile_with_policy\n    return function(*args, **kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/h100-full-20260919/python-triton-reduction-tree-fma/triton/runtime/jit.py\", line 840, in async_compile\n    return self.compile(src, target=target, options=options.__dict__, _env_vars=env_vars)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/h100-full-20260919/python-triton-reduction-tree-fma/triton/compiler/compiler.py\", line 304, in compile\n    module = src.make_ir(target, options, codegen_fns, module_map, context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/h100-full-20260919/python-triton-reduction-tree-fma/triton/compiler/compiler.py\", line 80, in make_ir\n    return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,\ntriton.compiler.errors.CompilationError: at 66:33:\n    )\n    upper_d = alpha * accumulator + beta * upper_c\n    if tile_m < tile_n:\n        lower_c = tl.load(\n            c_ptr + cols[:, None] * stride_cm + rows[None, :] * stride_cn,\n            mask=tile_mask,\n            other=0.0,\n        )\n        lower_d = alpha * tl.trans(accumulator) + beta * lower_c\n    partial = tl.sum(tl.abs(upper_d), dtype=tl.float32)\n    if tile_m < tile_n:\n        partial += tl.sum(tl.abs(lower_d), dtype=tl.float32)\n                                 ^\nNameError('lower_d is not defined')\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.6318307099863887
+}

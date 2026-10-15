@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.07998399809002876,
+  "reference_ms": 0.08936800062656403,
+  "ratio": 0.8949959440656219,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_layer_norm_relu_linear/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 28.030229864176363,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "linear_relu": "/home/kingdom/.cache/intentdsl/compiler/0d4a0d43c7e3449b948656a4e89e5266",
+    "linear_relu_no_bias": "/home/kingdom/.cache/intentdsl/compiler/d9010df0c5704fafbdc884c16d6fabbb",
+    "layer_norm": "/home/kingdom/.cache/intentdsl/compiler/c54b31786f414dc68372b1c9b128043d"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 112,
+      "seconds": 1.9238667488098145,
+      "winner": "BLOCK_K_1_2: 32, FRAGMENT_D1: 64, FRAGMENT_S2_A0: 32, USE_TENSOR_DESCRIPTOR: 0, num_warps: 8, num_ctas: 1, num_stages: 3, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 112,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 80,
+      "seconds": 0.3987247943878174,
+      "winner": "FRAGMENT_D1: 1, NUM_STAGES: 1, POINTWISE_CHUNK_S7_A0: 4096, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 30.97898017289117
+}

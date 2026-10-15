@@ -1,0 +1,17 @@
+from __future__ import annotations
+from intent_bench.sides import Side
+import intent
+import torch
+from kernels.factorization.triangular_solve import batched_lower_triangular_solve
+from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+
+def prepare(context):
+    lower = torch.tril(torch.randn((4096, 16, 16), dtype=torch.float32))
+    lower.diagonal(dim1=-2, dim2=-1).add_(2.0)
+    initial = torch.randn((4096, 16), dtype=torch.float32)
+    artifact = intent.compile(batched_lower_triangular_solve, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+
+    def side(function):
+        solution = initial.clone()
+        return PreparedLaunch(lambda : function(lower, solution), lambda : solution, prepare=lambda : solution.copy_(initial))
+    return Side(side(artifact.run), Tolerance(atol=0.0001, rtol=0.0001), cuda_graph=False, device_type='cpu', note='既有 B4096-N16 f32 lower-triangular solve；PyTorch eager CPU reference 保持逐列有序减法；单 NUMA 8 核；双方完整 host 调用，每次恢复相同 RHS，恢复不计时。', owners=locals())

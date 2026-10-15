@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.025919999927282333,
+  "reference_ms": 0.16842400282621384,
+  "ratio": 0.15389730378292668,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/least_squares_qr/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 2.566026774002239,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 2.9962146191392094
+}

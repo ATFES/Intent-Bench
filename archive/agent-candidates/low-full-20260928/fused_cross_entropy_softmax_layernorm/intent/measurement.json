@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.009719999972730875,
+  "reference_ms": 0.02160000056028366,
+  "ratio": 0.4499999870649646,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cross_entropy_softmax_layernorm/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 14.849379802122712,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "fused_ce_rows": "/home/kingdom/.cache/intentdsl/compiler/2e6757d88c344a26840f4b18d71d7f58",
+    "fused_ce_mean": "/home/kingdom/.cache/intentdsl/compiler/7e81ce7603c347afbcac28c132f4b7cf"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 42,
+      "measured": 26,
+      "seconds": 0.2253105640411377,
+      "winner": "FRAGMENT_D1: 1, num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 120,
+      "measured": 120,
+      "seconds": 0.5322506427764893,
+      "winner": "NUM_STAGES: 1, REDUCE_CHUNK_1_A0: 1024, num_warps: 2, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 16.179107272066176
+}

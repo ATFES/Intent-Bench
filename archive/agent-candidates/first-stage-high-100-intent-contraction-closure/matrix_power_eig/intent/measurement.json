@@ -1,0 +1,44 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 33.72700264630839,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=0.0421142578125, atol=0.0001, rtol=0.0001; largest tolerance excess has generated=161.16188049316406, source=161.20399475097656, abs_error=0.0421142578125, limit=0.016220398247241974",
+  "traceback": "Traceback (most recent call last):\n  File \"/tmp/intentdsl-first-stage-worktree/examples/repro/agent_study/benchmark.py\", line 138, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/tmp/intentdsl-first-stage-worktree/examples/repro/v2/measurement.py\", line 314, in evaluate\n    validate_outputs()\n  File \"/tmp/intentdsl-first-stage-worktree/examples/repro/v2/measurement.py\", line 307, in validate_outputs\n    compare_outputs(\n  File \"/tmp/intentdsl-first-stage-worktree/examples/repro/v2/measurement.py\", line 193, in compare_outputs\n    _compare_float_chunk(\n  File \"/tmp/intentdsl-first-stage-worktree/examples/repro/v2/measurement.py\", line 244, in _compare_float_chunk\n    raise NumericalComparisonError(\nrepro.v2.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.0421142578125, atol=0.0001, rtol=0.0001; largest tolerance excess has generated=161.16188049316406, source=161.20399475097656, abs_error=0.0421142578125, limit=0.016220398247241974\n",
+  "precompile_failures": [
+    {
+      "kernel": "_intent_kernel",
+      "error": "out of resource: shared memory, Required: 131072, Hardware limit: 101376. Reducing block sizes or `num_stages` may help."
+    },
+    {
+      "kernel": "_intent_kernel",
+      "error": "out of resource: shared memory, Required: 229376, Hardware limit: 101376. Reducing block sizes or `num_stages` may help."
+    }
+  ],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 16,
+      "seconds": 0.19609618186950684,
+      "winner": "FRAGMENT_S4_A0: 16, FRAGMENT_S5_A0: 16, num_warps: 4, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 70,
+      "measured": 16,
+      "seconds": 0.3216214179992676,
+      "winner": "BLOCK_K_5_4: 32, BLOCK_M_CACHE_4_0_0_D1: 64, USE_TENSOR_DESCRIPTOR: 0, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 34.93414441077039
+}

@@ -1,0 +1,39 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.01068799989297986,
+  "reference_ms": 0.02035200037062168,
+  "ratio": 0.525157217882528,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/add_mean/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 2.4149719309061766,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "add_mean_segment_sums": "/home/kingdom/.cache/intentdsl/compiler/fc39be6d7e044adab342ff7662364524",
+    "add_mean_final_mean": "/home/kingdom/.cache/intentdsl/compiler/f70b9b81104944b8921970c7d62752c5"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 30,
+      "measured": 30,
+      "seconds": 0.16455578804016113,
+      "winner": "FRAGMENT_S22_A0: 1, num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 5,
+      "measured": 5,
+      "seconds": 0.022881031036376953,
+      "winner": "num_warps: 16, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 2.9554006250109524
+}

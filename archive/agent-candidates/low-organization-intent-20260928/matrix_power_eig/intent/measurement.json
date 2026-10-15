@@ -1,0 +1,33 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-organization-intent-20260928/matrix_power_eig/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "failure_stage": "physical_program_verification",
+  "error": "Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":5:10): error: 'intent_gpu.contract' op ordinary contract paired axes have conflicting physical extents; lhs_axis=1; lhs_extent=#intent_gpu.expr<7, 0, \"\", [#intent_gpu.expr<1, 0, \"POINTWISE_CHUNK_S2_A1\", []>, #intent_gpu.expr<12, 0, \"\", [#intent_gpu.expr<7, 0, \"\", [#intent_gpu.expr<11, 0, \"\", [#intent_gpu.expr<2, 1, \"D1\", []>, #intent_gpu.expr<0, 1, \"\", []>]>, #intent_gpu.expr<0, 4096, \"\", []>]>]>]>; rhs_axis=0; rhs_extent=#intent_gpu.expr<1, 0, \"FULL_D1\", []>\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: form-pointwise-blocking\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/e643d3562d58426f9d5a3531b8575e47",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/low-organization-intent-20260928/matrix_power_eig/intent/candidate.py\", line 32, in build\n    square = context.compile(\"matrix_power_eig_square\", _square)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 46, in generate\n    return _generate_source(kernel_mlir, resolved, compiler, tuning_config)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 62, in _generate_source\n    source, realized_mlir, metadata, cache_directory = run_compiler(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 105, in run_compiler\n    return _compile(executable_path, module_text, options, role, shared=False)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 83, in _compile\n    raise CompilationStageError(\nintent.compiler.toolchain.CompilationStageError: Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":5:10): error: 'intent_gpu.contract' op ordinary contract paired axes have conflicting physical extents; lhs_axis=1; lhs_extent=#intent_gpu.expr<7, 0, \"\", [#intent_gpu.expr<1, 0, \"POINTWISE_CHUNK_S2_A1\", []>, #intent_gpu.expr<12, 0, \"\", [#intent_gpu.expr<7, 0, \"\", [#intent_gpu.expr<11, 0, \"\", [#intent_gpu.expr<2, 1, \"D1\", []>, #intent_gpu.expr<0, 1, \"\", []>]>, #intent_gpu.expr<0, 4096, \"\", []>]>]>]>; rhs_axis=0; rhs_extent=#intent_gpu.expr<1, 0, \"FULL_D1\", []>\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: form-pointwise-blocking\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/e643d3562d58426f9d5a3531b8575e47\n",
+  "failed_compiler_artifact": "/home/kingdom/.cache/intentdsl/compiler/e643d3562d58426f9d5a3531b8575e47",
+  "compiler_artifacts": {
+    "matrix_power_eig_symmetrize": "/home/kingdom/.cache/intentdsl/compiler/b13709e6c8c54d21ac389c670ec0789f"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 4,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 0.19686805387027562
+}

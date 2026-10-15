@@ -1,0 +1,277 @@
+from __future__ import annotations
+
+import ast
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import threading
+import time
+
+import tomli
+import triton
+import triton.language
+
+from intent.tools.manual import snapshot
+from intent_bench.corpus import PROJECT_ROOT
+
+
+def _toml(value) -> str:
+    if isinstance(value, dict):
+        return "{" + ", ".join(f"{json.dumps(key)} = {_toml(item)}" for key, item in value.items()) + "}"
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml(item) for item in value) + "]"
+    return json.dumps(value)
+
+
+def instructions(language: str) -> str:
+    text = Path(__file__).with_name("instructions.md").read_text()
+    return re.sub(
+        r"<!-- (intent|triton) -->\n(.*?)<!-- /\1 -->\n",
+        lambda section: section[2] if section[1] == language else "",
+        text,
+        flags=re.DOTALL,
+    )
+
+
+def intent_tensor_types(metadata: dict) -> dict[str, dict[str, str]]:
+    names = {
+        "bool": "bool", "int8": "i8", "int16": "i16", "int32": "i32", "int64": "i64",
+        "uint8": "u8", "uint16": "u16", "uint32": "u32", "uint64": "u64",
+        "float16": "f16", "bfloat16": "bf16", "float32": "f32", "float64": "f64",
+        "float8_e4m3fn": "f8e4m3fn", "float8_e5m2": "f8e5m2",
+    }
+    result = {}
+
+    def collect(value, path):
+        if isinstance(value, dict):
+            if "shape" in value and "dtype" in value:
+                name = value["dtype"].removeprefix("torch.")
+                if name not in names:
+                    raise NotImplementedError(f"No public Intent storage dtype spelling for {value['dtype']}")
+                result[path] = {"dtype": "I." + names[name], "shape": repr(tuple(value["shape"]))}
+            else:
+                for key, item in value.items():
+                    collect(item, f"{path}.{key}" if path else key)
+        elif isinstance(value, (tuple, list)):
+            for index, item in enumerate(value):
+                collect(item, f"{path}[{index}]")
+
+    collect(metadata, "")
+    return result
+
+
+def intent_constexpr_options(invocation: dict) -> dict[str, dict[str, str]]:
+    return {
+        name: {"annotation": f"I.Constexpr[{type(value).__name__}]",
+               "binding": repr(name) + ": " + repr(value)}
+        for name, value in invocation.items()
+        if type(value) in (bool, int, float)
+    }
+
+
+def materialize_language(project: Path, triton_ref: Path, directory: Path, language: str) -> list[str]:
+    directory.mkdir(parents=True)
+    if language == "intent":
+        corpus = snapshot(project)
+        source = Path(__file__).with_name("instructions.md")
+        text = source.read_text()
+        contract = re.search(r"<!-- host-interface -->\n(.*?)<!-- /host-interface -->", text, re.DOTALL)
+        line = text[:contract.start(1)].count("\n") + 1
+        identifier = f"{source.relative_to(project)}#L{line}"
+        corpus["documents"][identifier] = {
+            "id": identifier, "title": "context.compile and artifact launch interface",
+            "kind": "concept", "source": str(source.relative_to(project)),
+            "line": line, "text": contract[1],
+        }
+        program = ast.parse(Path(__file__).with_name("program.py").read_text())
+        context = next(node for node in program.body
+                       if isinstance(node, ast.ClassDef) and node.name == "ProgramContext")
+        compile_method = next(node for node in context.body
+                              if isinstance(node, ast.FunctionDef) and node.name == "compile")
+        signature = "(" + ast.unparse(compile_method.args).removeprefix("self, ") + ")"
+        corpus["symbols"]["context.compile"] = {
+            "name": "context.compile", "kind": "host function", "signature": str(signature),
+            "declaration": "method of the evaluator-provided build(context) argument",
+            "sections": [identifier], "canonical": "context.compile", "members": [],
+            "availability": "provided by this evaluator inside build(context)",
+        }
+        (directory / "manual.json").write_text(json.dumps(corpus, ensure_ascii=False))
+        declarations = [
+            "Public author API declarations. Consult intent_manual.api for type and result rules.",
+            "Kernel intrinsics are DSL operations; dtype tokens and type aliases are not operations.",
+            "Annotations describe parameters. Namespaces expose members; a namespace is callable only if a signature is shown.",
+            "Quoted return annotations describe result kinds, not exported Python types.",
+            "Arithmetic uses Python +, -, * and floating /; integer division/remainder use // and %. Comparisons use Python operators.",
+            "Use context.compile inside build for this evaluator's host interface.",
+        ]
+        for name, symbol in sorted(corpus["symbols"].items()):
+            if name.startswith("intent.") and name not in {"intent.kernel", "intent.fn"}:
+                continue
+            qualified = name if name.startswith(("intent.", "context.")) else "I." + name
+            declarations.append(f"[{symbol['kind']}] " + qualified + (symbol["signature"] or ""))
+        (directory / "api.txt").write_text("\n".join(declarations) + "\n")
+        return sorted({entry["source"] for entry in corpus["documents"].values()})
+    language_path = Path(triton.language.__file__).parent
+    sources = []
+    for name in ("__init__.py", "core.py", "standard.py", "math.py", "extra/cuda/libdevice.py"):
+        destination = directory / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(language_path / name, destination)
+        sources.append(f"triton-{triton.__version__}/language/{name}")
+    path = triton_ref / "docs/python-api/triton-semantics.rst"
+    shutil.copyfile(path, directory / path.name)
+    sources.append("ref/triton/docs/python-api/triton-semantics.rst")
+    example = Path(__file__).resolve().with_name("materials") / "triton/vector_add.py"
+    shutil.copyfile(example, directory / "vector_add.py")
+    return sources + [str(example.relative_to(project))]
+
+
+def command(directory: Path, suite: dict, response: Path, executable: Path,
+            state_root: Path, language: str, session: str | None = None) -> list[str]:
+    config = tomli.loads((state_root / "config.toml").read_text())
+    if (config["model"], config["model_reasoning_effort"]) != (suite["model"], suite["reasoning_effort"]):
+        raise ValueError("dedicated configuration must retain the agreed model and reasoning effort")
+    provider = config["model_provider"]
+    if config["model_providers"][provider]["env_key"] != "INTENT_STUDY_API_KEY":
+        raise ValueError("dedicated provider must use INTENT_STUDY_API_KEY")
+    # The outer generation deadline also bounds a silent reasoning stream.
+    config["model_providers"][provider]["stream_idle_timeout_ms"] = int(suite["agent_seconds"] * 1000)
+    values = {
+        "model_reasoning_effort": suite["reasoning_effort"],
+        "model_provider": provider,
+        f"model_providers.{provider}": config["model_providers"][provider],
+        "approval_policy": "never",
+        "default_permissions": "study",
+        "permissions.study.filesystem": {":root": "deny", ":minimal": "read",
+                                         ":workspace_roots": {".": "write", "materials": "read", "TASK.md": "read"},
+                                         str(executable): "read", str(state_root / "codex/tmp/arg0"): "read"},
+        "permissions.study.network.enabled": False,
+        "project_doc_max_bytes": 0,
+        "developer_instructions": instructions(language),
+        "memories.generate_memories": False, "memories.use_memories": False,
+        "agents.enabled": False, "web_search": "disabled",
+        "shell_environment_policy.inherit": "none",
+        "shell_environment_policy.set": {"PATH": "/usr/local/bin:/usr/bin:/bin", "PYTHONNOUSERSITE": "1"},
+        "allow_login_shell": False, "features.skip_host_skill_discovery": True,
+    }
+    if language == "intent":
+        project = PROJECT_ROOT
+        values["mcp_servers.intent_manual"] = {
+            "command": "/usr/bin/env",
+            "args": ["-i", "PATH=/usr/local/bin:/usr/bin:/bin", f"PYTHONPATH={project / 'python'}",
+                     sys.executable, "-B", "-m", "intent.tools.manual", "--corpus", str(directory / "materials/manual.json")],
+            "required": True, "enabled_tools": ["search", "api", "read"],
+            "default_tools_approval_mode": "approve",
+        }
+    result = [str(executable), "exec"]
+    if session:
+        result += ["resume", session]
+    else:
+        result += ["--cd", str(directory), "--color", "never"]
+    result += ["--ignore-user-config", "--ignore-rules", "--strict-config",
+               "--skip-git-repo-check", "--json", "--model", suite["model"],
+               "--output-last-message", str(response)]
+    for feature in ("multi_agent", "multi_agent_v2", "memories", "hooks", "plugins", "apps",
+                    "browser_use", "computer_use", "image_generation", "shell_snapshot", "skill_search",
+                    "unbounded_connection_retries", "view_image"):
+        result += ["--disable", feature]
+    for key, value in values.items():
+        result += ["-c", f"{key}={_toml(value)}"]
+    return result + ["-"]
+
+
+def execute(directory: Path, suite: dict, prompt: str, *, executable: Path,
+            state_root: Path, language: str, stop: threading.Event) -> dict:
+    response = directory / "response.txt"
+    secret_path = state_root / "provider.key"
+    if secret_path.stat().st_mode & 0o077:
+        raise PermissionError("dedicated provider.key must only be accessible to its owner")
+    key = secret_path.read_text().strip()
+    if not key:
+        raise ValueError("dedicated provider.key is empty")
+    environment = {name: os.environ[name] for name in ("PATH", "HOME", "USER", "LANG", "TMPDIR") if name in os.environ}
+    environment.update(CODEX_HOME=str(state_root / "codex"), INTENT_STUDY_API_KEY=key)
+    started = time.monotonic()
+    threads, errors, mcp_calls, stderr, completed_turns = [], [], [], [], []
+
+    def collect_stdout():
+        for line in process.stdout:
+            if not line.startswith("{"):
+                continue
+            event = json.loads(line.replace(key, "<redacted>"))
+            if event["type"] == "thread.started":
+                threads.append(event["thread_id"])
+            elif event["type"] in {"error", "turn.failed"}:
+                errors.append(event)
+            elif event["type"] == "turn.completed":
+                completed_turns.append(event)
+            elif event["type"] == "item.completed" and event["item"]["type"] == "mcp_tool_call":
+                item = event["item"]
+                call = {k: item[k] for k in ("server", "tool", "arguments", "status", "error") if k in item}
+                mcp_calls.append(call)
+                print(json.dumps({"task_directory": str(directory), "manual_call": call}), flush=True)
+
+    def collect_stderr():
+        for line in process.stderr:
+            stderr.append(line.replace(key, "<redacted>"))
+
+    timed_out = False
+    session = None
+    continuation_count = 0
+    unfinished_reasoning = False
+    while True:
+        response.unlink(missing_ok=True)
+        process = subprocess.Popen(
+            command(directory, suite, response, executable, state_root, language, session),
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            cwd=directory, env=environment, start_new_session=True)
+        readers = [threading.Thread(target=collect_stdout), threading.Thread(target=collect_stderr)]
+        for reader in readers:
+            reader.start()
+        process.stdin.write(prompt)
+        process.stdin.close()
+        while process.poll() is None:
+            timed_out = time.monotonic() - started >= suite["agent_seconds"]
+            if timed_out or stop.is_set():
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
+                break
+            stop.wait(1)
+        for reader in readers:
+            reader.join()
+        timed_out |= time.monotonic() - started >= suite["agent_seconds"]
+        reply = response.read_text() if response.exists() else ""
+        unfinished_reasoning = reply.count("<think>") > reply.count("</think>")
+        delivered = (directory / "candidate.py").exists() and not unfinished_reasoning
+        if (timed_out or stop.is_set() or process.returncode or not response.exists()
+                or delivered or not threads):
+            break
+        # A draft file does not finish a response that stopped inside reasoning.
+        # The original deadline and isolation apply to the same persisted session.
+        session = threads[-1]
+        continuation_count += 1
+        prompt = ("The previous response ended before a final submission. Continue the original task "
+                  "in this session and write one complete candidate.py before finishing. "
+                  "No compiler or benchmark feedback is provided.")
+    result = {"task_directory": str(directory), "model": suite["model"], "reasoning_effort": suite["reasoning_effort"],
+              "threads": threads, "exit_code": process.returncode, "manual_calls": mcp_calls,
+              "delivery_continuations": continuation_count,
+              "generation_seconds": time.monotonic() - started,
+              "completed_turns": completed_turns}
+    if timed_out or stop.is_set() or process.returncode or not response.exists() or unfinished_reasoning:
+        result.update(action="unavailable", status="agent_timeout" if timed_out else "agent_environment_failure",
+                      errors=errors, error=("Provider response ended inside an unfinished reasoning block"
+                                           if unfinished_reasoning else "".join(stderr)[-6000:]
+                                           or "Agent stopped without a submission"))
+    else:
+        result.update(action="submit", reason=response.read_text().replace(key, "<redacted>"))
+    return result

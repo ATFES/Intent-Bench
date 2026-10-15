@@ -1,0 +1,74 @@
+{
+  "status": "numerical_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_cross_entropy_log_softmax/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 34.938767018029466,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "failure_stage": "comparison",
+  "error": "generated/source floating result 0 differs: max_abs=2.5914435386657715, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=2.715932846069336, source=5.307376384735107, abs_error=2.5914435386657715, limit=0.00015307376452255994",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 158, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=2.5914435386657715, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=2.715932846069336, source=5.307376384735107, abs_error=2.5914435386657715, limit=0.00015307376452255994\n",
+  "compiler_artifacts": {
+    "fused_row_losses_plain": "/home/kingdom/.cache/intentdsl/compiler/7b5635eb3cdf403186d2069822103a3c",
+    "fused_row_losses_smoothed": "/home/kingdom/.cache/intentdsl/compiler/f8d245ac7ce349188e4285f6b1623815",
+    "fused_row_losses_weighted": "/home/kingdom/.cache/intentdsl/compiler/2ad5eab3936d4ed59bb9e98d375f2279",
+    "fused_row_losses_weighted_smoothed": "/home/kingdom/.cache/intentdsl/compiler/ea2335544c834635aba8e1457da57ad1",
+    "reduce_partial_losses_sum": "/home/kingdom/.cache/intentdsl/compiler/4dbcd67183994264a0cf58c93ee32c5b",
+    "reduce_partial_losses_mean": "/home/kingdom/.cache/intentdsl/compiler/c26c8152b94c4757ae11cf5981956f47"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 152,
+      "seconds": 0.9215524196624756,
+      "winner": "FRAGMENT_D1: 4, NUM_STAGES: 1, REDUCE_CHUNK_1_A1: 64, num_warps: 4, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 160,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 120,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 120,
+      "measured": 120,
+      "seconds": 0.6567678451538086,
+      "winner": "NUM_STAGES: 1, REDUCE_CHUNK_1_A0: 1024, num_warps: 32, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 37.229661846067756
+}

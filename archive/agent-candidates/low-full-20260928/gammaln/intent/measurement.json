@@ -1,0 +1,31 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.008671999908983707,
+  "reference_ms": 0.009248000103980303,
+  "ratio": 0.9377162425907968,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/gammaln/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 33.8711690180935,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "gammaln_pointwise": "/home/kingdom/.cache/intentdsl/compiler/706b7857c0084d829e92e866ec7940f5"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 24,
+      "seconds": 0.1579573154449463,
+      "winner": "FRAGMENT_D1: 1024, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 37.56130422791466
+}

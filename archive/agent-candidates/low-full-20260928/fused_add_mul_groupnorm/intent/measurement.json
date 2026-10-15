@@ -1,0 +1,33 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_add_mul_groupnorm/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "physical_program_verification",
+  "error": "Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":66:19): error: 'intent_gpu.gather' op loaded source coordinate cannot be composed with gather indexing\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: realize-contractions\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/819541aa703f422da1315c426c883d9d",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_add_mul_groupnorm/intent/candidate.py\", line 58, in build\n    norm = context.compile(\"group_norm_stage\", _group_norm)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 46, in generate\n    return _generate_source(kernel_mlir, resolved, compiler, tuning_config)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/pipeline.py\", line 62, in _generate_source\n    source, realized_mlir, metadata, cache_directory = run_compiler(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 105, in run_compiler\n    return _compile(executable_path, module_text, options, role, shared=False)\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/python/intent/compiler/toolchain.py\", line 83, in _compile\n    raise CompilationStageError(\nintent.compiler.toolchain.CompilationStageError: Intent Triton compiler failed with exit code 4:\nloc(\"<stdin>\":66:19): error: 'intent_gpu.gather' op loaded source coordinate cannot be composed with gather indexing\nloc(\"<stdin>\":1:1): error: shared GPU transformation failed: realize-contractions\n\nCompiler artifacts: /home/kingdom/.cache/intentdsl/compiler/819541aa703f422da1315c426c883d9d\n",
+  "failed_compiler_artifact": "/home/kingdom/.cache/intentdsl/compiler/819541aa703f422da1315c426c883d9d",
+  "compiler_artifacts": {
+    "fused_add_mul_stage": "/home/kingdom/.cache/intentdsl/compiler/3c27539de267466c9159adcdd98b0244"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 81,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 0.4569454120937735
+}

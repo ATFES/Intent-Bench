@@ -1,0 +1,5093 @@
+[
+  {
+    "name": "corpus/triton/fused_softmax",
+    "provider": "triton",
+    "kernel": "fused_softmax",
+    "case": "8192x8192-fp16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "softmax_f16",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/normalization/softmax/02-fused-softmax_runtime.py",
+    "examples": [
+      "normalization/softmax.py:stable_softmax_f16"
+    ]
+  },
+  {
+    "name": "corpus/triton/dense_gemm",
+    "provider": "triton",
+    "kernel": "dense_gemm",
+    "case": "M4096-N14336-K4096-fp16",
+    "family": "contraction",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "dense_gemm",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm"
+    ]
+  },
+  {
+    "name": "corpus/triton/grouped_gemm",
+    "provider": "triton",
+    "kernel": "grouped_gemm",
+    "case": "E8-M1024-K4096-N14336-fp16",
+    "family": "ragged",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "grouped_gemm_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/gemm/grouped/08-grouped-gemm_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:ragged_grouped_gemm"
+    ]
+  },
+  {
+    "name": "corpus/triton/flash_attention_forward",
+    "provider": "triton",
+    "kernel": "flash_attention_forward",
+    "case": "B4-H32-S4096-D128-fp16-causal",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flash_attention_forward",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/attention/fused/06-fused-attention_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/triton/layer_norm",
+    "provider": "triton",
+    "kernel": "layer_norm",
+    "case": "8192x4096-fp16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "layer_norm_f16",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/normalization/layer_norm/05-layer-norm_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:layer_norm_f16"
+    ]
+  },
+  {
+    "name": "corpus/triton/flash_cross_entropy",
+    "provider": "triton",
+    "kernel": "flash_cross_entropy",
+    "case": "8192x32768-bf16",
+    "family": "loss",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flash_cross_entropy",
+    "source_runtime": "corpus/gpu/baselines/triton/flash-attention/loss/cross_entropy/cross_entropy_runtime.py",
+    "examples": [
+      "loss/cross_entropy.py:flash_cross_entropy_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/flash_layer_norm",
+    "provider": "triton",
+    "kernel": "flash_layer_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flash_layer_norm",
+    "source_runtime": "corpus/gpu/baselines/triton/flash-attention/normalization/layer_norm/layer_norm_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:layer_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/rotary_embedding",
+    "provider": "triton",
+    "kernel": "rotary_embedding",
+    "case": "B4-S4096-H32-D128-bf16",
+    "family": "position",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "rotary_embedding",
+    "source_runtime": "corpus/gpu/baselines/triton/flash-attention/position/rotary/rotary_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_embedding_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/swiglu",
+    "provider": "triton",
+    "kernel": "swiglu",
+    "case": "8192x14336-bf16",
+    "family": "activation",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "swiglu_8192",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/activation/swiglu/swiglu_runtime.py",
+    "examples": [
+      "activation/swiglu.py:swiglu_forward"
+    ]
+  },
+  {
+    "name": "corpus/triton/embedding_lookup",
+    "provider": "triton",
+    "kernel": "embedding_lookup",
+    "case": "tokens16384-vocab32768-hidden4096-bf16",
+    "family": "backward",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "embedding_lookup_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/embedding/lookup/embedding_runtime.py",
+    "examples": [
+      "backward/embedding.py:embedding_forward_lookup_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/cross_entropy",
+    "provider": "triton",
+    "kernel": "cross_entropy",
+    "case": "8192x32768-bf16",
+    "family": "loss",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "cross_entropy_bf16",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/loss/cross_entropy/cross_entropy_runtime.py",
+    "examples": [
+      "loss/cross_entropy.py:fused_cross_entropy_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/padded_rope_cache_update",
+    "provider": "triton",
+    "kernel": "padded_rope_cache_update",
+    "case": "B32-QH32-KVH8-D128-cache8192-fp16",
+    "family": "position",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "padded_rope_cache_update",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/position/rope_padded/rope_padded_kernels_runtime.py",
+    "examples": [
+      "position/rope_cache.py:padded_rope_cache_update"
+    ]
+  },
+  {
+    "name": "corpus/triton/fused_add_rms_norm",
+    "provider": "triton",
+    "kernel": "fused_add_rms_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "fused_add_rms_norm_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/normalization/fused_add_rms_norm/fused_add_rms_norm_runtime.py",
+    "examples": [
+      "normalization/fused_add_rms_norm.py:fused_add_rms_norm"
+    ]
+  },
+  {
+    "name": "corpus/triton/rms_norm",
+    "provider": "triton",
+    "kernel": "rms_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "rms_norm_bf16",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/normalization/rms_norm/rms_norm_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:rms_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/xformers_rms_norm",
+    "provider": "triton",
+    "kernel": "xformers_rms_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "xformers_rms_norm",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/normalization/rms_norm/rmsnorm_kernels_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:rms_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/qkv_projection_pipeline",
+    "provider": "triton",
+    "kernel": "qkv_projection_pipeline",
+    "case": "M4096-K4096-QKV4096-fp16",
+    "family": "contraction",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "qkv_projection_pipeline",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/gemm/tiled/tiled_matmul_kernels_runtime.py",
+    "examples": [
+      "contraction/qkv.py:fused_qkv_projection"
+    ]
+  },
+  {
+    "name": "corpus/triton/index_select",
+    "provider": "triton",
+    "kernel": "index_select",
+    "case": "source65536-selected32768-hidden4096-fp16",
+    "family": "indexing",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "index_select_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/indexing/index_select_cat/k_index_select_cat_runtime.py",
+    "examples": [
+      "indexing/relations.py:index_select_rows"
+    ]
+  },
+  {
+    "name": "corpus/triton/scaled_index_add",
+    "provider": "triton",
+    "kernel": "scaled_index_add",
+    "case": "destination65536-routed32768-hidden4096-fp16",
+    "family": "indexing",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "scaled_index_add_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/indexing/scaled_index_add/k_scaled_index_add_runtime.py",
+    "examples": [
+      "indexing/relations.py:scaled_index_add_unique"
+    ]
+  },
+  {
+    "name": "corpus/triton/scaled_fp8_splitk_gemm",
+    "provider": "triton",
+    "kernel": "scaled_fp8_splitk_gemm",
+    "case": "M4096-N14336-K4096-e4m3-split4",
+    "family": "contraction",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "scaled_fp8_splitk_gemm",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/gemm/fp8_scaled/scaled_fp8_gemm_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:scaled_fp8_splitk_matmul"
+    ]
+  },
+  {
+    "name": "corpus/triton/jagged_mean",
+    "provider": "triton",
+    "kernel": "jagged_mean",
+    "case": "B512-T33024-D128-fp32",
+    "family": "ragged",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "jagged_mean",
+    "source_runtime": "corpus/gpu/baselines/triton/tritonbench/ragged/jagged_mean/jagged_mean_runtime.py",
+    "examples": [
+      "ragged/jagged_mean.py:jagged_mean"
+    ]
+  },
+  {
+    "name": "corpus/triton/fp8_groupwise_quantize",
+    "provider": "triton",
+    "kernel": "fp8_groupwise_quantize",
+    "case": "8192x4096-group128-bf16-e4m3",
+    "family": "quantization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "bf16_groupwise_fp8_quantize",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/quantization/fp8_groupwise/float8_groupwise_quant_runtime.py",
+    "examples": [
+      "quantization/fp8.py:bf16_groupwise_fp8_quantize"
+    ]
+  },
+  {
+    "name": "corpus/triton/rope_qk",
+    "provider": "triton",
+    "kernel": "rope_qk",
+    "case": "B4-S4096-QH32-KVH8-D128-fp16",
+    "family": "position",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "rope_qk_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/liger-kernel/position/rope/rope_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_qk_inplace"
+    ]
+  },
+  {
+    "name": "corpus/triton/causal_conv1d",
+    "provider": "triton",
+    "kernel": "causal_conv1d",
+    "case": "B4-C4096-S4096-W4-bf16-silu",
+    "family": "convolution",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "causal_conv1d_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/convolution/causal_conv1d/causal_1d_conv_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/varlen_causal_conv1d",
+    "provider": "triton",
+    "kernel": "varlen_causal_conv1d",
+    "case": "lengths2048-1536-1024-512-D4096-W4-bf16",
+    "family": "convolution",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "varlen_causal_conv1d",
+    "source_runtime": "corpus/gpu/baselines/triton/fla/conv/causal1d/causal_conv_varlen_runtime.py",
+    "examples": [
+      "convolution/varlen.py:varlen_aligned_causal_depthwise_conv1d",
+      "convolution/varlen.py:varlen_causal_conv1d_final_state"
+    ]
+  },
+  {
+    "name": "corpus/triton/causal_conv1d_update",
+    "provider": "triton",
+    "kernel": "causal_conv1d_update",
+    "case": "B32-D4096-W4-bf16",
+    "family": "convolution",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "causal_conv1d_update_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/fla/conv/causal1d/causal_conv_update_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d_update_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/modern_flash_attention_forward",
+    "provider": "triton",
+    "kernel": "modern_flash_attention_forward",
+    "case": "B2-H16-S2048-D128-fp16-causal",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "modern_flash_attention_forward",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_forward_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/triton/mamba3_siso_step",
+    "provider": "triton",
+    "kernel": "mamba3_siso_step",
+    "case": "B32-HQK4-H16-DQK32-DV64-bf16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mamba3_siso_step",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_step_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba3_siso_step"
+    ]
+  },
+  {
+    "name": "corpus/triton/flash_attention_backward",
+    "provider": "triton",
+    "kernel": "flash_attention_backward",
+    "case": "B2-H16-S2048-D128-fp16-causal",
+    "family": "backward",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "attention_backward_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward_runtime.py",
+    "examples": [
+      "backward/attention.py:attention_backward_delta",
+      "backward/attention.py:attention_backward_dkdv",
+      "backward/attention.py:attention_backward_dq"
+    ]
+  },
+  {
+    "name": "corpus/triton/moe_expert_projection",
+    "provider": "triton",
+    "kernel": "moe_expert_projection",
+    "case": "T2048-E8-top2-4096x14336-bf16",
+    "family": "ragged",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "moe_projection_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/moe/grouped/v0_moe_fused_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:routed_expert_projection_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/moe_splitk_expert_projection",
+    "provider": "triton",
+    "kernel": "moe_splitk_expert_projection",
+    "case": "T2048-E8-top2-4096x14336-bf16",
+    "family": "ragged",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "moe_splitk_projection",
+    "source_runtime": "corpus/gpu/baselines/triton/meta-applied-ai/moe/splitk/v1_moe_fused_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:routed_expert_projection_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/mamba_chunk_state",
+    "provider": "triton",
+    "kernel": "mamba_chunk_state",
+    "case": "B1-S2048-H32-G8-P64-N128-C256-bf16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mamba_chunk_state",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_chunk_state_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/triton/mamba_state_passing",
+    "provider": "triton",
+    "kernel": "mamba_state_passing",
+    "case": "B1-C8-H32-state8192-fp32",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mamba_state_passing",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_state_passing_fwd"
+    ]
+  },
+  {
+    "name": "corpus/triton/mamba_chunk_scan",
+    "provider": "triton",
+    "kernel": "mamba_chunk_scan",
+    "case": "B1-S2048-H32-G8-P64-N128-C256-bf16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mamba_chunk_scan_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan_runtime.py",
+    "examples": [
+      "streaming/selective_scan.py:mamba_chunk_scan_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/triton/mamba3_siso_forward",
+    "provider": "triton",
+    "kernel": "mamba3_siso_forward",
+    "case": "B1-S2048-HQK4-H16-DQK32-DV64-bf16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mamba3_siso_forward",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/mamba3/mamba3_siso_fwd_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba3_siso_forward"
+    ]
+  },
+  {
+    "name": "corpus/triton/paged_gqa_decode",
+    "provider": "triton",
+    "kernel": "paged_gqa_decode",
+    "case": "B16-QH32-KVH8-S8192-D128-page16-fp16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "paged_gqa_decode_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_gqa_decode_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_f32_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/triton/splitk_paged_attention",
+    "provider": "triton",
+    "kernel": "splitk_paged_attention",
+    "case": "B16-QH32-KVH8-S8192-D128-page16-split8-fp16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "splitk_paged_attention",
+    "source_runtime": "corpus/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:splitk_paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_weighted_sum_reduce"
+    ]
+  },
+  {
+    "name": "corpus/triton/paged_mla_decode",
+    "provider": "triton",
+    "kernel": "paged_mla_decode",
+    "case": "B8-QH128-KVH1-S8192-C512-R64-page16-fp16",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "paged_mla_decode_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_mla_decode_runtime.py",
+    "examples": [
+      "streaming/mla.py:paged_mla_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_f32_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/triton/block_sparse_gqa_decode",
+    "provider": "triton",
+    "kernel": "block_sparse_gqa_decode",
+    "case": "B8-QH32-KVH8-S8192-D128-blocks32x128",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "block_sparse_gqa_decode_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/vllm/attention/minimax_m3/sparse_decode_runtime.py",
+    "examples": [
+      "streaming/block_sparse_attention.py:block_sparse_gqa_decode_partials",
+      "streaming/block_sparse_attention.py:block_sparse_gqa_decode_combine"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_conv1d",
+    "provider": "triton",
+    "kernel": "flaggems_conv1d",
+    "case": "B64-L16384-K5-fp16-same",
+    "family": "convolution",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_conv1d",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
+    "examples": [
+      "convolution/direct.py:conv1d_same"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_triangular_solve",
+    "provider": "triton",
+    "kernel": "flaggems_triangular_solve",
+    "case": "B4096-N16-fp32-lower",
+    "family": "factorization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_triangular_solve",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "examples": [
+      "factorization/triangular_solve.py:batched_lower_triangular_solve"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_embedding_lookup",
+    "provider": "triton",
+    "kernel": "flaggems_embedding_lookup",
+    "case": "tokens16384-vocab32768-hidden4096-bf16",
+    "family": "backward",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_embedding_lookup",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
+    "examples": [
+      "backward/embedding.py:embedding_forward_lookup_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_roll",
+    "provider": "triton",
+    "kernel": "flaggems_roll",
+    "case": "8192x4096-fp16-shift-1-axis0",
+    "family": "indexing",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_roll",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
+    "examples": [
+      "indexing/relations.py:roll_rows_forward"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_transpose_copy",
+    "provider": "triton",
+    "kernel": "flaggems_transpose_copy",
+    "case": "4093x8191-fp16",
+    "family": "layout",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_transpose_copy",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
+    "examples": [
+      "layout/transpose.py:matrix_transpose"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_batch_norm_training",
+    "provider": "triton",
+    "kernel": "flaggems_batch_norm_training",
+    "case": "B32-C64-S4096-fp16",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_batch_norm_training",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
+    "examples": [
+      "normalization/batch_norm.py:batch_norm_training"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_group_norm_backward",
+    "provider": "triton",
+    "kernel": "flaggems_group_norm_backward",
+    "case": "B32-C256-S1024-G32-fp16",
+    "family": "backward",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_group_norm_backward",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
+    "examples": [
+      "backward/group_norm.py:group_norm_backward_dx",
+      "backward/group_norm.py:group_norm_backward_weight_bias"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_logsumexp",
+    "provider": "triton",
+    "kernel": "flaggems_logsumexp",
+    "case": "8192x8192-fp32",
+    "family": "normalization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_logsumexp",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
+    "examples": [
+      "normalization/logsumexp.py:row_logsumexp"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_softmax_backward",
+    "provider": "triton",
+    "kernel": "flaggems_softmax_backward",
+    "case": "4096x4097-fp32",
+    "family": "backward",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_softmax_backward",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
+    "examples": [
+      "backward/softmax.py:softmax_backward"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_fused_adamw",
+    "provider": "triton",
+    "kernel": "flaggems_fused_adamw",
+    "case": "N8388608-fp32",
+    "family": "optimization",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_fused_adamw",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
+    "examples": [
+      "optimization/adamw.py:adamw_update"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_addcmul",
+    "provider": "triton",
+    "kernel": "flaggems_addcmul",
+    "case": "B64-C128-L4096-bf16",
+    "family": "activation",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_addcmul",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
+    "examples": [
+      "activation/pointwise.py:addcmul_broadcast_bf16"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_fp8_mqa_logits",
+    "provider": "triton",
+    "kernel": "flaggems_fp8_mqa_logits",
+    "case": "Q256-K4096-H32-D128-e4m3",
+    "family": "routing",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_fp8_mqa_logits",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
+    "examples": [
+      "routing/mqa_logits.py:fp8_mqa_logits"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_cumsum",
+    "provider": "triton",
+    "kernel": "flaggems_cumsum",
+    "case": "8192x8192-fp32-axis1",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_cumsum",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
+    "examples": [
+      "streaming/ordered_prefix.py:row_cumsum_f32"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_histogram",
+    "provider": "triton",
+    "kernel": "flaggems_histogram",
+    "case": "N8388608-bins256-fp32",
+    "family": "statistics",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_histogram",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
+    "examples": [
+      "statistics/histogram.py:histogram_256"
+    ]
+  },
+  {
+    "name": "corpus/triton/flaggems_max_pool2d_with_indices",
+    "provider": "triton",
+    "kernel": "flaggems_max_pool2d_with_indices",
+    "case": "B8-C32-H128-W128-K3-S2-P1-fp16",
+    "family": "vision",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "flaggems_max_pool2d_with_indices",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
+    "examples": [
+      "vision/max_pool_with_indices.py:max_pool2d_with_indices"
+    ]
+  },
+  {
+    "name": "corpus/triton/legacy_flash_attention_bias",
+    "provider": "triton",
+    "kernel": "legacy_flash_attention_bias",
+    "case": "B4-H32-S4096-D128-fp16-vector-bias",
+    "family": "streaming",
+    "implementations": [
+      "triton",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "legacy_flash_attention_bias",
+    "source_runtime": "corpus/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_bias_fwd"
+    ]
+  },
+  {
+    "name": "corpus/cutile/official_fmha",
+    "provider": "cutile",
+    "kernel": "official_fmha",
+    "case": "B4-QH32-KVH8-S4096-D128-fp16-causal",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "official_fmha",
+    "source_runtime": "corpus/gpu/baselines/cutile/cutile-python/attention/fmha/AttentionFMHA_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_gqa_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/cutile/block_scaled_gemm",
+    "provider": "cutile",
+    "kernel": "block_scaled_gemm",
+    "case": "M4096-N14336-K4096-fp8-block32",
+    "family": "contraction",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "block_scaled_gemm_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:block_scaled_matmul"
+    ]
+  },
+  {
+    "name": "corpus/cutile/dense_gemm",
+    "provider": "cutile",
+    "kernel": "dense_gemm",
+    "case": "M4096-N14336-K4096-fp16",
+    "family": "contraction",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "dense_gemm",
+    "source_runtime": "corpus/gpu/baselines/cutile/cutile-python/gemm/dense/MatMul_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm"
+    ]
+  },
+  {
+    "name": "corpus/cutile/moe_expert_projection",
+    "provider": "cutile",
+    "kernel": "moe_expert_projection",
+    "case": "T4096-E8-top2-4096x14336-bf16",
+    "family": "ragged",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "moe_projection_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/moe/fused/moe_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:routed_expert_projection_bf16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/layer_norm",
+    "provider": "cutile",
+    "kernel": "layer_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "layer_norm_bf16",
+    "source_runtime": "corpus/gpu/baselines/cutile/cutile-python/normalization/layer_norm/LayerNorm_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:layer_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/silu_and_mul",
+    "provider": "cutile",
+    "kernel": "silu_and_mul",
+    "case": "4096x28672-to14336-bf16",
+    "family": "activation",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "silu_and_mul",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/activation/silu_and_mul/silu_and_mul_runtime.py",
+    "examples": [
+      "activation/swiglu.py:silu_and_mul_packed"
+    ]
+  },
+  {
+    "name": "corpus/cutile/attention_backward",
+    "provider": "cutile",
+    "kernel": "attention_backward",
+    "case": "B2-QH8-KVH2-S1024-D64-fp16-causal",
+    "family": "backward",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "attention_backward_cutile_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/dense/attention_backward_runtime.py",
+    "examples": [
+      "backward/attention.py:attention_backward_delta",
+      "backward/attention.py:attention_backward_dkdv",
+      "backward/attention.py:attention_backward_dq"
+    ]
+  },
+  {
+    "name": "corpus/cutile/dense_attention_forward",
+    "provider": "cutile",
+    "kernel": "dense_attention_forward",
+    "case": "B2-QH32-KVH8-S4096-D128-bf16-causal",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "dense_attention_forward",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/dense/attention_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_gqa_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/cutile/grouped_flash_decode",
+    "provider": "cutile",
+    "kernel": "grouped_flash_decode",
+    "case": "B8-QH32-KVH8-S8192-D128-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "grouped_flash_decode",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/flash_decode_runtime.py",
+    "examples": [
+      "streaming/attention.py:grouped_flash_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/cutile/swiglu",
+    "provider": "cutile",
+    "kernel": "swiglu",
+    "case": "8192x14336-bf16",
+    "family": "activation",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "swiglu_8192",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/activation/swiglu/swiglu_runtime.py",
+    "examples": [
+      "activation/swiglu.py:swiglu_forward"
+    ]
+  },
+  {
+    "name": "corpus/cutile/splitk_attention_reduce",
+    "provider": "cutile",
+    "kernel": "splitk_attention_reduce",
+    "case": "B8-H32-S8192-splits16-D128",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "splitk_attention_reduce_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/flash_decode/splitk_reduce_runtime.py",
+    "examples": [
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/cutile/mla_prefill",
+    "provider": "cutile",
+    "kernel": "mla_prefill",
+    "case": "B1-QH128-KVH1-S2048-D128-R64-fp16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mla_prefill_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/mla/mla_runtime.py",
+    "examples": [
+      "streaming/attention.py:mla_prefill"
+    ]
+  },
+  {
+    "name": "corpus/cutile/batched_gemm",
+    "provider": "cutile",
+    "kernel": "batched_gemm",
+    "case": "B32-M512-N512-K1024-bf16",
+    "family": "contraction",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "batched_gemm_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/gemm/batched/bmm_runtime.py",
+    "examples": [
+      "contraction/batched_gemm.py:batched_gemm_nn"
+    ]
+  },
+  {
+    "name": "corpus/cutile/tilegym_dense_gemm",
+    "provider": "cutile",
+    "kernel": "tilegym_dense_gemm",
+    "case": "M8192-N11008-K4096-bf16",
+    "family": "contraction",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "tilegym_dense_gemm",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/gemm/dense/matmul_runtime.py",
+    "examples": [
+      "contraction/gemm.py:bf16_gemm"
+    ]
+  },
+  {
+    "name": "corpus/cutile/grouped_gemm",
+    "provider": "cutile",
+    "kernel": "grouped_gemm",
+    "case": "rows256-512-1024-2048-K4096-N4096-bf16",
+    "family": "ragged",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "grouped_gemm_cutile_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/gemm/grouped/group_gemm_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:ragged_grouped_gemm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/moe_alignment",
+    "provider": "cutile",
+    "kernel": "moe_alignment",
+    "case": "T4096-top2-E64",
+    "family": "routing",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "moe_alignment_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/moe/alignment/moe_align_block_runtime.py",
+    "examples": [
+      "routing/moe_align.py:moe_count_routes",
+      "routing/moe_align.py:moe_prefix_routes",
+      "routing/moe_align.py:moe_scatter_routes",
+      "routing/moe_align.py:moe_mark_expert_blocks"
+    ]
+  },
+  {
+    "name": "corpus/cutile/mhc_gemm_rms_scale",
+    "provider": "cutile",
+    "kernel": "mhc_gemm_rms_scale",
+    "case": "T2048-H4096-streams4-bf16",
+    "family": "routing",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mhc_gemm_rms_scale",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_gemm_rms_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_gemm_rms_partial",
+      "routing/mhc.py:mhc_gemm_rms_finalize"
+    ]
+  },
+  {
+    "name": "corpus/cutile/chunked_softmax",
+    "provider": "cutile",
+    "kernel": "chunked_softmax",
+    "case": "8192x32768-bf16",
+    "family": "normalization",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "chunked_softmax_bf16",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/normalization/softmax/softmax_runtime.py",
+    "examples": [
+      "normalization/softmax.py:chunked_softmax_bf16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/rope_qk",
+    "provider": "cutile",
+    "kernel": "rope_qk",
+    "case": "B2-S4096-QH32-KVH8-D128-bf16",
+    "family": "position",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "rope_qk_bf16",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/position/rope/rope_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_qk_bf16_inplace"
+    ]
+  },
+  {
+    "name": "corpus/cutile/gelu",
+    "provider": "cutile",
+    "kernel": "gelu",
+    "case": "8192x4096-fp16-tanh",
+    "family": "activation",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "gelu_tanh",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/activation/fused/gelu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:gelu_tanh"
+    ]
+  },
+  {
+    "name": "corpus/cutile/geglu",
+    "provider": "cutile",
+    "kernel": "geglu",
+    "case": "4096x28672-fp16-tanh",
+    "family": "activation",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "geglu_tanh",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/activation/fused/geglu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:geglu_tanh"
+    ]
+  },
+  {
+    "name": "corpus/cutile/relu",
+    "provider": "cutile",
+    "kernel": "relu",
+    "case": "8192x4096-fp16",
+    "family": "activation",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "relu_forward",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/activation/relu/relu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:relu_forward"
+    ]
+  },
+  {
+    "name": "corpus/cutile/dropout",
+    "provider": "cutile",
+    "kernel": "dropout",
+    "case": "8192x4096-fp16-p0.1",
+    "family": "regularization",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "xor_shift_dropout",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/regularization/dropout/dropout_runtime.py",
+    "examples": [
+      "regularization/dropout.py:xor_shift_dropout"
+    ]
+  },
+  {
+    "name": "corpus/cutile/attention_sink_prefill",
+    "provider": "cutile",
+    "kernel": "attention_sink_prefill",
+    "case": "B1-S4096-QH32-KVH8-D128-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "attention_sink_prefill",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/sink_prefill/attention_sink_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:attention_sink_prefill"
+    ]
+  },
+  {
+    "name": "corpus/cutile/attention_sink_decode",
+    "provider": "cutile",
+    "kernel": "attention_sink_decode",
+    "case": "B32-S8192-QH32-KVH8-D128-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "attention_sink_decode",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/sink_decode/attention_sink_decode_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:attention_sink_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/cutile/mhc_apply_residual",
+    "provider": "cutile",
+    "kernel": "mhc_apply_residual",
+    "case": "T2048-H4096-streams4-bf16",
+    "family": "routing",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mhc_apply_residual",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_apply_residual_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_apply_residual"
+    ]
+  },
+  {
+    "name": "corpus/cutile/gemma_prefill",
+    "provider": "cutile",
+    "kernel": "gemma_prefill",
+    "case": "B2-S4096-QH32-KVH8-D128-window1024-cap50-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "gemma_prefill",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/gemma_prefill/gemma_attention_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:gemma_gqa_prefill"
+    ]
+  },
+  {
+    "name": "corpus/cutile/gemma_decode",
+    "provider": "cutile",
+    "kernel": "gemma_decode",
+    "case": "B32-S8192-QH32-KVH8-D128-window1024-cap50-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "gemma_decode",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/gemma_decode/gemma_attention_decode_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:gemma_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/cutile/mhc_sinkhorn",
+    "provider": "cutile",
+    "kernel": "mhc_sinkhorn",
+    "case": "T8192-streams4-fp32",
+    "family": "routing",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "mhc_sinkhorn",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/mhc/fused/mhc_sinkhorn_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_sinkhorn"
+    ]
+  },
+  {
+    "name": "corpus/cutile/absorbed_mla_decode",
+    "provider": "cutile",
+    "kernel": "absorbed_mla_decode",
+    "case": "B8-H64-S8192-C512-R64-fp16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "absorbed_mla_decode",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding_runtime.py",
+    "examples": [
+      "streaming/mla.py:absorbed_mla_decode"
+    ]
+  },
+  {
+    "name": "corpus/cutile/splitk_mla_decode",
+    "provider": "cutile",
+    "kernel": "splitk_mla_decode",
+    "case": "B8-H64-S8192-C512-R64-split512-fp16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "splitk_mla_decode",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/mla_decode_split/mla_decoding_split_kv_runtime.py",
+    "examples": [
+      "streaming/mla.py:splitk_mla_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce_f16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/sparse_mla_prefill",
+    "provider": "cutile",
+    "kernel": "sparse_mla_prefill",
+    "case": "S2048-SKV4096-H64-topk512-D128-R64-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "sparse_mla_prefill_v2",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/sparse_mla/sparse_mla_runtime.py",
+    "examples": [
+      "streaming/mla.py:token_sparse_mla_value_prefill"
+    ]
+  },
+  {
+    "name": "corpus/cutile/sliding_window_attention",
+    "provider": "cutile",
+    "kernel": "sliding_window_attention",
+    "case": "B2-S4096-QH32-KVH8-D128-window1024-fp16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "sliding_window_attention",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/attention/sliding_window/swa_attention_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:sliding_window_gqa_prefill"
+    ]
+  },
+  {
+    "name": "corpus/cutile/rms_norm",
+    "provider": "cutile",
+    "kernel": "rms_norm",
+    "case": "8192x4096-bf16",
+    "family": "normalization",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "rms_norm_bf16",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/normalization/rms_norm/rms_norm_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:rms_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/cutile/recurrent_gated_delta",
+    "provider": "cutile",
+    "kernel": "recurrent_gated_delta",
+    "case": "B2-S2048-H8-K128-V128-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "recurrent_gated_delta",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:recurrent_gated_delta_fwd"
+    ]
+  },
+  {
+    "name": "corpus/cutile/chunk_gated_delta",
+    "provider": "cutile",
+    "kernel": "chunk_gated_delta",
+    "case": "B2-S2048-H8-K128-V128-C64-bf16",
+    "family": "streaming",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "chunk_gated_delta",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:chunk_gated_delta_prepare",
+      "streaming/gated_delta.py:chunk_gated_delta_recurrence"
+    ]
+  },
+  {
+    "name": "corpus/cutile/nvfp4_quantize",
+    "provider": "cutile",
+    "kernel": "nvfp4_quantize",
+    "case": "8192x4096-block16-bf16",
+    "family": "quantization",
+    "implementations": [
+      "cutile",
+      "intent:triton",
+      "intent:cutile"
+    ],
+    "description": "nvfp4_quantize",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/quantization/nvfp4/nvfp4_quantize_runtime.py",
+    "examples": [
+      "quantization/nvfp4.py:nvfp4_quantize",
+      "quantization/nvfp4.py:encode_e2m1"
+    ]
+  },
+  {
+    "name": "corpus/mojo/gemma_decode",
+    "provider": "mojo",
+    "kernel": "gemma_decode",
+    "case": "B32-QH32-KVH8-S8192-D128-window1024-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "gemma_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:gemma_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paged_gqa_decode",
+    "provider": "mojo",
+    "kernel": "paged_gqa_decode",
+    "case": "B16-QH32-KVH8-S8192-D128-page16-split8-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "paged_gqa_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_f32_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/block_sparse_gqa_decode",
+    "provider": "mojo",
+    "kernel": "block_sparse_gqa_decode",
+    "case": "B8-QH32-KVH8-S8192-D128-block32-selected128-split4-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "block_sparse_gqa_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/block_sparse_attention.py:block_sparse_gqa_decode_partials",
+      "streaming/block_sparse_attention.py:block_sparse_gqa_decode_combine"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paged_mla_decode",
+    "provider": "mojo",
+    "kernel": "paged_mla_decode",
+    "case": "B32-QH128-KVH1-S8192-C128-R64-page64-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "paged_mla_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:paged_mla_decode"
+    ]
+  },
+  {
+    "name": "corpus/mojo/sparse_mla_backward",
+    "provider": "mojo",
+    "kernel": "sparse_mla_backward",
+    "case": "B1-S4096-SKV8192-H64-DQ576-DV512-topk2048-bf16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "sparse_mla_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/sparse_mla.py:sparse_mla_backward_delta",
+      "backward/sparse_mla.py:sparse_mla_backward_main",
+      "backward/sparse_mla.py:sparse_mla_grad_kv_cast"
+    ]
+  },
+  {
+    "name": "corpus/mojo/sparse_2to4_gemm",
+    "provider": "mojo",
+    "kernel": "sparse_2to4_gemm",
+    "case": "M8192-N14336-K8192-f16-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "sparse_2to4_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/sparse_2to4.py:sparse_2to4_gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/nvfp4_quantize",
+    "provider": "mojo",
+    "kernel": "nvfp4_quantize",
+    "case": "8192x4096-bf16-e2m1-e4m3-8cores-host",
+    "family": "quantization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "nvfp4_quantize",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "quantization/nvfp4.py:nvfp4_quantize"
+    ]
+  },
+  {
+    "name": "corpus/mojo/reshape_and_cache",
+    "provider": "mojo",
+    "kernel": "reshape_and_cache",
+    "case": "T4096-H8-D128-blocks2048-page16-f16-8cores-host",
+    "family": "cache",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "reshape_and_cache",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "cache/reshape_and_cache.py:reshape_and_cache"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_fp8_mqa_logits",
+    "provider": "mojo",
+    "kernel": "flaggems_fp8_mqa_logits",
+    "case": "Q256-K4096-H32-D128-f8-f32-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "fp8_mqa_logits",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/mqa_logits.py:fp8_mqa_logits"
+    ]
+  },
+  {
+    "name": "corpus/mojo/swiglu_forward_helper",
+    "provider": "mojo",
+    "kernel": "swiglu_forward_helper",
+    "case": "4096x14336-bf16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "swiglu_forward_helper",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/activation.py:swiglu_forward_helper"
+    ]
+  },
+  {
+    "name": "corpus/mojo/gemm_loop_interchange",
+    "provider": "mojo",
+    "kernel": "gemm_loop_interchange",
+    "case": "M4096-K4096-N14336-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "gemm_loop_interchange",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/contraction.py:gemm_loop_interchange"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rotary_embedding_equivalent_index",
+    "provider": "mojo",
+    "kernel": "rotary_embedding_equivalent_index",
+    "case": "rows65536-D128-heads32-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "rotary_embedding_equivalent_index",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/indexing.py:rotary_embedding_equivalent_index"
+    ]
+  },
+  {
+    "name": "corpus/mojo/matrix_transpose_scalar_domains",
+    "provider": "mojo",
+    "kernel": "matrix_transpose_scalar_domains",
+    "case": "4093x8191-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "matrix_transpose_scalar_domains",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/layout.py:matrix_transpose_scalar_domains"
+    ]
+  },
+  {
+    "name": "corpus/mojo/stable_softmax_online",
+    "provider": "mojo",
+    "kernel": "stable_softmax_online",
+    "case": "8192x8192-f32-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "stable_softmax_online",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/normalization.py:stable_softmax_online"
+    ]
+  },
+  {
+    "name": "corpus/mojo/streamed_online_softmax_inline",
+    "provider": "mojo",
+    "kernel": "streamed_online_softmax_inline",
+    "case": "8192x8192-f32-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "streamed_online_softmax_inline",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/streaming.py:streamed_online_softmax_inline"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_cholesky_right_looking",
+    "provider": "mojo",
+    "kernel": "batched_cholesky_right_looking",
+    "case": "B256-N16-f32-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_cholesky_right_looking",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:batched_cholesky_right_looking"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba_chunk_state",
+    "provider": "mojo",
+    "kernel": "mamba_chunk_state",
+    "case": "B1-L2048-H32-G8-P64-N128-C256-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba_chunk_state_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_chunk_state_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/linear_attention_forward",
+    "provider": "mojo",
+    "kernel": "linear_attention_forward",
+    "case": "B1-S2048-H16-D128-f16-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fused_chunk_linear_attention_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/linear_attention.py:fused_chunk_linear_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/moe_expert_ffn",
+    "provider": "mojo",
+    "kernel": "moe_expert_ffn",
+    "case": "T4096-D4096-F14336-E8-topk2-f16-f32-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "moe_expert_ffn",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/moe.py:moe_expert_ffn"
+    ]
+  },
+  {
+    "name": "corpus/mojo/padded_rope_cache_update",
+    "provider": "mojo",
+    "kernel": "padded_rope_cache_update",
+    "case": "B32-QH32-KVH8-D128-cache8192-f16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "padded_rope_cache_update",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope_cache.py:padded_rope_cache_update"
+    ]
+  },
+  {
+    "name": "corpus/mojo/moe_alignment",
+    "provider": "mojo",
+    "kernel": "moe_alignment",
+    "case": "T4096-topk2-E64-block128-i32-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "moe_alignment",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/moe_align.py:moe_count_routes",
+      "routing/moe_align.py:moe_prefix_routes",
+      "routing/moe_align.py:moe_scatter_routes",
+      "routing/moe_align.py:moe_mark_expert_blocks"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mhc_post",
+    "provider": "mojo",
+    "kernel": "mhc_post",
+    "case": "T4096-H2560-streams4-bf16-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mhc_post",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_apply_residual"
+    ]
+  },
+  {
+    "name": "corpus/mojo/attention_backward",
+    "provider": "mojo",
+    "kernel": "attention_backward",
+    "case": "B2-HQ8-HK2-S1024-D64-f16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "attention_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/attention.py:attention_backward_delta",
+      "backward/attention.py:attention_backward_dkdv",
+      "backward/attention.py:attention_backward_dq"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mxfp8_gemm",
+    "provider": "mojo",
+    "kernel": "mxfp8_gemm",
+    "case": "M4096-K4096-N14336-group32-e4m3-e8m0-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "block_scaled_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:block_scaled_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/block_sparse_gemm",
+    "provider": "mojo",
+    "kernel": "block_sparse_gemm",
+    "case": "M4096-K4096-N4096-block128x128x32-f16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "block_sparse_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/block_sparse.py:block_sparse_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba_chunk_scan",
+    "provider": "mojo",
+    "kernel": "mamba_chunk_scan",
+    "case": "B1-L2048-H32-G8-P64-N128-C256-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba_chunk_scan_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/selective_scan.py:mamba_chunk_scan_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/layer_norm_backward",
+    "provider": "mojo",
+    "kernel": "layer_norm_backward",
+    "case": "4096x4096-partial128-bf16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "layer_norm_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/layer_norm.py:layer_norm_backward_rows",
+      "backward/layer_norm.py:layer_norm_backward_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/group_norm_backward",
+    "provider": "mojo",
+    "kernel": "group_norm_backward",
+    "case": "B32-C256-S1024-G32-f16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "group_norm_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/group_norm.py:group_norm_backward_dx",
+      "backward/group_norm.py:group_norm_backward_weight_bias"
+    ]
+  },
+  {
+    "name": "corpus/mojo/qkv_projection",
+    "provider": "mojo",
+    "kernel": "qkv_projection",
+    "case": "P3-T4096-K4096-N4096-f16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "qkv_projection_pipeline",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/qkv.py:fused_qkv_projection"
+    ]
+  },
+  {
+    "name": "corpus/mojo/dropout",
+    "provider": "mojo",
+    "kernel": "dropout",
+    "case": "8192x4096-f16-seed12345-p0.1-8cores-host",
+    "family": "regularization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "dropout",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "regularization/dropout.py:xor_shift_dropout"
+    ]
+  },
+  {
+    "name": "corpus/mojo/unique_consecutive",
+    "provider": "mojo",
+    "kernel": "unique_consecutive",
+    "case": "64x4096-i32-8cores-host",
+    "family": "compaction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "unique_consecutive",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "compaction/unique_consecutive.py:unique_consecutive_rows"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_bf16",
+    "provider": "mojo",
+    "kernel": "flash_attention_bf16",
+    "case": "B2-HQ32-HK8-S4096-D128-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_attention_bf16_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/ragged_grouped_gemm",
+    "provider": "mojo",
+    "kernel": "ragged_grouped_gemm",
+    "case": "R8192-G8-K4096-N4096-f16-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "ragged_grouped_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:ragged_grouped_gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/nested_jagged_mean_pool",
+    "provider": "mojo",
+    "kernel": "nested_jagged_mean_pool",
+    "case": "D256-S4096-T65536-F128-f32-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "nested_jagged_mean_pool",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/nested_pool.py:nested_jagged_mean_pool"
+    ]
+  },
+  {
+    "name": "corpus/mojo/jagged_mean",
+    "provider": "mojo",
+    "kernel": "jagged_mean",
+    "case": "B512-T33024-D128-f32-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "jagged_mean",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/jagged_mean.py:jagged_mean"
+    ]
+  },
+  {
+    "name": "corpus/mojo/selective_state_scan",
+    "provider": "mojo",
+    "kernel": "selective_state_scan",
+    "case": "B128-L4096-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "selective_state_scan",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/selective_scan.py:selective_state_scan"
+    ]
+  },
+  {
+    "name": "corpus/mojo/streamed_online_softmax_f16",
+    "provider": "mojo",
+    "kernel": "streamed_online_softmax_f16",
+    "case": "8192x8192-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "streamed_online_softmax_f16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/online_softmax.py:streamed_online_softmax_f16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/recurrent_gated_delta_fwd",
+    "provider": "mojo",
+    "kernel": "recurrent_gated_delta_fwd",
+    "case": "B2-T2048-H8-K128-V128-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "recurrent_gated_delta_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:recurrent_gated_delta_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fp8_gemm",
+    "provider": "mojo",
+    "kernel": "fp8_gemm",
+    "case": "M4096-N14336-K4096-f8e4m3fn-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "fp8_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:fp8_e4m3_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/silu_and_mul_packed",
+    "provider": "mojo",
+    "kernel": "silu_and_mul_packed",
+    "case": "4096x28672-bf16-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "silu_and_mul_packed",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/swiglu.py:silu_and_mul_packed"
+    ]
+  },
+  {
+    "name": "corpus/mojo/geglu_tanh",
+    "provider": "mojo",
+    "kernel": "geglu_tanh",
+    "case": "4096x28672-f16-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "geglu_tanh",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:geglu_tanh"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rope_qk_partial",
+    "provider": "mojo",
+    "kernel": "rope_qk_partial",
+    "case": "B4-S2048-QH32-KH8-D128-R64-f16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "rope_qk_partial",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_qk_partial_inplace"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rotary_embedding_bf16",
+    "provider": "mojo",
+    "kernel": "rotary_embedding_bf16",
+    "case": "B4-S4096-H32-D128-bf16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "rotary_embedding_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_embedding_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rope_qk_bf16_inplace",
+    "provider": "mojo",
+    "kernel": "rope_qk_bf16_inplace",
+    "case": "B2-S4096-QH32-KH8-D128-bf16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "rope_qk_bf16_inplace",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_qk_bf16_inplace"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fp8_groupwise_quantize",
+    "provider": "mojo",
+    "kernel": "fp8_groupwise_quantize",
+    "case": "8192x4096-bf16-group128-f8e4m3fn-8cores-host",
+    "family": "quantization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fp8_groupwise_quantize",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "quantization/fp8.py:bf16_groupwise_fp8_quantize"
+    ]
+  },
+  {
+    "name": "corpus/mojo/partitioned_two_pass_max",
+    "provider": "mojo",
+    "kernel": "partitioned_two_pass_max",
+    "case": "M128-N257-P300-f32-8cores-host",
+    "family": "reduction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "partitioned_two_pass_max",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "reduction/two_pass.py:partitioned_max_partial",
+      "reduction/two_pass.py:partitioned_max_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/shifted_row_copy",
+    "provider": "mojo",
+    "kernel": "shifted_row_copy",
+    "case": "4096x1024-f32-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "shifted_row_copy",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:shifted_row_copy"
+    ]
+  },
+  {
+    "name": "corpus/mojo/roll_rows_forward",
+    "provider": "mojo",
+    "kernel": "roll_rows_forward",
+    "case": "8192x4096-f16-flat-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "roll_rows_forward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:roll_rows_forward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/grouped_query_head_add",
+    "provider": "mojo",
+    "kernel": "grouped_query_head_add",
+    "case": "QH32-KH8-T4096-f16-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "grouped_query_head_add",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:grouped_query_head_add"
+    ]
+  },
+  {
+    "name": "corpus/mojo/alternating_signed_indices",
+    "provider": "mojo",
+    "kernel": "alternating_signed_indices",
+    "case": "4093x8191-i32-8cores-host",
+    "family": "pointwise",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "alternating_signed_indices",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "pointwise/select.py:alternating_signed_indices"
+    ]
+  },
+  {
+    "name": "corpus/mojo/boolean_reduction",
+    "provider": "mojo",
+    "kernel": "boolean_reduction",
+    "case": "8192x4093-i32-8cores-host",
+    "family": "reduction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "row_boolean_reduction",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "reduction/boolean.py:row_boolean_reduction"
+    ]
+  },
+  {
+    "name": "corpus/mojo/kmeans_assign",
+    "provider": "mojo",
+    "kernel": "kmeans_assign",
+    "case": "points65536-clusters64-features64-f16-8cores-host",
+    "family": "clustering",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "kmeans_assign",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "clustering/kmeans.py:kmeans_assign"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fused_cross_entropy",
+    "provider": "mojo",
+    "kernel": "fused_cross_entropy",
+    "case": "4096x16384-f32-8cores-host",
+    "family": "loss",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fused_cross_entropy",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "loss/cross_entropy.py:fused_cross_entropy"
+    ]
+  },
+  {
+    "name": "corpus/mojo/group_norm_silu_backward",
+    "provider": "mojo",
+    "kernel": "group_norm_silu_backward",
+    "case": "B32-C256-S1024-G32-bf16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "group_norm_silu_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/group_norm_silu.py:group_norm_silu_backward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_conv1d",
+    "provider": "mojo",
+    "kernel": "causal_conv1d",
+    "case": "B8-C2048-L4096-W4-f16-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "causal_conv1d",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d"
+    ]
+  },
+  {
+    "name": "corpus/mojo/conv2d",
+    "provider": "mojo",
+    "kernel": "conv2d",
+    "case": "B16-H256-W256-K3-f16-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "conv2d",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:conv2d_same"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_conv1d_backward",
+    "provider": "mojo",
+    "kernel": "causal_conv1d_backward",
+    "case": "B8-C2048-L4096-W4-f16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "causal_conv1d_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/causal_conv.py:causal_conv1d_backward_partials",
+      "backward/causal_conv.py:causal_conv1d_backward_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batch_norm_training",
+    "provider": "mojo",
+    "kernel": "batch_norm_training",
+    "case": "B32-C64-S4096-fp16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batch_norm_training",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/batch_norm.py:batch_norm_training"
+    ]
+  },
+  {
+    "name": "corpus/mojo/insertion_top_k",
+    "provider": "mojo",
+    "kernel": "insertion_top_k",
+    "case": "1024x4093-k8-fp32-8cores-host",
+    "family": "sampling",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "insertion_top_k",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "sampling/top_k.py:insertion_top_k"
+    ]
+  },
+  {
+    "name": "corpus/mojo/histogram",
+    "provider": "mojo",
+    "kernel": "histogram",
+    "case": "N8388608-bins256-f32-to-i32-8cores-host",
+    "family": "statistics",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "histogram_256",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "statistics/histogram.py:histogram_256"
+    ]
+  },
+  {
+    "name": "corpus/mojo/cholesky",
+    "provider": "mojo",
+    "kernel": "cholesky",
+    "case": "B256-N16-fp32-8cores-host",
+    "family": "factorization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_cholesky_lower",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "factorization/cholesky.py:batched_cholesky_lower"
+    ]
+  },
+  {
+    "name": "corpus/mojo/householder_qr",
+    "provider": "mojo",
+    "kernel": "householder_qr",
+    "case": "B128-R32-C16-fp32-8cores-host",
+    "family": "factorization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_householder_qr",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "factorization/householder_qr.py:batched_householder_qr"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_conv_update",
+    "provider": "mojo",
+    "kernel": "causal_conv_update",
+    "case": "B64-D4096-W4-fp16-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "causal_depthwise_conv1d_update",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d_update"
+    ]
+  },
+  {
+    "name": "corpus/mojo/sorted_nucleus_cutoff",
+    "provider": "mojo",
+    "kernel": "sorted_nucleus_cutoff",
+    "case": "1024x4093-fp32-8cores-host",
+    "family": "sampling",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "sorted_nucleus_cutoff",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "sampling/nucleus.py:sorted_nucleus_cutoff"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_cumsum",
+    "provider": "mojo",
+    "kernel": "flaggems_cumsum",
+    "case": "8192x8192-fp32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "row_cumsum_f32",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/ordered_prefix.py:row_cumsum_f32"
+    ]
+  },
+  {
+    "name": "corpus/mojo/ordered_prefix",
+    "provider": "mojo",
+    "kernel": "ordered_prefix",
+    "case": "512x17x31-fp32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "ordered_product_prefix",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/ordered_prefix.py:ordered_product_prefix"
+    ]
+  },
+  {
+    "name": "corpus/mojo/compact_nonzero",
+    "provider": "mojo",
+    "kernel": "compact_nonzero",
+    "case": "64x4096-fp32-8cores-host",
+    "family": "compaction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "compact_nonzero_rows",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "compaction/nonzero.py:compact_nonzero_rows"
+    ]
+  },
+  {
+    "name": "corpus/mojo/varlen_causal_conv1d",
+    "provider": "mojo",
+    "kernel": "varlen_causal_conv1d",
+    "case": "U5120-D4096-W4-bf16-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "varlen_aligned_causal_depthwise_conv1d + varlen_causal_conv1d_final_state",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/varlen.py:varlen_aligned_causal_depthwise_conv1d",
+      "convolution/varlen.py:varlen_causal_conv1d_final_state"
+    ]
+  },
+  {
+    "name": "corpus/mojo/radix2_fft",
+    "provider": "mojo",
+    "kernel": "radix2_fft",
+    "case": "B1024-N1024-fp32-complex-8cores-host",
+    "family": "spectral",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "radix2_fft",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "spectral/fft.py:radix2_fft"
+    ]
+  },
+  {
+    "name": "corpus/mojo/viterbi",
+    "provider": "mojo",
+    "kernel": "viterbi",
+    "case": "B64-T256-S64-fp32-8cores-host",
+    "family": "dynamic_programming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "viterbi_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "dynamic_programming/viterbi.py:viterbi_decode"
+    ]
+  },
+  {
+    "name": "corpus/mojo/smith_waterman",
+    "provider": "mojo",
+    "kernel": "smith_waterman",
+    "case": "B128-Q128-R128-i32-8cores-host",
+    "family": "dynamic_programming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "smith_waterman_score",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "dynamic_programming/smith_waterman.py:smith_waterman_score"
+    ]
+  },
+  {
+    "name": "corpus/mojo/bitonic_sort",
+    "provider": "mojo",
+    "kernel": "bitonic_sort",
+    "case": "4096x256-fp32-8cores-host",
+    "family": "sorting",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "bitonic_sort_rows",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "sorting/bitonic.py:bitonic_sort_rows"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_triangular_solve",
+    "provider": "mojo",
+    "kernel": "flaggems_triangular_solve",
+    "case": "B4096-N16-fp32-lower-8cores-host",
+    "family": "factorization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_lower_triangular_solve",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "factorization/triangular_solve.py:batched_lower_triangular_solve"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_conv1d",
+    "provider": "mojo",
+    "kernel": "flaggems_conv1d",
+    "case": "B64-L16384-K5-fp16-same-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "conv1d_same",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:conv1d_same"
+    ]
+  },
+  {
+    "name": "corpus/mojo/swiglu",
+    "provider": "mojo",
+    "kernel": "swiglu",
+    "case": "8192x14336-bf16-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "swiglu_forward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/swiglu.py:swiglu_forward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/embedding_lookup",
+    "provider": "mojo",
+    "kernel": "embedding_lookup",
+    "case": "tokens16384-vocab32768-hidden4096-bf16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "embedding_forward_lookup_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/embedding.py:embedding_forward_lookup_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/embedding_lookup_f32",
+    "provider": "mojo",
+    "kernel": "embedding_lookup_f32",
+    "case": "tokens8192-vocab8192-hidden1021-f32-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "embedding_forward_lookup",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/embedding.py:embedding_forward_lookup"
+    ]
+  },
+  {
+    "name": "corpus/mojo/embedding_backward_atomic",
+    "provider": "mojo",
+    "kernel": "embedding_backward_atomic",
+    "case": "M32768-V8192-D1021-f32-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "embedding_backward_atomic",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/embedding.py:embedding_backward_atomic"
+    ]
+  },
+  {
+    "name": "corpus/mojo/atomic_compare_exchange",
+    "provider": "mojo",
+    "kernel": "atomic_compare_exchange",
+    "case": "N65536-i32-8cores-host",
+    "family": "synchronization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "claim_zero_slots",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "synchronization/compare_exchange.py:claim_zero_slots"
+    ]
+  },
+  {
+    "name": "corpus/mojo/index_select",
+    "provider": "mojo",
+    "kernel": "index_select",
+    "case": "source65536-selected32768-hidden4096-fp16-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "index_select_rows",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:index_select_rows"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_fused_adamw",
+    "provider": "mojo",
+    "kernel": "flaggems_fused_adamw",
+    "case": "N8388608-fp32-8cores-host",
+    "family": "optimization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "adamw_update",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "optimization/adamw.py:adamw_update"
+    ]
+  },
+  {
+    "name": "corpus/mojo/adafactor",
+    "provider": "mojo",
+    "kernel": "adafactor",
+    "case": "4096x4096-fp32-8cores-host",
+    "family": "optimization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "adafactor",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "optimization/adafactor.py:adafactor_update_rows",
+      "optimization/adafactor.py:adafactor_update_columns",
+      "optimization/adafactor.py:adafactor_apply"
+    ]
+  },
+  {
+    "name": "corpus/mojo/dense_gemm",
+    "provider": "mojo",
+    "kernel": "dense_gemm",
+    "case": "M4096-N14336-K4096-fp16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/tilegym_dense_gemm",
+    "provider": "mojo",
+    "kernel": "tilegym_dense_gemm",
+    "case": "M8192-N11008-K4096-bf16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "bf16_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/gemm.py:bf16_gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_gemm",
+    "provider": "mojo",
+    "kernel": "batched_gemm",
+    "case": "B32-M512-N512-K1024-bf16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "batched_gemm_nn",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/batched_gemm.py:batched_gemm_nn"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_gemm_tn",
+    "provider": "mojo",
+    "kernel": "batched_gemm_tn",
+    "case": "B32-M512-N512-K1024-bf16-TN-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_gemm_tn",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/batched_gemm.py:batched_gemm_tn"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_gemm_nt",
+    "provider": "mojo",
+    "kernel": "batched_gemm_nt",
+    "case": "B32-M512-N512-K1024-bf16-NT-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_gemm_nt",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/batched_gemm.py:batched_gemm_nt"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_gemm_tt",
+    "provider": "mojo",
+    "kernel": "batched_gemm_tt",
+    "case": "B32-M512-N512-K1024-bf16-TT-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "batched_gemm_tt",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/batched_gemm.py:batched_gemm_tt"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mla_head_query_projection",
+    "provider": "mojo",
+    "kernel": "mla_head_query_projection",
+    "case": "B1-Q512-H8-I128-O512-fp16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mla_head_query_projection",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/mla.py:mla_head_projection"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mla_head_value_projection",
+    "provider": "mojo",
+    "kernel": "mla_head_value_projection",
+    "case": "B1-Q512-H8-I512-O128-fp16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mla_head_value_projection",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/mla.py:mla_head_projection"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fused_softmax",
+    "provider": "mojo",
+    "kernel": "fused_softmax",
+    "case": "8192x8192-fp16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "stable_softmax_f16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/softmax.py:stable_softmax_f16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/chunked_softmax",
+    "provider": "mojo",
+    "kernel": "chunked_softmax",
+    "case": "8192x32768-bf16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "chunked_softmax_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/softmax.py:chunked_softmax_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/layer_norm_f16",
+    "provider": "mojo",
+    "kernel": "layer_norm_f16",
+    "case": "8192x4096-fp16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "layer_norm_f16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:layer_norm_f16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/layer_norm_bf16",
+    "provider": "mojo",
+    "kernel": "layer_norm_bf16",
+    "case": "8192x4096-bf16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "layer_norm_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:layer_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rms_norm_f32",
+    "provider": "mojo",
+    "kernel": "rms_norm_f32",
+    "case": "8192x4096-f32-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "rms_norm_f32",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:rms_norm_f32"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rms_norm_bf16",
+    "provider": "mojo",
+    "kernel": "rms_norm_bf16",
+    "case": "8192x4096-bf16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "rms_norm_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:rms_norm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_softmax_backward",
+    "provider": "mojo",
+    "kernel": "flaggems_softmax_backward",
+    "case": "4096x4097-fp32-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "softmax_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/softmax.py:softmax_backward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_transpose_copy",
+    "provider": "mojo",
+    "kernel": "flaggems_transpose_copy",
+    "case": "4093x8191-fp16-8cores-host",
+    "family": "layout",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "matrix_transpose",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "layout/transpose.py:matrix_transpose"
+    ]
+  },
+  {
+    "name": "corpus/mojo/gelu",
+    "provider": "mojo",
+    "kernel": "gelu",
+    "case": "8192x4096-fp16-tanh-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "gelu_tanh",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:gelu_tanh"
+    ]
+  },
+  {
+    "name": "corpus/mojo/relu",
+    "provider": "mojo",
+    "kernel": "relu",
+    "case": "8192x4096-fp16-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "relu_forward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:relu_forward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_addcmul",
+    "provider": "mojo",
+    "kernel": "flaggems_addcmul",
+    "case": "B64-C128-L4096-bf16-8cores-host",
+    "family": "activation",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "addcmul_broadcast_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "activation/pointwise.py:addcmul_broadcast_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_logsumexp",
+    "provider": "mojo",
+    "kernel": "flaggems_logsumexp",
+    "case": "8192x8192-fp32-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "row_logsumexp",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/logsumexp.py:row_logsumexp"
+    ]
+  },
+  {
+    "name": "corpus/mojo/scalar_table_lookup",
+    "provider": "mojo",
+    "kernel": "scalar_table_lookup",
+    "case": "C65536-D128-M65536-i32-f32-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "scalar_table_lookup",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:scalar_table_lookup"
+    ]
+  },
+  {
+    "name": "corpus/mojo/csr_spmv",
+    "provider": "mojo",
+    "kernel": "csr_spmv",
+    "case": "32768x32768-nnz32-fp32-8cores-host",
+    "family": "sparse",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "csr_spmv",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "sparse/csr_spmv.py:csr_spmv"
+    ]
+  },
+  {
+    "name": "corpus/mojo/csr_spmm",
+    "provider": "mojo",
+    "kernel": "csr_spmm",
+    "case": "8192x8192-nnz32-features128-fp32-8cores-host",
+    "family": "sparse",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "csr_spmm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "sparse/csr_spmm.py:csr_spmm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/roi_align_center_sample",
+    "provider": "mojo",
+    "kernel": "roi_align_center_sample",
+    "case": "B8-C64-H128-W128-R2048-7x7-fp32-8cores-host",
+    "family": "vision",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "roi_align_center_sample",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "vision/roi_align.py:roi_align_center_sample"
+    ]
+  },
+  {
+    "name": "corpus/mojo/max_pool2d",
+    "provider": "mojo",
+    "kernel": "max_pool2d",
+    "case": "B8-C32-H128-W128-K3-S2-P1-fp16-8cores-host",
+    "family": "vision",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "max_pool2d",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "vision/max_pool.py:max_pool2d"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flaggems_max_pool2d_with_indices",
+    "provider": "mojo",
+    "kernel": "flaggems_max_pool2d_with_indices",
+    "case": "B8-C32-H128-W128-K3-S2-P1-fp16-8cores-host",
+    "family": "vision",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "max_pool2d_with_indices",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "vision/max_pool_with_indices.py:max_pool2d_with_indices"
+    ]
+  },
+  {
+    "name": "corpus/mojo/integer_log2_floor",
+    "provider": "mojo",
+    "kernel": "integer_log2_floor",
+    "case": "N262144-i32-8cores-host",
+    "family": "pointwise",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "integer_log2_floor",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "pointwise/while_loop.py:integer_log2_floor"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rope_qk",
+    "provider": "mojo",
+    "kernel": "rope_qk",
+    "case": "B4-S4096-QH32-KVH8-D128-fp16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "rotary_qk_inplace",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_qk_inplace"
+    ]
+  },
+  {
+    "name": "corpus/mojo/greedy_nms",
+    "provider": "mojo",
+    "kernel": "greedy_nms",
+    "case": "B32-N1024-fp32-8cores-host",
+    "family": "vision",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "greedy_nms",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "vision/nms.py:greedy_nms"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_attention_f32",
+    "provider": "mojo",
+    "kernel": "causal_attention_f32",
+    "case": "B8-S128-D32-f32-8cores",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "causal_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_attention_f32"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_linear_attention_f32",
+    "provider": "mojo",
+    "kernel": "causal_linear_attention_f32",
+    "case": "B8-S128-D32-f32-8cores",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "causal_linear_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_linear_attention_f32"
+    ]
+  },
+  {
+    "name": "corpus/mojo/batched_row_affine",
+    "provider": "mojo",
+    "kernel": "batched_row_affine",
+    "case": "17x257x4093-f32-8cores",
+    "family": "pointwise",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "batched_row_affine",
+    "source_runtime": "corpus/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine_runtime.py",
+    "examples": [
+      "pointwise/batched_affine.py:batched_row_affine"
+    ]
+  },
+  {
+    "name": "corpus/mojo/weighted_rms_norm",
+    "provider": "mojo",
+    "kernel": "weighted_rms_norm",
+    "case": "8192x4096-f32-8cores",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "weighted_rms_norm",
+    "source_runtime": "corpus/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm_runtime.py",
+    "examples": [
+      "normalization/rms_norm.py:weighted_rms_norm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/dense_gemm_f32",
+    "provider": "mojo",
+    "kernel": "dense_gemm_f32",
+    "case": "M1024-N1024-K1024-f32-8cores",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "gemm_f32",
+    "source_runtime": "corpus/cpu/baselines/mojo/modular/contraction/gemm/gemm_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm_f32"
+    ]
+  },
+  {
+    "name": "corpus/mojo/stable_softmax",
+    "provider": "mojo",
+    "kernel": "stable_softmax",
+    "case": "8192x8192-f32-8cores",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "stable_softmax",
+    "source_runtime": "corpus/cpu/baselines/mojo/modular/normalization/softmax/softmax_runtime.py",
+    "examples": [
+      "normalization/softmax.py:stable_softmax"
+    ]
+  },
+  {
+    "name": "corpus/mojo/weighted_layer_norm",
+    "provider": "mojo",
+    "kernel": "weighted_layer_norm",
+    "case": "8192x4096-f32-8cores",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "mojo"
+    ],
+    "description": "weighted_layer_norm",
+    "source_runtime": "corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm_runtime.py",
+    "examples": [
+      "normalization/layer_norm.py:weighted_layer_norm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/swiglu_backward",
+    "provider": "mojo",
+    "kernel": "swiglu_backward",
+    "case": "4096x4096-bf16-8cores-host",
+    "family": "backward",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "swiglu_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "backward/swiglu.py:swiglu_backward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fused_add_rms_norm",
+    "provider": "mojo",
+    "kernel": "fused_add_rms_norm",
+    "case": "8192x4096-bf16-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "fused_add_rms_norm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/fused_add_rms_norm.py:fused_add_rms_norm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paired_sum_product",
+    "provider": "mojo",
+    "kernel": "paired_sum_product",
+    "case": "N1048576-f32-8cores-host",
+    "family": "pointwise",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "paired_sum_product",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "pointwise/record.py:paired_sum_product"
+    ]
+  },
+  {
+    "name": "corpus/mojo/gated_dual_gemm",
+    "provider": "mojo",
+    "kernel": "gated_dual_gemm",
+    "case": "M2048-N4096-K4096-fp16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "gated_dual_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/dual_gemm.py:gated_dual_gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/dropout_residual_rms_norm",
+    "provider": "mojo",
+    "kernel": "dropout_residual_rms_norm",
+    "case": "4096x4096-bf16-seed17-p0.1-8cores-host",
+    "family": "normalization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "dropout_residual_rms_norm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "normalization/dropout_residual_rms_norm.py:dropout_residual_rms_norm_forward",
+      "normalization/dropout_residual_rms_norm.py:dropout_residual_rms_norm_backward_data"
+    ]
+  },
+  {
+    "name": "corpus/mojo/barrier_option_paths",
+    "provider": "mojo",
+    "kernel": "barrier_option_paths",
+    "case": "paths262144-steps64-f32-seed17-8cores-host",
+    "family": "simulation",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "barrier_option_paths",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "simulation/monte_carlo.py:barrier_option_paths"
+    ]
+  },
+  {
+    "name": "corpus/mojo/vector_dot",
+    "provider": "mojo",
+    "kernel": "vector_dot",
+    "case": "K1048576-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "vector_dot",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/vector.py:vector_dot"
+    ]
+  },
+  {
+    "name": "corpus/mojo/matrix_vector",
+    "provider": "mojo",
+    "kernel": "matrix_vector",
+    "case": "M1024-K1024-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "matrix_vector",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/vector.py:matrix_vector"
+    ]
+  },
+  {
+    "name": "corpus/mojo/vector_matrix",
+    "provider": "mojo",
+    "kernel": "vector_matrix",
+    "case": "K1024-N1024-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "vector_matrix",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/vector.py:vector_matrix"
+    ]
+  },
+  {
+    "name": "corpus/mojo/vector_outer",
+    "provider": "mojo",
+    "kernel": "vector_outer",
+    "case": "M1024-N1024-f32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "vector_outer",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/vector.py:vector_outer"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fused_linear_cross_entropy",
+    "provider": "mojo",
+    "kernel": "fused_linear_cross_entropy",
+    "case": "tokens2048-hidden4096-vocab32768-chunk1024-bf16-f32-8cores-host",
+    "family": "loss",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fused_linear_cross_entropy",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "loss/fused_linear_cross_entropy.py:linear_logits_chunk",
+      "loss/fused_linear_cross_entropy.py:cross_entropy_probability_chunk",
+      "loss/fused_linear_cross_entropy.py:cross_entropy_mean"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_conv1d_bf16",
+    "provider": "mojo",
+    "kernel": "causal_conv1d_bf16",
+    "case": "B4-C4096-S4096-W4-bf16-silu-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "causal_depthwise_conv1d_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/causal_conv_update_bf16",
+    "provider": "mojo",
+    "kernel": "causal_conv_update_bf16",
+    "case": "B32-D4096-W4-bf16-f32-silu-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "causal_depthwise_conv1d_update_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:causal_depthwise_conv1d_update_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fused_cross_entropy_bf16",
+    "provider": "mojo",
+    "kernel": "fused_cross_entropy_bf16",
+    "case": "8192x32768-bf16-i64-8cores-host",
+    "family": "loss",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fused_cross_entropy_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "loss/cross_entropy.py:fused_cross_entropy_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_cross_entropy_bf16",
+    "provider": "mojo",
+    "kernel": "flash_cross_entropy_bf16",
+    "case": "8192x32768-bf16-i64-zloss1e-4-8cores-host",
+    "family": "loss",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_cross_entropy_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "loss/cross_entropy.py:flash_cross_entropy_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/ragged_grouped_gemm_bf16",
+    "provider": "mojo",
+    "kernel": "ragged_grouped_gemm_bf16",
+    "case": "rows256-512-1024-2048-K4096-N4096-bf16-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "ragged_grouped_gemm_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:ragged_grouped_gemm_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/grouped_gemm_backward",
+    "provider": "mojo",
+    "kernel": "grouped_gemm_backward",
+    "case": "rows256-512-1024-2048-K4096-N4096-f16-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "ragged_grouped_gemm_backward_weight",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:ragged_grouped_gemm_backward_weight"
+    ]
+  },
+  {
+    "name": "corpus/mojo/moe_expert_projection",
+    "provider": "mojo",
+    "kernel": "moe_expert_projection",
+    "case": "T2048-E8-top2-4096x14336-bf16-8cores-host",
+    "family": "ragged",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "routed_expert_projection_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "ragged/grouped_gemm.py:routed_expert_projection_bf16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mhc_gemm_rms_scale",
+    "provider": "mojo",
+    "kernel": "mhc_gemm_rms_scale",
+    "case": "T2048-H4096-streams4-P16-bf16-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "mhc_gemm_rms_scale",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_gemm_rms_partial",
+      "routing/mhc.py:mhc_gemm_rms_finalize"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mhc_pre",
+    "provider": "mojo",
+    "kernel": "mhc_pre",
+    "case": "T2048-H4096-streams4-bf16-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "mhc_pre",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_pre_gemm_sqrsum",
+      "routing/mhc.py:mhc_pre_fuse"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mhc_sinkhorn",
+    "provider": "mojo",
+    "kernel": "mhc_sinkhorn",
+    "case": "T8192-streams4-f32-8cores-host",
+    "family": "routing",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "mhc_sinkhorn",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "routing/mhc.py:mhc_sinkhorn"
+    ]
+  },
+  {
+    "name": "corpus/mojo/quantized_gemm",
+    "provider": "mojo",
+    "kernel": "quantized_gemm",
+    "case": "M4096-K4096-N14336-f16-i8-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "quantized_gemm",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/gemm.py:quantized_gemm"
+    ]
+  },
+  {
+    "name": "corpus/mojo/fp8_e5m2_gemm",
+    "provider": "mojo",
+    "kernel": "fp8_e5m2_gemm",
+    "case": "M1024-N1024-K1024-f8e5m2-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "fp8_e5m2_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:fp8_e5m2_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/weight_only_int4",
+    "provider": "mojo",
+    "kernel": "weight_only_int4",
+    "case": "M512-K2048-N4096-signed-w4-group64-f16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "weight_only_int4_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:weight_only_int4_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/per_token_fp8",
+    "provider": "mojo",
+    "kernel": "per_token_fp8",
+    "case": "8192x8192-f32-group128-e4m3-8cores-host",
+    "family": "quantization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "f32_groupwise_fp8_quantize",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "quantization/fp8.py:f32_groupwise_fp8_quantize"
+    ]
+  },
+  {
+    "name": "corpus/mojo/w4a8_gemm",
+    "provider": "mojo",
+    "kernel": "w4a8_gemm",
+    "case": "M4096-K4096-N14336-i8-packed-w4-i32-NM-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "w4a8_packed_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:w4a8_packed_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/bitnet_int2_decode",
+    "provider": "mojo",
+    "kernel": "bitnet_int2_decode",
+    "case": "M1-N4096-K4096-i8-interleaved-u2-i32-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "bitnet_int2_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:bitnet_int2_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/dequant_bf16_fp4",
+    "provider": "mojo",
+    "kernel": "dequant_bf16_fp4",
+    "case": "M4096-N4096-K4096-bf16-packed-fp4-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "dequant_bf16_fp4_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/weight_only_int4.py:dequant_bf16_fp4_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/deepgemm_fp8_2xacc",
+    "provider": "mojo",
+    "kernel": "deepgemm_fp8_2xacc",
+    "case": "M4096-N4096-K4096-e4m3-f32scales-bf16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "deepgemm_fp8_2xacc",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:deepgemm_fp8_2xacc"
+    ]
+  },
+  {
+    "name": "corpus/mojo/scaled_fp8_gemm",
+    "provider": "mojo",
+    "kernel": "scaled_fp8_gemm",
+    "case": "M4096-N14336-K4096-e4m3-scale1-f16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "scaled_fp8_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:scaled_fp8_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/scaled_fp8_splitk_gemm",
+    "provider": "mojo",
+    "kernel": "scaled_fp8_splitk_gemm",
+    "case": "M4096-N14336-K4096-e4m3-split4-f16-8cores-host",
+    "family": "contraction",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "scaled_fp8_splitk_matmul",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "contraction/block_scaled.py:scaled_fp8_splitk_matmul"
+    ]
+  },
+  {
+    "name": "corpus/mojo/rotary_embedding_flat",
+    "provider": "mojo",
+    "kernel": "rotary_embedding_flat",
+    "case": "R65536-D128-H32-f16-8cores-host",
+    "family": "position",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "rotary_embedding_flat",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "position/rope.py:rotary_embedding_flat"
+    ]
+  },
+  {
+    "name": "corpus/mojo/streamed_online_softmax",
+    "provider": "mojo",
+    "kernel": "streamed_online_softmax",
+    "case": "8192x8192-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "streamed_online_softmax",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/online_softmax.py:streamed_online_softmax"
+    ]
+  },
+  {
+    "name": "corpus/mojo/matrix_transpose_product_domains",
+    "provider": "mojo",
+    "kernel": "matrix_transpose_product_domains",
+    "case": "4093x8191-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "matrix_transpose_product_domains",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:matrix_transpose_product_domains"
+    ]
+  },
+  {
+    "name": "corpus/mojo/scaled_index_add",
+    "provider": "mojo",
+    "kernel": "scaled_index_add",
+    "case": "65536x1x4096-from32768-f16-8cores-host",
+    "family": "indexing",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "scaled_index_add_unique",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "indexing/relations.py:scaled_index_add_unique"
+    ]
+  },
+  {
+    "name": "corpus/mojo/adamw_split",
+    "provider": "mojo",
+    "kernel": "adamw_split",
+    "case": "N8388608-f32-split2-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "adamw_split",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:adamw_update_moments",
+      "variants/decomposition.py:adamw_update_parameter"
+    ]
+  },
+  {
+    "name": "corpus/mojo/adafactor_scalar_product",
+    "provider": "mojo",
+    "kernel": "adafactor_scalar_product",
+    "case": "4096x4096-f32-3kernels-8cores-host",
+    "family": "optimization",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "adafactor_scalar_product",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "optimization/adafactor.py:adafactor_update_rows",
+      "optimization/adafactor.py:adafactor_update_columns",
+      "variants/decomposition.py:adafactor_apply_scalar_product"
+    ]
+  },
+  {
+    "name": "corpus/mojo/reshape_and_cache_split",
+    "provider": "mojo",
+    "kernel": "reshape_and_cache_split",
+    "case": "T4096-H8-D128-cache2048x16-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "reshape_and_cache_split",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:reshape_key_cache",
+      "variants/decomposition.py:reshape_value_cache"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_f16",
+    "provider": "mojo",
+    "kernel": "flash_attention_f16",
+    "case": "B4-H32-S4096-D128-f16-causal-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_attention_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_gqa_attention_f16",
+    "provider": "mojo",
+    "kernel": "flash_gqa_attention_f16",
+    "case": "B4-QH32-KVH8-S4096-D128-f16-causal-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_gqa_attention_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_gqa_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/continuous_gqa_decode",
+    "provider": "mojo",
+    "kernel": "continuous_gqa_decode",
+    "case": "B32-QH32-KVH8-K8192-D128-f16-mask1-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "continuous_gqa_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:continuous_gqa_decode"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_varlen_gqa_prefill",
+    "provider": "mojo",
+    "kernel": "flash_varlen_gqa_prefill",
+    "case": "B8-U29184-QH32-KVH8-D128-f16-causal-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_varlen_gqa_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_varlen_gqa_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_bias",
+    "provider": "mojo",
+    "kernel": "flash_attention_bias",
+    "case": "B4-H32-S4096-D128-f16-bias-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_attention_bias_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_attention_bias_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_varlen_attention",
+    "provider": "mojo",
+    "kernel": "flash_varlen_attention",
+    "case": "B8-U29114-D128-f16-balanced-causal-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "flash_varlen_attention_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:flash_varlen_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/conv2d_nhwc",
+    "provider": "mojo",
+    "kernel": "conv2d_nhwc",
+    "case": "N32-H128-W128-CI256-CO512-K3-f16-8cores-host",
+    "family": "convolution",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "conv2d_nhwc",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "convolution/direct.py:conv2d_nhwc"
+    ]
+  },
+  {
+    "name": "corpus/mojo/conv2d_reduce_order",
+    "provider": "mojo",
+    "kernel": "conv2d_reduce_order",
+    "case": "B16-256x256-K3-f16-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "conv2d_reduce_order",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/contraction.py:conv2d_reduce_order"
+    ]
+  },
+  {
+    "name": "corpus/mojo/weighted_layer_norm_second_moment",
+    "provider": "mojo",
+    "kernel": "weighted_layer_norm_second_moment",
+    "case": "8192x4096-f32-eps1e-5-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "weighted_layer_norm_second_moment",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/normalization.py:weighted_layer_norm_second_moment"
+    ]
+  },
+  {
+    "name": "corpus/mojo/ordered_prefix_nested",
+    "provider": "mojo",
+    "kernel": "ordered_prefix_nested",
+    "case": "512x17x31-f32-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "ordered_prefix_nested",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:ordered_prefix_nested"
+    ]
+  },
+  {
+    "name": "corpus/mojo/moe_count_routes_product_domain",
+    "provider": "mojo",
+    "kernel": "moe_count_routes_product_domain",
+    "case": "T4096-top2-E64-i32-random-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "moe_count_routes_product_domain",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:moe_count_routes_product_domain"
+    ]
+  },
+  {
+    "name": "corpus/mojo/nested_jagged_mean_pool_identity",
+    "provider": "mojo",
+    "kernel": "nested_jagged_mean_pool_identity",
+    "case": "D256-S4096-T65536-F128-f32-indexed-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "nested_jagged_mean_pool_identity",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:nested_jagged_mean_pool_identity"
+    ]
+  },
+  {
+    "name": "corpus/mojo/nested_jagged_mean_pool_split",
+    "provider": "mojo",
+    "kernel": "nested_jagged_mean_pool_split",
+    "case": "D256-S4096-T65536-F128-f32-2kernels-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "nested_jagged_mean_pool_split",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/decomposition.py:nested_sentence_pool",
+      "variants/decomposition.py:nested_document_pool"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba_chunk_state_bf16",
+    "provider": "mojo",
+    "kernel": "mamba_chunk_state_bf16",
+    "case": "B1-L2048-H32-G8-P64-N128-C8-S256-bf16-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba_chunk_state_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_chunk_state_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba_state_passing",
+    "provider": "mojo",
+    "kernel": "mamba_state_passing",
+    "case": "B1-C8-H32-D8192-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba_state_passing",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_state_passing_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba_chunk_scan_bf16",
+    "provider": "mojo",
+    "kernel": "mamba_chunk_scan_bf16",
+    "case": "B1-L2048-H32-G8-P64-N128-C8-S256-bf16-f32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba_chunk_scan_bf16",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/selective_scan.py:mamba_chunk_scan_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba3_siso_step",
+    "provider": "mojo",
+    "kernel": "mamba3_siso_step",
+    "case": "B32-H16-QKH4-DQK32-DV64-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba3_siso_step",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba3_siso_step"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mamba3_siso_forward",
+    "provider": "mojo",
+    "kernel": "mamba3_siso_forward",
+    "case": "B1-S2048-H16-QKH4-DQK32-DV64-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mamba3_siso_forward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba3_siso_forward"
+    ]
+  },
+  {
+    "name": "corpus/mojo/chunk_gated_delta",
+    "provider": "mojo",
+    "kernel": "chunk_gated_delta",
+    "case": "B2-S2048-H8-K128-V128-bf16-chunk64-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "chunk_gated_delta",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:chunk_gated_delta_prepare",
+      "streaming/gated_delta.py:chunk_gated_delta_recurrence"
+    ]
+  },
+  {
+    "name": "corpus/mojo/linear_attention_backward",
+    "provider": "mojo",
+    "kernel": "linear_attention_backward",
+    "case": "B1-S2048-H16-D128-f16-f32grad-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "linear_attention_backward",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/linear_attention.py:fused_chunk_linear_attention_bwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/chunk_retention",
+    "provider": "mojo",
+    "kernel": "chunk_retention",
+    "case": "B1-S2048-H16-D128-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "chunk_retention",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/linear_attention.py:chunk_retention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/attention_sink_prefill",
+    "provider": "mojo",
+    "kernel": "attention_sink_prefill",
+    "case": "B1-S4096-HQ32-HK8-D128-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "attention_sink_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:attention_sink_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/attention_sink_decode",
+    "provider": "mojo",
+    "kernel": "attention_sink_decode",
+    "case": "B32-S8192-HQ32-HK8-D128-bf16-P32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "attention_sink_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:attention_sink_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/gemma_gqa_prefill",
+    "provider": "mojo",
+    "kernel": "gemma_gqa_prefill",
+    "case": "B2-S4096-HQ32-HK8-D128-bf16-window1024-softcap50-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "gemma_gqa_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:gemma_gqa_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/sliding_window_gqa_prefill",
+    "provider": "mojo",
+    "kernel": "sliding_window_gqa_prefill",
+    "case": "B2-S4096-HQ32-HK8-D128-f16-window1024-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "sliding_window_gqa_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:sliding_window_gqa_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/block_causal_attention",
+    "provider": "mojo",
+    "kernel": "block_causal_attention",
+    "case": "B2-S4096-H16-D128-f16-block64-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "block_causal_attention",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:block_causal_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/varlen_block_causal_attention",
+    "provider": "mojo",
+    "kernel": "varlen_block_causal_attention",
+    "case": "B4-U14848-H16-D128-f16-block64-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "varlen_block_causal_attention",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:varlen_block_causal_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/native_sparse_attention",
+    "provider": "mojo",
+    "kernel": "native_sparse_attention",
+    "case": "B2-Q4096-K4096-HQ32-HK4-D128-S64-f16-block64-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "native_sparse_attention",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention_specialized.py:native_sparse_attention_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_inline",
+    "provider": "mojo",
+    "kernel": "flash_attention_inline",
+    "case": "B4-H32-S4096-D128-f16-causal-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "flash_attention_inline_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/streaming.py:flash_attention_inline_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_select",
+    "provider": "mojo",
+    "kernel": "flash_attention_select",
+    "case": "B4-H32-S4096-D128-f16-causal-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "flash_attention_select_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/streaming.py:flash_attention_select_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/flash_attention_full_causal_stream",
+    "provider": "mojo",
+    "kernel": "flash_attention_full_causal_stream",
+    "case": "B4-H32-S4096-D128-f16-causal-8cores-host",
+    "family": "variants",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "flash_attention_full_causal_stream_fwd",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "variants/streaming.py:flash_attention_full_causal_stream_fwd"
+    ]
+  },
+  {
+    "name": "corpus/mojo/mla_prefill",
+    "provider": "mojo",
+    "kernel": "mla_prefill",
+    "case": "B1-HQ128-HK1-S2048-D128-R64-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "mla_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:mla_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/absorbed_mla_prefill",
+    "provider": "mojo",
+    "kernel": "absorbed_mla_prefill",
+    "case": "B1-S512-H8-C512-R64-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "absorbed_mla_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:absorbed_mla_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/absorbed_mla_decode",
+    "provider": "mojo",
+    "kernel": "absorbed_mla_decode",
+    "case": "B8-H64-S8192-C512-R64-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "absorbed_mla_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:absorbed_mla_decode"
+    ]
+  },
+  {
+    "name": "corpus/mojo/splitk_mla_decode",
+    "provider": "mojo",
+    "kernel": "splitk_mla_decode",
+    "case": "B8-H64-S8192-C512-R64-f16-split512-P16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "splitk_mla_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:splitk_mla_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce_f16"
+    ]
+  },
+  {
+    "name": "corpus/mojo/token_sparse_mla_prefill",
+    "provider": "mojo",
+    "kernel": "token_sparse_mla_prefill",
+    "case": "Q64-H8-K4096-T256-C512-R64-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "token_sparse_mla_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:token_sparse_mla_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/token_sparse_mla_value_prefill",
+    "provider": "mojo",
+    "kernel": "token_sparse_mla_value_prefill",
+    "case": "Q2048-H64-K4096-T512-D128-DV128-R64-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "token_sparse_mla_value_prefill",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:token_sparse_mla_value_prefill"
+    ]
+  },
+  {
+    "name": "corpus/mojo/grouped_flash_decode",
+    "provider": "mojo",
+    "kernel": "grouped_flash_decode",
+    "case": "B8-HQ32-HK8-K8192-D128-bf16-P32-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "grouped_flash_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:grouped_flash_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/varlen_gqa_decode_with_sink_logits",
+    "provider": "mojo",
+    "kernel": "varlen_gqa_decode_with_sink_logits",
+    "case": "B16-U57856-HQ32-HK8-D64-f16-block64-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "varlen_gqa_decode_with_sink_logits",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/attention.py:varlen_gqa_decode_with_sink_logits"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paged_gqa_decode_attention",
+    "provider": "mojo",
+    "kernel": "paged_gqa_decode_attention",
+    "case": "B8-HQ32-HK8-D128-page64-varlen-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "torch"
+    ],
+    "description": "paged_gqa_decode_attention",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:paged_gqa_decode_attention"
+    ]
+  },
+  {
+    "name": "corpus/mojo/splitk_paged_gqa_decode",
+    "provider": "mojo",
+    "kernel": "splitk_paged_gqa_decode",
+    "case": "B16-HQ32-HK8-K8192-D128-page16-split8-f16-bf16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "splitk_paged_gqa_decode",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:splitk_paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_weighted_sum_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paged_gqa_f16_reduction",
+    "provider": "mojo",
+    "kernel": "paged_gqa_f16_reduction",
+    "case": "B16-HQ32-HK8-K8192-D128-page16-split8-bf16-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "paged_gqa_f16_reduction",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:splitk_paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_bf16_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/mojo/paged_mla_decode_partials",
+    "provider": "mojo",
+    "kernel": "paged_mla_decode_partials",
+    "case": "B8-HQ128-HK1-K8192-C512-R64-page16-split8-f16-8cores-host",
+    "family": "streaming",
+    "implementations": [
+      "intent:mojo",
+      "source:mojo"
+    ],
+    "description": "paged_mla_decode_partials",
+    "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
+    "examples": [
+      "streaming/mla.py:paged_mla_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_f32_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/weft/i8_gemv_bias",
+    "provider": "weft",
+    "kernel": "i8_gemv_bias",
+    "case": "M1-N4096-K4096-i8-i32-IME1-1core",
+    "family": "contraction",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "gemm_i8",
+    "source_runtime": "corpus/cpu/baselines/weft/intentdsl/contraction/i8/i8_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm_i8"
+    ]
+  },
+  {
+    "name": "corpus/weft/i8_gemm_bias",
+    "provider": "weft",
+    "kernel": "i8_gemm_bias",
+    "case": "M128-N4096-K4096-i8-i32-IME1-1core",
+    "family": "contraction",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "gemm_i8",
+    "source_runtime": "corpus/cpu/baselines/weft/intentdsl/contraction/i8/i8_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm_i8"
+    ]
+  },
+  {
+    "name": "corpus/weft/causal_attention_f32",
+    "provider": "weft",
+    "kernel": "causal_attention_f32",
+    "case": "B8-S128-D32-f32-1core",
+    "family": "streaming",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "causal_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/weft/intentdsl/attention/attention_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_attention_f32"
+    ]
+  },
+  {
+    "name": "corpus/weft/causal_linear_attention_f32",
+    "provider": "weft",
+    "kernel": "causal_linear_attention_f32",
+    "case": "B8-S128-D32-f32-1core",
+    "family": "streaming",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "causal_linear_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/weft/intentdsl/attention/attention_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_linear_attention_f32"
+    ]
+  },
+  {
+    "name": "corpus/weft/q4_k_projection",
+    "provider": "weft",
+    "kernel": "q4_k_projection",
+    "case": "N4096-K4096-Q4_K-f32-1core",
+    "family": "quantization",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "quantized_projection",
+    "source_runtime": "corpus/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection_runtime.py",
+    "examples": [
+      "quantization/quantized_projection.py:quantized_projection"
+    ]
+  },
+  {
+    "name": "corpus/weft/q4_k_projection_ime",
+    "provider": "weft",
+    "kernel": "q4_k_projection_ime",
+    "case": "N4096-K4096-Q4_K-f32-IME1-1core",
+    "family": "quantization",
+    "implementations": [
+      "intent:weft",
+      "source:weft"
+    ],
+    "description": "quantized_projection",
+    "source_runtime": "corpus/cpu/baselines/weft/tianchenrv/contraction/q4_k_projection/q4_k_projection_runtime.py",
+    "examples": [
+      "quantization/quantized_projection.py:quantized_projection"
+    ]
+  },
+  {
+    "name": "corpus/bangc/relu",
+    "provider": "bangc",
+    "kernel": "relu",
+    "case": "8192x4096-fp16",
+    "family": "activation",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "relu_forward",
+    "source_runtime": "corpus/mlu/baselines/cnnl/runtime.py",
+    "examples": [
+      "activation/pointwise.py:relu_forward"
+    ]
+  },
+  {
+    "name": "corpus/bangc/recurrent_gated_delta",
+    "provider": "bangc",
+    "kernel": "recurrent_gated_delta",
+    "case": "B2-S2048-H8-K128-V128-bf16",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "recurrent_gated_delta",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:recurrent_gated_delta_fwd"
+    ]
+  },
+  {
+    "name": "corpus/bangc/chunk_gated_delta",
+    "provider": "bangc",
+    "kernel": "chunk_gated_delta",
+    "case": "B2-S2048-H8-K128-V128-C64-bf16",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "chunk_gated_delta",
+    "source_runtime": "corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_chunk/chunk_gated_delta_rule_runtime.py",
+    "examples": [
+      "streaming/gated_delta.py:chunk_gated_delta_prepare",
+      "streaming/gated_delta.py:chunk_gated_delta_recurrence"
+    ]
+  },
+  {
+    "name": "corpus/bangc/fused_softmax",
+    "provider": "bangc",
+    "kernel": "fused_softmax",
+    "case": "8192x8192-fp16",
+    "family": "normalization",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "softmax_f16",
+    "source_runtime": "corpus/mlu/baselines/cnnl/runtime.py",
+    "examples": [
+      "normalization/softmax.py:stable_softmax_f16"
+    ]
+  },
+  {
+    "name": "corpus/bangc/dense_gemm",
+    "provider": "bangc",
+    "kernel": "dense_gemm",
+    "case": "M4096-N14336-K4096-fp16",
+    "family": "contraction",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "dense_gemm",
+    "source_runtime": "corpus/gpu/baselines/triton/triton/gemm/dense/03-matrix-multiplication_runtime.py",
+    "examples": [
+      "contraction/gemm.py:gemm"
+    ]
+  },
+  {
+    "name": "corpus/bangc/jagged_mean",
+    "provider": "bangc",
+    "kernel": "jagged_mean",
+    "case": "B512-T33024-D128-fp32",
+    "family": "ragged",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "jagged_mean",
+    "source_runtime": "corpus/gpu/baselines/triton/tritonbench/ragged/jagged_mean/jagged_mean_runtime.py",
+    "examples": [
+      "ragged/jagged_mean.py:jagged_mean"
+    ]
+  },
+  {
+    "name": "corpus/bangc/mamba_chunk_state",
+    "provider": "bangc",
+    "kernel": "mamba_chunk_state",
+    "case": "B1-S2048-H32-G8-P64-N128-C256-bf16",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "mamba_chunk_state",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_state_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_chunk_state_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/bangc/mamba_state_passing",
+    "provider": "bangc",
+    "kernel": "mamba_state_passing",
+    "case": "B1-C8-H32-state8192-fp32",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "mamba_state_passing",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_state_passing_runtime.py",
+    "examples": [
+      "streaming/mamba.py:mamba_state_passing_fwd"
+    ]
+  },
+  {
+    "name": "corpus/bangc/mamba_chunk_scan",
+    "provider": "bangc",
+    "kernel": "mamba_chunk_scan",
+    "case": "B1-S2048-H32-G8-P64-N128-C256-bf16",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "mamba_chunk_scan_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/state-spaces-mamba/mamba_ssm/ops/triton/ssd_chunk_scan_runtime.py",
+    "examples": [
+      "streaming/selective_scan.py:mamba_chunk_scan_bf16_fwd"
+    ]
+  },
+  {
+    "name": "corpus/bangc/paged_gqa_decode",
+    "provider": "bangc",
+    "kernel": "paged_gqa_decode",
+    "case": "B16-QH32-KVH8-S8192-D128-page16-fp16",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "paged_gqa_decode_v2",
+    "source_runtime": "corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_gqa_decode_runtime.py",
+    "examples": [
+      "streaming/paged_attention.py:paged_gqa_decode_partials",
+      "streaming/splitk_reduce.py:splitk_attention_f32_to_f16_reduce"
+    ]
+  },
+  {
+    "name": "corpus/bangc/flaggems_triangular_solve",
+    "provider": "bangc",
+    "kernel": "flaggems_triangular_solve",
+    "case": "B4096-N16-fp32-lower",
+    "family": "factorization",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "flaggems_triangular_solve",
+    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "examples": [
+      "factorization/triangular_solve.py:batched_lower_triangular_solve"
+    ]
+  },
+  {
+    "name": "corpus/bangc/causal_attention_f32",
+    "provider": "bangc",
+    "kernel": "causal_attention_f32",
+    "case": "B8-S128-D32-f32-8cores",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "causal_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_attention_f32"
+    ]
+  },
+  {
+    "name": "corpus/bangc/causal_linear_attention_f32",
+    "provider": "bangc",
+    "kernel": "causal_linear_attention_f32",
+    "case": "B8-S128-D32-f32-8cores",
+    "family": "streaming",
+    "implementations": [
+      "intent:bangc",
+      "source:bangc"
+    ],
+    "description": "causal_linear_attention_f32",
+    "source_runtime": "corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py",
+    "examples": [
+      "streaming/attention_f32.py:causal_linear_attention_f32"
+    ]
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.004696000134572387,
+  "reference_ms": 1.0710240006446838,
+  "ratio": 0.004384589077131524,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_svd_reconstruct/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 0.0001
+  },
+  "precompile_seconds": 0.6305556620936841,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.8720339331775904
+}

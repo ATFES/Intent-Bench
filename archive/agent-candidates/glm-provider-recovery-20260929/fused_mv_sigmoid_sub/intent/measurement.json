@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.00913600018247962,
+  "reference_ms": 0.01101600006222725,
+  "ratio": 0.829339154944819,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_mv_sigmoid_sub/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 10.025137981167063,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "fused_mv_sigmoid_sub_matrix_vector": "/home/kingdom/.cache/intentdsl/compiler/a4b70523201140cc9aebbf68b052b5fc",
+    "fused_mv_sigmoid_sub_scalar": "/home/kingdom/.cache/intentdsl/compiler/b706999ae2d148bba4842afa61e5b56b",
+    "fused_mv_sigmoid_sub_tensor": "/home/kingdom/.cache/intentdsl/compiler/735d8d39580740e8a67e01aa44d74e86"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 120,
+      "measured": 120,
+      "seconds": 0.5973198413848877,
+      "winner": "NUM_STAGES: 2, REDUCE_CHUNK_1_A1: 1024, num_warps: 8, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 24,
+      "seconds": 0.10190582275390625,
+      "winner": "FRAGMENT_D1: 256, num_warps: 2, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 11.18571832193993
+}

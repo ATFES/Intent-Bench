@@ -1,0 +1,21 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.008080000057816505,
+  "reference_ms": 0.022559999488294125,
+  "ratio": 0.35815603905527726,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_hardsigmoid_batch_norm/triton/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 0.6901610011700541,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.874417674029246
+}

@@ -1,0 +1,22 @@
+{
+  "status": "compilation_failure",
+  "candidate_ms": null,
+  "reference_ms": null,
+  "ratio": null,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/relu_batch_norm_conv2d/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "failure_stage": "frontend_kir",
+  "error": "name 'BATCH' is not defined",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 51, in _inputs\n    kernel_mlir = lower_to_mlir(definition, constexprs=constexprs)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/frontend/compilation/compiler.py\", line 97, in lower_to_mlir\n    return FrontendCompiler(definition, dict(constexprs or {})).lower()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/frontend/compilation/compiler.py\", line 37, in __init__\n    self.signature = lower_kernel_signature(definition, self.source, constexprs)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/frontend/source/signature.py\", line 40, in lower_kernel_signature\n    signature = definition.signature\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/api/definitions.py\", line 48, in signature\n    return inspect.signature(self.python_function, eval_str=True)\n  File \"/usr/lib/python3.10/inspect.py\", line 3254, in signature\n    return Signature.from_callable(obj, follow_wrapped=follow_wrapped,\n  File \"/usr/lib/python3.10/inspect.py\", line 3002, in from_callable\n    return _signature_from_callable(obj, sigcls=cls,\n  File \"/usr/lib/python3.10/inspect.py\", line 2463, in _signature_from_callable\n    return _signature_from_function(sigcls, obj,\n  File \"/usr/lib/python3.10/inspect.py\", line 2307, in _signature_from_function\n    annotations = get_annotations(func, globals=globals, locals=locals, eval_str=eval_str)\n  File \"/usr/lib/python3.10/inspect.py\", line 175, in get_annotations\n    return_value = {key:\n  File \"/usr/lib/python3.10/inspect.py\", line 176, in <dictcomp>\n    value if not isinstance(value, str) else eval(value, globals, locals)\n  File \"<string>\", line 1, in <module>\nNameError: name 'BATCH' is not defined\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 132, in run\n    function = module.build(context)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/relu_batch_norm_conv2d/intent/candidate.py\", line 194, in build\n    no_bias_artifact = context.compile(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/program.py\", line 46, in compile\n    program = intent.generate(definition, target=self.target, compiler=self.compiler,\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 45, in generate\n    kernel_mlir, resolved = _inputs(definition, target, constexprs)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/python/intent/compiler/pipeline.py\", line 53, in _inputs\n    raise CompilationStageError(\"frontend_kir\", str(error)) from error\nintent.compiler.toolchain.CompilationStageError: name 'BATCH' is not defined\n",
+  "compiler_artifacts": {},
+  "precompile_failures": [],
+  "tuning": [],
+  "preparation_and_benchmark_seconds": 0.02277374896220863
+}

@@ -1,0 +1,47 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.4647440016269684,
+  "reference_ms": 0.052744001150131226,
+  "ratio": 8.811314869801304,
+  "target": "triton",
+  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_masked_select_add_gelu/intent/candidate.py",
+  "reference_time_reused": true,
+  "reference_timing_note": null,
+  "timing": "cuda_event",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 18.17662915494293,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "compiler_artifacts": {
+    "masked_positions": "/home/kingdom/.cache/intentdsl/compiler/306a9c0b591e42f5a0c118c91abd07d1",
+    "masked_compact_gelu_exact": "/home/kingdom/.cache/intentdsl/compiler/eb5dae202bc5404bb0e55cab7c2b62d5",
+    "masked_compact_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/8eb1e493da244e6ab638ef18210ff770"
+  },
+  "precompile_failures": [],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 96,
+      "measured": 96,
+      "seconds": 3.890777826309204,
+      "winner": "SCAN_CHUNK_S4_A0: 8192, num_warps: 8, num_ctas: 1, num_stages: 3, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 24,
+      "seconds": 0.14859890937805176,
+      "winner": "FRAGMENT_D1: 1024, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 24,
+      "measured": 0,
+      "seconds": 0.0,
+      "winner": null
+    }
+  ],
+  "preparation_and_benchmark_seconds": 22.857579150935635
+}

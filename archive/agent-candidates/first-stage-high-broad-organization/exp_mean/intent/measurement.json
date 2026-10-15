@@ -1,0 +1,37 @@
+{
+  "status": "pass",
+  "candidate_ms": 0.00788799999281764,
+  "reference_ms": 0.014336000196635723,
+  "ratio": 0.5502232062377304,
+  "reference_timing_note": null,
+  "timing": "cuda_graph",
+  "tolerance": {
+    "atol": 0.0001,
+    "rtol": 1e-05
+  },
+  "precompile_seconds": 2.3066529859788716,
+  "preparation_policy": "compile_only_before_gpu_timing_lock",
+  "precompile_failures": [
+    {
+      "kernel": "_intent_kernel",
+      "error": "at 6:4:\ndef _intent_kernel(_intent_view_0, _intent_view_1, D2: tl.constexpr, D6: tl.constexpr, S0_0: tl.constexpr, S1_0: tl.constexpr, FRAGMENT_S14_A0: tl.constexpr):\n    NUM_WARPS: tl.constexpr = tl.extra.cuda.num_warps()\n    v1: tl.constexpr = ((1 * FRAGMENT_S14_A0) * 256)\n    v2: tl.constexpr = ((NUM_WARPS * 8160) if (NUM_WARPS - 32) else 9223372036854775807)\n    v3: tl.constexpr = (v1 <= v2)\n    tl.static_assert(v3, \"Triton collective fragment exceeds the nominal per-thread register budget\")\n    ^\nTriton collective fragment exceeds the nominal per-thread register budget"
+    }
+  ],
+  "tuning": [
+    {
+      "kernel": "_intent_kernel",
+      "declared": 36,
+      "measured": 16,
+      "seconds": 0.27272844314575195,
+      "winner": "FRAGMENT_S14_A0: 1, num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    },
+    {
+      "kernel": "_intent_kernel",
+      "declared": 6,
+      "measured": 6,
+      "seconds": 0.06380367279052734,
+      "winner": "num_warps: 1, num_ctas: 1, num_stages: 2, maxnreg: None"
+    }
+  ],
+  "preparation_and_benchmark_seconds": 3.273673854302615
+}
