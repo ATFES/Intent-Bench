@@ -1,0 +1,10 @@
+{
+  "description": "Run Python GPU implementations on a host with CUDA SDKs",
+  "transport": "ssh",
+  "host": "gpu-server",
+  "python": "/path/to/cuda-venv/bin/python",
+  "intent_root": "/path/to/intentdsl/on/server",
+  "compiler": "/path/to/intent-compile/on/server",
+  "device": "cuda:0",
+  "threads": 8
+}

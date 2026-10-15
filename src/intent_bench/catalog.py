@@ -20,6 +20,9 @@ def catalog():
         elif provider=='bangc':
             source='cnnl' if row['kernel'] in {'relu','fused_softmax','dense_gemm'} else 'reference:mojo' if row['kernel'] in {'causal_attention_f32','causal_linear_attention_f32'} else 'reference:cuda'
             row['implementations']=[source,'intent:bangc']
+        if 'source_implementation' in row:
+            targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
+            row['implementations']=[row['source_implementation'],*('intent:'+target for target in targets)]
     return rows
 
 

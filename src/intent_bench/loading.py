@@ -36,3 +36,26 @@ def intent_environment(environment):
         return importlib.import_module("intent")
     except ImportError as error:
         raise EnvironmentUnavailable("install intentdsl or supply --intent-root") from error
+
+
+def load_workload(name):
+    if name.startswith("advanced/"):
+        from .workloads.advanced import build
+        return build(name.split("/",1)[1])
+    if name.startswith("rvv/"):
+        from .workloads.rvv import build
+        return build(name.split("/",1)[1])
+    if name.startswith("mlu/"):
+        from .workloads.mlu import build
+        return build(name.split("/",1)[1])
+    if name.startswith("cpu/"):
+        from .workloads.cpu import build
+        return build(name.split("/",1)[1])
+    if name in {"softmax", "relu"}:
+        from .workloads.elementwise import build
+        return build(name)
+    if name.startswith("corpus/"):
+        from .catalog import get_workload
+        return get_workload(name)
+    value = load(name)
+    return value() if callable(value) else value

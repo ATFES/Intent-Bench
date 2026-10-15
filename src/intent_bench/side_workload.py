@@ -69,6 +69,7 @@ def build(row,entries):
     source_name='torch' if provider=='mojo' else 'reference:cuda' if provider=='bangc' else provider
     if provider=='bangc' and row['kernel'] in {'causal_attention_f32','causal_linear_attention_f32'}:
         source_name='reference:mojo'
+    source_name=row.get('source_implementation',source_name)
     impls={source_name:Implementation(source_name,lambda case,seed,env:prepare('source',provider,case,seed,env))}
     impls.update({'intent:'+target:Implementation('intent:'+target,
         lambda case,seed,env,target=target:prepare('intent',target,case,seed,env)) for target in targets})

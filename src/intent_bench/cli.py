@@ -7,32 +7,11 @@ from pathlib import Path
 import sys
 
 from .engine import benchmark
-from .loading import load
+from .loading import load_workload as workload
 from .model import Case, Environment, Measurement
 from . import results
 
 
-def workload(name):
-    if name.startswith("advanced/"):
-        from .workloads.advanced import build
-        return build(name.split("/",1)[1])
-    if name.startswith("rvv/"):
-        from .workloads.rvv import build
-        return build(name.split("/",1)[1])
-    if name.startswith("mlu/"):
-        from .workloads.mlu import build
-        return build(name.split("/",1)[1])
-    if name.startswith("cpu/"):
-        from .workloads.cpu import build
-        return build(name.split("/",1)[1])
-    if name in {"softmax", "relu"}:
-        from .workloads.elementwise import build
-        return build(name)
-    if name.startswith("corpus/"):
-        from .catalog import get_workload
-        return get_workload(name)
-    value = load(name)
-    return value() if callable(value) else value
 
 
 def main(argv=None):
@@ -44,6 +23,14 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="command", required=True)
     listing = sub.add_parser("list", help="Discover workloads without loading compiler or device SDKs")
     listing.add_argument("--json", action="store_true")
+    describe = sub.add_parser("describe", help="Show a workload's implementations, cases and parameters")
+    describe.add_argument("workload")
+    environments = sub.add_parser("env", help="List or inspect named execution environments")
+    environments.add_argument("action", choices=("list","show"))
+    environments.add_argument("name", nargs="?")
+    plugin = sub.add_parser("plugin", help="Export the IntentDSL plugin with this Python environment")
+    plugin.add_argument("--output",type=Path,required=True)
+    plugin.add_argument("--intent-root",type=Path)
     run = sub.add_parser("run", help="Measure a built-in workload or file.py:bench")
     run.add_argument("workload",nargs="?")
     run.add_argument("--suite",choices=("gpu","cpu","rvv","mlu","all"))
@@ -55,8 +42,9 @@ def main(argv=None):
     run.add_argument("--baseline")
     run.add_argument("--case", action="append")
     run.add_argument("--param", action="append", default=[], metavar="NAME=JSON", help="Override a parameter; a JSON list creates a sweep")
-    run.add_argument("--device", default="auto")
-    run.add_argument("--threads", type=int, default=1)
+    run.add_argument("--env", help="Environment name or JSON file")
+    run.add_argument("--device")
+    run.add_argument("--threads", type=int)
     run.add_argument("--seed", type=int, default=0)
     run.add_argument("--samples", type=int, help="Override automatic sample count")
     run.add_argument("--warmup", type=int, help="Override automatic warmup count")
@@ -74,7 +62,11 @@ def main(argv=None):
     report = sub.add_parser("report", help="Render a saved run")
     report.add_argument("run"); report.add_argument("--output", type=Path)
     check = sub.add_parser("check", help="Check mainline public programs")
-    check.add_argument("--intent-root", type=Path, required=True)
+    check.add_argument("--intent-root", type=Path)
+    check.add_argument("--env", help="Environment name or JSON file")
+    check.add_argument("--device")
+    check.add_argument("--threads", type=int)
+    check.add_argument("--option", action="append", default=[], metavar="NAME=JSON")
     check.add_argument("--suite", choices=("mainline",), default="mainline")
     check.add_argument("--target", default="triton")
     check.add_argument("--program", action="append")
@@ -82,18 +74,20 @@ def main(argv=None):
     check.add_argument("--compiler")
     check.add_argument("--output", type=Path)
     args = parser.parse_args(argv)
+    if args.command == "plugin":
+        from .plugins import export_plugin
+        print(json.dumps(export_plugin(args.output,args.intent_root),indent=2));return 0
+    if args.command == "describe":
+        from .discovery import describe_workload
+        print(json.dumps(describe_workload(args.workload),indent=2));return 0
+    if args.command == "env":
+        from .environments import list_environments,load_environment,describe_environment
+        if args.action == "show" and not args.name:parser.error("env show requires a name or JSON file")
+        value=list_environments() if args.action=="list" else describe_environment(load_environment(args.name))
+        print(json.dumps(value,indent=2));return 0
     if args.command == "list":
-        entries = [{"name":name,"family":workload(name).family,"implementations":list(workload(name).implementations)}
-                   for name in ("softmax","relu")]
-        from .catalog import catalog,ADVANCED_OPERATIONS
-        entries.extend(catalog())
-        entries.extend({'name':'advanced/'+name,'family':'advanced','implementations':['torch','mojo','intent:mojo']} for name in ADVANCED_OPERATIONS)
-        from .implementations.mojo import NAMES
-        entries.extend({"name":"cpu/"+name,"family":"cpu","implementations":["numpy","mojo"]} for name in NAMES)
-        from .workloads.mlu import NAMES as MLU_NAMES
-        entries.extend({"name":"mlu/"+name,"family":"mlu","implementations":["cnnl","intent:bangc"]} for name in MLU_NAMES)
-        from .workloads.rvv import NAMES as RVV_NAMES
-        entries.extend({"name":"rvv/"+name,"family":"rvv","implementations":["ggml","intent:weft"]} for name in RVV_NAMES)
+        from .discovery import list_workloads
+        entries=list_workloads()
         print(json.dumps(entries, indent=2) if args.json else "\n".join(
             f"{x['name']}: {', '.join(x['implementations'])}" for x in entries))
         return 0
@@ -108,8 +102,17 @@ def main(argv=None):
         results.write_html(results.read(args.run),output,source=source/'results.json' if source.is_dir() else source)
         print(output.resolve()); return 0
     if args.command == "check":
+        env=_environment(args)
+        from .execution import dispatch_cli
+        dispatched=dispatch_cli(arguments,args,env)
+        if dispatched is not None:return dispatched
+        if args.intent_root is None:parser.error("check requires --intent-root or intent_root in --env")
         from .mainline import check_programs
         return check_programs(args)
+    env=_environment(args)
+    from .execution import dispatch_cli
+    dispatched=dispatch_cli(arguments,args,env)
+    if dispatched is not None:return dispatched
     if args.suite:
         if args.workload:parser.error("choose a workload or --suite")
         if args.jobs<1:parser.error('jobs must be positive')
@@ -154,7 +157,6 @@ def main(argv=None):
     if selected is not None:
         unknown=set(selected)-bench.implementations.keys()
         if unknown: parser.error(f"unknown implementations: {sorted(unknown)}")
-    env=Environment(args.device,args.intent_root,args.compiler,args.threads,dict(_assignment(x) for x in args.option))
     settings=Measurement(args.timing,args.samples,args.warmup,args.scope,not args.check_only,
                          cache=args.cache,throughput=args.throughput)
     rows=benchmark(bench,selected,environment=env,measurement=settings,baseline=args.baseline,seed=args.seed)
@@ -169,6 +171,16 @@ def _assignment(text):
     if not key or not sep:
         raise ValueError("expected NAME=JSON")
     return key,json.loads(value)
+
+
+def _environment(args):
+    from .environments import load_environment
+    value=load_environment(args.env,device=args.device,threads=args.threads,
+                           intent_root=args.intent_root,compiler=args.compiler,
+                           options=dict(_assignment(text) for text in args.option))
+    args.device,args.threads,args.intent_root,args.compiler=value.device,value.threads,value.intent_root,value.compiler
+    args.option=[key+'='+json.dumps(item) for key,item in value.options.items()]
+    return value
 
 
 if __name__ == "__main__":

@@ -18,7 +18,6 @@ The preserved license texts are included in `src/intent_bench/licenses` and in t
 | `triton/state-spaces-mamba` | [Mamba](https://github.com/state-spaces/mamba) | Apache-2.0 |
 | `triton/fla` | [Flash Linear Attention](https://github.com/fla-org/flash-linear-attention) | MIT |
 | `triton/vllm` | [vLLM](https://github.com/vllm-project/vllm) | Apache-2.0 |
-| `triton/flag-gems` | [FlagGems](https://github.com/FlagOpen/FlagGems) | Apache-2.0 |
 | `cutile/cutile-python` | [cuTile Python](https://github.com/NVIDIA/cutile-python) | Apache-2.0 |
 | `cutile/tilegym` | [TileGym](https://github.com/NVIDIA/TileGym) | MIT (operator sources) |
 
@@ -32,3 +31,8 @@ The `archive` directory contains historical material, including older CUDA
 sources and Agent candidates. It is not installed as part of the tool. Its files
 retain their original notices and recorded provenance. The migration index maps
 original paths to their retained destinations without hashes or checksums.
+
+FlagGems sources are retained only under `archive/legacy-tools/gpu/baselines/triton/flag-gems`
+with their Apache-2.0 notices. They are not runnable baselines or numerical oracles.
+The corresponding workloads use independent Torch implementations; historical
+workload identifiers remain available so prior result references still resolve.

@@ -34,6 +34,10 @@ class Environment:
     compiler: str | None = None
     threads: int = 1
     options: Mapping[str, Any] = field(default_factory=dict)
+    transport: str | None = None
+    host: str | None = None
+    python: str | None = None
+    controller_python: str | None = None
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,16 @@
 # IntentDSL Bench
 
+Use `--impl` to select implementations and `--env NAME` to select a saved local/SSH environment.
+`intent-bench describe softmax` lists the available cases and implementations; `intent-bench env list`
+discovers profiles in `~/.config/intent-bench/environments/`. Machine details live outside operator adapters.
+The shared execution layer handles transport and native workers; compiler backends contain no SSH logic.
+
+Install `.[mcp]` and run `intent-bench plugin --intent-root /path/to/intentdsl --output /tmp/intentdsl-plugin`
+to export an installable IntentDSL plugin with language, compiler and benchmark MCP servers and a usage skill.
+Benchmark tools discover workloads/environments, start background runs, read results and compare saved runs.
+The CLI, Python API and Agent entry use the same benchmark engine. FlagGems implementations have been
+removed; their workloads now use explicit Torch implementations and keep historical identifiers.
+
 [Validation and known issues](docs/validation.md) · [Mutable GPU extension example](examples/custom_softmax.py)
 
 An installable operator benchmark with one default metric: median latency.

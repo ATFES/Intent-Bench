@@ -1,0 +1,6 @@
+{
+  "description": "Local CUDA execution; select implementations with --impl",
+  "transport": "local",
+  "device": "cuda:0",
+  "threads": 8
+}

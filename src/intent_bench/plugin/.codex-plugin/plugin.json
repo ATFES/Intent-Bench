@@ -1,0 +1,7 @@
+{
+  "name": "intentdsl",
+  "version": "0.1.0",
+  "description": "IntentDSL language, compiler and operator benchmarks",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

@@ -15,15 +15,17 @@ dependencies = ["numpy>=1.24"]
 [project.optional-dependencies]
 test = ["pytest>=7"]
 torch = ["torch"]
+mcp = ["mcp>=1.28,<2"]
 
 [project.scripts]
 intent-bench = "intent_bench.cli:main"
+intent-bench-mcp = "intent_bench.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-intent_bench = ["**/*.json", "**/*.mojo", "**/*.cpp", "**/*.c", "**/*.h", "**/*.cu", "**/*.cuh", "**/*.md", "licenses/*.txt"]
+intent_bench = ["**/*.json", "**/*.mojo", "**/*.cpp", "**/*.c", "**/*.h", "**/*.cu", "**/*.cuh", "**/*.md", "licenses/*.txt", "plugin/.mcp.json", "plugin/.codex-plugin/plugin.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

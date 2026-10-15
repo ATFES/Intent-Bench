@@ -659,15 +659,17 @@
     "case": "B64-L16384-K5-fp16-same",
     "family": "convolution",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_conv1d",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "convolution/direct.py:conv1d_same"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_triangular_solve",
@@ -676,15 +678,17 @@
     "case": "B4096-N16-fp32-lower",
     "family": "factorization",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_triangular_solve",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "factorization/triangular_solve.py:batched_lower_triangular_solve"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_embedding_lookup",
@@ -693,15 +697,17 @@
     "case": "tokens16384-vocab32768-hidden4096-bf16",
     "family": "backward",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_embedding_lookup",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "backward/embedding.py:embedding_forward_lookup_bf16"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_roll",
@@ -710,15 +716,17 @@
     "case": "8192x4096-fp16-shift-1-axis0",
     "family": "indexing",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_roll",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "indexing/relations.py:roll_rows_forward"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_transpose_copy",
@@ -727,15 +735,17 @@
     "case": "4093x8191-fp16",
     "family": "layout",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_transpose_copy",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "layout/transpose.py:matrix_transpose"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_batch_norm_training",
@@ -744,15 +754,17 @@
     "case": "B32-C64-S4096-fp16",
     "family": "normalization",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_batch_norm_training",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "normalization/batch_norm.py:batch_norm_training"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_group_norm_backward",
@@ -761,16 +773,18 @@
     "case": "B32-C256-S1024-G32-fp16",
     "family": "backward",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_group_norm_backward",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "backward/group_norm.py:group_norm_backward_dx",
       "backward/group_norm.py:group_norm_backward_weight_bias"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_logsumexp",
@@ -779,15 +793,17 @@
     "case": "8192x8192-fp32",
     "family": "normalization",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_logsumexp",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "normalization/logsumexp.py:row_logsumexp"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_softmax_backward",
@@ -796,15 +812,17 @@
     "case": "4096x4097-fp32",
     "family": "backward",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_softmax_backward",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "backward/softmax.py:softmax_backward"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_fused_adamw",
@@ -813,15 +831,17 @@
     "case": "N8388608-fp32",
     "family": "optimization",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_fused_adamw",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "optimization/adamw.py:adamw_update"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_addcmul",
@@ -830,15 +850,17 @@
     "case": "B64-C128-L4096-bf16",
     "family": "activation",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_addcmul",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "activation/pointwise.py:addcmul_broadcast_bf16"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_fp8_mqa_logits",
@@ -847,15 +869,17 @@
     "case": "Q256-K4096-H32-D128-e4m3",
     "family": "routing",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_fp8_mqa_logits",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "routing/mqa_logits.py:fp8_mqa_logits"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_cumsum",
@@ -864,15 +888,17 @@
     "case": "8192x8192-fp32-axis1",
     "family": "streaming",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_cumsum",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "streaming/ordered_prefix.py:row_cumsum_f32"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_histogram",
@@ -881,15 +907,17 @@
     "case": "N8388608-bins256-fp32",
     "family": "statistics",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_histogram",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "statistics/histogram.py:histogram_256"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/flaggems_max_pool2d_with_indices",
@@ -898,15 +926,17 @@
     "case": "B8-C32-H128-W128-K3-S2-P1-fp16",
     "family": "vision",
     "implementations": [
-      "triton",
+      "torch",
       "intent:triton",
       "intent:cutile"
     ],
     "description": "flaggems_max_pool2d_with_indices",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "vision/max_pool_with_indices.py:max_pool2d_with_indices"
-    ]
+    ],
+    "source_implementation": "torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/triton/legacy_flash_attention_bias",
@@ -5049,14 +5079,16 @@
     "case": "B4096-N16-fp32-lower",
     "family": "factorization",
     "implementations": [
-      "intent:bangc",
-      "source:bangc"
+      "reference:torch",
+      "intent:bangc"
     ],
     "description": "flaggems_triangular_solve",
-    "source_runtime": "corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "source_runtime": "references/torch_ops.py",
     "examples": [
       "factorization/triangular_solve.py:batched_lower_triangular_solve"
-    ]
+    ],
+    "source_implementation": "reference:torch",
+    "historical_source": "FlagGems"
   },
   {
     "name": "corpus/bangc/causal_attention_f32",

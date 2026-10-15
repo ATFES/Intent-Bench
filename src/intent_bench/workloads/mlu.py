@@ -19,7 +19,7 @@ def build(name):
             centered=a-a.mean(-1,keepdims=True);return (centered/np.sqrt((centered**2).mean(-1,keepdims=True)+1e-5)).astype("float16")
         return (a@arrays[1].astype("float32")).astype("float16")
     def prepare(case,arrays,env):
-        from ..implementations.remote import cnnl
+        from ..implementations.native_libraries import cnnl
         return cnnl(name,case,arrays,env)
     def generated(case,arrays,env):
         from ..loading import intent_environment

@@ -2226,157 +2226,157 @@
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/convolution/conv1d/conv1d_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/convolution/conv1d/conv2d.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/convolution/conv1d/conv2d.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/convolution/conv1d/conv2d.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/factorization/triangular_solve/linalg_solve_triangular_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/indexing/embedding/embedding.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/indexing/embedding/embedding.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/indexing/embedding/embedding_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/indexing/roll/roll.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/indexing/roll/roll.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/indexing/roll/roll_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/layout/copy/copy.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/layout/copy/copy.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/layout/copy/copy.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/layout/copy/copy_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/batch_norm/batch_norm_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/group_norm/groupnorm_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/logsumexp/logsumexp_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/softmax/softmax.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/softmax/softmax.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/normalization/softmax/softmax_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/optimization/adamw/_fused_adam.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/optimization/adamw/_fused_adam.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/optimization/adamw/_fused_adam.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/optimization/adamw/fused_adam_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/pointwise/addcmul/addcmul_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/scan/cumsum/cumsum_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/statistics/histogram/histc.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/statistics/histogram/histc.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/statistics/histogram/histc_runtime.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices.py",
     "content": "unchanged"
   },
   {
     "original": "experiments/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
-    "destination": "src/intent_bench/corpus/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
+    "destination": "archive/legacy-tools/gpu/baselines/triton/flag-gems/vision/max_pool2d/max_pool2d_with_indices_runtime.py",
     "content": "unchanged"
   },
   {

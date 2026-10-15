@@ -9,7 +9,7 @@ import time
 
 from ..loading import load
 from ..model import BenchError,EnvironmentUnavailable,PreparedCall
-from .remote import NativeSession
+from ..execution import WorkerSession
 
 
 class SourceCompilationError(BenchError):
@@ -19,7 +19,7 @@ class SourceCompilationError(BenchError):
 def deployment(env,ime=False):
     default=Path(__file__).parents[1]/'profiles'/('ime.json' if ime else 'rvv.json')
     profile=json.loads(Path(env.options.get('deployment',default)).read_text())
-    for key in ('host','cc','cflags','cpus','march','vlen_bits'):
+    for key in ('cc','cflags','cpus','march','vlen_bits'):
         if key in env.options:profile[key]=env.options[key]
     return profile
 
@@ -42,11 +42,11 @@ def prepare(reference,arguments,outputs,bindings,dimensions,env,*,ime=False,meta
     lowering=time.perf_counter()-started;artifact=json.loads(proc.stdout)
     native=Path(__file__).parents[1]/'native'
     request={'profile':profile,'artifact':artifact,'arity':len(arguments),'outputs':outputs,'bindings':bindings,'dimensions':dimensions}
-    session=NativeSession(profile['host'],'weft_source_worker.py',[native/'weft_source_worker.py',native/'cnnl_worker.py'],request,arguments,env.options.get('python','python3'))
+    session=WorkerSession(env,'weft_source_worker.py',[native/'weft_source_worker.py',native/'cnnl_worker.py'],request,arguments)
     (session.local/'canonical.mlir').write_text(canonical)
     metadata={**session.metadata(),'source_compile_seconds':lowering,'weft_compiler':compiler}
     def measure(settings):
         metadata['cache_policy']='flush_cpu_64m' if settings.cache=='flush' else 'warm'
         return session.call('measure',samples=settings.samples,warmup=settings.warmup,cache=settings.cache)
     return PreparedCall(lambda:session.call('run'),session.result,close=session.close,native_measure=measure,
-                        device=profile['host']+'/cpu',timing='cpu_native_monotonic',metadata=metadata)
+                        device=session.device('cpu'),timing='cpu_native_monotonic',metadata=metadata)

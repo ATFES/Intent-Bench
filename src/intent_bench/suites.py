@@ -25,6 +25,7 @@ def run_suite(args):
         for flag,value in (("--intent-root",args.intent_root),("--compiler",args.compiler),("--baseline",args.baseline),
                            ("--samples",args.samples),("--warmup",args.warmup),("--throughput",args.throughput)):
             if value is not None:command.extend([flag,str(value)])
+        if getattr(args,'env',None):command.extend(['--env',args.env])
         if args.check_only:command.append('--check-only')
         for flag,values in (("--impl",args.impl or ["intent:"+item["provider"]]),("--option",args.option)):
             for value in values:command.extend([flag,value])

@@ -6,7 +6,7 @@ import numpy as np
 
 from ..loading import intent_environment,load
 from ..model import EnvironmentUnavailable,PreparedCall
-from .remote import NativeSession
+from ..execution import WorkerSession
 from .weft_source import deployment
 
 
@@ -27,12 +27,12 @@ def prepare(reference,args,env,*,ime=False):
             if isinstance(value,np.ndarray):arguments.append({'input':len(arrays)});arrays.append(value)
             else:arguments.append(value)
         native=Path(__file__).parents[1]/'native'
-        session=NativeSession(profile['host'],'weft_intent_worker.py',[native/'weft_intent_worker.py',native/'cnnl_worker.py',
-            export,Path(intent.__file__).parent],{'profile':profile,'arguments':arguments},arrays,env.options.get('python','python3'))
+        session=WorkerSession(env,'weft_intent_worker.py',[native/'weft_intent_worker.py',native/'cnnl_worker.py',
+            export,Path(intent.__file__).parent],{'profile':profile,'arguments':arguments},arrays)
     finally:shutil.rmtree(root)
     metadata=session.metadata()
     def measure(settings):
         metadata['cache_policy']='flush_cpu_64m' if settings.cache=='flush' else 'warm'
         return session.call('measure',samples=settings.samples,warmup=settings.warmup,cache=settings.cache)
     return PreparedCall(lambda:session.call('run'),session.result,close=session.close,native_measure=measure,
-                        device=profile['host']+'/cpu',timing='cpu_native_monotonic',metadata=metadata)
+                        device=session.device('cpu'),timing='cpu_native_monotonic',metadata=metadata)

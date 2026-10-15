@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "intent_bench": {"type": "stdio", "command": "intent-bench-mcp", "args": []},
+    "intent_manual": {"type": "stdio", "command": "intent-bench-mcp", "args": ["--component", "manual"]},
+    "intent_compiler": {"type": "stdio", "command": "intent-bench-mcp", "args": ["--component", "compiler"]}
+  }
+}

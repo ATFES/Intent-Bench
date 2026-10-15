@@ -26,7 +26,7 @@ def build(name):
         rng=np.random.default_rng(seed);p=case.parameters
         return (rng.normal(size=(p["n"],p["k"])).astype("float32"),rng.normal(size=(p["m"],p["k"])).astype("float32"))
     def prepare(case,data,env,reference=False):
-        from ..implementations.remote import ggml
+        from ..implementations.native_libraries import ggml
         return ggml(name,case,data,env,reference=reference)
     if name=="q8_quantize":oracle=q8_reference
     elif name=="rms_norm":oracle=lambda case,x:x[1]/np.sqrt((x[1]**2).mean(-1,keepdims=True)+1e-5)
@@ -43,7 +43,7 @@ def build(name):
             call=prepare(prefix+name,(data[1].reshape(-1,256),),env)
             result=call.result;call.result=lambda:result().reshape(-1)
             return call
-        from ..implementations.remote import pack_q4
+        from ..implementations.native_libraries import pack_q4
         weights=pack_q4(data,env)
         if name=='q4_projection':args=(weights,data[1].reshape(data[1].shape[0],-1,256))
         else:args=(weights[0],q8_reference(case,data).reshape(-1,292))

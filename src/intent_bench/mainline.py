@@ -20,14 +20,17 @@ def check_programs(args):
     unknown=set(names)-entries.keys()
     if unknown:raise ValueError(f"unknown mainline programs: {unknown}")
     rows=[]
+    device=getattr(args,'device',None) or 'auto'
+    if device=='auto':device='cuda:0' if args.target in ('triton','cutile') else 'cpu'
+    target_options={'device':int(device.partition(':')[2] or 0)} if args.target in ('triton','cutile') else {'workers':getattr(args,'threads',1)} if args.target in ('mojo','weft') else {}
     for name in names:
         context=None
         row=Result("mainline/"+name,"mainline","author",{},"intent:"+args.target,
-                   device="cuda:0" if args.target in ("triton","cutile") else "cpu",stage=args.stage)
+                   device=device,stage=args.stage)
         start=time.perf_counter()
         try:
             inputs.seed([0,list(entries).index(name)])
-            context=ExampleContext(make_target(args.target,{}),row.device,compiler=args.compiler,
+            context=ExampleContext(make_target(args.target,target_options),row.device,compiler=args.compiler,
                                    prepared=True,stage=args.stage)
             module,_=entries[name]
             getattr(import_module("programs."+module),name)(context)

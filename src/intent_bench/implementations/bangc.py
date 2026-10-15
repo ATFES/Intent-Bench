@@ -4,7 +4,7 @@ import json
 import tempfile
 
 from ..model import EnvironmentUnavailable, PreparedCall
-from .remote import NativeSession
+from ..execution import WorkerSession
 
 
 def prepare_sequence(sequence, outputs):
@@ -13,8 +13,6 @@ def prepare_sequence(sequence, outputs):
     from intent.runtime.bangc import export_artifact
     from .bangc_sequence import DTYPES
     env=sequence.context.environment
-    host=env.options.get('host')
-    if not host:raise EnvironmentUnavailable('Intent BANG C requires --option host="SSH_ALIAS"')
     root=Path(tempfile.mkdtemp(prefix='intent-bench-bangc-'))
     package=root/'program';package.mkdir()
     buffers={};storage_ids={};steps=[]
@@ -39,12 +37,12 @@ def prepare_sequence(sequence, outputs):
     native=Path(__file__).parents[1]/'native'
     request={'device':env.options.get('device',0),'neuware':env.options.get('neuware','/usr/local/neuware')}
     try:
-        session=NativeSession(host,'bangc_worker.py',[native/'bangc_worker.py',native/'cnnl_worker.py',package,Path(intent.__file__).parent],request,(),env.options.get('python','python3'))
+        session=WorkerSession(env,'bangc_worker.py',[native/'bangc_worker.py',native/'cnnl_worker.py',package,Path(intent.__file__).parent],request,())
     finally:
         import shutil
         shutil.rmtree(root)
     return PreparedCall(lambda:session.call('run'),session.result,close=session.close,
         native_measure=lambda settings:session.call('measure',samples=settings.samples,warmup=settings.warmup),
-        device=f"{host}/mlu:{request['device']}",timing='cnrt_notifier',
+        device=session.device(f"mlu:{request['device']}"),timing='cnrt_notifier',
         metadata={**session.metadata(),
                   'scope_note':'Complete authored sequence; transfers and state restoration excluded'})

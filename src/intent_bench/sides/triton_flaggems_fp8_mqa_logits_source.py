@@ -1,7 +1,7 @@
 from __future__ import annotations
 from intent_bench.sides import Side
 import torch
-from intent_bench.corpus._common.loading import load_module
+from intent_bench.references.torch_ops import fp8_mqa_logits
 from intent_bench.corpus._common.measurement import functional_launch
 from intent_bench.corpus._common.model import Tolerance
 
@@ -15,6 +15,5 @@ def prepare(context):
     key_start = indices % 17
     key_end = keys - indices % 19
     arguments = (q, kv, kv_scale, head_weight, key_start, key_end)
-    runtime = load_module(context.project_root / 'corpus/gpu/baselines/triton/flag-gems/routing/fp8_mqa_logits/fp8_mqa_logits_runtime.py', 'intent_v2_triton_flaggems_fp8_mqa_logits')
-    source = functional_launch(lambda : runtime.upstream(arguments))
+    source = functional_launch(lambda : fp8_mqa_logits(*arguments))
     return Side(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, owners=locals())

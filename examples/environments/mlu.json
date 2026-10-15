@@ -1,0 +1,10 @@
+{
+  "description": "Compile on the controller; execute native calls on MLU",
+  "transport": "ssh",
+  "host": "mlu-server",
+  "python": "/path/to/worker-venv/bin/python",
+  "controller_python": "/path/to/controller-venv/bin/python",
+  "intent_root": "/path/to/intentdsl/on/controller",
+  "compiler": "/path/to/intent-compile/on/controller",
+  "options": {"device": 0, "neuware": "/usr/local/neuware"}
+}
