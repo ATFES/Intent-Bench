@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import runtime_module
 
 def prepare(context):
@@ -24,4 +24,4 @@ def prepare(context):
     grad_output = torch.randn_like(output) * 0.05
     runtime = runtime_module(context, 'corpus/gpu/baselines/cutile/tilegym/attention/dense/attention_backward_runtime.py', 'intent_v2_cutile_attention_backward_runtime')
     source = functional_launch(lambda : runtime.upstream((query, key, value, output, grad_output, source_lse, scale, True)))
-    return Side(source, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=True, note='同算法；中间精度和舍入不同', owners=locals())
+    return checked_call(source, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=True, note='同算法；中间精度和舍入不同', owners=locals())

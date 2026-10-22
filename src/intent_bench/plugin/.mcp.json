@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "intent_bench": {"command": "intent-bench-mcp", "args": []},
-    "intent_manual": {"command": "intent-bench-mcp", "args": ["--component", "manual"]},
-    "intent_compiler": {"command": "intent-bench-mcp", "args": ["--component", "compiler"]}
+    "intent_manual": {"command": "intent-manual", "args": []},
+    "intent_compiler": {"command": "intent-compiler-mcp", "args": []}
   }
 }

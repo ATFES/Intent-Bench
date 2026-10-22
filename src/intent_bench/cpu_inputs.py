@@ -6,117 +6,117 @@ only when an Intent implementation is selected.
 import torch
 import math
 from .structured import InputBundle, KernelSymbol
-from .corpus._common.model import Tolerance, IntegerTolerance, SimilarityTolerance
+from .implementations.context import Tolerance, IntegerTolerance, SimilarityTolerance
 
 def inputs_batched_row_affine():
     shape = (17, 257, 4093)
     x = torch.randn(shape, dtype=torch.float32)
     scale = torch.randn(shape[:2], dtype=torch.float32)
     bias = torch.randn(shape[:2], dtype=torch.float32)
-    return InputBundle((x, scale, bias), 'kernels.pointwise.batched_affine:batched_row_affine', 'corpus/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine_runtime.py', Tolerance(2e-06), None, ())
+    return InputBundle((x, scale, bias), 'intent.examples.kernels.pointwise.batched_affine:batched_row_affine', 'corpus/cpu/baselines/mojo/modular/pointwise/batched_affine/batched_affine_runtime.py', Tolerance(2e-06), None, ())
 
 def inputs_integer_log2_floor():
     values = torch.randint(1, 1 << 30, (262144,), dtype=torch.int32)
-    return InputBundle((values,), 'kernels.pointwise.while_loop:integer_log2_floor', 'integer_log2_floor', Tolerance(atol=0.0), None, ())
+    return InputBundle((values,), 'intent.examples.kernels.pointwise.while_loop:integer_log2_floor', 'integer_log2_floor', Tolerance(atol=0.0), None, ())
 
 def inputs_paired_sum_product():
     x = torch.randn((1048576,), dtype=torch.float32)
     y = torch.randn_like(x)
-    return InputBundle((x, y), 'kernels.pointwise.record:paired_sum_product', 'paired_sum_product', Tolerance(atol=2e-06), None, ())
+    return InputBundle((x, y), 'intent.examples.kernels.pointwise.record:paired_sum_product', 'paired_sum_product', Tolerance(atol=2e-06), None, ())
 
 def inputs_weighted_rms_norm():
     x = torch.randn((8192, 4096), dtype=torch.float32)
     weight = torch.randn((4096,), dtype=torch.float32)
-    return InputBundle((x, weight, 1.0 / 4096, 1e-06), 'kernels.normalization.rms_norm:weighted_rms_norm', 'corpus/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm_runtime.py', Tolerance(5e-05), None, ())
+    return InputBundle((x, weight, 1.0 / 4096, 1e-06), 'intent.examples.kernels.normalization.rms_norm:weighted_rms_norm', 'corpus/cpu/baselines/mojo/modular/normalization/rms_norm/rms_norm_runtime.py', Tolerance(5e-05), None, ())
 
 def inputs_stable_softmax():
     x = torch.randn((8192, 8192), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.normalization.softmax:stable_softmax', 'corpus/cpu/baselines/mojo/modular/normalization/softmax/softmax_runtime.py', Tolerance(1e-06, 1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.normalization.softmax:stable_softmax', 'corpus/cpu/baselines/mojo/modular/normalization/softmax/softmax_runtime.py', Tolerance(1e-06, 1e-05), None, ())
 
 def inputs_weighted_layer_norm():
     x = torch.randn((8192, 4096), dtype=torch.float32)
     weight = torch.randn((4096,), dtype=torch.float32)
     bias = torch.randn((4096,), dtype=torch.float32)
-    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-06), 'kernels.normalization.layer_norm:weighted_layer_norm', 'corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm_runtime.py', Tolerance(5e-05, 1e-05), None, ())
+    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-06), 'intent.examples.kernels.normalization.layer_norm:weighted_layer_norm', 'corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm_runtime.py', Tolerance(5e-05, 1e-05), None, ())
 
 def inputs_flaggems_logsumexp():
     x = torch.randn((8192, 8192), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.normalization.logsumexp:row_logsumexp', 'logsumexp', Tolerance(atol=0.0001, rtol=1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.normalization.logsumexp:row_logsumexp', 'logsumexp', Tolerance(atol=0.0001, rtol=1e-05), None, ())
 
 def inputs_fused_softmax():
     x = torch.randn((8192, 8192), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.normalization.softmax:stable_softmax_f16', 'softmax', Tolerance(0.01, 0.01), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.normalization.softmax:stable_softmax_f16', 'softmax', Tolerance(0.01, 0.01), None, ())
 
 def inputs_chunked_softmax():
     x = torch.randn((8192, 32768), dtype=torch.bfloat16)
-    return InputBundle((x,), 'kernels.normalization.softmax:chunked_softmax_bf16', 'softmax', Tolerance(0.02, 0.01), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.normalization.softmax:chunked_softmax_bf16', 'softmax', Tolerance(0.02, 0.01), None, ())
 
 def inputs_layer_norm_f16():
     x = torch.randn((8192, 4096), dtype=torch.float16)
     weight = torch.randn((4096,), dtype=torch.float16)
     bias = torch.randn((4096,), dtype=torch.float16)
-    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'kernels.normalization.layer_norm:layer_norm_f16', 'layer_norm', Tolerance(0.01), None, ())
+    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'intent.examples.kernels.normalization.layer_norm:layer_norm_f16', 'layer_norm', Tolerance(0.01), None, ())
 
 def inputs_layer_norm_bf16():
     x = torch.randn((8192, 4096), dtype=torch.bfloat16)
     weight = torch.randn((4096,), dtype=torch.bfloat16)
     bias = torch.randn((4096,), dtype=torch.bfloat16)
-    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'kernels.normalization.layer_norm:layer_norm_bf16', 'layer_norm', Tolerance(0.02, 0.01), None, ())
+    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'intent.examples.kernels.normalization.layer_norm:layer_norm_bf16', 'layer_norm', Tolerance(0.02, 0.01), None, ())
 
 def inputs_rms_norm_f32():
     x = torch.randn((8192, 4096), dtype=torch.float32)
-    return InputBundle((x, 1.0 / 4096, 1e-05), 'kernels.normalization.rms_norm:rms_norm_f32', 'rms_norm', Tolerance(0.01, 0.01), None, ())
+    return InputBundle((x, 1.0 / 4096, 1e-05), 'intent.examples.kernels.normalization.rms_norm:rms_norm_f32', 'rms_norm', Tolerance(0.01, 0.01), None, ())
 
 def inputs_rms_norm_bf16():
     x = torch.randn((8192, 4096), dtype=torch.bfloat16)
     weight = torch.randn((4096,), dtype=torch.bfloat16)
-    return InputBundle((x, weight, 1.0 / 4096, 1e-06), 'kernels.normalization.rms_norm:rms_norm_bf16', 'weighted_rms_norm', Tolerance(0.02, 0.01), None, ())
+    return InputBundle((x, weight, 1.0 / 4096, 1e-06), 'intent.examples.kernels.normalization.rms_norm:rms_norm_bf16', 'weighted_rms_norm', Tolerance(0.02, 0.01), None, ())
 
 def inputs_flaggems_softmax_backward():
     probabilities = torch.randn((4096, 4097), dtype=torch.float32)
     upstream = torch.randn_like(probabilities)
-    return InputBundle((probabilities, upstream), 'kernels.backward.softmax:softmax_backward', 'softmax_backward', Tolerance(0.0001, 1e-05), None, ())
+    return InputBundle((probabilities, upstream), 'intent.examples.kernels.backward.softmax:softmax_backward', 'softmax_backward', Tolerance(0.0001, 1e-05), None, ())
 
 def inputs_fused_add_rms_norm():
     shape = (8192, 4096)
     x = torch.randn(shape, dtype=torch.bfloat16) * 0.5
     residual = torch.randn_like(x) * 0.5
     weight = torch.randn((4096,), dtype=torch.bfloat16)
-    return InputBundle((x, residual, weight, 1.0 / 4096, 1e-06, 1.0), 'kernels.normalization.fused_add_rms_norm:fused_add_rms_norm', 'fused_add_rms_norm', (Tolerance(atol=0.05), Tolerance(atol=0.05)), None, ())
+    return InputBundle((x, residual, weight, 1.0 / 4096, 1e-06, 1.0), 'intent.examples.kernels.normalization.fused_add_rms_norm:fused_add_rms_norm', 'fused_add_rms_norm', (Tolerance(atol=0.05), Tolerance(atol=0.05)), None, ())
 
 def inputs_dense_gemm_f32():
     a = torch.randn((1024, 1024), dtype=torch.float32)
     b = torch.randn((1024, 1024), dtype=torch.float32)
-    return InputBundle((a, b), 'kernels.contraction.gemm:gemm_f32', 'corpus/cpu/baselines/mojo/modular/contraction/gemm/gemm_runtime.py', Tolerance(0.0002, 1e-05), None, ())
+    return InputBundle((a, b), 'intent.examples.kernels.contraction.gemm:gemm_f32', 'corpus/cpu/baselines/mojo/modular/contraction/gemm/gemm_runtime.py', Tolerance(0.0002, 1e-05), None, ())
 
 def inputs_dense_gemm():
     a = torch.randn((4096, 4096), dtype=torch.float16)
     b = torch.randn((4096, 14336), dtype=torch.float16)
-    return InputBundle((a, b), 'kernels.contraction.gemm:gemm', 'matmul', Tolerance(0.01, 0.01), {'ACTIVATION': KernelSymbol('kernels.contraction.gemm:Activation', 'NONE')}, ())
+    return InputBundle((a, b), 'intent.examples.kernels.contraction.gemm:gemm', 'matmul', Tolerance(0.01, 0.01), {'ACTIVATION': KernelSymbol('intent.examples.kernels.contraction.gemm:Activation', 'NONE')}, ())
 
 def inputs_tilegym_dense_gemm():
     a = torch.randn((8192, 4096), dtype=torch.bfloat16)
     b = torch.randn((4096, 11008), dtype=torch.bfloat16)
-    return InputBundle((a, b), 'kernels.contraction.gemm:bf16_gemm', 'matmul', Tolerance(0.05, 0.02), None, ())
+    return InputBundle((a, b), 'intent.examples.kernels.contraction.gemm:bf16_gemm', 'matmul', Tolerance(0.05, 0.02), None, ())
 
 def inputs_batched_gemm():
     a = torch.randn((32, 512, 1024), dtype=torch.bfloat16)
     b = torch.randn((32, 1024, 512), dtype=torch.bfloat16)
-    return InputBundle((a, b), 'kernels.contraction.batched_gemm:batched_gemm_nn', 'matmul', Tolerance(0.05, 0.02), None, ())
+    return InputBundle((a, b), 'intent.examples.kernels.contraction.batched_gemm:batched_gemm_nn', 'matmul', Tolerance(0.05, 0.02), None, ())
 
 def inputs_batched_gemm_tn():
     logical_a = torch.randn((32, 512, 1024), dtype=torch.bfloat16)
     logical_a /= math.sqrt(1024)
     logical_b = torch.randn((32, 1024, 512), dtype=torch.bfloat16)
     a = logical_a.transpose(-1, -2).contiguous()
-    return InputBundle((a, logical_b), 'kernels.contraction.batched_gemm:batched_gemm_tn', 'batched_gemm_tn', Tolerance(atol=0.05), None, ())
+    return InputBundle((a, logical_b), 'intent.examples.kernels.contraction.batched_gemm:batched_gemm_tn', 'batched_gemm_tn', Tolerance(atol=0.05), None, ())
 
 def inputs_batched_gemm_nt():
     logical_a = torch.randn((32, 512, 1024), dtype=torch.bfloat16)
     logical_a /= math.sqrt(1024)
     logical_b = torch.randn((32, 1024, 512), dtype=torch.bfloat16)
     b = logical_b.transpose(-1, -2).contiguous()
-    return InputBundle((logical_a, b), 'kernels.contraction.batched_gemm:batched_gemm_nt', 'batched_gemm_nt', Tolerance(atol=0.05), None, ())
+    return InputBundle((logical_a, b), 'intent.examples.kernels.contraction.batched_gemm:batched_gemm_nt', 'batched_gemm_nt', Tolerance(atol=0.05), None, ())
 
 def inputs_batched_gemm_tt():
     logical_a = torch.randn((32, 512, 1024), dtype=torch.bfloat16)
@@ -124,41 +124,41 @@ def inputs_batched_gemm_tt():
     logical_b = torch.randn((32, 1024, 512), dtype=torch.bfloat16)
     a = logical_a.transpose(-1, -2).contiguous()
     b = logical_b.transpose(-1, -2).contiguous()
-    return InputBundle((a, b), 'kernels.contraction.batched_gemm:batched_gemm_tt', 'batched_gemm_tt', Tolerance(atol=0.05), None, ())
+    return InputBundle((a, b), 'intent.examples.kernels.contraction.batched_gemm:batched_gemm_tt', 'batched_gemm_tt', Tolerance(atol=0.05), None, ())
 
 def inputs_mla_head_query_projection():
     source = torch.randn((1, 512, 8, 128), dtype=torch.float16) * 0.1
     weight = torch.randn((8, 512, 128), dtype=torch.float16) * 0.05
-    return InputBundle((source, weight), 'kernels.contraction.mla:mla_head_projection', 'mla_head_projection', Tolerance(atol=0.03), None, ())
+    return InputBundle((source, weight), 'intent.examples.kernels.contraction.mla:mla_head_projection', 'mla_head_projection', Tolerance(atol=0.03), None, ())
 
 def inputs_mla_head_value_projection():
     source = torch.randn((1, 512, 8, 512), dtype=torch.float16) * 0.1
     weight = torch.randn((8, 128, 512), dtype=torch.float16) * 0.05
-    return InputBundle((source, weight), 'kernels.contraction.mla:mla_head_projection', 'mla_head_projection', Tolerance(atol=0.03), None, ())
+    return InputBundle((source, weight), 'intent.examples.kernels.contraction.mla:mla_head_projection', 'mla_head_projection', Tolerance(atol=0.03), None, ())
 
 def inputs_qkv_projection():
     tokens = hidden = projection = 4096
     x = torch.randn((tokens, hidden), dtype=torch.float16)
     weights = tuple((torch.randn((hidden, projection), dtype=torch.float16) for _ in range(3)))
     packed_weights = torch.stack(weights)
-    return InputBundle((x, packed_weights), 'kernels.contraction.qkv:fused_qkv_projection', 'qkv_projection', Tolerance(atol=0.02, rtol=0.01), None, ())
+    return InputBundle((x, packed_weights), 'intent.examples.kernels.contraction.qkv:fused_qkv_projection', 'qkv_projection', Tolerance(atol=0.02, rtol=0.01), None, ())
 
 def inputs_gated_dual_gemm():
     x = torch.randn((2048, 4096), dtype=torch.float16)
     x /= math.sqrt(4096)
     gate_weight = torch.randn((4096, 4096), dtype=torch.float16)
     value_weight = torch.randn_like(gate_weight)
-    return InputBundle((x, gate_weight, value_weight), 'kernels.contraction.dual_gemm:gated_dual_gemm', 'gated_dual_gemm', Tolerance(atol=0.05), None, ())
+    return InputBundle((x, gate_weight, value_weight), 'intent.examples.kernels.contraction.dual_gemm:gated_dual_gemm', 'gated_dual_gemm', Tolerance(atol=0.05), None, ())
 
 def inputs_fp8_gemm():
     lhs = torch.randn((4096, 4096), dtype=torch.float16).to(torch.float8_e4m3fn)
     rhs = torch.randn((14336, 4096), dtype=torch.float16).to(torch.float8_e4m3fn)
-    return InputBundle((lhs, rhs), 'kernels.contraction.weight_only_int4:fp8_e4m3_matmul', 'fp8_matmul', Tolerance(atol=0.5, rtol=0.05), None, ())
+    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.weight_only_int4:fp8_e4m3_matmul', 'fp8_matmul', Tolerance(atol=0.5, rtol=0.05), None, ())
 
 def inputs_fp8_e5m2_gemm():
     lhs = torch.randn((1024, 1024), dtype=torch.float16).to(torch.float8_e5m2)
     rhs = torch.randn((1024, 1024), dtype=torch.float16).to(torch.float8_e5m2)
-    return InputBundle((lhs, rhs), 'kernels.contraction.weight_only_int4:fp8_e5m2_matmul', 'fp8_matmul', SimilarityTolerance(max_error=0.001), None, ())
+    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.weight_only_int4:fp8_e5m2_matmul', 'fp8_matmul', SimilarityTolerance(max_error=0.001), None, ())
 
 def inputs_quantized_gemm():
     lhs = torch.randn((4096, 4096), dtype=torch.float16) / math.sqrt(4096)
@@ -166,7 +166,7 @@ def inputs_quantized_gemm():
     bias = torch.randn((14336,), dtype=torch.float32) * 0.25
     residual = torch.randn((4096, 14336), dtype=torch.float16) * 0.25
     scale = torch.linspace(1.0 / 48.0, 1.0 / 24.0, 14336, dtype=torch.float32)
-    return InputBundle((lhs, rhs, bias, residual, scale), 'kernels.contraction.gemm:quantized_gemm', 'quantized_gemm', IntegerTolerance(max_abs=2), None, ())
+    return InputBundle((lhs, rhs, bias, residual, scale), 'intent.examples.kernels.contraction.gemm:quantized_gemm', 'quantized_gemm', IntegerTolerance(max_abs=2), None, ())
 
 def inputs_weight_only_int4():
     activation = torch.randn((512, 2048), dtype=torch.float16) * 0.05
@@ -175,12 +175,12 @@ def inputs_weight_only_int4():
     for lane in range(8):
         packed |= (logical[lane::8] & 15) << 4 * lane
     scales = 0.01 + 0.02 * torch.rand((32, 4096), dtype=torch.float16)
-    return InputBundle((activation, packed, scales), 'kernels.contraction.weight_only_int4:weight_only_int4_matmul', 'weight_only_int4_matmul', Tolerance(atol=0.04), None, ())
+    return InputBundle((activation, packed, scales), 'intent.examples.kernels.contraction.weight_only_int4:weight_only_int4_matmul', 'weight_only_int4_matmul', Tolerance(atol=0.04), None, ())
 
 def inputs_w4a8_gemm():
     activation = torch.randint(-128, 128, (4096, 4096), dtype=torch.int8)
     packed = torch.randint(0, 256, (14336, 2048), dtype=torch.uint8)
-    return InputBundle((activation, packed), 'kernels.contraction.weight_only_int4:w4a8_packed_matmul', 'w4a8_packed_matmul', Tolerance(atol=0.0), None, ())
+    return InputBundle((activation, packed), 'intent.examples.kernels.contraction.weight_only_int4:w4a8_packed_matmul', 'w4a8_packed_matmul', Tolerance(atol=0.0), None, ())
 
 def inputs_bitnet_int2_decode():
     activation = torch.randint(-8, 8, (1, 4096), dtype=torch.int8)
@@ -188,12 +188,12 @@ def inputs_bitnet_int2_decode():
     packed = torch.zeros((4096, 256, 4), dtype=torch.uint8)
     for lane in range(4):
         packed |= logical[:, :, lane, :].to(torch.uint8) << lane * 2
-    return InputBundle((activation, packed.flatten(1)), 'kernels.contraction.weight_only_int4:bitnet_int2_matmul', 'bitnet_int2_matmul', Tolerance(atol=0.0), None, ())
+    return InputBundle((activation, packed.flatten(1)), 'intent.examples.kernels.contraction.weight_only_int4:bitnet_int2_matmul', 'bitnet_int2_matmul', Tolerance(atol=0.0), None, ())
 
 def inputs_dequant_bf16_fp4():
     activation = torch.randn((4096, 4096), dtype=torch.bfloat16) * 0.125
     packed = torch.randint(0, 256, (4096, 2048), dtype=torch.uint8)
-    return InputBundle((activation, packed), 'kernels.contraction.weight_only_int4:dequant_bf16_fp4_matmul', 'dequant_bf16_fp4_matmul', Tolerance(atol=1.0, rtol=0.02), None, ())
+    return InputBundle((activation, packed), 'intent.examples.kernels.contraction.weight_only_int4:dequant_bf16_fp4_matmul', 'dequant_bf16_fp4_matmul', Tolerance(atol=1.0, rtol=0.02), None, ())
 
 def inputs_deepgemm_fp8_2xacc():
     lhs_values = torch.randn((4096, 4096), dtype=torch.bfloat16).view(4096, 32, 128)
@@ -202,32 +202,32 @@ def inputs_deepgemm_fp8_2xacc():
     rhs_values = torch.randn((4096, 4096), dtype=torch.bfloat16).view(32, 128, 32, 128)
     rhs_max = rhs_values.abs().float().amax(dim=(1, 3), keepdim=True).clamp_min(0.0001)
     rhs = (rhs_values * (448.0 / rhs_max)).to(torch.float8_e4m3fn).view(4096, 32, 128)
-    return InputBundle((lhs, rhs, lhs_max / 448.0, (rhs_max / 448.0).view(32, 32)), 'kernels.contraction.block_scaled:deepgemm_fp8_2xacc', 'deepgemm_fp8_2xacc', Tolerance(atol=1.0, rtol=0.02), None, ())
+    return InputBundle((lhs, rhs, lhs_max / 448.0, (rhs_max / 448.0).view(32, 32)), 'intent.examples.kernels.contraction.block_scaled:deepgemm_fp8_2xacc', 'deepgemm_fp8_2xacc', Tolerance(atol=1.0, rtol=0.02), None, ())
 
 def inputs_scaled_fp8_gemm():
     lhs = torch.randn((4096, 4096), dtype=torch.bfloat16).to(torch.float8_e4m3fn)
     rhs = torch.randn((4096, 14336), dtype=torch.bfloat16).to(torch.float8_e4m3fn)
-    return InputBundle((lhs, rhs, 1.0, 1.0), 'kernels.contraction.block_scaled:scaled_fp8_matmul', 'bench_scaled_fp8_gemm', Tolerance(atol=0.5, rtol=0.05), None, ())
+    return InputBundle((lhs, rhs, 1.0, 1.0), 'intent.examples.kernels.contraction.block_scaled:scaled_fp8_matmul', 'bench_scaled_fp8_gemm', Tolerance(atol=0.5, rtol=0.05), None, ())
 
 def inputs_vector_dot():
     lhs = torch.randn((1048576,), dtype=torch.float32)
     rhs = torch.randn_like(lhs)
-    return InputBundle((lhs, rhs), 'kernels.contraction.vector:vector_dot', 'vector_dot', Tolerance(atol=0.002, rtol=1e-05), None, ())
+    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.vector:vector_dot', 'vector_dot', Tolerance(atol=0.002, rtol=1e-05), None, ())
 
 def inputs_matrix_vector():
     matrix = torch.randn((1024, 1024), dtype=torch.float32)
     vector = torch.randn((1024,), dtype=torch.float32)
-    return InputBundle((matrix, vector), 'kernels.contraction.vector:matrix_vector', 'matmul', Tolerance(atol=0.0002, rtol=1e-05), None, ())
+    return InputBundle((matrix, vector), 'intent.examples.kernels.contraction.vector:matrix_vector', 'matmul', Tolerance(atol=0.0002, rtol=1e-05), None, ())
 
 def inputs_vector_matrix():
     vector = torch.randn((1024,), dtype=torch.float32)
     matrix = torch.randn((1024, 1024), dtype=torch.float32)
-    return InputBundle((vector, matrix), 'kernels.contraction.vector:vector_matrix', 'matmul', Tolerance(atol=0.0002, rtol=1e-05), None, ())
+    return InputBundle((vector, matrix), 'intent.examples.kernels.contraction.vector:vector_matrix', 'matmul', Tolerance(atol=0.0002, rtol=1e-05), None, ())
 
 def inputs_vector_outer():
     lhs = torch.randn((1024,), dtype=torch.float32)
     rhs = torch.randn_like(lhs)
-    return InputBundle((lhs, rhs), 'kernels.contraction.vector:vector_outer', 'vector_outer', Tolerance(atol=0.0), None, ())
+    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.vector:vector_outer', 'vector_outer', Tolerance(atol=0.0), None, ())
 
 def inputs_mxfp8_gemm():
 
@@ -247,49 +247,49 @@ def inputs_mxfp8_gemm():
     lhs_scale = lhs_scale_rows.view(torch.uint8)
     rhs = rhs_rows.T.view(k // block, block, n)
     rhs_scale = rhs_scale_rows.T.view(torch.uint8)
-    return InputBundle((lhs, lhs_scale, rhs, rhs_scale), 'kernels.contraction.block_scaled:block_scaled_matmul', 'block_scaled_matmul', Tolerance(atol=1.0, rtol=0.02), None, ())
+    return InputBundle((lhs, lhs_scale, rhs, rhs_scale), 'intent.examples.kernels.contraction.block_scaled:block_scaled_matmul', 'block_scaled_matmul', Tolerance(atol=1.0, rtol=0.02), None, ())
 
 def inputs_block_sparse_gemm():
     dimension = 4096
     lhs = torch.randn((dimension, dimension), dtype=torch.float16)
     rhs = torch.randn_like(lhs)
     mask = (torch.rand((32, 32, 128)) > 0.5).to(torch.uint8)
-    return InputBundle((lhs, rhs, mask), 'kernels.contraction.block_sparse:block_sparse_matmul', 'block_sparse_matmul', Tolerance(atol=0.05, rtol=0.02), None, ())
+    return InputBundle((lhs, rhs, mask), 'intent.examples.kernels.contraction.block_sparse:block_sparse_matmul', 'block_sparse_matmul', Tolerance(atol=0.05, rtol=0.02), None, ())
 
 def inputs_causal_attention_f32():
     q = torch.randn((8, 128, 32), dtype=torch.float32)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 32 ** (-0.5)), 'kernels.streaming.attention_f32:causal_attention_f32', 'corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py', Tolerance(0.0002, 1e-05), None, ())
+    return InputBundle((q, k, v, 32 ** (-0.5)), 'intent.examples.kernels.streaming.attention_f32:causal_attention_f32', 'corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py', Tolerance(0.0002, 1e-05), None, ())
 
 def inputs_causal_linear_attention_f32():
     q = torch.randn((8, 128, 32), dtype=torch.float32)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v), 'kernels.streaming.attention_f32:causal_linear_attention_f32', 'corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py', Tolerance(0.0002, 1e-05), None, ())
+    return InputBundle((q, k, v), 'intent.examples.kernels.streaming.attention_f32:causal_linear_attention_f32', 'corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py', Tolerance(0.0002, 1e-05), None, ())
 
 def inputs_flash_attention_bf16():
     dimension = 128
     q = torch.randn((2, 32, 4096, dimension), dtype=torch.bfloat16)
     k = torch.randn((2, 8, 4096, dimension), dtype=torch.bfloat16)
     v = torch.randn_like(k)
-    return InputBundle((q, k, v, dimension ** (-0.5)), 'kernels.streaming.attention:flash_attention_bf16_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'CAUSAL': True}, ())
+    return InputBundle((q, k, v, dimension ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_attention_bf16_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'CAUSAL': True}, ())
 
 def inputs_flash_attention_f16():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.attention:flash_attention_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.02, rtol=0.02), {'CAUSAL': True}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_attention_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.02, rtol=0.02), {'CAUSAL': True}, ())
 
 def inputs_flash_gqa_attention_f16():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     k = torch.randn((4, 8, 4096, 128), dtype=torch.float16)
     v = torch.randn_like(k)
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.attention:flash_gqa_attention_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'CAUSAL': True}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_gqa_attention_fwd', 'flash_attention_bf16_fwd', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'CAUSAL': True}, ())
 
 def inputs_continuous_gqa_decode():
     q = torch.randn((32, 32, 128), dtype=torch.float16)
     k = torch.randn((32, 8192, 8, 128), dtype=torch.float16)
     v = torch.randn_like(k)
     mask = torch.ones((32, 8192, 8), dtype=torch.uint8)
-    return InputBundle((q, k, v, mask, 128 ** (-0.5)), 'kernels.streaming.attention:continuous_gqa_decode', 'continuous_gqa_decode', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
+    return InputBundle((q, k, v, mask, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:continuous_gqa_decode', 'continuous_gqa_decode', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
 
 def inputs_flash_varlen_gqa_prefill():
     lengths = torch.tensor((4096, 3968, 3840, 3712, 3584, 3456, 3328, 3200), dtype=torch.int32)
@@ -297,13 +297,13 @@ def inputs_flash_varlen_gqa_prefill():
     q = torch.randn((29184, 32, 128), dtype=torch.float16)
     k = torch.randn((29184, 8, 128), dtype=torch.float16)
     v = torch.randn_like(k)
-    return InputBundle((q, k, v, lengths, offsets, 128 ** (-0.5)), 'kernels.streaming.attention:flash_varlen_gqa_prefill', 'flash_varlen_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
+    return InputBundle((q, k, v, lengths, offsets, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_varlen_gqa_prefill', 'flash_varlen_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
 
 def inputs_flash_attention_bias():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
     bias = torch.randn((4, 32, 4096), dtype=torch.float32)
-    return InputBundle((q, k, v, bias, 128 ** (-0.5)), 'kernels.streaming.attention:flash_attention_bias_fwd', 'bench_flash_attention_bias', Tolerance(atol=0.05, rtol=0.02), None, ())
+    return InputBundle((q, k, v, bias, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_attention_bias_fwd', 'bench_flash_attention_bias', Tolerance(atol=0.05, rtol=0.02), None, ())
 
 def inputs_flash_varlen_attention():
     VARLEN_BATCH = 8
@@ -313,44 +313,44 @@ def inputs_flash_varlen_attention():
     offsets = torch.cat((torch.zeros(1, dtype=torch.int32), lengths.cumsum(0).int()))
     q = torch.randn((VARLEN_TOTAL_TOKENS, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, lengths, offsets, 128 ** (-0.5)), 'kernels.streaming.attention:flash_varlen_attention_fwd', 'bench_flash_varlen_attention', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
+    return InputBundle((q, k, v, lengths, offsets, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention:flash_varlen_attention_fwd', 'bench_flash_varlen_attention', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
 
 def inputs_attention_sink_prefill():
     q = torch.randn((1, 32, 4096, 128), dtype=torch.bfloat16)
     k = torch.randn((1, 8, 4096, 128), dtype=torch.bfloat16)
     v = torch.randn_like(k)
     sinks = torch.randn((32,), dtype=torch.bfloat16)
-    return InputBundle((q, k, v, sinks, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:attention_sink_prefill', 'attention_sink_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
+    return InputBundle((q, k, v, sinks, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:attention_sink_prefill', 'attention_sink_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4}, ())
 
 def inputs_gemma_gqa_prefill():
     q = torch.randn((2, 32, 4096, 128), dtype=torch.bfloat16)
     k = torch.randn((2, 8, 4096, 128), dtype=torch.bfloat16)
     v = torch.randn_like(k)
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:gemma_gqa_prefill', 'gemma_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'WINDOW': 1024, 'SOFT_CAP': 50.0}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:gemma_gqa_prefill', 'gemma_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'WINDOW': 1024, 'SOFT_CAP': 50.0}, ())
 
 def inputs_sliding_window_gqa_prefill():
     q = torch.randn((2, 32, 4096, 128), dtype=torch.float16)
     k = torch.randn((2, 8, 4096, 128), dtype=torch.float16)
     v = torch.randn_like(k)
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:sliding_window_gqa_prefill', 'sliding_window_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'WINDOW': 1024}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:sliding_window_gqa_prefill', 'sliding_window_gqa_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 4, 'WINDOW': 1024}, ())
 
 def inputs_block_causal_attention():
     q = torch.randn((2, 4096, 16, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:block_causal_attention_fwd', 'block_causal_attention', Tolerance(atol=0.05, rtol=0.02), {'BLOCK': 64}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:block_causal_attention_fwd', 'block_causal_attention', Tolerance(atol=0.05, rtol=0.02), {'BLOCK': 64}, ())
 
 def inputs_varlen_block_causal_attention():
     offsets = torch.tensor((0, 4096, 7936, 11520, 14848), dtype=torch.int32)
     q = torch.randn((14848, 16, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, offsets, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:varlen_block_causal_attention_fwd', 'varlen_block_causal_attention', Tolerance(atol=0.05, rtol=0.02), {'BLOCK': 64}, ())
+    return InputBundle((q, k, v, offsets, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:varlen_block_causal_attention_fwd', 'varlen_block_causal_attention', Tolerance(atol=0.05, rtol=0.02), {'BLOCK': 64}, ())
 
 def inputs_native_sparse_attention():
     q = torch.randn((2, 4096, 32, 128), dtype=torch.float16)
     k = torch.randn((2, 4096, 4, 128), dtype=torch.float16)
     v = torch.randn_like(k)
     blocks = torch.arange(64, dtype=torch.int32).reshape(1, 1, 1, 64).expand(2, 4096, 4, 64).contiguous()
-    return InputBundle((q, k, v, blocks, 128 ** (-0.5)), 'kernels.streaming.attention_specialized:native_sparse_attention_fwd', 'native_sparse_attention', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 8, 'BLOCK': 64}, ())
+    return InputBundle((q, k, v, blocks, 128 ** (-0.5)), 'intent.examples.kernels.streaming.attention_specialized:native_sparse_attention_fwd', 'native_sparse_attention', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 8, 'BLOCK': 64}, ())
 
 def inputs_varlen_gqa_decode_with_sink_logits():
     lengths = 4096 - torch.arange(16, dtype=torch.int32) * 64
@@ -359,7 +359,7 @@ def inputs_varlen_gqa_decode_with_sink_logits():
     k = torch.randn((57856, 8, 64), dtype=torch.float16)
     v = torch.randn_like(k)
     sink = torch.zeros((32,), dtype=torch.float32)
-    return InputBundle((q, k, v, offsets, sink, 64 ** (-0.5)), 'kernels.streaming.attention:varlen_gqa_decode_with_sink_logits', 'varlen_gqa_decode_with_sink_logits', (Tolerance(atol=0.05, rtol=0.02), Tolerance(atol=0.05, rtol=0.02)), {'HEAD_GROUP': 4, 'MAX_BLOCKS': 64}, ())
+    return InputBundle((q, k, v, offsets, sink, 64 ** (-0.5)), 'intent.examples.kernels.streaming.attention:varlen_gqa_decode_with_sink_logits', 'varlen_gqa_decode_with_sink_logits', (Tolerance(atol=0.05, rtol=0.02), Tolerance(atol=0.05, rtol=0.02)), {'HEAD_GROUP': 4, 'MAX_BLOCKS': 64}, ())
 
 def inputs_paged_gqa_decode_attention():
     lengths = torch.tensor((8191, 7937, 7683, 7429, 7175, 6921, 6667, 6413), dtype=torch.int32)
@@ -370,73 +370,73 @@ def inputs_paged_gqa_decode_attention():
     q = torch.randn((8, 32, 128), dtype=torch.float16) * 0.5
     key = torch.randn((pages, 64, 8, 128), dtype=torch.float16) * 0.5
     value = torch.randn_like(key) * 0.5
-    return InputBundle((q, key, value, offsets, indices, lengths, 128 ** (-0.5)), 'kernels.streaming.paged_attention:paged_gqa_decode_attention', 'paged_gqa_decode_attention', Tolerance(atol=0.03), {'PAGE_SIZE': 64, 'HEAD_GROUP': 4}, ())
+    return InputBundle((q, key, value, offsets, indices, lengths, 128 ** (-0.5)), 'intent.examples.kernels.streaming.paged_attention:paged_gqa_decode_attention', 'paged_gqa_decode_attention', Tolerance(atol=0.03), {'PAGE_SIZE': 64, 'HEAD_GROUP': 4}, ())
 
 def inputs_gelu():
     x = torch.randn((8192, 4096), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.activation.pointwise:gelu_tanh', 'gelu', Tolerance(atol=0.01, rtol=0.01), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.activation.pointwise:gelu_tanh', 'gelu', Tolerance(atol=0.01, rtol=0.01), None, ())
 
 def inputs_relu():
     x = torch.randn((8192, 4096), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.activation.pointwise:relu_forward', 'relu', Tolerance(atol=0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.activation.pointwise:relu_forward', 'relu', Tolerance(atol=0.0), None, ())
 
 def inputs_flaggems_addcmul():
     shape = (64, 128, 4096)
     x = torch.randn(shape, dtype=torch.bfloat16)
     scale = torch.randn(shape[:2], dtype=torch.bfloat16)
     bias = torch.randn(shape[:2], dtype=torch.bfloat16)
-    return InputBundle((x, scale, bias), 'kernels.activation.pointwise:addcmul_broadcast_bf16', 'addcmul', Tolerance(atol=0.02, rtol=0.01), None, ())
+    return InputBundle((x, scale, bias), 'intent.examples.kernels.activation.pointwise:addcmul_broadcast_bf16', 'addcmul', Tolerance(atol=0.02, rtol=0.01), None, ())
 
 def inputs_swiglu():
     gate = torch.randn((8192, 14336), dtype=torch.bfloat16)
     up = torch.randn_like(gate)
-    return InputBundle((gate, up), 'kernels.activation.swiglu:swiglu_forward', 'swiglu', Tolerance(atol=0.02, rtol=0.01), None, ())
+    return InputBundle((gate, up), 'intent.examples.kernels.activation.swiglu:swiglu_forward', 'swiglu', Tolerance(atol=0.02, rtol=0.01), None, ())
 
 def inputs_swiglu_backward():
     shape = (4096, 4096)
     dc = torch.randn(shape, dtype=torch.bfloat16) * 0.5
     a = torch.randn(shape, dtype=torch.bfloat16) * 0.5
     b = torch.randn(shape, dtype=torch.bfloat16) * 0.5
-    return InputBundle((dc, a, b), 'kernels.backward.swiglu:swiglu_backward', 'swiglu_backward', (Tolerance(atol=0.05), Tolerance(atol=0.05)), None, ())
+    return InputBundle((dc, a, b), 'intent.examples.kernels.backward.swiglu:swiglu_backward', 'swiglu_backward', (Tolerance(atol=0.05), Tolerance(atol=0.05)), None, ())
 
 def inputs_silu_and_mul_packed():
     SWIGLU_FEATURES = 14336
     packed = torch.randn((4096, 2 * SWIGLU_FEATURES), dtype=torch.bfloat16)
-    return InputBundle((packed,), 'kernels.activation.swiglu:silu_and_mul_packed', 'silu_and_mul_packed', Tolerance(atol=0.02, rtol=0.01), None, ())
+    return InputBundle((packed,), 'intent.examples.kernels.activation.swiglu:silu_and_mul_packed', 'silu_and_mul_packed', Tolerance(atol=0.02, rtol=0.01), None, ())
 
 def inputs_flaggems_transpose_copy():
     x = torch.randn((4093, 8191), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.layout.transpose:matrix_transpose', 'transpose', Tolerance(0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.layout.transpose:matrix_transpose', 'transpose', Tolerance(0.0), None, ())
 
 def inputs_embedding_lookup():
     table = torch.randn((32768, 4096), dtype=torch.bfloat16)
     indices = torch.randint(0, 32768, (8, 2048), dtype=torch.int64).reshape(-1)
-    return InputBundle((table, indices), 'kernels.backward.embedding:embedding_forward_lookup_bf16', 'index_select', Tolerance(atol=0.0), None, ())
+    return InputBundle((table, indices), 'intent.examples.kernels.backward.embedding:embedding_forward_lookup_bf16', 'index_select', Tolerance(atol=0.0), None, ())
 
 def inputs_embedding_lookup_f32():
     table = torch.randn((8192, 1021), dtype=torch.float32)
     indices = torch.randint(0, 8192, (8192,), dtype=torch.int32)
-    return InputBundle((table, indices), 'kernels.backward.embedding:embedding_forward_lookup', 'embedding_forward_lookup', Tolerance(atol=0.0), None, ())
+    return InputBundle((table, indices), 'intent.examples.kernels.backward.embedding:embedding_forward_lookup', 'embedding_forward_lookup', Tolerance(atol=0.0), None, ())
 
 def inputs_index_select():
     source = torch.randn((65536, 4096), dtype=torch.float16)
     indices = torch.arange(0, 32768 * 2, 2, dtype=torch.int64)
-    return InputBundle((source, indices), 'kernels.indexing.relations:index_select_rows', 'index_select', Tolerance(atol=0.0), None, ())
+    return InputBundle((source, indices), 'intent.examples.kernels.indexing.relations:index_select_rows', 'index_select', Tolerance(atol=0.0), None, ())
 
 def inputs_scalar_table_lookup():
     labels = torch.randint(0, 65536, (65536,), dtype=torch.int32)
     table = torch.randn((65536, 128), dtype=torch.float32)
-    return InputBundle((labels, table), 'kernels.indexing.relations:scalar_table_lookup', 'scalar_table_lookup', Tolerance(atol=0.0), None, ())
+    return InputBundle((labels, table), 'intent.examples.kernels.indexing.relations:scalar_table_lookup', 'scalar_table_lookup', Tolerance(atol=0.0), None, ())
 
 def inputs_shifted_row_copy():
     OFFSET_FEATURES = 1024
     OFFSET_ROWS = 4096
     x = torch.randn((OFFSET_ROWS, OFFSET_FEATURES), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.indexing.relations:shifted_row_copy', 'shifted_row_copy', Tolerance(atol=0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.indexing.relations:shifted_row_copy', 'shifted_row_copy', Tolerance(atol=0.0), None, ())
 
 def inputs_roll_rows_forward():
     x = torch.randn((8192, 4096), dtype=torch.float16).reshape(-1)
-    return InputBundle((x,), 'kernels.indexing.relations:roll_rows_forward', 'roll_rows_forward', Tolerance(atol=0.0), {'ROW_WIDTH': 4096}, ())
+    return InputBundle((x,), 'intent.examples.kernels.indexing.relations:roll_rows_forward', 'roll_rows_forward', Tolerance(atol=0.0), {'ROW_WIDTH': 4096}, ())
 
 def inputs_grouped_query_head_add():
     GQA_KEY_HEADS = 8
@@ -444,13 +444,13 @@ def inputs_grouped_query_head_add():
     GQA_TOKENS = 4096
     query = torch.randn((GQA_QUERY_HEADS, GQA_TOKENS), dtype=torch.float16)
     key = torch.randn((GQA_KEY_HEADS, GQA_TOKENS), dtype=torch.float16)
-    return InputBundle((query, key), 'kernels.indexing.relations:grouped_query_head_add', 'grouped_query_head_add', Tolerance(atol=0.0), None, ())
+    return InputBundle((query, key), 'intent.examples.kernels.indexing.relations:grouped_query_head_add', 'grouped_query_head_add', Tolerance(atol=0.0), None, ())
 
 def inputs_alternating_signed_indices():
     SELECT_COLUMNS = 8191
     SELECT_ROWS = 4093
     shape_source = torch.empty((SELECT_ROWS, SELECT_COLUMNS), dtype=torch.float32)
-    return InputBundle((shape_source,), 'kernels.pointwise.select:alternating_signed_indices', 'alternating_signed_indices', Tolerance(atol=0.0), None, ())
+    return InputBundle((shape_source,), 'intent.examples.kernels.pointwise.select:alternating_signed_indices', 'alternating_signed_indices', Tolerance(atol=0.0), None, ())
 
 def inputs_csr_spmv():
     rows = columns = 32768
@@ -460,7 +460,7 @@ def inputs_csr_spmv():
     column_indices = torch.randint(0, columns, (nonzeros,), dtype=torch.int32)
     values = torch.randn((nonzeros,), dtype=torch.float32) * 0.1
     vector = torch.randn((columns,), dtype=torch.float32)
-    return InputBundle((row_offsets, column_indices, values, vector), 'kernels.sparse.csr_spmv:csr_spmv', 'csr_spmv', Tolerance(atol=2e-05), None, ())
+    return InputBundle((row_offsets, column_indices, values, vector), 'intent.examples.kernels.sparse.csr_spmv:csr_spmv', 'csr_spmv', Tolerance(atol=2e-05), None, ())
 
 def inputs_csr_spmm():
     rows = columns = 8192
@@ -471,7 +471,7 @@ def inputs_csr_spmm():
     column_indices = torch.randint(0, columns, (nonzeros,), dtype=torch.int32)
     values = torch.randn((nonzeros,), dtype=torch.float32) * 0.1
     dense = torch.randn((columns, features), dtype=torch.float32)
-    return InputBundle((row_offsets, column_indices, values, dense), 'kernels.sparse.csr_spmm:csr_spmm', 'csr_spmm', Tolerance(atol=3e-05), None, ())
+    return InputBundle((row_offsets, column_indices, values, dense), 'intent.examples.kernels.sparse.csr_spmm:csr_spmm', 'csr_spmm', Tolerance(atol=3e-05), None, ())
 
 def inputs_roi_align_center_sample():
     (batch_size, channels, height, width) = (8, 64, 128, 128)
@@ -483,28 +483,28 @@ def inputs_roi_align_center_sample():
     size = torch.rand((rois_count, 2)) * 48 + 8
     lower_right = torch.minimum(upper_left + size, torch.tensor([width - 1, height - 1]))
     rois = torch.cat((batch, upper_left, lower_right), dim=1)
-    return InputBundle((feature, rois), 'kernels.vision.roi_align:roi_align_center_sample', 'roi_align_center_sample', Tolerance(atol=0.0001), None, ())
+    return InputBundle((feature, rois), 'intent.examples.kernels.vision.roi_align:roi_align_center_sample', 'roi_align_center_sample', Tolerance(atol=0.0001), None, ())
 
 def inputs_max_pool2d():
     x = torch.randn((8, 32, 128, 128), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.vision.max_pool:max_pool2d', 'max_pool2d', Tolerance(atol=0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.vision.max_pool:max_pool2d', 'max_pool2d', Tolerance(atol=0.0), None, ())
 
 def inputs_flaggems_max_pool2d_with_indices():
     x = torch.randn((8, 32, 128, 128), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.vision.max_pool_with_indices:max_pool2d_with_indices', 'max_pool2d_with_indices', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.vision.max_pool_with_indices:max_pool2d_with_indices', 'max_pool2d_with_indices', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
 
 def inputs_greedy_nms():
     upper_left = torch.rand((32, 1024, 2), dtype=torch.float32) * 0.8
     size = torch.rand_like(upper_left) * 0.2 + 0.01
     boxes = torch.cat((upper_left, upper_left + size), dim=2)
     threshold = 0.5
-    return InputBundle((boxes, threshold), 'kernels.vision.nms:greedy_nms', 'greedy_nms', Tolerance(atol=0.0), None, ())
+    return InputBundle((boxes, threshold), 'intent.examples.kernels.vision.nms:greedy_nms', 'greedy_nms', Tolerance(atol=0.0), None, ())
 
 def inputs_rotary_embedding_flat():
     values = torch.randn((65536, 128), dtype=torch.float16)
     cosine = torch.randn((2048, 64), dtype=torch.float16)
     sine = torch.randn_like(cosine)
-    return InputBundle((values, cosine, sine), 'kernels.position.rope:rotary_embedding_flat', 'rotary_embedding_flat', Tolerance(atol=0.01), {'HEADS': 32}, ())
+    return InputBundle((values, cosine, sine), 'intent.examples.kernels.position.rope:rotary_embedding_flat', 'rotary_embedding_flat', Tolerance(atol=0.01), {'HEADS': 32}, ())
 
 def inputs_rotary_embedding_bf16():
     (batch, sequence, heads, dimension) = (4, 4096, 32, 128)
@@ -513,12 +513,12 @@ def inputs_rotary_embedding_bf16():
     inverse = 1.0 / 10000 ** (torch.arange(0, dimension, 2, dtype=torch.float32) / dimension)
     angles = torch.outer(positions, inverse)
     (cosine, sine) = (angles.cos(), angles.sin())
-    return InputBundle((values, cosine, sine), 'kernels.position.rope:rotary_embedding_bf16', 'rotary_embedding_bf16', Tolerance(atol=0.005, rtol=0.05), None, ())
+    return InputBundle((values, cosine, sine), 'intent.examples.kernels.position.rope:rotary_embedding_bf16', 'rotary_embedding_bf16', Tolerance(atol=0.005, rtol=0.05), None, ())
 
 def inputs_flaggems_conv1d():
     x = torch.randn((64, 16384), dtype=torch.float16)
     weight = torch.randn((5,), dtype=torch.float16)
-    return InputBundle((x, weight), 'kernels.convolution.direct:conv1d_same', 'conv1d_same', Tolerance(atol=0.02, rtol=0.01), None, ())
+    return InputBundle((x, weight), 'intent.examples.kernels.convolution.direct:conv1d_same', 'conv1d_same', Tolerance(atol=0.02, rtol=0.01), None, ())
 
 def inputs_causal_conv1d():
     CAUSAL_CONV_BATCH = 8
@@ -528,13 +528,13 @@ def inputs_causal_conv1d():
     x = torch.randn((CAUSAL_CONV_BATCH, CAUSAL_CONV_CHANNELS, CAUSAL_CONV_LENGTH), dtype=torch.float16) * 0.1
     weight = torch.randn((CAUSAL_CONV_CHANNELS, CAUSAL_CONV_WIDTH), dtype=torch.float16) * 0.1
     bias = torch.randn((CAUSAL_CONV_CHANNELS,), dtype=torch.float16) * 0.1
-    return InputBundle((x, weight, bias), 'kernels.convolution.direct:causal_depthwise_conv1d', 'causal_conv1d', Tolerance(atol=0.003), {'SILU': True}, ())
+    return InputBundle((x, weight, bias), 'intent.examples.kernels.convolution.direct:causal_depthwise_conv1d', 'causal_conv1d', Tolerance(atol=0.003), {'SILU': True}, ())
 
 def inputs_causal_conv1d_bf16():
     x = torch.randn((4, 4096, 4096), dtype=torch.bfloat16).transpose(1, 2)
     weight = torch.randn((4096, 4), dtype=torch.bfloat16)
     bias = torch.randn((4096,), dtype=torch.bfloat16)
-    return InputBundle((x, weight, bias), 'kernels.convolution.direct:causal_depthwise_conv1d_bf16', 'causal_conv1d', Tolerance(atol=0.05, rtol=0.05), {'SILU': True}, ())
+    return InputBundle((x, weight, bias), 'intent.examples.kernels.convolution.direct:causal_depthwise_conv1d_bf16', 'causal_conv1d', Tolerance(atol=0.05, rtol=0.05), {'SILU': True}, ())
 
 def inputs_conv2d():
     CONV2D_BATCH = 16
@@ -544,30 +544,30 @@ def inputs_conv2d():
     CONV2D_WIDTH = 256
     x = torch.randn((CONV2D_BATCH, CONV2D_HEIGHT, CONV2D_WIDTH), dtype=torch.float16) * 0.1
     weight = torch.randn((CONV2D_FILTER_HEIGHT, CONV2D_FILTER_WIDTH), dtype=torch.float16) * 0.1
-    return InputBundle((x, weight), 'kernels.convolution.direct:conv2d_same', 'conv2d', Tolerance(atol=0.003), None, ())
+    return InputBundle((x, weight), 'intent.examples.kernels.convolution.direct:conv2d_same', 'conv2d', Tolerance(atol=0.003), None, ())
 
 def inputs_conv2d_nhwc():
     x = torch.randn((32, 128, 128, 256), dtype=torch.float16)
     weight = torch.randn((3, 3, 256, 512), dtype=torch.float16)
-    return InputBundle((x, weight), 'kernels.convolution.direct:conv2d_nhwc', 'conv2d_nhwc', Tolerance(atol=0.02, rtol=0.02), None, ())
+    return InputBundle((x, weight), 'intent.examples.kernels.convolution.direct:conv2d_nhwc', 'conv2d_nhwc', Tolerance(atol=0.02, rtol=0.02), None, ())
 
 def inputs_bitonic_sort():
     values = torch.randn((4096, 256), dtype=torch.float32)
-    return InputBundle((values,), 'kernels.sorting.bitonic:bitonic_sort_rows', 'bitonic_sort', Tolerance(atol=0.0), None, ())
+    return InputBundle((values,), 'intent.examples.kernels.sorting.bitonic:bitonic_sort_rows', 'bitonic_sort', Tolerance(atol=0.0), None, ())
 
 def inputs_insertion_top_k():
     logits = torch.randn((1024, 4093), dtype=torch.float32)
-    return InputBundle((logits,), 'kernels.sampling.top_k:insertion_top_k', 'insertion_top_k', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
+    return InputBundle((logits,), 'intent.examples.kernels.sampling.top_k:insertion_top_k', 'insertion_top_k', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
 
 def inputs_smith_waterman():
     query = torch.randint(0, 20, (128, 128), dtype=torch.int32)
     reference = torch.randint(0, 20, (128, 128), dtype=torch.int32)
-    return InputBundle((query, reference), 'kernels.dynamic_programming.smith_waterman:smith_waterman_score', 'smith_waterman', Tolerance(atol=0.0), None, ())
+    return InputBundle((query, reference), 'intent.examples.kernels.dynamic_programming.smith_waterman:smith_waterman_score', 'smith_waterman', Tolerance(atol=0.0), None, ())
 
 def inputs_viterbi():
     emissions = torch.randn((64, 256, 64), dtype=torch.float32) * 0.1
     transitions = torch.randn((64, 64), dtype=torch.float32) * 0.1
-    return InputBundle((emissions, transitions), 'kernels.dynamic_programming.viterbi:viterbi_decode', 'viterbi', (Tolerance(atol=0.0), Tolerance(atol=2e-05)), None, ())
+    return InputBundle((emissions, transitions), 'intent.examples.kernels.dynamic_programming.viterbi:viterbi_decode', 'viterbi', (Tolerance(atol=0.0), Tolerance(atol=2e-05)), None, ())
 
 def inputs_radix2_fft():
     real = torch.randn((1024, 1024), dtype=torch.float32)
@@ -579,34 +579,34 @@ def inputs_radix2_fft():
         angle = -2.0 * math.pi * lanes / (1 << stage + 1)
         twiddle_real[stage] = torch.cos(angle)
         twiddle_imag[stage] = torch.sin(angle)
-    return InputBundle((real, imag, twiddle_real, twiddle_imag), 'kernels.spectral.fft:radix2_fft', 'radix2_fft', (Tolerance(atol=0.0003), Tolerance(atol=0.0003)), None, ())
+    return InputBundle((real, imag, twiddle_real, twiddle_imag), 'intent.examples.kernels.spectral.fft:radix2_fft', 'radix2_fft', (Tolerance(atol=0.0003), Tolerance(atol=0.0003)), None, ())
 
 def inputs_flaggems_cumsum():
     x = torch.randn((8192, 8192), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.streaming.ordered_prefix:row_cumsum_f32', 'cumsum', Tolerance(atol=0.002, rtol=1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.streaming.ordered_prefix:row_cumsum_f32', 'cumsum', Tolerance(atol=0.002, rtol=1e-05), None, ())
 
 def inputs_ordered_prefix():
     x = torch.randn((512, 17, 31), dtype=torch.float32) * 0.01
-    return InputBundle((x,), 'kernels.streaming.ordered_prefix:ordered_product_prefix', 'ordered_prefix', Tolerance(atol=2e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.streaming.ordered_prefix:ordered_product_prefix', 'ordered_prefix', Tolerance(atol=2e-05), None, ())
 
 def inputs_compact_nonzero():
     values = torch.randn((64, 4096), dtype=torch.float32)
     values[torch.rand_like(values) < 0.7] = 0.0
-    return InputBundle((values,), 'kernels.compaction.nonzero:compact_nonzero_rows', 'compact_nonzero', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
+    return InputBundle((values,), 'intent.examples.kernels.compaction.nonzero:compact_nonzero_rows', 'compact_nonzero', (Tolerance(atol=0.0), Tolerance(atol=0.0)), None, ())
 
 def inputs_sorted_nucleus_cutoff():
     ranks = torch.arange(4093, dtype=torch.float32)
     probabilities = torch.softmax(-ranks / 256.0, dim=0)[None, :].expand(1024, -1).contiguous()
-    return InputBundle((probabilities, 0.9), 'kernels.sampling.nucleus:sorted_nucleus_cutoff', 'nucleus', (Tolerance(atol=0.0002), Tolerance(atol=0.0)), None, ())
+    return InputBundle((probabilities, 0.9), 'intent.examples.kernels.sampling.nucleus:sorted_nucleus_cutoff', 'nucleus', (Tolerance(atol=0.0002), Tolerance(atol=0.0)), None, ())
 
 def inputs_histogram():
     samples = torch.randint(0, 256, (8 * 1024 * 1024,), dtype=torch.int32).to(torch.float32)
-    return InputBundle((samples,), 'kernels.statistics.histogram:histogram_256', 'histogram', Tolerance(atol=0.0), None, ())
+    return InputBundle((samples,), 'intent.examples.kernels.statistics.histogram:histogram_256', 'histogram', Tolerance(atol=0.0), None, ())
 
 def inputs_flash_cross_entropy_bf16():
     logits = torch.randn((8192, 32768), dtype=torch.bfloat16)
     labels = torch.randint(0, 32768, (8192,), dtype=torch.int64)
-    return InputBundle((logits, labels), 'kernels.loss.cross_entropy:flash_cross_entropy_bf16', 'flash_cross_entropy_bf16', (Tolerance(atol=0.05, rtol=0.01), Tolerance(atol=0.05, rtol=0.01)), {'IGNORE_INDEX': -100, 'Z_LOSS_SCALE': 0.0001}, ())
+    return InputBundle((logits, labels), 'intent.examples.kernels.loss.cross_entropy:flash_cross_entropy_bf16', 'flash_cross_entropy_bf16', (Tolerance(atol=0.05, rtol=0.01), Tolerance(atol=0.05, rtol=0.01)), {'IGNORE_INDEX': -100, 'Z_LOSS_SCALE': 0.0001}, ())
 
 def inputs_dropout():
     DROPOUT_FEATURES = 4096
@@ -623,16 +623,16 @@ def inputs_dropout():
     probability = DROP_PROBABILITY
     mixed_seed = _mix_dropout_seed(DROPOUT_SEED)
     inverse_keep = 1.0 / (1.0 - probability)
-    return InputBundle((x, mixed_seed, probability, inverse_keep), 'kernels.regularization.dropout:xor_shift_dropout', 'dropout', Tolerance(atol=0.0), None, ())
+    return InputBundle((x, mixed_seed, probability, inverse_keep), 'intent.examples.kernels.regularization.dropout:xor_shift_dropout', 'dropout', Tolerance(atol=0.0), None, ())
 
 def inputs_barrier_option_paths():
-    return InputBundle((17, 100.0, 95.0, 150.0, 0.0002, 0.01), 'kernels.simulation.monte_carlo:barrier_option_paths', 'barrier_option_paths', Tolerance(atol=0.0003), None, ())
+    return InputBundle((17, 100.0, 95.0, 150.0, 0.0002, 0.01), 'intent.examples.kernels.simulation.monte_carlo:barrier_option_paths', 'barrier_option_paths', Tolerance(atol=0.0003), None, ())
 
 def inputs_boolean_reduction():
     BOOLEAN_COLUMNS = 4093
     BOOLEAN_ROWS = 8192
     shape_source = torch.empty((BOOLEAN_ROWS, BOOLEAN_COLUMNS), dtype=torch.float32)
-    return InputBundle((shape_source,), 'kernels.reduction.boolean:row_boolean_reduction', 'row_boolean_reduction', Tolerance(atol=0.0), None, ())
+    return InputBundle((shape_source,), 'intent.examples.kernels.reduction.boolean:row_boolean_reduction', 'row_boolean_reduction', Tolerance(atol=0.0), None, ())
 
 def inputs_kmeans_assign():
     CLUSTERS = 64
@@ -640,7 +640,7 @@ def inputs_kmeans_assign():
     POINTS = 65536
     points = torch.randn((POINTS, FEATURES), dtype=torch.float16) * 0.1
     centroids = torch.randn((CLUSTERS, FEATURES), dtype=torch.float16) * 0.1
-    return InputBundle((points, centroids), 'kernels.clustering.kmeans:kmeans_assign', 'kmeans_assign', (Tolerance(atol=0.0), Tolerance(atol=0.0002)), None, ())
+    return InputBundle((points, centroids), 'intent.examples.kernels.clustering.kmeans:kmeans_assign', 'kmeans_assign', (Tolerance(atol=0.0), Tolerance(atol=0.0002)), None, ())
 
 def inputs_jagged_mean():
     lengths = torch.arange(512, dtype=torch.int32) % 128 + 1
@@ -648,7 +648,7 @@ def inputs_jagged_mean():
     offsets[0] = 0
     offsets[1:] = torch.cumsum(lengths, dim=0)
     values = torch.randn((33024, 128), dtype=torch.float32)
-    return InputBundle((values, offsets), 'kernels.ragged.jagged_mean:jagged_mean', 'jagged_mean', Tolerance(atol=2e-05, rtol=1e-05), None, ())
+    return InputBundle((values, offsets), 'intent.examples.kernels.ragged.jagged_mean:jagged_mean', 'jagged_mean', Tolerance(atol=2e-05, rtol=1e-05), None, ())
 
 def inputs_ragged_grouped_gemm():
     GROUPED_K = 4096
@@ -659,14 +659,14 @@ def inputs_ragged_grouped_gemm():
     x /= math.sqrt(GROUPED_K)
     offsets = torch.tensor([0, GROUPED_ROWS // 32, GROUPED_ROWS // 16, GROUPED_ROWS // 8, GROUPED_ROWS // 4, GROUPED_ROWS // 2, 3 * GROUPED_ROWS // 4, 7 * GROUPED_ROWS // 8, GROUPED_ROWS], dtype=torch.int32)
     weight = torch.randn((GROUPS, GROUPED_K, GROUPED_N), dtype=torch.float16)
-    return InputBundle((x, offsets, weight), 'kernels.ragged.grouped_gemm:ragged_grouped_gemm', 'ragged_grouped_gemm', Tolerance(atol=0.05), None, ())
+    return InputBundle((x, offsets, weight), 'intent.examples.kernels.ragged.grouped_gemm:ragged_grouped_gemm', 'ragged_grouped_gemm', Tolerance(atol=0.05), None, ())
 
 def inputs_ragged_grouped_gemm_bf16():
     rows = (256, 512, 1024, 2048)
     x = torch.cat(tuple((torch.randn((count, 4096), dtype=torch.bfloat16) for count in rows)))
     weight = torch.stack(tuple((torch.randn((4096, 4096), dtype=torch.bfloat16) for _ in rows)))
     offsets = torch.tensor((0, 256, 768, 1792, 3840), dtype=torch.int32)
-    return InputBundle((x, offsets, weight), 'kernels.ragged.grouped_gemm:ragged_grouped_gemm_bf16', 'ragged_grouped_gemm', Tolerance(atol=0.05, rtol=0.02), None, ())
+    return InputBundle((x, offsets, weight), 'intent.examples.kernels.ragged.grouped_gemm:ragged_grouped_gemm_bf16', 'ragged_grouped_gemm', Tolerance(atol=0.05, rtol=0.02), None, ())
 
 def inputs_moe_expert_projection():
     (tokens, hidden, output, experts) = (2048, 4096, 14336, 8)
@@ -676,7 +676,7 @@ def inputs_moe_expert_projection():
     member_routes = torch.argsort(ids.reshape(-1), stable=True).to(torch.int32)
     counts = torch.bincount(ids.reshape(-1), minlength=experts)
     offsets = torch.cat((torch.zeros(1, dtype=torch.int64), counts.cumsum(0))).to(torch.int32)
-    return InputBundle((x, offsets, member_routes, weight), 'kernels.ragged.grouped_gemm:routed_expert_projection_bf16', 'routed_expert_projection_bf16', Tolerance(atol=0.1, rtol=0.05), {'TOP_K': 2}, ())
+    return InputBundle((x, offsets, member_routes, weight), 'intent.examples.kernels.ragged.grouped_gemm:routed_expert_projection_bf16', 'routed_expert_projection_bf16', Tolerance(atol=0.1, rtol=0.05), {'TOP_K': 2}, ())
 
 def inputs_nested_jagged_mean_pool():
     DOCUMENTS = 256
@@ -694,7 +694,7 @@ def inputs_nested_jagged_mean_pool():
         values = torch.randn((NESTED_TOKENS, NESTED_FEATURES), dtype=torch.float32)
         return (document_offsets, sentence_offsets, values)
     (document_offsets, sentence_offsets, values) = _nested_pool_inputs()
-    return InputBundle((document_offsets, sentence_offsets, values), 'kernels.ragged.nested_pool:nested_jagged_mean_pool', 'nested_jagged_mean_pool', (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), None, ())
+    return InputBundle((document_offsets, sentence_offsets, values), 'intent.examples.kernels.ragged.nested_pool:nested_jagged_mean_pool', 'nested_jagged_mean_pool', (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), None, ())
 
 def inputs_nested_jagged_mean_pool_identity():
     DOCUMENTS = 256
@@ -714,7 +714,7 @@ def inputs_nested_jagged_mean_pool_identity():
     (document_offsets, sentence_offsets, values) = _nested_pool_inputs()
     document_indices = torch.arange(SENTENCES, dtype=torch.int32)
     token_indices = torch.arange(NESTED_TOKENS, dtype=torch.int32)
-    return InputBundle((document_offsets, sentence_offsets, document_indices, token_indices, values), 'kernels.variants.decomposition:nested_jagged_mean_pool_identity', 'nested_jagged_mean_pool_indexed', (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), None, ())
+    return InputBundle((document_offsets, sentence_offsets, document_indices, token_indices, values), 'intent.examples.kernels.variants.decomposition:nested_jagged_mean_pool_identity', 'nested_jagged_mean_pool_indexed', (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), None, ())
 
 def inputs_selective_state_scan():
     SELECTIVE_SCAN_BATCH = 128
@@ -722,15 +722,15 @@ def inputs_selective_state_scan():
     x = torch.randn((SELECTIVE_SCAN_BATCH, SELECTIVE_SCAN_LENGTH), dtype=torch.float32) * 0.05
     decay = 0.9 + 0.09 * torch.rand_like(x)
     drive = torch.randn_like(x) * 0.05
-    return InputBundle((x, decay, drive), 'kernels.streaming.selective_scan:selective_state_scan', 'selective_state_scan', Tolerance(atol=2e-05), None, ())
+    return InputBundle((x, decay, drive), 'intent.examples.kernels.streaming.selective_scan:selective_state_scan', 'selective_state_scan', Tolerance(atol=2e-05), None, ())
 
 def inputs_streamed_online_softmax_f16():
     x = torch.randn((8192, 8192), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.streaming.online_softmax:streamed_online_softmax_f16', 'streamed_online_softmax_f16', Tolerance(atol=0.01, rtol=0.01), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.streaming.online_softmax:streamed_online_softmax_f16', 'streamed_online_softmax_f16', Tolerance(atol=0.01, rtol=0.01), None, ())
 
 def inputs_streamed_online_softmax():
     x = torch.randn((8192, 8192), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.streaming.online_softmax:streamed_online_softmax', 'softmax', Tolerance(atol=1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.streaming.online_softmax:streamed_online_softmax', 'softmax', Tolerance(atol=1e-05), None, ())
 
 def inputs_recurrent_gated_delta_fwd():
     (batch, sequence, heads, key_dimension, value_dimension) = (2, 2048, 8, 128, 128)
@@ -740,7 +740,7 @@ def inputs_recurrent_gated_delta_fwd():
     gate = -torch.rand((batch, sequence, heads), dtype=torch.bfloat16) * 0.5
     beta = torch.sigmoid(torch.randn_like(gate))
     scale = 1.0 / math.sqrt(key_dimension)
-    return InputBundle((query, key, value, gate, beta, scale), 'kernels.streaming.gated_delta:recurrent_gated_delta_fwd', 'recurrent_gated_delta_fwd', (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), {'HEAD_GROUP': 1}, ())
+    return InputBundle((query, key, value, gate, beta, scale), 'intent.examples.kernels.streaming.gated_delta:recurrent_gated_delta_fwd', 'recurrent_gated_delta_fwd', (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), {'HEAD_GROUP': 1}, ())
 
 def inputs_mamba_chunk_scan():
     (batch, sequence, heads, groups, dimension, state, chunk) = (1, 2048, 32, 8, 64, 128, 256)
@@ -752,7 +752,7 @@ def inputs_mamba_chunk_scan():
     state_matrix = torch.randn((batch, sequence, groups, state), dtype=torch.float16) * 0.05
     previous = torch.randn((batch, chunks, heads, dimension, state), dtype=torch.float16) * 0.05
     residual_scale = torch.randn((heads,), dtype=torch.float16) * 0.1
-    return InputBundle((cb, x, dt, dA, state_matrix, previous, residual_scale), 'kernels.streaming.selective_scan:mamba_chunk_scan_fwd', 'mamba_chunk_scan_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEADS_PER_GROUP': heads // groups}, ())
+    return InputBundle((cb, x, dt, dA, state_matrix, previous, residual_scale), 'intent.examples.kernels.streaming.selective_scan:mamba_chunk_scan_fwd', 'mamba_chunk_scan_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEADS_PER_GROUP': heads // groups}, ())
 
 def inputs_mamba_chunk_state():
     (batch, sequence, heads, groups, dimension, state, chunk) = (1, 2048, 32, 8, 64, 128, 256)
@@ -761,7 +761,7 @@ def inputs_mamba_chunk_state():
     x = torch.randn((batch, sequence, heads, dimension), dtype=torch.float16)
     dt = torch.randn((batch, heads, chunks, chunk), dtype=torch.float16)
     cumulative_decay = torch.cumsum(-torch.rand_like(dt) * 0.1, dim=-1)
-    return InputBundle((state_basis, x, dt, cumulative_decay), 'kernels.streaming.mamba:mamba_chunk_state_fwd', 'mamba_chunk_state_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEAD_GROUP': heads // groups}, ())
+    return InputBundle((state_basis, x, dt, cumulative_decay), 'intent.examples.kernels.streaming.mamba:mamba_chunk_state_fwd', 'mamba_chunk_state_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEAD_GROUP': heads // groups}, ())
 
 def inputs_linear_attention_forward():
     (batch, sequence, heads, dimension) = (1, 2048, 16, 128)
@@ -769,20 +769,20 @@ def inputs_linear_attention_forward():
     k = torch.randn_like(q)
     v = torch.randn_like(q)
     scale = 1.0 / math.sqrt(dimension)
-    return InputBundle((q, k, v, scale), 'kernels.streaming.linear_attention:fused_chunk_linear_attention_fwd', 'linear_attention_forward', (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), None, ())
+    return InputBundle((q, k, v, scale), 'intent.examples.kernels.streaming.linear_attention:fused_chunk_linear_attention_fwd', 'linear_attention_forward', (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), None, ())
 
 def inputs_mamba_chunk_state_bf16():
     x = torch.randn((1, 2048, 32, 64), dtype=torch.bfloat16)
     basis = torch.randn((1, 2048, 8, 128), dtype=torch.bfloat16)
     dt = torch.rand((1, 32, 8, 256), dtype=torch.float32) * 0.01
     decay = -torch.rand_like(dt).cumsum(-1) * 0.01
-    return InputBundle((basis, x, dt, decay), 'kernels.streaming.mamba:mamba_chunk_state_bf16_fwd', 'mamba_chunk_state_bf16_fwd', Tolerance(atol=0.02, rtol=0.02), {'HEAD_GROUP': 4}, ())
+    return InputBundle((basis, x, dt, decay), 'intent.examples.kernels.streaming.mamba:mamba_chunk_state_bf16_fwd', 'mamba_chunk_state_bf16_fwd', Tolerance(atol=0.02, rtol=0.02), {'HEAD_GROUP': 4}, ())
 
 def inputs_mamba_state_passing():
     states = torch.randn((1, 8, 32, 8192), dtype=torch.float32) * 0.01
     decay = -torch.rand((1, 32, 8), dtype=torch.float32) * 0.1
     initial = torch.zeros((1, 32, 8192), dtype=torch.float32)
-    return InputBundle((states, decay, initial), 'kernels.streaming.mamba:mamba_state_passing_fwd', 'mamba_state_passing_fwd', (Tolerance(atol=1e-05, rtol=1e-05), Tolerance(atol=1e-05, rtol=1e-05)), None, ())
+    return InputBundle((states, decay, initial), 'intent.examples.kernels.streaming.mamba:mamba_state_passing_fwd', 'mamba_state_passing_fwd', (Tolerance(atol=1e-05, rtol=1e-05), Tolerance(atol=1e-05, rtol=1e-05)), None, ())
 
 def inputs_mamba_chunk_scan_bf16():
     x = torch.randn((1, 2048, 32, 64), dtype=torch.bfloat16)
@@ -792,7 +792,7 @@ def inputs_mamba_chunk_scan_bf16():
     decay = -torch.rand_like(dt).cumsum(-1) * 0.01
     previous = torch.randn((1, 8, 32, 64, 128), dtype=torch.float32) * 0.01
     residual = torch.randn((32,), dtype=torch.float32) * 0.01
-    return InputBundle((cb, x, dt, decay, state_matrix, previous, residual), 'kernels.streaming.selective_scan:mamba_chunk_scan_bf16_fwd', 'mamba_chunk_scan_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEADS_PER_GROUP': 4}, ())
+    return InputBundle((cb, x, dt, decay, state_matrix, previous, residual), 'intent.examples.kernels.streaming.selective_scan:mamba_chunk_scan_bf16_fwd', 'mamba_chunk_scan_fwd', Tolerance(atol=0.1, rtol=0.05), {'HEADS_PER_GROUP': 4}, ())
 
 def inputs_mamba3_siso_step():
     query = torch.randn((32, 4, 32), dtype=torch.bfloat16) * 0.1
@@ -806,7 +806,7 @@ def inputs_mamba3_siso_step():
     residual = torch.randn((16,), dtype=torch.float32) * 0.01
     gate = torch.randn_like(value) * 0.1
     states = tuple((torch.zeros(shape, dtype=torch.float32) for shape in ((32, 16, 16), (32, 16, 64, 32), (32, 16, 32), (32, 16, 64))))
-    return InputBundle((query, key, value, adt, dt, trap, query_bias, key_bias, angles, residual, gate, *states), 'kernels.streaming.mamba:mamba3_siso_step', 'bench_mamba3_step', (Tolerance(0.002, 0.02), Tolerance(1e-05, 1e-05), Tolerance(0.0001, 0.0001), Tolerance(0.002, 0.02)), {'HEAD_GROUP': 4}, ())
+    return InputBundle((query, key, value, adt, dt, trap, query_bias, key_bias, angles, residual, gate, *states), 'intent.examples.kernels.streaming.mamba:mamba3_siso_step', 'bench_mamba3_step', (Tolerance(0.002, 0.02), Tolerance(1e-05, 1e-05), Tolerance(0.0001, 0.0001), Tolerance(0.002, 0.02)), {'HEAD_GROUP': 4}, ())
 
 def inputs_mamba3_siso_forward():
     query = torch.randn((1, 2048, 4, 32), dtype=torch.bfloat16) * 0.1
@@ -820,18 +820,18 @@ def inputs_mamba3_siso_forward():
     residual = torch.randn((16,), dtype=torch.float32) * 0.01
     gate = torch.randn_like(value) * 0.1
     stores = (torch.empty((1, 2048, 16, 32), dtype=torch.bfloat16), torch.empty((1, 2048, 16, 32), dtype=torch.bfloat16), *(torch.empty((1, 16, 2048), dtype=torch.float32) for _ in range(3)))
-    return InputBundle((query, key, value, adt, dt, trap, query_bias, key_bias, angles, residual, gate, *stores), 'kernels.streaming.mamba:mamba3_siso_forward', 'bench_mamba3_forward', Tolerance(0.002, 0.02), {'HEAD_GROUP': 4}, (11, 12, 13, 14, 15))
+    return InputBundle((query, key, value, adt, dt, trap, query_bias, key_bias, angles, residual, gate, *stores), 'intent.examples.kernels.streaming.mamba:mamba3_siso_forward', 'bench_mamba3_forward', Tolerance(0.002, 0.02), {'HEAD_GROUP': 4}, (11, 12, 13, 14, 15))
 
 def inputs_linear_attention_backward():
     q = torch.randn((1, 2048, 16, 128), dtype=torch.float16)
     (k, v, gradient) = (torch.randn_like(q), torch.randn_like(q), torch.randn_like(q))
     tolerance = Tolerance(atol=0.1, rtol=0.05)
-    return InputBundle((q, k, v, gradient, 128 ** (-0.5)), 'kernels.streaming.linear_attention:fused_chunk_linear_attention_bwd', 'linear_attention_backward', (tolerance, tolerance, tolerance), None, ())
+    return InputBundle((q, k, v, gradient, 128 ** (-0.5)), 'intent.examples.kernels.streaming.linear_attention:fused_chunk_linear_attention_bwd', 'linear_attention_backward', (tolerance, tolerance, tolerance), None, ())
 
 def inputs_chunk_retention():
     q = torch.randn((1, 2048, 16, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.streaming.linear_attention:chunk_retention_fwd', 'bench_retention', Tolerance(0.05, 0.02), None, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.streaming.linear_attention:chunk_retention_fwd', 'bench_retention', Tolerance(0.05, 0.02), None, ())
 
 def inputs_mhc_post():
     (tokens, hidden, streams) = (4096, 2560, 4)
@@ -839,7 +839,7 @@ def inputs_mhc_post():
     residual = torch.randn((tokens, streams, hidden), dtype=torch.bfloat16)
     post_mix = torch.randn((tokens, streams), dtype=torch.float32)
     residual_mix = torch.randn((tokens, streams, streams), dtype=torch.float32)
-    return InputBundle((residual, layer_output, post_mix, residual_mix), 'kernels.routing.mhc:mhc_apply_residual', 'mhc_apply_residual', Tolerance(atol=0.05, rtol=0.02), None, ())
+    return InputBundle((residual, layer_output, post_mix, residual_mix), 'intent.examples.kernels.routing.mhc:mhc_apply_residual', 'mhc_apply_residual', Tolerance(atol=0.05, rtol=0.02), None, ())
 
 def inputs_flaggems_fp8_mqa_logits():
     (queries, keys, heads, dimension) = (256, 4096, 32, 128)
@@ -850,7 +850,7 @@ def inputs_flaggems_fp8_mqa_logits():
     indices = torch.arange(queries, dtype=torch.int32)
     key_start = indices % 17
     key_end = keys - indices % 19
-    return InputBundle((q, kv, kv_scale, head_weight, key_start, key_end), 'kernels.routing.mqa_logits:fp8_mqa_logits', 'fp8_mqa_logits', Tolerance(atol=0.02, rtol=0.02), None, ())
+    return InputBundle((q, kv, kv_scale, head_weight, key_start, key_end), 'intent.examples.kernels.routing.mqa_logits:fp8_mqa_logits', 'fp8_mqa_logits', Tolerance(atol=0.02, rtol=0.02), None, ())
 
 def inputs_swiglu_forward_helper():
     SWIGLU_FEATURES = 14336
@@ -858,7 +858,7 @@ def inputs_swiglu_forward_helper():
     shape = (SWIGLU_TOKENS, SWIGLU_FEATURES)
     gate = torch.randn(shape, dtype=torch.bfloat16) * 0.5
     up = torch.randn_like(gate) * 0.5
-    return InputBundle((gate, up), 'kernels.variants.activation:swiglu_forward_helper', 'swiglu_float_intermediate', Tolerance(atol=0.05), None, ())
+    return InputBundle((gate, up), 'intent.examples.kernels.variants.activation:swiglu_forward_helper', 'swiglu_float_intermediate', Tolerance(atol=0.05), None, ())
 
 def inputs_gemm_loop_interchange():
     GEMM_K = 4096
@@ -866,7 +866,7 @@ def inputs_gemm_loop_interchange():
     GEMM_N = 14336
     a = torch.randn((GEMM_M, GEMM_K), dtype=torch.float16) * 0.1
     b = torch.randn((GEMM_K, GEMM_N), dtype=torch.float16) * 0.1
-    return InputBundle((a, b), 'kernels.variants.contraction:gemm_loop_interchange', 'matmul', Tolerance(atol=0.03), {'ACTIVATION': KernelSymbol('kernels.contraction.gemm:Activation', 'NONE')}, ())
+    return InputBundle((a, b), 'intent.examples.kernels.variants.contraction:gemm_loop_interchange', 'matmul', Tolerance(atol=0.03), {'ACTIVATION': KernelSymbol('intent.examples.kernels.contraction.gemm:Activation', 'NONE')}, ())
 
 def inputs_rotary_embedding_equivalent_index():
     HALF_DIMENSION = 64
@@ -876,61 +876,61 @@ def inputs_rotary_embedding_equivalent_index():
     values = torch.randn((rows, HEAD_DIMENSION), dtype=torch.float16)
     cosine = torch.randn((tokens, HALF_DIMENSION), dtype=torch.float16)
     sine = torch.randn_like(cosine)
-    return InputBundle((values, cosine, sine), 'kernels.variants.indexing:rotary_embedding_equivalent_index', 'rotary_embedding_flat', Tolerance(atol=0.01), {'HEADS': heads}, ())
+    return InputBundle((values, cosine, sine), 'intent.examples.kernels.variants.indexing:rotary_embedding_equivalent_index', 'rotary_embedding_flat', Tolerance(atol=0.01), {'HEADS': heads}, ())
 
 def inputs_matrix_transpose_scalar_domains():
     TRANSPOSE_COLUMNS = 8191
     TRANSPOSE_ROWS = 4093
     x = torch.randn((TRANSPOSE_ROWS, TRANSPOSE_COLUMNS), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.variants.layout:matrix_transpose_scalar_domains', 'transpose', Tolerance(atol=0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.variants.layout:matrix_transpose_scalar_domains', 'transpose', Tolerance(atol=0.0), None, ())
 
 def inputs_matrix_transpose_product_domains():
     TRANSPOSE_COLUMNS = 8191
     TRANSPOSE_ROWS = 4093
     x = torch.randn((TRANSPOSE_ROWS, TRANSPOSE_COLUMNS), dtype=torch.float16)
-    return InputBundle((x,), 'kernels.variants.decomposition:matrix_transpose_product_domains', 'transpose', Tolerance(atol=0.0), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.variants.decomposition:matrix_transpose_product_domains', 'transpose', Tolerance(atol=0.0), None, ())
 
 def inputs_conv2d_reduce_order():
     x = torch.randn((16, 256, 256), dtype=torch.float16) * 0.1
     weight = torch.randn((3, 3), dtype=torch.float16) * 0.1
-    return InputBundle((x, weight), 'kernels.variants.contraction:conv2d_reduce_order', 'conv2d', Tolerance(atol=0.003), None, ())
+    return InputBundle((x, weight), 'intent.examples.kernels.variants.contraction:conv2d_reduce_order', 'conv2d', Tolerance(atol=0.003), None, ())
 
 def inputs_weighted_layer_norm_second_moment():
     x = torch.randn((8192, 4096), dtype=torch.float32)
     weight = torch.randn((4096,), dtype=torch.float32)
     bias = torch.randn_like(weight)
-    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'kernels.variants.normalization:weighted_layer_norm_second_moment', 'layer_norm', Tolerance(atol=5e-05), None, ())
+    return InputBundle((x, weight, bias, 1.0 / 4096, 1e-05), 'intent.examples.kernels.variants.normalization:weighted_layer_norm_second_moment', 'layer_norm', Tolerance(atol=5e-05), None, ())
 
 def inputs_ordered_prefix_nested():
     x = torch.randn((512, 17, 31), dtype=torch.float32) * 0.1
-    return InputBundle((x,), 'kernels.variants.decomposition:ordered_prefix_nested', 'ordered_prefix', Tolerance(atol=2e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.variants.decomposition:ordered_prefix_nested', 'ordered_prefix', Tolerance(atol=2e-05), None, ())
 
 def inputs_stable_softmax_online():
     ONLINE_COLUMNS = 8192
     ONLINE_ROWS = 8192
     x = torch.randn((ONLINE_ROWS, ONLINE_COLUMNS), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.variants.normalization:stable_softmax_online', 'softmax', Tolerance(atol=1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.variants.normalization:stable_softmax_online', 'softmax', Tolerance(atol=1e-05), None, ())
 
 def inputs_streamed_online_softmax_inline():
     ONLINE_COLUMNS = 8192
     ONLINE_ROWS = 8192
     x = torch.randn((ONLINE_ROWS, ONLINE_COLUMNS), dtype=torch.float32)
-    return InputBundle((x,), 'kernels.variants.streaming:streamed_online_softmax_inline', 'softmax', Tolerance(atol=1e-05), None, ())
+    return InputBundle((x,), 'intent.examples.kernels.variants.streaming:streamed_online_softmax_inline', 'softmax', Tolerance(atol=1e-05), None, ())
 
 def inputs_flash_attention_inline():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.variants.streaming:flash_attention_inline_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.variants.streaming:flash_attention_inline_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
 
 def inputs_flash_attention_select():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.variants.streaming:flash_attention_select_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.variants.streaming:flash_attention_select_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
 
 def inputs_flash_attention_full_causal_stream():
     q = torch.randn((4, 32, 4096, 128), dtype=torch.float16)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    return InputBundle((q, k, v, 128 ** (-0.5)), 'kernels.variants.streaming:flash_attention_full_causal_stream_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
+    return InputBundle((q, k, v, 128 ** (-0.5)), 'intent.examples.kernels.variants.streaming:flash_attention_full_causal_stream_fwd', 'bench_flash_attention_causal', Tolerance(atol=0.05, rtol=0.02), {'CAUSAL': True}, ())
 
 def inputs_paged_mla_decode():
     (batch, query_heads, key_heads) = (32, 128, 1)
@@ -946,7 +946,7 @@ def inputs_paged_mla_decode():
     page_offsets = torch.arange(0, pages + 1, pages_per_sequence, dtype=torch.int32)
     lengths = torch.full((batch,), sequence, dtype=torch.int32)
     scale = (value_dimension + rope_dimension) ** (-0.5)
-    return InputBundle((q_latent, q_rope, latent_cache, rope_cache, page_offsets, page_indices, lengths, scale), 'kernels.streaming.mla:paged_mla_decode', 'paged_mla_decode', Tolerance(atol=0.05, rtol=0.05), {'PAGE_SIZE': page_size, 'HEAD_GROUP': query_heads // key_heads}, ())
+    return InputBundle((q_latent, q_rope, latent_cache, rope_cache, page_offsets, page_indices, lengths, scale), 'intent.examples.kernels.streaming.mla:paged_mla_decode', 'paged_mla_decode', Tolerance(atol=0.05, rtol=0.05), {'PAGE_SIZE': page_size, 'HEAD_GROUP': query_heads // key_heads}, ())
 
 def inputs_mla_prefill():
     query = torch.randn((1, 128, 2048, 128), dtype=torch.float16)
@@ -954,7 +954,7 @@ def inputs_mla_prefill():
     key = torch.randn((1, 1, 2048, 128), dtype=torch.float16)
     key_rope = torch.randn((1, 1, 2048, 64), dtype=torch.float16)
     value = torch.randn_like(key)
-    return InputBundle((query, query_rope, key, key_rope, value, 192 ** (-0.5)), 'kernels.streaming.attention:mla_prefill', 'mla_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 128}, ())
+    return InputBundle((query, query_rope, key, key_rope, value, 192 ** (-0.5)), 'intent.examples.kernels.streaming.attention:mla_prefill', 'mla_prefill', Tolerance(atol=0.05, rtol=0.02), {'HEAD_GROUP': 128}, ())
 
 def inputs_absorbed_mla_prefill():
     ABSORBED_MLA_SCALE = 0.07216878364870323
@@ -962,7 +962,7 @@ def inputs_absorbed_mla_prefill():
     query_rope = torch.randn((1, 512, 8, 64), dtype=torch.float16) * 0.1
     cache = torch.randn((1, 512, 512), dtype=torch.float16) * 0.1
     cache_rope = torch.randn((1, 512, 64), dtype=torch.float16) * 0.1
-    return InputBundle((query, query_rope, cache, cache_rope, ABSORBED_MLA_SCALE), 'kernels.streaming.mla:absorbed_mla_prefill', 'absorbed_mla_prefill', Tolerance(atol=0.04), None, ())
+    return InputBundle((query, query_rope, cache, cache_rope, ABSORBED_MLA_SCALE), 'intent.examples.kernels.streaming.mla:absorbed_mla_prefill', 'absorbed_mla_prefill', Tolerance(atol=0.04), None, ())
 
 def inputs_absorbed_mla_decode():
 
@@ -972,7 +972,7 @@ def inputs_absorbed_mla_decode():
         cache = torch.randn((8, 8192, 512), dtype=torch.float16)
         cache_rope = torch.randn((8, 8192, 64), dtype=torch.float16)
         return (query, query_rope, cache, cache_rope, 576 ** (-0.5))
-    return InputBundle(_absorbed_decode_inputs(), 'kernels.streaming.mla:absorbed_mla_decode', 'absorbed_mla_decode', Tolerance(atol=0.05, rtol=0.02), None, ())
+    return InputBundle(_absorbed_decode_inputs(), 'intent.examples.kernels.streaming.mla:absorbed_mla_decode', 'absorbed_mla_decode', Tolerance(atol=0.05, rtol=0.02), None, ())
 
 def inputs_token_sparse_mla_prefill():
     query = torch.randn((64, 8, 512), dtype=torch.bfloat16) * 0.1
@@ -981,7 +981,7 @@ def inputs_token_sparse_mla_prefill():
     cache_rope = torch.randn((4096, 64), dtype=torch.bfloat16) * 0.1
     selected = torch.randint(0, 4096, (64, 256), dtype=torch.int32)
     (selected[:, -2], selected[:, -1]) = (-1, 4096)
-    return InputBundle((query, query_rope, cache, cache_rope, selected, 576 ** (-0.5)), 'kernels.streaming.mla:token_sparse_mla_prefill', 'token_sparse_mla_prefill', (Tolerance(atol=0.05), Tolerance(atol=0.005), Tolerance(atol=0.005)), None, ())
+    return InputBundle((query, query_rope, cache, cache_rope, selected, 576 ** (-0.5)), 'intent.examples.kernels.streaming.mla:token_sparse_mla_prefill', 'token_sparse_mla_prefill', (Tolerance(atol=0.05), Tolerance(atol=0.005), Tolerance(atol=0.005)), None, ())
 
 def inputs_token_sparse_mla_value_prefill():
     query = torch.randn((1, 64, 2048, 128), dtype=torch.bfloat16)[0].permute(1, 0, 2).contiguous()
@@ -990,14 +990,14 @@ def inputs_token_sparse_mla_value_prefill():
     value = torch.randn_like(key)
     key_rope = torch.randn((4096, 64), dtype=torch.bfloat16)
     selected = (torch.arange(2048, dtype=torch.int32)[:, None] - torch.arange(512, dtype=torch.int32)[None, :]).clamp_min(0)
-    return InputBundle((query, query_rope, key, value, key_rope, selected, 192 ** (-0.5)), 'kernels.streaming.mla:token_sparse_mla_value_prefill', 'token_sparse_mla_value_prefill', Tolerance(atol=0.1, rtol=0.05), None, ())
+    return InputBundle((query, query_rope, key, value, key_rope, selected, 192 ** (-0.5)), 'intent.examples.kernels.streaming.mla:token_sparse_mla_value_prefill', 'token_sparse_mla_value_prefill', Tolerance(atol=0.1, rtol=0.05), None, ())
 
 def inputs_sparse_2to4_gemm():
     from .corpus.cpu.baselines.pytorch.cpu_runtime import make_sparse_2to4_inputs
     m, n, k = 8192, 14336, 8192
     compressed, metadata = make_sparse_2to4_inputs(m, k)
     rhs = torch.randn((k, n), dtype=torch.float16)
-    return InputBundle((compressed, metadata, rhs), 'kernels.contraction.sparse_2to4:sparse_2to4_gemm',
+    return InputBundle((compressed, metadata, rhs), 'intent.examples.kernels.contraction.sparse_2to4:sparse_2to4_gemm',
                        'sparse_2to4_gemm', Tolerance(atol=5e-2, rtol=2e-2))
 
 

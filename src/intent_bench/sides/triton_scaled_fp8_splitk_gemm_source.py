@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 import triton
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (m, n, k, splits, block) = (4096, 14336, 4096, 4, 256)
@@ -19,5 +19,5 @@ def prepare(context):
     def launch():
         source_module.scaled_gemm_splitk[grid](lhs_storage, rhs_storage, source_output, lhs_storage.stride(0), lhs_storage.stride(1), rhs_storage.stride(0), rhs_storage.stride(1), source_output.stride(0), source_output.stride(1), 1.0, 1.0, m, n, k, block_m, block_n, block, splits, 8, num_stages=3, num_warps=8)
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : source_output, prepare=lambda : source_output.zero_())
-    return Side(source, Tolerance(atol=0.5, rtol=0.01), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : source_output, reset=lambda : source_output.zero_())
+    return checked_call(source, Tolerance(atol=0.5, rtol=0.01), cuda_graph=False, owners=locals())

@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.routing.mqa_logits import fp8_mqa_logits
+from intent.examples.kernels.routing.mqa_logits import fp8_mqa_logits
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (queries, keys, heads, dimension) = (256, 4096, 32, 128)
@@ -16,4 +16,4 @@ def prepare(context):
     key_end = keys - indices % 19
     arguments = (q, kv, kv_scale, head_weight, key_start, key_end)
     (_, generated) = compile_single(context, fp8_mqa_logits, arguments)
-    return Side(generated, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, owners=locals())
+    return checked_call(generated, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, owners=locals())

@@ -6,7 +6,8 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 import torch
 
-from .model import Context, PreparedLaunch, TensorTree
+from intent_bench.implementations.context import Context, TensorTree
+from intent_bench.model import PreparedCall
 
 
 class PipelineStageError(RuntimeError):
@@ -56,41 +57,21 @@ def compile_kernel(
     import intent
     report_stage("generated_compilation")
     try:
-        artifact = intent.compile(
-            definition,
-            target=context.target,
-            compiler=context.compiler,
-            constexprs=constexprs,
-            tuning_config=context.tuning_config,
-            options=context.compile_options,
-        )
+        artifact = context.compile(definition, constexprs=constexprs)
     except intent.CompilationStageError as error:
         raise PipelineStageError(f"generated_{error.stage}", str(error)) from error
-    context.artifacts.append(str(artifact.cache_directory))
     return artifact
 
 
-def prepare_program(program, arguments: tuple[object, ...]) -> PreparedLaunch:
-    """Compile and warm one complete author callable with its owned workspace."""
-    import intent
+def prepare_program(program, arguments: tuple[object, ...]) -> PreparedCall:
+    """Bind a complete author callable without compiling, tuning or executing it."""
     report_stage("generated_launcher_preparation")
     try:
         call = program.prepare(*arguments)
     except Exception as error:
         raise PipelineStageError("generated_launcher_preparation", str(error)) from error
-    report_stage("generated_native_compilation")
-    try:
-        call.compile()
-    except intent.CompilationStageError as error:
-        raise PipelineStageError(f"generated_{error.stage}", str(error)) from error
-    initial_launch(call.launch, side="generated")
-    report_stage("generated_launcher_preparation")
-    try:
-        call.launch()
-    except Exception as error:
-        raise PipelineStageError("generated_launcher_preparation", str(error)) from error
     report_stage("adapter_preparation")
-    return PreparedLaunch(launch=call.launch, outputs=call.result)
+    return PreparedCall(launch=call.launch, result=call.result, compile=call.compile)
 
 
 def compile_single(
@@ -99,17 +80,18 @@ def compile_single(
     arguments: tuple[object, ...],
     *,
     constexprs: dict[str, object] | None = None,
-) -> tuple[object, PreparedLaunch]:
+) -> tuple[object, PreparedCall]:
     artifact = compile_kernel(context, definition, constexprs=constexprs)
-    return artifact, prepare_program(artifact, arguments)
+    call = prepare_program(artifact, arguments)
+    context.prepared_calls.append(call)
+    return artifact, call
 
 
-def functional_launch(function) -> PreparedLaunch:
+def functional_launch(function) -> PreparedCall:
     state: dict[str, TensorTree] = {}
 
     def launch():
         state["output"] = function()
         return state["output"]
 
-    initial_launch(launch, side="source")
-    return PreparedLaunch(launch=launch, outputs=lambda: state["output"])
+    return PreparedCall(launch=launch, result=lambda: state["output"])

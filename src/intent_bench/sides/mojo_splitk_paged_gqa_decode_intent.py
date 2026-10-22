@@ -1,11 +1,13 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.streaming.paged_attention import splitk_paged_gqa_decode_partials
-from kernels.streaming.splitk_reduce import splitk_attention_weighted_sum_reduce
+from intent.examples.kernels.streaming.paged_attention import splitk_paged_gqa_decode_partials
+from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_weighted_sum_reduce
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.prepared import IntentSequence
 
 def prepare(context):
     _inlined_paged_gqa_split_q = torch.randn((16, 32, 128), dtype=torch.float16)
@@ -16,8 +18,8 @@ def prepare(context):
     _inlined_paged_gqa_split_splits = torch.arange(0, 8193, 64, dtype=torch.int32)
     _inlined_paged_gqa_split_lengths = torch.full((16,), 8192, dtype=torch.int32)
     _inlined_paged_gqa_split_arguments = (_inlined_paged_gqa_split_q, _inlined_paged_gqa_split_key, _inlined_paged_gqa_split_value, _inlined_paged_gqa_split_offsets, _inlined_paged_gqa_split_indices, _inlined_paged_gqa_split_lengths, _inlined_paged_gqa_split_splits, 128 ** (-0.5))
-    _inlined_paged_gqa_split_partials = intent.compile(splitk_paged_gqa_decode_partials, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options, constexprs={'PAGE_SIZE': 16, 'HEAD_GROUP': 4, 'SPLITS': 8})
-    _inlined_paged_gqa_split_reduction = intent.compile(splitk_attention_weighted_sum_reduce, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    _inlined_paged_gqa_split_partials = context.compile(splitk_paged_gqa_decode_partials, constexprs={'PAGE_SIZE': 16, 'HEAD_GROUP': 4, 'SPLITS': 8})
+    _inlined_paged_gqa_split_reduction = context.compile(splitk_attention_weighted_sum_reduce)
     (_inlined_paged_gqa_split_generated, _inlined_paged_gqa_split_source) = ({}, {})
 
     def _inlined_paged_gqa_split_launch():
@@ -28,7 +30,7 @@ def prepare(context):
 
         def _inlined_paged_gqa_split_reference():
             _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime.paged_gqa_decode_bf16(*_inlined_paged_gqa_split_arguments)
-        _inlined_paged_gqa_split_source_launch = PreparedLaunch(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
+        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
         (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
         _inlined_paged_gqa_split_note = '原B16/HQ32/HK8/K8192/D128/page16/split8 f16输入，BF16 partial+weighted BF16 reduce完整调用含workspace分配；CPU参考page-table attention f32概率后直接转BF16，原容差。'
     else:
@@ -36,7 +38,12 @@ def prepare(context):
 
         def _inlined_paged_gqa_split_reference():
             _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime._paged_gqa_decode(_inlined_paged_gqa_split_q, _inlined_paged_gqa_split_key, _inlined_paged_gqa_split_value, _inlined_paged_gqa_split_offsets, _inlined_paged_gqa_split_indices, _inlined_paged_gqa_split_lengths, 128 ** (-0.5)).half()
-        _inlined_paged_gqa_split_source_launch = PreparedLaunch(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
+        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
         (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
         _inlined_paged_gqa_split_note = 'BF16 partials with f16 final reduction; complete page-table attention checked against independent f32 CPU reference, preserving the existing BF16-partial tolerance.'
-    return Side(PreparedLaunch(_inlined_paged_gqa_split_launch, lambda : _inlined_paged_gqa_split_generated['output']), _inlined_paged_gqa_split_tolerance, cuda_graph=False, status=_inlined_paged_gqa_split_status, device_type='cpu', note=_inlined_paged_gqa_split_note, owners=locals())
+    sequence = IntentSequence()
+    lse, partial = sequence.add(_inlined_paged_gqa_split_partials, *_inlined_paged_gqa_split_arguments)
+    output = sequence.add(_inlined_paged_gqa_split_reduction, partial, lse)
+    call = sequence.prepared(lambda: output, host_run=_inlined_paged_gqa_split_launch,
+                             host_result=lambda: _inlined_paged_gqa_split_generated['output'])
+    return checked_call(call, _inlined_paged_gqa_split_tolerance, status=_inlined_paged_gqa_split_status, device_type='cpu', note='Prepared split-K paged GQA; original BF16 partial+weighted reduction and output contract.', owners=locals())

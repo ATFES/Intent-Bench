@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -23,4 +23,4 @@ def prepare(context):
         output = source_module.tile_sparse_mla(q_source, k_source, v_source, source_indices, qpe_source, kpe_source, is_causal=True, scaling=scale)
         return output[0].permute(1, 0, 2)
     source = functional_launch(source_call)
-    return Side(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())
+    return checked_call(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())

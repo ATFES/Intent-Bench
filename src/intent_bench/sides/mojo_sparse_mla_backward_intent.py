@@ -1,10 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.backward.sparse_mla import sparse_mla_backward_delta, sparse_mla_backward_main, sparse_mla_grad_kv_cast
+from intent.examples.kernels.backward.sparse_mla import sparse_mla_backward_delta, sparse_mla_backward_main, sparse_mla_grad_kv_cast
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, sequence, key_value_sequence) = (1, 4096, 8192)
@@ -21,10 +22,10 @@ def prepare(context):
     scale = query_dimension ** (-0.5)
     runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference_sparse_mla_backward')
     (output, lse, source_backward) = runtime.prepare_sparse_mla_backward(query, key_value, grad_output, selected_indices, scale)
-    delta_artifact = intent.compile(sparse_mla_backward_delta, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    delta_artifact = context.compile(sparse_mla_backward_delta)
     constexprs = {'HEAD_GROUP': heads // key_value_groups}
-    main_artifact = intent.compile(sparse_mla_backward_main, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options, constexprs=constexprs)
-    cast_artifact = intent.compile(sparse_mla_grad_kv_cast, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    main_artifact = context.compile(sparse_mla_backward_main, constexprs=constexprs)
+    cast_artifact = context.compile(sparse_mla_grad_kv_cast)
     delta = torch.empty((batch, sequence, heads), dtype=torch.float32)
     grad_key_value = torch.zeros_like(key_value, dtype=torch.float32)
     grad_query = torch.empty_like(query)
@@ -37,4 +38,4 @@ def prepare(context):
         main_artifact(query, key_value, grad_output, selected_indices, lse, delta, grad_key_value, grad_query, scale)
         cast_artifact(grad_key_value, grad_key_value_bf16)
         generated_state['output'] = (grad_query, grad_key_value_bf16)
-    return Side(PreparedLaunch(generated_launch, lambda : generated_state['output']), (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；计入 f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())
+    return checked_call(PreparedCall(generated_launch, lambda : generated_state['output']), (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；计入 f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())

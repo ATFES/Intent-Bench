@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     tokens = hidden = projection = 4096
@@ -19,8 +19,8 @@ def prepare(context):
     def launch():
         source_module._launch_triton_matmul(a, b, c, [tokens], [projection] * 3, [hidden])
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : source_outputs)
-    return Side(source, Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : source_outputs)
+    return checked_call(source, Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, owners=locals())
 
 def _runtime(context, path, name):
     return load_module(context.project_root / path, name)

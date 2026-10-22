@@ -1,11 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from triton.runtime.errors import OutOfResources
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import ComparisonUnavailable
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import ComparisonUnavailable
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, heads, sequence, dimension) = (2, 16, 2048, 128)
@@ -21,8 +21,8 @@ def prepare(context):
     def source_launch():
         source_module.flash(q, k, v, source_output, source_lse)
     _prepare_source_launch(source_launch)
-    source = PreparedLaunch(source_launch, lambda : source_output)
-    return Side(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='source launch uses num_stages=1 and num_warps=4.', owners=locals())
+    source = PreparedCall(source_launch, lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='source launch uses num_stages=1 and num_warps=4.', owners=locals())
 
 def _prepare_source_launch(launch):
     try:

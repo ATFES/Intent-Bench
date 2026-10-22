@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     x = torch.randn((2048, 16384), dtype=torch.bfloat16)
@@ -13,4 +14,4 @@ def prepare(context):
 
     def reference():
         source['output'] = runtime.mhc_gemm_rms_scale(x, weight, bias)
-    return Side(PreparedLaunch(reference, lambda : source['output']), (Tolerance(atol=0.05, rtol=0.02), Tolerance(atol=0.005, rtol=0.001)), cuda_graph=False, device_type='cpu', note='既有 T2048/H4096/streams4/P16 bf16 MHC GEMM+RMS；partial/finalize 两 kernel 完整 host 调用，含中间及输出分配；PyTorch CPU reference，保留 split16、bf16 mixed、f32 rms 与原容差，单 NUMA 8 核。', owners=locals())
+    return checked_call(PreparedCall(reference, lambda : source['output']), (Tolerance(atol=0.05, rtol=0.02), Tolerance(atol=0.005, rtol=0.001)), cuda_graph=False, device_type='cpu', note='既有 T2048/H4096/streams4/P16 bf16 MHC GEMM+RMS；partial/finalize 两 kernel 完整 host 调用，含中间及输出分配；PyTorch CPU reference，保留 split16、bf16 mixed、f32 rms 与原容差，单 NUMA 8 核。', owners=locals())

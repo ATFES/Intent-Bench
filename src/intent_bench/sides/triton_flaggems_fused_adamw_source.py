@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.references.torch_ops import adamw
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     elements = 8 * 1024 * 1024
@@ -16,5 +16,5 @@ def prepare(context):
     source_first = initial_first.clone()
     source_second = initial_second.clone()
     source_arguments = (gradient, source_parameter, source_first, source_second, *scalars)
-    source = PreparedLaunch(launch=lambda : adamw(*source_arguments), outputs=lambda : (source_parameter, source_first, source_second), prepare=lambda : (source_parameter.copy_(initial_parameter), source_first.copy_(initial_first), source_second.copy_(initial_second)))
-    return Side(source, Tolerance(atol=1e-05, rtol=1e-05), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=lambda : adamw(*source_arguments), result=lambda : (source_parameter, source_first, source_second), reset=lambda : (source_parameter.copy_(initial_parameter), source_first.copy_(initial_first), source_second.copy_(initial_second)))
+    return checked_call(source, Tolerance(atol=1e-05, rtol=1e-05), cuda_graph=False, owners=locals())

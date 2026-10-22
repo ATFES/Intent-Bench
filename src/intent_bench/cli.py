@@ -1,187 +1,159 @@
-from __future__ import annotations
-
+"""Human entrypoints over the same request service used by Python and MCP."""
 import argparse
-from dataclasses import asdict, replace
+from dataclasses import replace
 import json
 from pathlib import Path
 import sys
 
-from .engine import benchmark
-from .loading import load_workload as workload
-from .model import Case, Environment, Measurement
-from . import results
-
-
-
+def _assignment(text):
+    key, separator, value = text.partition("=")
+    if not key or not separator:
+        raise ValueError("expected NAME=JSON")
+    return key, json.loads(value)
 
 def main(argv=None):
-    arguments=list(argv) if argv is not None else sys.argv[1:]
-    if arguments and arguments[0]=='agent':
+    arguments = list(argv) if argv is not None else sys.argv[1:]
+    if arguments[:2] == ["experiment","agent"]:
         from .agent import main as agent_main
-        return agent_main(arguments[1:])
-    parser = argparse.ArgumentParser(prog="intent-bench", description="Compare operator implementations on shared workloads")
-    sub = parser.add_subparsers(dest="command", required=True)
-    listing = sub.add_parser("list", help="Discover workloads without loading compiler or device SDKs")
-    listing.add_argument("--json", action="store_true")
-    describe = sub.add_parser("describe", help="Show a workload's implementations, cases and parameters")
+        return agent_main(arguments[2:])
+    if arguments[:2] == ["experiment","paper"]:
+        from .experiment import paper
+        return paper(arguments[2:])
+    parser = argparse.ArgumentParser(prog="intent-bench")
+    commands = parser.add_subparsers(dest="command",required=True)
+    listing = commands.add_parser("list",help="Discover registered workloads, programs and environments")
+    listing.add_argument("--kind",choices=("workloads","implementations","programs","suites","environments"),default="workloads")
+    listing.add_argument("--json",action="store_true")
+    describe = commands.add_parser("describe")
     describe.add_argument("workload")
-    environments = sub.add_parser("env", help="List or inspect named execution environments")
-    environments.add_argument("action", choices=("list","show"))
-    environments.add_argument("name", nargs="?")
-    plugin = sub.add_parser("plugin", help="Export the IntentDSL plugin with this Python environment")
+    environment = commands.add_parser("env")
+    environment.add_argument("action",choices=("list","show"))
+    environment.add_argument("name",nargs="?")
+    plugin = commands.add_parser("plugin")
     plugin.add_argument("--output",type=Path,required=True)
-    plugin.add_argument("--intent-root",type=Path)
-    run = sub.add_parser("run", help="Measure a built-in workload or file.py:bench")
+    comparison = commands.add_parser("compare")
+    comparison.add_argument("before")
+    comparison.add_argument("after")
+    comparison.add_argument("--max-regression",type=float)
+    report = commands.add_parser("report")
+    report.add_argument("run")
+    report.add_argument("--output",type=Path)
+    experiment = commands.add_parser("experiment",help="Explicit paper and Agent protocols")
+    experiment.add_argument("protocol",choices=("agent","paper"))
+    run = commands.add_parser("run")
     run.add_argument("workload",nargs="?")
     run.add_argument("--suite",choices=("gpu","cpu","rvv","mlu","all"))
-    run.add_argument("--timeout",type=float,default=300,help="Per-workload subprocess timeout for a suite")
-    run.add_argument("--check-only",action="store_true",help="Check compilation/execution/correctness without measuring performance")
-    run.add_argument("--jobs",type=int,default=1,help="Concurrent suite checks; performance runs use one worker")
-    run.add_argument("--resume",action="store_true",help="Explicitly reuse completed cases from this suite output directory")
-    run.add_argument("--impl", action="append", help="Implementation names, comma separated; repeatable")
+    run.add_argument("--impl",action="append")
     run.add_argument("--baseline")
-    run.add_argument("--case", action="append")
-    run.add_argument("--param", action="append", default=[], metavar="NAME=JSON", help="Override a parameter; a JSON list creates a sweep")
-    run.add_argument("--env", help="Environment name or JSON file")
-    run.add_argument("--device")
-    run.add_argument("--threads", type=int)
-    run.add_argument("--seed", type=int, default=0)
-    run.add_argument("--samples", type=int, help="Override automatic sample count")
-    run.add_argument("--warmup", type=int, help="Override automatic warmup count")
-    run.add_argument("--cache", choices=("flush", "warm"), default="flush", help="CUDA L2 policy (default: flush before each sample)")
-    run.add_argument("--throughput", choices=("tflops", "gbps"), help="Show one optional throughput metric when the workload defines it")
-    run.add_argument("--timing", default="auto", choices=("auto","host","cuda_event","cuda_graph","native"))
-    run.add_argument("--scope", default="prepared_call", choices=("prepared_call","host_call"))
-    run.add_argument("--intent-root", type=Path)
-    run.add_argument("--compiler")
-    run.add_argument("--option", action="append", default=[], metavar="NAME=JSON")
-    run.add_argument("--output", type=Path)
-    comparison = sub.add_parser("compare", help="Compare two result runs")
-    comparison.add_argument("before"); comparison.add_argument("after")
-    comparison.add_argument("--max-regression", type=float, help="Optional fractional slowdown limit")
-    report = sub.add_parser("report", help="Render a saved run")
-    report.add_argument("run"); report.add_argument("--output", type=Path)
-    check = sub.add_parser("check", help="Check mainline public programs")
-    check.add_argument("--intent-root", type=Path)
-    check.add_argument("--env", help="Environment name or JSON file")
-    check.add_argument("--device")
-    check.add_argument("--threads", type=int)
-    check.add_argument("--option", action="append", default=[], metavar="NAME=JSON")
-    check.add_argument("--suite", choices=("mainline",), default="mainline")
-    check.add_argument("--target", default="triton")
-    check.add_argument("--program", action="append")
-    check.add_argument("--stage", choices=("source","native","run"), default="run")
-    check.add_argument("--compiler")
-    check.add_argument("--output", type=Path)
-    args = parser.parse_args(argv)
+    run.add_argument("--case",action="append")
+    run.add_argument("--param",action="append",default=[])
+    run.add_argument("--check-only",action="store_true")
+    run.add_argument("--jobs",type=int,default=1)
+    run.add_argument("--samples",type=int)
+    run.add_argument("--warmup",type=int)
+    run.add_argument("--cache",choices=("flush","warm"),default="flush")
+    run.add_argument("--throughput",choices=("tflops","gbps"))
+    run.add_argument("--timing",choices=("auto","host","cuda_event","cuda_graph","native"),default="auto")
+    run.add_argument("--scope",choices=("operator","host_call"),default="operator")
+    check = commands.add_parser("check")
+    check.add_argument("--suite",choices=("mainline",),default="mainline")
+    check.add_argument("--backend",required=True,choices=("triton","cutile","mojo","weft","bangc"))
+    check.add_argument("--program",action="append")
+    check.add_argument("--stage",choices=("source","native","run"),default="run")
+    for command in (run,check):
+        command.add_argument("--timeout",type=float,default=300)
+        command.add_argument("--env")
+        command.add_argument("--device")
+        command.add_argument("--threads",type=int)
+        command.add_argument("--seed",type=int,default=0)
+        command.add_argument("--compiler")
+        command.add_argument("--intent-root",type=Path,help="Verify an installed editable checkout; never modifies imports")
+        command.add_argument("--option",action="append",default=[])
+        command.add_argument("--output",type=Path)
+        command.add_argument("--output-root",type=Path)
+    args = parser.parse_args(arguments)
+    from . import results
     if args.command == "plugin":
         from .plugins import export_plugin
-        print(json.dumps(export_plugin(args.output,args.intent_root),indent=2));return 0
+        print(json.dumps(export_plugin(args.output),indent=2))
+        return 0
     if args.command == "describe":
         from .discovery import describe_workload
-        print(json.dumps(describe_workload(args.workload),indent=2));return 0
+        print(json.dumps(describe_workload(args.workload),indent=2))
+        return 0
     if args.command == "env":
         from .environments import list_environments,load_environment,describe_environment
-        if args.action == "show" and not args.name:parser.error("env show requires a name or JSON file")
-        value=list_environments() if args.action=="list" else describe_environment(load_environment(args.name))
-        print(json.dumps(value,indent=2));return 0
+        if args.action == "show" and not args.name:
+            parser.error("env show requires a name")
+        value = list_environments() if args.action == "list" else describe_environment(load_environment(args.name))
+        print(json.dumps(value,indent=2))
+        return 0
     if args.command == "list":
-        from .discovery import list_workloads
-        entries=list_workloads()
-        print(json.dumps(entries, indent=2) if args.json else "\n".join(
-            f"{x['name']}: {', '.join(x['implementations'])}" for x in entries))
+        from .discovery import list_workloads,describe_implementation
+        if args.kind == "workloads":
+            value = list_workloads()
+        elif args.kind == "implementations":
+            value = [describe_implementation(name) for name in sorted({name for row in list_workloads() for name in row["implementations"]})]
+        elif args.kind == "programs":
+            from intent.examples import PROGRAMS
+            value = [{"name":name,"description":description} for name,(_,description) in PROGRAMS.items()]
+        elif args.kind == "environments":
+            from .environments import list_environments
+            value = list_environments()
+        else:
+            from .suites import SUITES
+            value = [{"name":name,"providers":sorted(providers)} for name,providers in SUITES.items()]
+        print(json.dumps(value,indent=2) if args.json else "\n".join(str(row) for row in value))
         return 0
     if args.command == "compare":
         changes = results.compare(results.read(args.before),results.read(args.after))
         print(results.comparison_table(changes))
-        return int(args.max_regression is not None and any(
-            r["speedup"] is not None and 1/r["speedup"] > 1+args.max_regression for r in changes))
+        return int(args.max_regression is not None and any(r["speedup"] is not None and 1/r["speedup"]>1+args.max_regression for r in changes))
     if args.command == "report":
-        source=Path(args.run)
-        output = args.output or (source/"report.html" if source.is_dir() else source.with_suffix('.html'))
-        results.write_html(results.read(args.run),output,source=source/'results.json' if source.is_dir() else source)
-        print(output.resolve()); return 0
-    if args.command == "check":
-        env=_environment(args)
-        from .execution import dispatch_cli
-        dispatched=dispatch_cli(arguments,args,env)
-        if dispatched is not None:return dispatched
-        if args.intent_root is None:parser.error("check requires --intent-root or intent_root in --env")
-        from .mainline import check_programs
-        return check_programs(args)
-    env=_environment(args)
-    from .execution import dispatch_cli
-    dispatched=dispatch_cli(arguments,args,env)
-    if dispatched is not None:return dispatched
-    if args.suite:
-        if args.workload:parser.error("choose a workload or --suite")
-        if args.jobs<1:parser.error('jobs must be positive')
-        if args.jobs>1 and not args.check_only:parser.error('parallel suite workers require --check-only; performance runs are serialized')
-        from .suites import run_suite
-        return run_suite(args)
-    if not args.workload:parser.error("run requires a workload or --suite")
-    try:
-        bench = workload(args.workload)
-    except ImportError as error:
-        from .model import Result
-        from .catalog import catalog
-        entry=next((row for row in catalog() if row['name']==args.workload),{})
-        selected=[name for group in args.impl for name in group.split(',')] if args.impl else entry.get('implementations',['requested'])
-        rows=[Result(args.workload,entry.get('family','custom'),case,{},name,status='environment_missing',stage='load',
-                     device=args.device,error=f'{type(error).__name__}: {error}')
-              for case in (args.case or [entry.get('case','load')]) for name in selected]
-        print(results.table(rows))
-        directory=results.save(rows,args.output,command=['intent-bench',*arguments])
-        print(f'Results: {directory.resolve()}')
-        return 1
-    if args.case:
-        known = {c.name for c in bench.cases}
-        if set(args.case)-known:
-            parser.error(f"unknown cases: {set(args.case)-known}")
-        bench = replace(bench,cases=[c for c in bench.cases if c.name in args.case])
-    if args.param:
-        from itertools import product
-        values = dict(_assignment(text) for text in args.param)
-        if bench.parameter_keys is not None and set(values)-set(bench.parameter_keys):
-            parser.error("this workload does not expose those parameters; use an explicit custom workload for a different input contract")
-        keys = list(values)
-        cases = []
-        for base in bench.cases:
-            for items in product(*(v if isinstance(v,list) else [v] for v in values.values())):
-                parameters = {**base.parameters,**dict(zip(keys,items))}
-                name = ",".join(f"{k}={v}" for k,v in parameters.items())
-                if not any(c.name==name for c in cases):
-                    cases.append(Case(name,parameters))
-        bench = replace(bench,cases=cases)
-    selected = [name for group in args.impl for name in group.split(",")] if args.impl else None
-    if selected is not None:
-        unknown=set(selected)-bench.implementations.keys()
-        if unknown: parser.error(f"unknown implementations: {sorted(unknown)}")
-    settings=Measurement(args.timing,args.samples,args.warmup,args.scope,not args.check_only,
-                         cache=args.cache,throughput=args.throughput)
-    rows=benchmark(bench,selected,environment=env,measurement=settings,baseline=args.baseline,seed=args.seed)
-    print(results.table(rows),flush=True)
-    directory=results.save(rows,args.output,command=["intent-bench",*(argv or sys.argv[1:])])
-    print(f"Results: {directory.resolve()}")
-    return int(any(r.status not in {"passed","unchecked"} for r in rows))
-
-
-def _assignment(text):
-    key,sep,value=text.partition("=")
-    if not key or not sep:
-        raise ValueError("expected NAME=JSON")
-    return key,json.loads(value)
-
-
-def _environment(args):
+        path = Path(args.run)
+        output = args.output or (path/"report.html" if path.is_dir() else path.with_suffix(".html"))
+        results.write_html(results.read(path),output,source=path/"results.json" if path.is_dir() else path)
+        print(output.resolve())
+        return 0
     from .environments import load_environment
-    value=load_environment(args.env,device=args.device,threads=args.threads,
-                           intent_root=args.intent_root,compiler=args.compiler,
-                           options=dict(_assignment(text) for text in args.option))
-    args.device,args.threads,args.intent_root,args.compiler=value.device,value.threads,value.intent_root,value.compiler
-    args.option=[key+'='+json.dumps(item) for key,item in value.options.items()]
-    return value
-
+    env = load_environment(args.env,device=args.device,threads=args.threads,compiler=args.compiler,
+                           intent_root=args.intent_root,output_root=args.output_root,
+                           options=dict(_assignment(item) for item in args.option))
+    from .request import RunRequest
+    from .service import run as execute
+    from .model import Measurement
+    if args.command == "check":
+        from intent.examples import PROGRAMS
+        names = args.program or tuple(PROGRAMS)
+        if set(names)-PROGRAMS.keys():
+            parser.error("unknown program")
+        code = 0
+        for name in names:
+            output = args.output/name if args.output else None
+            outcome = execute(RunRequest(f"mainline/{args.backend}/{name}",("intent:"+args.backend,),
+                environment=env,measurement=Measurement(enabled=False),output=output,seed=args.seed,
+                kind="program",stage=args.stage,timeout=args.timeout))
+            print(results.table(outcome.results),flush=True)
+            print(f"Results: {outcome.directory}")
+            code |= outcome.exit_code
+        return code
+    selected = tuple(name for group in args.impl or () for name in group.split(","))
+    settings = Measurement(method=args.timing,samples=args.samples,warmup=args.warmup,scope=args.scope,
+                           enabled=not args.check_only,cache=args.cache,throughput=args.throughput)
+    if args.suite:
+        if args.workload:
+            parser.error("choose a workload or a suite")
+        if args.jobs != 1 and not args.check_only:
+            parser.error("performance runs are serial")
+        from .suites import run_suite
+        return run_suite(args,env,settings,selected)
+    if not args.workload or not selected:
+        parser.error("run requires a workload and explicit --impl")
+    outcome = execute(RunRequest(args.workload,selected,env,settings,args.baseline,
+        tuple(args.case or ()),dict(_assignment(item) for item in args.param),args.seed,args.output,timeout=args.timeout))
+    print(results.table(outcome.results))
+    print(f"Results: {outcome.directory}")
+    return outcome.exit_code
 
 if __name__ == "__main__":
     raise SystemExit(main())

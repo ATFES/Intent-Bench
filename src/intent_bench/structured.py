@@ -62,16 +62,17 @@ def cpu_workload(row,factory):
         intent=intent_environment(env)
         definition=load(data.kernel)
         constexprs={key:value.resolve() if isinstance(value,KernelSymbol) else value for key,value in (data.constexprs or {}).items()}
-        artifact=intent.compile(definition,target=intent.MojoTarget(workers=env.threads),compiler=env.compiler,constexprs=constexprs or None)
+        from .implementations.intent import make_kernel
+        artifact=make_kernel(definition,env,'mojo',constexprs=constexprs or None)
         call=artifact.prepare(*data.arguments)
         initial=clone(data.arguments)
         host_state={}
-        from .implementations.intent_mojo_timer import sample
+        from .implementations.native_sampling import sample
         reset=lambda:restore(data.arguments,initial)
         def host_run():host_state['output']=artifact.run(*data.arguments)
         return PreparedCall(call.launch,lambda:observed(call.result(),data),compile=call.compile,reset=reset,
                             native_measure=lambda settings:sample(call,settings,reset),timing='cpu_native_monotonic',
-                            metadata={'artifact':str(artifact.cache_directory)},host_run=host_run,
+                            metadata={'artifacts':[str(a.cache_directory) for a in artifact.artifacts]},host_run=host_run,
                             host_result=lambda:observed(host_state['output'],data))
     def native_advanced(case,data,env):
         from .implementations.advanced_mojo import prepare

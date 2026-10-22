@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, hidden, width) = (32, 4096, 4)
@@ -21,5 +21,5 @@ def prepare(context):
         state['output'] = output
         state['updated'] = updated
     source_launch()
-    source = PreparedLaunch(launch=source_launch, outputs=lambda : (state['output'], state['updated']), prepare=lambda : source_state.copy_(initial))
-    return Side(source, (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=source_launch, result=lambda : (state['output'], state['updated']), reset=lambda : source_state.copy_(initial))
+    return checked_call(source, (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())

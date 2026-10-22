@@ -1,11 +1,18 @@
 import json
 import sys
 import numpy as np
+import pytest
 from intent_bench import (Case, Environment, ExpressionGap, Implementation, Measurement,
-                         PreparedCall, Workload, benchmark, callable_implementation)
+                         PreparedCall, Workload, callable_implementation)
+from intent_bench.engine import benchmark
 from intent_bench.loading import load
 from intent_bench.results import compare, read, save
 from intent_bench.trees import clone
+
+
+@pytest.fixture(autouse=True)
+def output_directory(tmp_path, monkeypatch):
+    monkeypatch.setenv("INTENT_BENCH_OUTPUT_ROOT", str(tmp_path))
 
 
 def test_custom_mutation_and_repeated_measurements(tmp_path):
@@ -51,11 +58,11 @@ def test_cross_scope_comparison_not_merged(tmp_path):
     assert sum(r["change"]=="added" for r in changes)==1
 
 
-def test_gpu_graph_refuses_to_change_reset_contract():
+def test_gpu_graph_refuses_to_change_device_or_timing_method():
     from intent_bench.measurement import measure
-    call=PreparedCall(lambda:None,lambda:None,reset=lambda:None,device="cuda:0")
+    call=PreparedCall(lambda:None,lambda:None,reset=lambda:None,device="cpu")
     import pytest
-    with pytest.raises(ValueError,match="restore mutable"):
+    with pytest.raises(ValueError,match="requires a CUDA"):
         measure(call,Measurement("cuda_graph",1,0))
 
 

@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (source_rows, selected_rows, hidden) = (65536, 32768, 4096)
@@ -16,8 +16,8 @@ def prepare(context):
     def launch():
         source_module.index_select_cat_fwd(source_output, source_tensor, indices)
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : source_output)
-    return Side(source, Tolerance(atol=0.0), cuda_graph=True, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.0), cuda_graph=True, owners=locals())
 
 def _runtime(context, path, name):
     return load_module(context.project_root / path, name)

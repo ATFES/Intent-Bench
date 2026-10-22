@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import cuda.tile as ct
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -21,4 +21,4 @@ def prepare(context):
     def launch_source():
         ct.launch(torch.cuda.current_stream(), (column_blocks, row_blocks, 1), source_kernel, (x, source_scales, source_packed, global_scale, column_blocks, row_blocks, columns, rows, False, False))
         return (source_packed, source_scales)
-    return Side(functional_launch(launch_source), Tolerance(atol=0.0), cuda_graph=True, note='同算法、group16；CUDA Graph 重放下的算子 GPU 执行延迟，不含编译、调优与输出分配', owners=locals())
+    return checked_call(functional_launch(launch_source), Tolerance(atol=0.0), cuda_graph=True, note='同算法、group16；CUDA Graph 重放下的算子 GPU 执行延迟，不含编译、调优与输出分配', owners=locals())

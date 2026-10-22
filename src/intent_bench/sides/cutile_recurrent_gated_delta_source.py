@@ -1,8 +1,8 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -14,4 +14,4 @@ def prepare(context):
     beta = torch.sigmoid(torch.randn_like(gate))
     source_module = tilegym_source(context, 'corpus/gpu/baselines/cutile/tilegym/scan/gated_delta_recurrent/recurrent_gated_delta_rule.py', 'recurrent_gated_delta', needs_utils=True)
     source = functional_launch(lambda : source_module.recurrent_gated_delta_rule(query, key, value, gate, beta, initial_state=None, output_final_state=True, compiler_timeout=context.compiler_timeout_seconds))
-    return Side(source, (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, owners=locals())
+    return checked_call(source, (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, owners=locals())

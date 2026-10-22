@@ -1,38 +1,35 @@
-import os
-from pathlib import Path
-import shutil
-import tempfile
+"""Use the installed product on the executing RISC-V host."""
 import numpy as np
+from ..loading import load
+from ..model import PreparedCall
+from .intent import make_kernel
+from .native_sampling import sample
 
-from ..loading import intent_environment,load
-from ..model import EnvironmentUnavailable,PreparedCall
-from ..execution import WorkerSession
-from .weft_source import deployment
 
-
-def prepare(reference,args,env,*,ime=False):
-    intent=intent_environment(env)
-    from intent.runtime.weft import TargetProfile,export_artifact
-    profile=deployment(env,ime)
-    target=intent.WeftTarget(vector_bits=profile['vlen_bits'],workers=env.threads,
-                             matrix_extension=profile.get('matrix_extension'))
-    program=intent.generate(load(reference),target=target,compiler=env.compiler)
-    compiler=env.options.get('weft_compiler') or os.environ.get('INTENT_WEFT_COMPILER') or shutil.which('weft-compile')
-    if not compiler:raise EnvironmentUnavailable('select --option weft_compiler="/path/to/weft-compile"')
-    root=Path(tempfile.mkdtemp(prefix='intent-bench-weft-'));export=root/'program'
-    try:
-        export_artifact(program,export,compiler=compiler,profile=TargetProfile.from_deployment(profile))
-        arrays=[];arguments=[]
-        for value in args:
-            if isinstance(value,np.ndarray):arguments.append({'input':len(arrays)});arrays.append(value)
-            else:arguments.append(value)
-        native=Path(__file__).parents[1]/'native'
-        session=WorkerSession(env,'weft_intent_worker.py',[native/'weft_intent_worker.py',native/'cnnl_worker.py',
-            export,Path(intent.__file__).parent],{'profile':profile,'arguments':arguments},arrays)
-    finally:shutil.rmtree(root)
-    metadata=session.metadata()
+def prepare(reference, args, env, *, ime=False):
+    from intent.runtime.weft import Buffer
+    from intent.examples.programs.inputs import numpy_dtype
+    dtypes = {str(numpy_dtype(name)): name for name in
+              ("bool", "u8", "i8", "u16", "i16", "u32", "i32", "u64", "i64", "f16", "f32", "f64")}
+    arrays = [value for value in args if isinstance(value, np.ndarray)]
+    saved = [value.copy() for value in arrays]
+    arguments = tuple(Buffer(value, shape=value.shape, dtype=dtypes[str(value.dtype)])
+                      if isinstance(value, np.ndarray) else value for value in args)
+    kernel = make_kernel(load(reference), env, "weft")
+    call = kernel.prepare(*arguments)
+    def restore():
+        for value, initial in zip(arrays, saved, strict=True):
+            np.copyto(value, initial)
+    def decode(value):
+        if isinstance(value, tuple):
+            return tuple(decode(item) for item in value)
+        if value is None:
+            return None
+        return np.frombuffer(value.storage, dtype=numpy_dtype(value.dtype)).reshape(value.shape).copy()
+    metadata = {"execution": "local_jit"}
     def measure(settings):
-        metadata['cache_policy']='flush_cpu_64m' if settings.cache=='flush' else 'warm'
-        return session.call('measure',samples=settings.samples,warmup=settings.warmup,cache=settings.cache)
-    return PreparedCall(lambda:session.call('run'),session.result,close=session.close,native_measure=measure,
-                        device=session.device('cpu'),timing='cpu_native_monotonic',metadata=metadata)
+        metadata["cache_policy"] = "flush_cpu_64m" if settings.cache == "flush" else "warm"
+        return sample(call, settings, restore)
+    return PreparedCall(call.launch, lambda: decode(call.result()), reset=restore, compile=call.compile,
+                        close=kernel.close, native_measure=measure, device="cpu",
+                        timing="cpu_native_monotonic", metadata=metadata, owners=(arguments, kernel))

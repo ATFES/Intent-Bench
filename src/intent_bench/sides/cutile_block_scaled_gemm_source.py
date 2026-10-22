@@ -1,8 +1,8 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import official_source
 
 def prepare(context):
@@ -13,4 +13,4 @@ def prepare(context):
     rhs = rhs_rows.T
     rhs_scale = rhs_scale_rows.T
     source = functional_launch(lambda : source_module.cutile_block_scaled_matmul(lhs, lhs_scale, rhs, rhs_scale, compiler_timeout=context.compiler_timeout_seconds))
-    return Side(source, Tolerance(atol=1.0, rtol=0.02), cuda_graph=True, owners=locals())
+    return checked_call(source, Tolerance(atol=1.0, rtol=0.02), cuda_graph=True, owners=locals())

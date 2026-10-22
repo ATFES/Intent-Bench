@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 BLOCK_SIZE = 128
 EXPERTS = 64
 
@@ -14,7 +15,7 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = runtime.moe_align_block_size(source_ids, BLOCK_SIZE, EXPERTS)
-    return Side(PreparedLaunch(source_launch, lambda : _canonical_alignment(*source_state['output'])), tuple((Tolerance(atol=0.0) for _ in range(3))), cuda_graph=False, device_type='cpu', note='既有MoE alignment；T4096、top-k2、E64、block128；完整计数/前缀/散射/标记调用，辅助workspace初始化计入调用，输出为canonical三元组。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : _canonical_alignment(*source_state['output'])), tuple((Tolerance(atol=0.0) for _ in range(3))), cuda_graph=False, device_type='cpu', note='既有MoE alignment；T4096、top-k2、E64、block128；完整计数/前缀/散射/标记调用，辅助workspace初始化计入调用，输出为canonical三元组。', owners=locals())
 
 def _canonical_alignment(sorted_ids, expert_ids, total):
     total_value = int(total.reshape(-1)[0].item())

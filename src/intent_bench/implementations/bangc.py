@@ -1,48 +1,45 @@
-"""An authored Intent sequence, exported to one persistent remote worker."""
-from pathlib import Path
-import json
-import tempfile
-
-from ..model import EnvironmentUnavailable, PreparedCall
-from ..execution import WorkerSession
+"""MLU operator timing over a product-owned queue and prepared calls."""
+import ctypes as C
+import torch
+from ..model import PreparedCall
+from .bangc_sequence import TORCH_DTYPES
 
 
 def prepare_sequence(sequence, outputs):
-    import intent
-    import torch
-    from intent.runtime.bangc import export_artifact
-    from .bangc_sequence import DTYPES
-    env=sequence.context.environment
-    root=Path(tempfile.mkdtemp(prefix='intent-bench-bangc-'))
-    package=root/'program';package.mkdir()
-    buffers={};storage_ids={};steps=[]
-    def describe(value):
-        if not isinstance(value,torch.Tensor):return value
-        storage=value.untyped_storage();key=(str(value.device),storage.data_ptr(),storage.nbytes())
-        if key not in storage_ids:
-            name='buffer'+str(len(storage_ids));storage_ids[key]=name
-            info={'dtype':DTYPES[value.dtype],'elements':storage.nbytes()//value.element_size()}
-            if key not in sequence.allocated_outputs:
-                raw=torch.empty(0,dtype=torch.uint8,device=value.device).set_(storage,0,(storage.nbytes(),),(1,))
-                (package/(name+'.bin')).write_bytes(raw.cpu().numpy().tobytes());info['file']=name+'.bin'
-            buffers[name]=info
-        return {'buffer':storage_ids[key],'shape':list(value.shape),'strides':list(value.stride()),'offset':value.storage_offset()}
-    for index,(program,arguments,interface) in enumerate(sequence.steps):
-        name='kernel'+str(index);export_artifact(program,package/name)
-        steps.append({'artifact':name,'arguments':[describe(arguments[p.name]) for p in interface.parameters]})
-    def output_tree(value):
-        return {'items':[output_tree(item) for item in value]} if isinstance(value,tuple) else describe(value)
-    manifest={'buffers':buffers,'steps':steps,'outputs':output_tree(outputs)}
-    (package/'manifest.json').write_text(json.dumps(manifest))
-    native=Path(__file__).parents[1]/'native'
-    request={'device':env.options.get('device',0),'neuware':env.options.get('neuware','/usr/local/neuware')}
-    try:
-        session=WorkerSession(env,'bangc_worker.py',[native/'bangc_worker.py',native/'cnnl_worker.py',package,Path(intent.__file__).parent],request,())
-    finally:
-        import shutil
-        shutil.rmtree(root)
-    return PreparedCall(lambda:session.call('run'),session.result,close=session.close,
-        native_measure=lambda settings:session.call('measure',samples=settings.samples,warmup=settings.warmup),
-        device=session.device(f"mlu:{request['device']}"),timing='cnrt_notifier',
-        metadata={**session.metadata(),
-                  'scope_note':'Complete authored sequence; transfers and state restoration excluded'})
+    def decode(value):
+        if isinstance(value, tuple):
+            return tuple(decode(item) for item in value)
+        if value is None:
+            return None
+        return torch.frombuffer(bytearray(value.to_host()), dtype=TORCH_DTYPES[value.dtype]).reshape(value.shape).clone()
+
+    def measure(settings):
+        queue = sequence.queue
+        runtime = queue.runtime
+        notifiers = []
+        try:
+            for _ in range(2):
+                notifier = C.c_void_p()
+                runtime.invoke("cnrtNotifierCreate", C.byref(notifier))
+                notifiers.append(notifier)
+            for _ in range(settings.warmup):
+                sequence.reset()
+                sequence.launch()
+            times = []
+            for _ in range(settings.samples):
+                sequence.reset()
+                runtime.invoke("cnrtPlaceNotifier", notifiers[0], queue.handle)
+                sequence.enqueue()
+                runtime.invoke("cnrtPlaceNotifier", notifiers[1], queue.handle)
+                queue.synchronize()
+                elapsed = C.c_float()
+                runtime.invoke("cnrtNotifierDuration", *notifiers, C.byref(elapsed))
+                times.append(elapsed.value*1e-3)
+            return times
+        finally:
+            for notifier in notifiers:
+                runtime.invoke("cnrtNotifierDestroy", notifier)
+    return PreparedCall(sequence.launch, lambda:decode(outputs), reset=sequence.reset,
+                        compile=sequence.compile, close=sequence.close, native_measure=measure,
+                        device=f"mlu:{sequence.device}", timing="cnrt_notifier", owners=sequence,
+                        metadata={"execution":"local_jit", "scope_note":"Complete authored sequence; transfers and state restoration excluded"})

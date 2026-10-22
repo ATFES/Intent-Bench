@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 ROWS = 64
 VALUES = 4096
 
@@ -19,4 +20,4 @@ def prepare(context):
 
     def source_outputs():
         return (*source_state['output'], source_lengths)
-    return Side(PreparedLaunch(source_launch, source_outputs, prepare=lambda : source_lengths.zero_()), tuple((Tolerance(atol=0.0) for _ in range(4))), cuda_graph=False, device_type='cpu', note='既有 unique-consecutive row-wise run-length encoding；输入/输出均 i32，生成端与 CPU reference 使用独立 InOut run_lengths。', owners=locals())
+    return checked_call(PreparedCall(source_launch, source_outputs, reset=lambda : source_lengths.zero_()), tuple((Tolerance(atol=0.0) for _ in range(4))), cuda_graph=False, device_type='cpu', note='既有 unique-consecutive row-wise run-length encoding；输入/输出均 i32，生成端与 CPU reference 使用独立 InOut run_lengths。', owners=locals())

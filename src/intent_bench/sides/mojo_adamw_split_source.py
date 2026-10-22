@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     gradient = torch.randn((8 * 1024 * 1024,), dtype=torch.float32) * 0.01
@@ -18,5 +19,5 @@ def prepare(context):
         def prepare():
             for (destination, source) in zip(state, initial):
                 destination.copy_(source)
-        return PreparedLaunch(lambda : function(*state), lambda : state, prepare=prepare)
-    return Side(side(reference), Tolerance(atol=2e-06), cuda_graph=False, device_type='cpu', note='原N8388608 f32两阶段AdamW变体输入和2e-6容差；moments后更新parameter，variant接收inverse bias10/1000，除法CPUreference接收对应correction0.1/0.001；独立状态恢复不计时，计两kernel完整host调用。', owners=locals())
+        return PreparedCall(lambda : function(*state), lambda : state, reset=prepare)
+    return checked_call(side(reference), Tolerance(atol=2e-06), cuda_graph=False, device_type='cpu', note='原N8388608 f32两阶段AdamW变体输入和2e-6容差；moments后更新parameter，variant接收inverse bias10/1000，除法CPUreference接收对应correction0.1/0.001；独立状态恢复不计时，计两kernel完整host调用。', owners=locals())

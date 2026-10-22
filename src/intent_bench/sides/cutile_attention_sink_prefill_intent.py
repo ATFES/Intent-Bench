@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
-from kernels.streaming.attention_specialized import attention_sink_prefill
+from intent.examples.kernels.streaming.attention_specialized import attention_sink_prefill
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, sequence, key_heads, repeats, dimension) = (1, 4096, 8, 4, 128)
@@ -15,4 +15,4 @@ def prepare(context):
     sinks = torch.randn((query_heads,), device='cuda', dtype=torch.bfloat16)
     scale = 1.0 / math.sqrt(dimension)
     (_, generated) = compile_single(context, attention_sink_prefill, (q, k, v, sinks, scale), constexprs={'HEAD_GROUP': repeats})
-    return Side(generated, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 的布局转换与辅助工作计入其调用时间', owners=locals())
+    return checked_call(generated, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 的布局转换与辅助工作计入其调用时间', owners=locals())

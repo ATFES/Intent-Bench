@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.references.torch_ops import triangular_solve
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, size) = (4096, 16)
@@ -11,5 +11,5 @@ def prepare(context):
     lower.diagonal(dim1=-2, dim2=-1).add_(2.0)
     initial = torch.randn((batch, size), device='cuda', dtype=torch.float32)
     source_solution = initial.clone()
-    source = PreparedLaunch(launch=lambda : triangular_solve(*(lower, source_solution)), outputs=lambda : source_solution, prepare=lambda : source_solution.copy_(initial))
-    return Side(source, Tolerance(atol=0.0001, rtol=0.0001), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=lambda : triangular_solve(*(lower, source_solution)), result=lambda : source_solution, reset=lambda : source_solution.copy_(initial))
+    return checked_call(source, Tolerance(atol=0.0001, rtol=0.0001), cuda_graph=False, owners=locals())

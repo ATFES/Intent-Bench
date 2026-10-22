@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.streaming.selective_scan import mamba_chunk_scan_bf16_fwd
+from intent.examples.kernels.streaming.selective_scan import mamba_chunk_scan_bf16_fwd
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, sequence, heads, dimension) = (1, 2048, 32, 64)
@@ -18,4 +18,4 @@ def prepare(context):
     residual = torch.randn((heads,), device='cuda', dtype=torch.float32) * 0.01
     arguments = (cb, x, dt, decay, state_matrix, previous, residual)
     (_, generated) = compile_single(context, mamba_chunk_scan_bf16_fwd, arguments, constexprs={'HEADS_PER_GROUP': heads // groups})
-    return Side(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=True, owners=locals())
+    return checked_call(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=True, owners=locals())

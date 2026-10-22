@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (tokens, vocabulary) = (8192, 32768)
@@ -17,5 +17,5 @@ def prepare(context):
     def source_launch():
         state['outputs'] = runtime.upstream((source_logits, labels))
     source_launch()
-    source = PreparedLaunch(launch=source_launch, outputs=lambda : state['outputs'], prepare=lambda : source_logits.copy_(logits))
-    return Side(source, (Tolerance(atol=0.05, rtol=0.01), Tolerance(atol=0.0), Tolerance(atol=0.05, rtol=0.05)), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=source_launch, result=lambda : state['outputs'], reset=lambda : source_logits.copy_(logits))
+    return checked_call(source, (Tolerance(atol=0.05, rtol=0.01), Tolerance(atol=0.0), Tolerance(atol=0.05, rtol=0.05)), cuda_graph=False, owners=locals())

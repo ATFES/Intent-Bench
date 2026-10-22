@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (8, 32, 8, 128)
@@ -27,5 +27,5 @@ def prepare(context):
     def source_launch():
         source_module.minimax_m3_sparse_attn_decode(q, kv_cache, topk, block_table, lengths, kv_heads, scale, source_output, decode_query_len=1)
     source_launch()
-    source = PreparedLaunch(launch=source_launch, outputs=lambda : source_output)
-    return Side(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, note='同算法；source 使用 packed KV/topk ABI；输入布局适配在计时前完成，完整 source 调用含 partial buffer 分配', owners=locals())
+    source = PreparedCall(launch=source_launch, result=lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, note='同算法；source 使用 packed KV/topk ABI；输入布局适配在计时前完成，完整 source 调用含 partial buffer 分配', owners=locals())

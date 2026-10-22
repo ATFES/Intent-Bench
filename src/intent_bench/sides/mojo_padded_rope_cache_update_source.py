@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, query_heads, kv_heads) = (32, 32, 8)
@@ -25,5 +26,5 @@ def prepare(context):
         source_key_cache = source_storage[query_rows:query_rows + cache_rows].view(batch, padded_length, kv_heads, dimension)
         source_value_cache = source_storage[query_rows + cache_rows:].view(batch, padded_length, kv_heads, dimension)
         return (source_query, source_key_cache[:, cache_length], source_value_cache[:, cache_length])
-    source = PreparedLaunch(source_launch, source_outputs)
-    return Side(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有 padded RoPE cache f16 InOut；保持原 B32/QH32/KVH8/D128/cache8192 输入、query/key/value 三个输出和原 tolerances；双方计完整 host 调用，输出 storage 分配不计时。', owners=locals())
+    source = PreparedCall(source_launch, source_outputs)
+    return checked_call(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有 padded RoPE cache f16 InOut；保持原 B32/QH32/KVH8/D128/cache8192 输入、query/key/value 三个输出和原 tolerances；双方计完整 host 调用，输出 storage 分配不计时。', owners=locals())

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 FEATURES = 4096
 KEEP_PROBABILITY = 0.9
 RMS_ROWS = 4096
@@ -24,4 +25,4 @@ def prepare(context):
 
     def source_launch():
         source_outputs['output'] = runtime.dropout_residual_rms_norm(x, residual, weight, dnormalized, dresidual, RMS_SEED, KEEP_PROBABILITY, inverse_keep_probability, inverse_features, epsilon, weight_offset)
-    return Side(PreparedLaunch(source_launch, lambda : source_outputs['output']), tuple((Tolerance(atol=0.065) for _ in range(4))), cuda_graph=False, device_type='cpu', note='既有dropout residual RMSNorm forward/backward完整调用；bf16、seed17、keep0.9；CPU reference为NumPy Philox加PyTorch算术，调用内生成随机掩码，双方计完整host调用。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_outputs['output']), tuple((Tolerance(atol=0.065) for _ in range(4))), cuda_graph=False, device_type='cpu', note='既有dropout residual RMSNorm forward/backward完整调用；bf16、seed17、keep0.9；CPU reference为NumPy Philox加PyTorch算术，调用内生成随机掩码，双方计完整host调用。', owners=locals())

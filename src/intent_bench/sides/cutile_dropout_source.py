@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 from types import SimpleNamespace
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -13,4 +13,4 @@ def prepare(context):
     probability = 0.1
     configs = tuple((SimpleNamespace(TILE_SIZE=1 << exponent, ACCESS_FORM=form) for exponent in range(5, 15) for form in (1, 2, 3)))
     source = functional_launch(lambda : source_module.dropout(x, seed, p=probability, training=True, inplace=False, tuning_configs=configs, compiler_timeout=context.compiler_timeout_seconds))
-    return Side(source, Tolerance(atol=0.0), cuda_graph=True, owners=locals())
+    return checked_call(source, Tolerance(atol=0.0), cuda_graph=True, owners=locals())

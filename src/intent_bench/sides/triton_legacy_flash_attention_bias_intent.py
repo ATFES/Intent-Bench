@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.streaming.attention import flash_attention_bias_fwd
+from intent.examples.kernels.streaming.attention import flash_attention_bias_fwd
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, heads, sequence, dimension) = (4, 32, 4096, 128)
@@ -14,4 +14,4 @@ def prepare(context):
     bias = torch.randn((batch, heads, sequence), device='cuda', dtype=torch.float32) * 0.125
     scale = dimension ** (-0.5)
     (_, generated) = compile_single(context, flash_attention_bias_fwd, (q, k, v, bias, scale))
-    return Side(generated, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='同算法；source 额外写 LSE 和临时数据。', owners=locals())
+    return checked_call(generated, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='同算法；source 额外写 LSE 和临时数据。', owners=locals())

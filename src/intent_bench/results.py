@@ -16,7 +16,10 @@ def record(value):
 
 def save(results, directory=None, *, command=None):
     if directory is None:
-        directory = Path("runs") / (datetime.now().strftime("%Y%m%d-%H%M%S") + "-" + uuid.uuid4().hex[:6])
+        configured = os.environ.get("INTENT_BENCH_RUN_DIR")
+        if not configured:
+            raise ValueError("result saving requires an explicit directory or the Bench run service")
+        directory = Path(configured)
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     rows = [record(r) for r in results]
@@ -105,7 +108,8 @@ def compare(before, after):
         return (r["workload"], r["case"], r["implementation"], r["device"], r["method"], r["scope"],
                 json.dumps(r["parameters"], sort_keys=True), r.get("metadata", {}).get("machine"),
                 r.get("metadata", {}).get("threads"), r.get("metadata", {}).get("cache_policy", "unspecified"),
-                r.get("metadata", {}).get("cache_bytes"))
+                r.get("metadata", {}).get("cache_bytes"), r.get("metadata", {}).get("measurement_contract"),
+                r.get("metadata", {}).get("timing_boundary"))
     left, right = {}, {}
     for source, target in ((before, left), (after, right)):
         for item in source:
@@ -157,6 +161,6 @@ def write_html(results, path, *, source=None):
         source_link = '<p>Source records: <a href="' + esc(reference) + '">' + esc(Path(source).name) + '</a></p>'
     Path(path).write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><title>Intent Bench</title>
 <style>body{font:14px system-ui;margin:32px;color:#182331}h1{font-size:26px}h2{font-size:14px;font-weight:500;color:#526173}section{margin:24px 0;overflow:auto}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}th{background:#f4f6f8}pre{white-space:pre-wrap;max-width:600px}input{padding:8px;width:320px}</style>
-<h1>Operator latency</h1><p>Median latency of the complete call. Throughput is optional. Failed or unchecked rows are diagnostic measurements.</p>
+<h1>Operator latency</h1><p>Median latency. Operator execution and optional Python host calls are shown separately by scope. Throughput is optional. Failed or unchecked rows are diagnostic measurements.</p>
 <input id="filter" placeholder="Filter workload, implementation or status">
 ''' + source_link + "".join(sections) + '''<script>document.querySelector('#filter').oninput=e=>{for(const r of document.querySelectorAll('tbody tr'))r.hidden=!r.textContent.toLowerCase().includes(e.target.value.toLowerCase())}</script></html>''')

@@ -42,23 +42,17 @@ def _prepare(name, implementation, case, inputs, env):
         return prepare(name, implementation, x)
     intent = intent_environment(env)
     if name == "softmax":
-        from kernels.normalization.softmax import stable_softmax, stable_softmax_f16
+        from intent.examples.kernels.normalization.softmax import stable_softmax, stable_softmax_f16
         definition = stable_softmax if x.dtype == torch.float32 else stable_softmax_f16
     else:
         if x.dtype != torch.float16:
             raise ExpressionGap("the mainline relu_forward example currently declares f16 input")
-        from kernels.activation.pointwise import relu_forward
+        from intent.examples.kernels.activation.pointwise import relu_forward
         definition = relu_forward
-    target_type = {"triton": intent.TritonTarget, "cutile": intent.CuTileTarget, "mojo": intent.MojoTarget}[target]
-    target_options = {"device": x.device.index or 0} if gpu else {"workers": env.threads}
-    program = intent.generate(definition, target=target_type(**target_options), compiler=env.compiler)
-    artifact = program.materialize()
-    call = artifact.prepare(x)
-    host_state={}
-    def host_run():host_state['output']=artifact.run(x)
-    return PreparedCall(call.launch, call.result, compile=call.compile, device=device,
-                        metadata={"artifact": str(program.directory) if hasattr(program, "directory") else str(program.cache_directory)},
-                        host_run=host_run,host_result=lambda:host_state['output'])
+    from ..implementations.intent import make_kernel
+    from ..implementations.prepared import intent_call
+    artifact = make_kernel(definition, env, target)
+    return intent_call(artifact, (x,), device=device)
 
 
 def build(name="softmax"):

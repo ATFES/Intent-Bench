@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.position.rope_cache import padded_rope_cache_update
+from intent.examples.kernels.position.rope_cache import padded_rope_cache_update
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads) = (32, 32, 8)
@@ -23,5 +23,5 @@ def prepare(context):
     generated_query = generated_storage[:query_rows].view(batch, query_heads, dimension)
     generated_key_cache = generated_storage[query_rows:query_rows + cache_rows].view(batch, padded_length, kv_heads, dimension)
     generated_value_cache = generated_storage[query_rows + cache_rows:].view(batch, padded_length, kv_heads, dimension)
-    generated = PreparedLaunch(launch=generated_base.launch, outputs=lambda : (generated_query, generated_key_cache[:, position], generated_value_cache[:, position]))
-    return Side(generated, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())
+    generated = PreparedCall(launch=generated_base.launch, result=lambda : (generated_query, generated_key_cache[:, position], generated_value_cache[:, position]))
+    return checked_call(generated, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())

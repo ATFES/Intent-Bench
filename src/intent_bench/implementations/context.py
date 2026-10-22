@@ -5,13 +5,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, TypeAlias
 
-import torch
-
 if TYPE_CHECKING:
+    import torch
     from intent import CompileOptions
 
 
-TensorTree: TypeAlias = torch.Tensor | tuple["TensorTree", ...]
+TensorTree: TypeAlias = "torch.Tensor | tuple[TensorTree, ...]"
 
 
 @dataclass(frozen=True)
@@ -44,14 +43,6 @@ NumericalTolerance: TypeAlias = Tolerance | IntegerTolerance | SimilarityToleran
 
 
 @dataclass(frozen=True)
-class PreparedLaunch:
-    launch: Callable[[], object]
-    outputs: Callable[[], TensorTree]
-    prepare: Callable[[], object] | None = None
-    native_benchmark: Callable[[], float] | None = None
-
-
-@dataclass(frozen=True)
 class Context:
     compiler: str
     project_root: Path
@@ -61,8 +52,21 @@ class Context:
     tuning_config: Path | None = None
     compile_options: CompileOptions | None = None
     intent_root: Path | None = None
-    artifacts: list[str] = field(default_factory=list)
+    kernels: list = field(default_factory=list)
+    prepared_calls: list = field(default_factory=list)
     environment: object | None = None
+
+    @property
+    def artifacts(self):
+        return [str(artifact.cache_directory) for kernel in self.kernels for artifact in kernel.artifacts]
+
+    def compile(self, definition, *, constexprs=None):
+        from intent_bench.implementations.intent import make_kernel
+        kernel = make_kernel(definition, self.environment, self.provider,
+                             constexprs=constexprs, tuning_config=self.tuning_config,
+                             options=self.compile_options)
+        self.kernels.append(kernel)
+        return kernel
 
 
 class ComparisonUnavailable(RuntimeError):

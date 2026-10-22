@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 BLOCKS = 2048
 BLOCK_SIZE = 16
 HEADS = 8
@@ -27,4 +28,4 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = runtime.reshape_and_cache(key, value, slots, source_key_cache, source_value_cache)
-    return Side(PreparedLaunch(source_launch, lambda : source_state['output'], prepare=source_prepare), (Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有reshape-and-cache；T4096、H8、D128、2048x16 cache，随机i32 slot mapping；双f16 InOut cache独立恢复，完整host调用。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_state['output'], reset=source_prepare), (Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有reshape-and-cache；T4096、H8、D128、2048x16 cache，随机i32 slot mapping；双f16 InOut cache独立恢复，完整host调用。', owners=locals())

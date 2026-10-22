@@ -1,44 +1,83 @@
-from dataclasses import replace
+"""Authored MLU sequences bind through the product JIT on the executing host."""
 import torch
-import intent
-from ..corpus._common.measurement import report_stage
+from intent.language.annotations import ConstexprSpec, ViewKind, ViewSpec
 
-DTYPES = {torch.float16: "f16", torch.bfloat16: "bf16", torch.float32: "f32", torch.int32: "i32", torch.int64: "i64", torch.bool: "bool"}
+DTYPES = {torch.float16:"f16", torch.bfloat16:"bf16", torch.float32:"f32",
+          torch.int8:"i8", torch.uint8:"u8", torch.int32:"i32", torch.int64:"i64", torch.bool:"bool"}
 TORCH_DTYPES = {value:key for key,value in DTYPES.items()}
 
-class RemoteSequence:
 
+class LocalSequence:
     def __init__(self, context):
+        from intent.runtime.bangc import Queue
         self.context = context
-        self.steps = []
-        self.allocated_outputs = set()
+        env = context.environment
+        self.device = int(env.device.split(":")[1])
+        self.neuware = env.options.get("neuware", "/usr/local/neuware")
+        self.queue = Queue(device=self.device, neuware=self.neuware)
+        self.calls, self.buffers, self.initial, self.outputs = [], {}, {}, []
 
-    def add(self, definition, arguments, *, constexprs=None, target=None):
-        views = {name: value for (name, value) in arguments.items() if isinstance(value, torch.Tensor)}
-        target = replace(target or self.context.target, shapes={name: tuple(value.shape) for (name, value) in views.items()}, strides={name: tuple(value.stride()) for (name, value) in views.items()})
-        report_stage('generated_compilation')
-        program = intent.generate(definition, target=target, compiler=self.context.compiler, constexprs=constexprs, tuning_config=self.context.tuning_config, options=self.context.compile_options)
-        bound = dict(arguments)
-        interface = program.interface
-        dimensions = {}
-        for parameter in interface.views:
-            value = bound.get(parameter.name)
-            if value is not None:
-                for (identity, extent) in zip(parameter.dimensions, value.shape):
-                    if identity > 0:
-                        dimensions[identity] = extent
-        outputs = {}
-        for parameter in interface.parameters:
-            name = parameter.name
-            if isinstance(parameter, intent.ViewParameter) and parameter.output and (name not in bound):
-                shape = tuple((fixed if fixed >= 0 else dimensions[identity] for (fixed, identity) in zip(parameter.shape, parameter.dimensions)))
-                bound[name] = torch.empty(shape, dtype=TORCH_DTYPES[parameter.dtype.name], device='cpu')
-                storage = bound[name].untyped_storage()
-                self.allocated_outputs.add((str(bound[name].device), storage.data_ptr(), storage.nbytes()))
-            if name not in bound:
-                raise ValueError(f'missing BANG C invocation argument {name}')
-            if isinstance(parameter, intent.ViewParameter) and parameter.writable:
-                outputs[name] = bound[name]
-        self.steps.append((program, bound, interface))
-        report_stage('adapter_preparation')
-        return outputs
+    def _buffer(self, value):
+        from intent.runtime.bangc import DeviceBuffer, DeviceView
+        if isinstance(value, (DeviceBuffer, DeviceView)):
+            return value
+        if not isinstance(value, torch.Tensor):
+            return value
+        if value.device.type != "cpu":
+            raise ValueError("MLU workload input preparation must produce CPU tensors or MLU buffers")
+        storage = value.untyped_storage()
+        key = storage.data_ptr(), storage.nbytes()
+        if key not in self.buffers:
+            raw = torch.empty(0, dtype=torch.uint8).set_(storage, 0, (storage.nbytes(),), (1,))
+            data = raw.numpy()
+            self.buffers[key] = DeviceBuffer.from_host(data, shape=(storage.nbytes()//value.element_size(),),
+                                                       dtype=DTYPES[value.dtype], device=self.device,
+                                                       neuware=self.neuware)
+            self.initial[key] = data.copy()
+        return self.buffers[key].view(tuple(value.shape), tuple(value.stride()), offset=value.storage_offset())
+
+    def add(self, definition, arguments, *, constexprs=None):
+        parameters = [p for p in definition.signature.parameters.values()
+                      if not isinstance(p.annotation, ConstexprSpec)]
+        inputs = [p for p in parameters if not (isinstance(p.annotation, ViewSpec)
+                                               and p.annotation.kind is ViewKind.OUT)]
+        outs = [p for p in parameters if isinstance(p.annotation, ViewSpec)
+                and p.annotation.kind is ViewKind.OUT]
+        supplied = {p.name:self._buffer(arguments[p.name]) for p in inputs}
+        explicit = any(p.name in arguments for p in outs)
+        output_values = tuple(self._buffer(arguments[p.name]) for p in outs) if explicit else None
+        kernel = self.context.compile(definition, constexprs=constexprs)
+        call = kernel.prepare(*(supplied[p.name] for p in inputs), outputs=output_values)
+        self.calls.append(call)
+        values = call.result()
+        values = () if not outs else (values,) if len(outs) == 1 else values
+        if not explicit:
+            self.outputs.extend(values)
+        return {**{p.name:supplied[p.name] for p in inputs if isinstance(p.annotation, ViewSpec)
+                   and p.annotation.kind is ViewKind.INOUT},
+                **dict(zip((p.name for p in outs), values, strict=True))}
+
+    def compile(self):
+        for call in self.calls:
+            call.compile()
+
+    def reset(self):
+        for key, data in self.initial.items():
+            self.buffers[key].copy_from_host(data)
+
+    def enqueue(self):
+        for call in self.calls:
+            call.enqueue(self.queue)
+
+    def launch(self):
+        self.enqueue()
+        self.queue.synchronize()
+
+    def close(self):
+        self.queue.close()
+        for kernel in self.context.kernels:
+            kernel.close()
+        for buffer in self.buffers.values():
+            buffer.close()
+        for value in self.outputs:
+            value.close()

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     x = torch.randn((32, 64, 4096), dtype=torch.float16)
@@ -24,5 +25,5 @@ def prepare(context):
         def launch():
             outputs = function(x, weight, bias, mean, variance, epsilon, momentum)
             state['output'] = (mean, variance, *outputs) if include_running_state else outputs
-        return PreparedLaunch(launch, lambda : state['output'], prepare=prepare)
-    return Side(side(runtime.batch_norm_training), (Tolerance(atol=2e-05), Tolerance(atol=2e-05), Tolerance(atol=0.01), Tolerance(atol=2e-05), Tolerance(atol=2e-05)), cuda_graph=False, device_type='cpu', note='既有B32-C64-S4096 f16训练态batch normalization；输出含running mean/variance、归一化值、saved mean/rstd；单NUMA8核，PyTorch CPU reference，完整host调用；运行统计每次恢复且恢复不计时。', owners=locals())
+        return PreparedCall(launch, lambda : state['output'], reset=prepare)
+    return checked_call(side(runtime.batch_norm_training), (Tolerance(atol=2e-05), Tolerance(atol=2e-05), Tolerance(atol=0.01), Tolerance(atol=2e-05), Tolerance(atol=2e-05)), cuda_graph=False, device_type='cpu', note='既有B32-C64-S4096 f16训练态batch normalization；输出含running mean/variance、归一化值、saved mean/rstd；单NUMA8核，PyTorch CPU reference，完整host调用；运行统计每次恢复且恢复不计时。', owners=locals())

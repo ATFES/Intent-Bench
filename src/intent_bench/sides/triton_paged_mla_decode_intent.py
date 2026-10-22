@@ -1,11 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.streaming.mla import paged_mla_decode_partials
-from kernels.streaming.splitk_reduce import splitk_attention_f32_to_f16_reduce
+from intent.examples.kernels.streaming.mla import paged_mla_decode_partials
+from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_f32_to_f16_reduce
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads) = (8, 128, 1)
@@ -23,11 +23,11 @@ def prepare(context):
     lengths = torch.full((batch,), sequence, device='cuda', dtype=torch.int32)
     scale = key_dimension ** (-0.5)
     (_, partials) = compile_single(context, paged_mla_decode_partials, (q_latent, q_rope, latent_cache.view(pages * page_size, kv_heads, latent_dimension), rope_cache.view(pages * page_size, kv_heads, rope_dimension), page_offsets, page_indices, lengths, scale), constexprs={'PAGE_SIZE': page_size, 'HEAD_GROUP': query_heads // kv_heads, 'SPLITS': splits})
-    (partial_lse, partial_output) = partials.outputs()
+    (partial_lse, partial_output) = partials.result()
     (_, reduction) = compile_single(context, splitk_attention_f32_to_f16_reduce, (partial_output, partial_lse))
 
     def generated_launch():
         partials.launch()
         reduction.launch()
-    generated = PreparedLaunch(generated_launch, reduction.outputs)
-    return Side(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, note='同算法；source 使用 packed KV/page-table ABI 并写辅助 LSE；输入布局适配在计时前完成，完整 source 调用含 scale 分配', owners=locals())
+    generated = PreparedCall(generated_launch, reduction.result)
+    return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, note='同算法；source 使用 packed KV/page-table ABI 并写辅助 LSE；输入布局适配在计时前完成，完整 source 调用含 scale 分配', owners=locals())

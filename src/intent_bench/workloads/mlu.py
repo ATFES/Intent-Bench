@@ -26,24 +26,24 @@ def build(name):
         intent=intent_environment(env)
         import torch
         from ..corpus import PROJECT_ROOT
-        from ..corpus._common.model import Context
-        from ..implementations.bangc_sequence import RemoteSequence
+        from ..implementations.context import Context
+        from ..implementations.bangc_sequence import LocalSequence
         from ..implementations.bangc import prepare_sequence
-        context=Context(env.compiler,PROJECT_ROOT,intent.BangCTarget(device=env.options.get('device',0)),
+        context=Context(env.compiler,PROJECT_ROOT,None,
                         'bangc',environment=env)
-        sequence=RemoteSequence(context)
+        sequence=LocalSequence(context)
         x=torch.from_numpy(arrays[0])
         if name=='relu':
-            from kernels.activation.pointwise import relu_forward
+            from intent.examples.kernels.activation.pointwise import relu_forward
             outputs=sequence.add(relu_forward,{'x':x})['output']
         elif name=='softmax':
-            from kernels.normalization.softmax import stable_softmax_f16
+            from intent.examples.kernels.normalization.softmax import stable_softmax_f16
             outputs=sequence.add(stable_softmax_f16,{'x':x})['y']
         elif name=='matmul':
-            from kernels.contraction.gemm import gemm,Activation
+            from intent.examples.kernels.contraction.gemm import gemm,Activation
             outputs=sequence.add(gemm,{'a':x,'b':torch.from_numpy(arrays[1])},constexprs={'ACTIVATION':Activation.NONE})['c']
         else:
-            from kernels.normalization.layer_norm import layer_norm_f16
+            from intent.examples.kernels.normalization.layer_norm import layer_norm_f16
             outputs=sequence.add(layer_norm_f16,{'x':x,'weight':torch.ones(x.shape[-1],dtype=torch.float16),
                 'bias':torch.zeros(x.shape[-1],dtype=torch.float16),'inverse_features':1/x.shape[-1],'epsilon':1e-5})['y']
         return prepare_sequence(sequence,outputs)

@@ -2,7 +2,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 import math
 import torch
-from .corpus._common.model import TensorTree, Tolerance, IntegerTolerance, SimilarityTolerance, NumericalTolerance
+from .implementations.context import TensorTree, Tolerance, IntegerTolerance, SimilarityTolerance, NumericalTolerance
 
 COMPARISON_CHUNK_ELEMENTS = 1048576
 

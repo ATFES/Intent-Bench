@@ -1,14 +1,14 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.routing.moe_align import moe_count_routes
-from kernels.routing.moe_align import moe_mark_expert_blocks
-from kernels.routing.moe_align import moe_prefix_routes
-from kernels.routing.moe_align import moe_scatter_routes
-from programs.composition import MoEAlignment
+from intent.examples.kernels.routing.moe_align import moe_count_routes
+from intent.examples.kernels.routing.moe_align import moe_mark_expert_blocks
+from intent.examples.kernels.routing.moe_align import moe_prefix_routes
+from intent.examples.kernels.routing.moe_align import moe_scatter_routes
+from intent.examples.programs.composition import MoEAlignment
 from intent_bench.corpus._common.measurement import compile_kernel, prepare_program
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 BLOCK_SIZE = 128
 EXPERTS = 64
 
@@ -17,8 +17,8 @@ def prepare(context):
     source_ids = torch.arange(tokens * topk, device='cuda', dtype=torch.int32).remainder(EXPERTS).reshape(tokens, topk).contiguous()
     program = MoEAlignment(compile_kernel(context, moe_count_routes), compile_kernel(context, moe_prefix_routes), compile_kernel(context, moe_scatter_routes), compile_kernel(context, moe_mark_expert_blocks))
     call = prepare_program(program, (source_ids,))
-    generated = PreparedLaunch(call.launch, lambda : _canonical_alignment(*call.outputs()))
-    return Side(generated, (Tolerance(atol=0.0), Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, note='同算法计数/前缀和/散射/标记；workspace初始化与辅助输出计入调用', owners=locals())
+    generated = PreparedCall(call.launch, lambda : _canonical_alignment(*call.result()))
+    return checked_call(generated, (Tolerance(atol=0.0), Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, note='同算法计数/前缀和/散射/标记；workspace初始化与辅助输出计入调用', owners=locals())
 
 def _canonical_alignment(sorted_ids, expert_ids, total):
     total_value = int(total[0].item())

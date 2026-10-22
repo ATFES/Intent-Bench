@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 BLOCKS = 2048
 BLOCK_SIZE = 16
 HEADS = 8
@@ -24,5 +25,5 @@ def prepare(context):
         def prepare():
             for cache in caches:
                 cache.zero_()
-        return PreparedLaunch(lambda : function(*caches), lambda : caches, prepare=prepare)
-    return Side(side(reference), Tolerance(atol=0.0), cuda_graph=False, device_type='cpu', note='原T4096/H8/D128/2048x16 cache两kernel变体，随机唯一i32 slots，f16复制精确比较；双cache独立，清零不计时；计key/value两次kernel完整host调用。', owners=locals())
+        return PreparedCall(lambda : function(*caches), lambda : caches, reset=prepare)
+    return checked_call(side(reference), Tolerance(atol=0.0), cuda_graph=False, device_type='cpu', note='原T4096/H8/D128/2048x16 cache两kernel变体，随机唯一i32 slots，f16复制精确比较；双cache独立，清零不计时；计key/value两次kernel完整host调用。', owners=locals())

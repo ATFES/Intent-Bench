@@ -48,9 +48,9 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     reference_call = workload.oracle.prepare(case, clone(inputs), env)
                     if reference_call.compile:
                         reference_call.compile()
-                    with device_window(reference_call.device) if settings.enabled else nullcontext():
+                    with device_window(reference_call.device):
                         reset(reference_call)
-                        reference_call.run()
+                        reference_call.launch()
                         synchronize(reference_call)
                         expected = clone(reference_call.result())
                 else:
@@ -76,11 +76,12 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                 started = time.perf_counter()
                 call = impl.prepare(case, clone(inputs), env)
                 if settings.scope == "host_call" and call.host_run is not None:
-                    call=replace(call,run=call.host_run,result=call.host_result or call.result,
+                    call=replace(call,launch=call.host_run,result=call.host_result or call.result,
                                  native_measure=None,scopes=("host_call",))
                 row.stages_seconds["prepare"] = time.perf_counter() - started
                 row.device = call.device
                 row.metadata.update(call.metadata)
+                row.metadata['measurement_contract'] = 'operator-v1' if settings.scope == 'operator' else 'host-call-v1'
                 if call.device.startswith('cuda'):
                     import torch
                     device=torch.cuda.get_device_properties(call.device)
@@ -95,27 +96,13 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     row.stages_seconds["native_compile"] = time.perf_counter() - started
                 elif "native_compile_seconds" in call.metadata:
                     row.stages_seconds["native_compile"] = call.metadata["native_compile_seconds"]
-                with device_window(call.device) if settings.enabled else nullcontext():
+                with device_window(call.device):
                     row.stage = "first_call"
                     reset(call)
                     started = time.perf_counter()
-                    call.run()
+                    call.launch()
                     synchronize(call)
                     row.stages_seconds["first_call"] = time.perf_counter() - started
-                    row.stage = "correctness"
-                    if oracle_error is not None:
-                        row.correctness = "reference_failed"
-                        row.metadata["reference_error"] = f"{type(oracle_error).__name__}: {oracle_error}"
-                    elif workload.oracle is not None:
-                        try:
-                            if workload.check:
-                                workload.check(call.result(), expected)
-                            else:
-                                assert_close(call.result(), expected, atol=workload.atol, rtol=workload.rtol)
-                            row.correctness = "passed"
-                        except AssertionError as error:
-                            row.correctness = "failed"
-                            row.error = str(error)
                     if settings.enabled:
                         row.stage = "measurement"
                         samples, row.method = measure(call, settings)
@@ -131,6 +118,22 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                                 row.metrics["tflops"] = work["flops"] / row.median_ms / 1e9
                             if settings.throughput == "gbps" and "bytes" in work:
                                 row.metrics["gbps"] = work["bytes"] / row.median_ms / 1e6
+                    # Observe the execution actually measured (including graph replay),
+                    # rather than validating only the eager warmup before capture.
+                    row.stage = "correctness"
+                    if oracle_error is not None:
+                        row.correctness = "reference_failed"
+                        row.metadata["reference_error"] = f"{type(oracle_error).__name__}: {oracle_error}"
+                    elif workload.oracle is not None:
+                        try:
+                            if workload.check:
+                                workload.check(call.result(), expected)
+                            else:
+                                assert_close(call.result(), expected, atol=workload.atol, rtol=workload.rtol)
+                            row.correctness = "passed"
+                        except AssertionError as error:
+                            row.correctness = "failed"
+                            row.error = str(error)
                     row.status = {"passed": "passed", "failed": "numerical_failed",
                                   "unchecked": "unchecked", "reference_failed": "reference_failed"}[row.correctness]
                     row.stage = "complete"
@@ -162,7 +165,8 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
             for row in case_results:
                 if (row.correctness == "passed" and row.median_ms and row.device == anchor.device
                         and row.method == anchor.method and row.scope == anchor.scope
-                        and row.metadata.get("cache_policy") == anchor.metadata.get("cache_policy")):
+                        and row.metadata.get("cache_policy") == anchor.metadata.get("cache_policy")
+                        and row.metadata.get("timing_boundary") == anchor.metadata.get("timing_boundary")):
                     row.speedup = anchor.median_ms / row.median_ms
         results.extend(case_results)
         if observer:

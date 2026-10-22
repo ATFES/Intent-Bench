@@ -1,12 +1,12 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.backward.attention import attention_backward_delta
-from kernels.backward.attention import attention_backward_dkdv
-from kernels.backward.attention import attention_backward_dq
+from intent.examples.kernels.backward.attention import attention_backward_delta
+from intent.examples.kernels.backward.attention import attention_backward_dkdv
+from intent.examples.kernels.backward.attention import attention_backward_dq
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, key_heads, sequence, dimension) = (2, 8, 2, 1024, 64)
@@ -24,7 +24,7 @@ def prepare(context):
     output = torch.matmul(torch.softmax(scores, dim=-1), repeated_value.float()).half()
     grad_output = torch.randn_like(output) * 0.05
     (_, delta) = compile_single(context, attention_backward_delta, (output, grad_output))
-    common = (query, key, value, grad_output, lse, delta.outputs(), scale)
+    common = (query, key, value, grad_output, lse, delta.result(), scale)
     constexprs = {'HEAD_GROUP': query_heads // key_heads, 'CAUSAL': True}
     (_, dkdv) = compile_single(context, attention_backward_dkdv, common, constexprs=constexprs)
     (_, dq) = compile_single(context, attention_backward_dq, common, constexprs=constexprs)
@@ -33,5 +33,5 @@ def prepare(context):
         delta.launch()
         dkdv.launch()
         dq.launch()
-    generated = PreparedLaunch(launch=generated_launch, outputs=lambda : (dq.outputs(), *dkdv.outputs()))
-    return Side(generated, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=True, note='同算法；中间精度和舍入不同', owners=locals())
+    generated = PreparedCall(launch=generated_launch, result=lambda : (dq.result(), *dkdv.result()))
+    return checked_call(generated, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=True, note='同算法；中间精度和舍入不同', owners=locals())

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 GROUP_NORM_BATCH = 32
 GROUP_NORM_CHANNELS = 256
 GROUP_NORM_CHANNELS_PER_GROUP = 8
@@ -23,4 +24,4 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = runtime.group_norm_backward(x, grad_y, weight, mean, rstd)
-    return Side(PreparedLaunch(source_launch, lambda : source_state['output']), (Tolerance(atol=0.02), Tolerance(atol=0.25), Tolerance(atol=0.25)), cuda_graph=False, device_type='cpu', note='既有B32-C256-S1024-G32 f16 GroupNorm backward；dx与weight/bias梯度两个kernel完整调用，PyTorch CPU reference同算法。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_state['output']), (Tolerance(atol=0.02), Tolerance(atol=0.25), Tolerance(atol=0.25)), cuda_graph=False, device_type='cpu', note='既有B32-C256-S1024-G32 f16 GroupNorm backward；dx与weight/bias梯度两个kernel完整调用，PyTorch CPU reference同算法。', owners=locals())

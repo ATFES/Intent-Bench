@@ -1,5 +1,7 @@
 from .model import Implementation, PreparedCall
 from .trees import clone, restore
+from .request import RunRequest
+from .service import run, RunOutcome
 
 
 def callable_implementation(name, function, *, mutable=False, device="cpu", synchronize=None):

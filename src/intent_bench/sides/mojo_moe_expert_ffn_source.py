@@ -1,9 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 MOE_EXPERTS = 8
 MOE_HIDDEN = 4096
 MOE_INTERMEDIATE = 14336
@@ -25,7 +26,7 @@ def prepare(context):
 
     def source_launch():
         runtime.moe_expert_ffn(*arguments, source_y)
-    return Side(PreparedLaunch(source_launch, lambda : source_y, prepare=lambda : source_y.zero_()), Tolerance(atol=0.002), cuda_graph=False, device_type='cpu', note='既有 MoE expert FFN 完整调用；x/w1/w2 为 f16，y 为独立 f32 InOut；每次 launch 前分别恢复 y=0，计时含完整 host 调用与同步。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_y, reset=lambda : source_y.zero_()), Tolerance(atol=0.002), cuda_graph=False, device_type='cpu', note='既有 MoE expert FFN 完整调用；x/w1/w2 为 f16，y 为独立 f32 InOut；每次 launch 前分别恢复 y=0，计时含完整 host 调用与同步。', owners=locals())
 
 def _make_moe_routes():
     route_count = MOE_TOKENS * MOE_TOP_K

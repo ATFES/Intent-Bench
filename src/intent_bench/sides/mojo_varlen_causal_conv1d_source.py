@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     lengths = (2048, 1536, 1024, 512)
@@ -17,5 +18,5 @@ def prepare(context):
 
         def launch():
             state['output'] = function()
-        return PreparedLaunch(launch, lambda : state['output'])
-    return Side(side(lambda : runtime.varlen_causal_conv1d(x, offsets, weight, bias)), (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有变长卷积及final-state两kernel完整调用；原长度2048/1536/1024/512、D4096、bf16、chunk64；同算法PyTorch eager CPU reference，单NUMA8核；含ABI、输出分配与同步。', owners=locals())
+        return PreparedCall(launch, lambda : state['output'])
+    return checked_call(side(lambda : runtime.varlen_causal_conv1d(x, offsets, weight, bias)), (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有变长卷积及final-state两kernel完整调用；原长度2048/1536/1024/512、D4096、bf16、chunk64；同算法PyTorch eager CPU reference，单NUMA8核；含ABI、输出分配与同步。', owners=locals())

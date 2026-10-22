@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, sequence, query_heads, kv_heads, dimension) = (4, 4096, 32, 8, 128)
@@ -24,5 +25,5 @@ def prepare(context):
     def restore_source():
         source_query.copy_(query_initial)
         source_key.copy_(key_initial)
-    source = PreparedLaunch(source_launch, lambda : (source_query, source_key), prepare=restore_source)
-    return Side(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002)), cuda_graph=False, device_type='cpu', note='既有 rope_qk f16 InOut；PyTorch CPU reference，单 NUMA 8 核；每次调用前恢复 query/key，恢复不计时；双方计完整 host 调用。', owners=locals())
+    source = PreparedCall(source_launch, lambda : (source_query, source_key), reset=restore_source)
+    return checked_call(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002)), cuda_graph=False, device_type='cpu', note='既有 rope_qk f16 InOut；PyTorch CPU reference，单 NUMA 8 核；每次调用前恢复 query/key，恢复不计时；双方计完整 host 调用。', owners=locals())

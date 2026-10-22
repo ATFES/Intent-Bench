@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import official_source
 
 def prepare(context):
@@ -17,4 +17,4 @@ def prepare(context):
     config = initial_launch(lambda : source_module['tune_cutile_fmha'](q, k, v, scale, query_group_size=query_heads // key_heads, causal=True), side='source')
     kernel = source_module['fmha_kernel'].replace_hints(num_ctas=config.num_ctas, occupancy=config.occupancy)
     source = functional_launch(lambda : source_module['cutile_fmha'](q, k, v, qk_scale=scale, query_group_size=query_heads // key_heads, causal=True, tile_m=config.TILE_M, tile_n=config.TILE_N, kernel=kernel))
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用 FTZ 与近似除法', owners=locals())
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用 FTZ 与近似除法', owners=locals())

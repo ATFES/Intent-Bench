@@ -4,14 +4,14 @@ from pathlib import Path
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.corpus._common.measurement import PipelineStageError
 from intent_bench.corpus._common.measurement import report_stage
-from intent_bench.corpus._common.model import Context
+from intent_bench.implementations.context import Context
 
 
 def reference_launch(function):
-    from .corpus._common.model import PreparedLaunch
+    from intent_bench.model import PreparedCall
     result={}
     def run():result['value']=function()
-    return PreparedLaunch(run,lambda:result['value'])
+    return PreparedCall(run,lambda:result['value'])
 
 
 def runtime_module(context: Context, relative_path: str, name: str):

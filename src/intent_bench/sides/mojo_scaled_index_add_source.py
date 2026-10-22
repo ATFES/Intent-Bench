@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     initial = torch.randn((65536, 1, 4096), dtype=torch.float16)
@@ -13,5 +14,5 @@ def prepare(context):
 
     def side(function):
         output = initial.clone()
-        return PreparedLaunch(lambda : function(output, indices, source, scaling, 1.0), lambda : output, prepare=lambda : output.copy_(initial))
-    return Side(side(runtime.scaled_index_add), Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, device_type='cpu', note='原65536x1x4096/32768唯一偶数indices f16 scaled-index-add，f32更新后f16写回；独立InOut状态每次恢复且恢复不计时；PyTorch CPU reference，原容差，完整host调用。', owners=locals())
+        return PreparedCall(lambda : function(output, indices, source, scaling, 1.0), lambda : output, reset=lambda : output.copy_(initial))
+    return checked_call(side(runtime.scaled_index_add), Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, device_type='cpu', note='原65536x1x4096/32768唯一偶数indices f16 scaled-index-add，f32更新后f16写回；独立InOut状态每次恢复且恢复不计时；PyTorch CPU reference，原容差，完整host调用。', owners=locals())

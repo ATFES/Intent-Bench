@@ -62,8 +62,8 @@ def build(row):
             arguments,outputs,bindings,{'B':b,'S':s,'TQ':s,'TK':s,'D':d,'DV':dv},env)
     def generated(case,args,env):
         from ..implementations.weft_intent import prepare
-        reference=('kernels.quantization.quantized_projection:quantized_projection' if projection else
-                   'kernels.contraction.gemm:gemm_i8' if matrix else 'kernels.streaming.attention_f32:'+name)
+        reference=('intent.examples.kernels.quantization.quantized_projection:quantized_projection' if projection else
+                   'intent.examples.kernels.contraction.gemm:gemm_i8' if matrix else 'intent.examples.kernels.streaming.attention_f32:'+name)
         return prepare(reference,args,env,ime=ime)
     def oracle(case,args):
         if projection:return q4_projection_reference(*args)

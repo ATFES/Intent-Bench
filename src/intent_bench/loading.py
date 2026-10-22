@@ -28,34 +28,21 @@ def intent_environment(environment):
         root = Path(environment.intent_root).resolve()
         if not (root / "python/intent").is_dir():
             raise EnvironmentUnavailable(f"Intent checkout not found: {root}")
-        for path in (root / "python", root / "examples"):
-            text = str(path)
-            if text not in sys.path:
-                sys.path.insert(0, text)
     try:
-        return importlib.import_module("intent")
+        module = importlib.import_module("intent")
+        if environment.intent_root is not None:
+            expected = root / "python/intent"
+            if Path(module.__file__).resolve().parent != expected:
+                raise EnvironmentUnavailable("install this Intent checkout with pip install -e; --intent-root does not modify sys.path")
+        return module
     except ImportError as error:
         raise EnvironmentUnavailable("install intentdsl or supply --intent-root") from error
 
 
 def load_workload(name):
-    if name.startswith("advanced/"):
-        from .workloads.advanced import build
-        return build(name.split("/",1)[1])
-    if name.startswith("rvv/"):
-        from .workloads.rvv import build
-        return build(name.split("/",1)[1])
-    if name.startswith("mlu/"):
-        from .workloads.mlu import build
-        return build(name.split("/",1)[1])
-    if name.startswith("cpu/"):
-        from .workloads.cpu import build
-        return build(name.split("/",1)[1])
-    if name in {"softmax", "relu"}:
-        from .workloads.elementwise import build
-        return build(name)
-    if name.startswith("corpus/"):
-        from .catalog import get_workload
-        return get_workload(name)
+    from .registry import workloads
+    registration = workloads().get(name)
+    if registration is not None:
+        return registration.build()
     value = load(name)
     return value() if callable(value) else value

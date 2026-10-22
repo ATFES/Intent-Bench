@@ -1,9 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.variants.decomposition import nested_sentence_pool, nested_document_pool
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent.examples.kernels.variants.decomposition import nested_sentence_pool, nested_document_pool
+from intent_bench.implementations.context import Tolerance
+from intent_bench.implementations.prepared import IntentSequence
 DOCUMENTS = 256
 NESTED_FEATURES = 128
 SENTENCES = 4096
@@ -11,13 +12,17 @@ NESTED_TOKENS = 65536
 
 def prepare(context):
     (document_offsets, sentence_offsets, values) = _nested_pool_inputs()
-    (sentences, documents) = (intent.compile(definition, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options) for definition in (nested_sentence_pool, nested_document_pool))
+    (sentences, documents) = (context.compile(definition) for definition in (nested_sentence_pool, nested_document_pool))
     (generated, source) = ({}, {})
 
     def launch():
         (sums, means) = sentences.run(sentence_offsets, values)
         generated['output'] = (means, documents.run(document_offsets, sentence_offsets, sums))
-    return Side(PreparedLaunch(launch, lambda : generated['output']), (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), cuda_graph=False, device_type='cpu', note='原D256/S4096/T65536/F128 f32 nested pool拆分变体；8/24交替正长度，sentence sum/mean后document mean，完整两kernel调用含scratch和输出分配；CPU fused数学参考、原容差。', owners=locals())
+    sequence = IntentSequence()
+    sums, means = sequence.add(sentences, sentence_offsets, values)
+    document_means = sequence.add(documents, document_offsets, sentence_offsets, sums)
+    call = sequence.prepared(lambda: (means, document_means), host_run=launch, host_result=lambda: generated['output'])
+    return checked_call(call, (Tolerance(atol=2e-05), Tolerance(atol=2e-05)), device_type='cpu', note='Prepared D256/S4096/T65536/F128 f32 nested pool split; original alternating 8/24 lengths and both sentence/document kernels.', owners=locals())
 
 def _nested_pool_inputs():
     document_lengths = torch.tensor([8 if index % 2 == 0 else 24 for index in range(DOCUMENTS)], dtype=torch.int32)

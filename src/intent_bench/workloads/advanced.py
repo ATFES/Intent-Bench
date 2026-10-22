@@ -1,12 +1,11 @@
 """Small independent cases complement the retained production profiles."""
-import torch
 from ..model import Case,Implementation,PreparedCall,Workload
-from ..references import advanced
 
 from ..catalog import ADVANCED_OPERATIONS as NAMES
 
 
 def data(name,case,seed):
+    import torch
     generator=torch.Generator().manual_seed(seed)
     def normal(shape,dtype):return torch.randn(shape,generator=generator,dtype=dtype)*.2
     size=case.parameters['size']
@@ -49,6 +48,7 @@ def data(name,case,seed):
 
 
 def reference(name,args):
+    from ..references import advanced
     if name=='mamba3_siso_step':return advanced.mamba3_step(*args)
     if name=='mamba3_siso_forward':
         output=advanced.mamba3_forward(*args)
@@ -74,6 +74,7 @@ def build(name):
             call.result=lambda:(original(),tuple(args[-5:]))
         return call
     def torch_prepare(case,args,env):
+        import torch
         torch.set_num_threads(env.threads)
         state={}
         def run():state['output']=reference(name,args)
@@ -83,7 +84,7 @@ def build(name):
         return prepare(name,args,env)
     def check(actual,expected):
         from ..numeric import compare_outputs
-        from ..corpus._common.model import Tolerance
+        from ..implementations.context import Tolerance
         compare_outputs(actual,expected,Tolerance(atol=2e-3,rtol=2e-2))
     return Workload('advanced/'+name,[Case('small',{'size':16}),Case('medium',{'size':128})],
                     lambda case,seed:data(name,case,seed),{'mojo':Implementation('mojo',prepare),'torch':Implementation('torch',torch_prepare),

@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
-from kernels.streaming.mla import token_sparse_mla_value_prefill
+from intent.examples.kernels.streaming.mla import token_sparse_mla_value_prefill
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (sequence, key_sequence, heads, topk, dimension, rope) = (2048, 4096, 64, 512, 128, 64)
@@ -22,4 +22,4 @@ def prepare(context):
     kpe = kpe_source[0, 0]
     scale = 1.0 / math.sqrt(dimension + rope)
     (_, generated) = compile_single(context, token_sparse_mla_value_prefill, (q, qpe, k, v, kpe, selected, scale))
-    return Side(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())
+    return checked_call(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())

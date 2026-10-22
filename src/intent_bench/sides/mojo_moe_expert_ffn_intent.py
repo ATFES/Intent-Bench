@@ -1,10 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import intent
 import torch
-from kernels.ragged.moe import moe_expert_ffn
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent.examples.kernels.ragged.moe import moe_expert_ffn
+from intent_bench.implementations.context import Tolerance
+from intent_bench.implementations.prepared import intent_call
 MOE_EXPERTS = 8
 MOE_HIDDEN = 4096
 MOE_INTERMEDIATE = 14336
@@ -19,13 +20,13 @@ def prepare(context):
     w1 /= math.sqrt(MOE_HIDDEN)
     w2 = torch.randn((MOE_EXPERTS, MOE_INTERMEDIATE, MOE_HIDDEN), dtype=torch.float16)
     w2 /= math.sqrt(MOE_INTERMEDIATE)
-    artifact = intent.compile(moe_expert_ffn, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    artifact = context.compile(moe_expert_ffn)
     generated_y = torch.zeros((MOE_TOKENS, MOE_HIDDEN), dtype=torch.float32)
     arguments = (x, route_offsets, member_routes, route_token, route_weights, w1, w2)
 
-    def generated_launch():
-        artifact.run(*arguments, generated_y)
-    return Side(PreparedLaunch(generated_launch, lambda : generated_y, prepare=lambda : generated_y.zero_()), Tolerance(atol=0.002), cuda_graph=False, device_type='cpu', note='既有 MoE expert FFN 完整调用；x/w1/w2 为 f16，y 为独立 f32 InOut；每次 launch 前分别恢复 y=0，计时含完整 host 调用与同步。', owners=locals())
+    generated = intent_call(artifact, (*arguments, generated_y), observe=lambda _: generated_y,
+                            reset=lambda: generated_y.zero_())
+    return checked_call(generated, Tolerance(atol=0.002), device_type='cpu', note='Prepared complete MoE expert FFN; f16 inputs/weights and f32 InOut. Restore y=0 outside timing.', owners=locals())
 
 def _make_moe_routes():
     route_count = MOE_TOKENS * MOE_TOP_K

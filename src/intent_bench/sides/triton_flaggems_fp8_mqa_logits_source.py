@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.references.torch_ops import fp8_mqa_logits
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (queries, keys, heads, dimension) = (256, 4096, 32, 128)
@@ -16,4 +16,4 @@ def prepare(context):
     key_end = keys - indices % 19
     arguments = (q, kv, kv_scale, head_weight, key_start, key_end)
     source = functional_launch(lambda : fp8_mqa_logits(*arguments))
-    return Side(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, owners=locals())
+    return checked_call(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, owners=locals())

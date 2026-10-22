@@ -27,6 +27,7 @@ def environment_path(name):
 def load_environment(name=None, **overrides):
     values = json.loads(environment_path(name).read_text()) if name else {}
     values.pop("description", None)
+    values.setdefault("name", Path(name).stem if name else "local")
     allowed = {field.name for field in fields(Environment)}
     unknown = set(values)-allowed
     if unknown:
@@ -37,9 +38,14 @@ def load_environment(name=None, **overrides):
     values.setdefault("device", "auto")
     if values.get("intent_root"):
         values["intent_root"] = Path(values["intent_root"]).expanduser()
+    if values.get("output_root"):
+        values["output_root"] = Path(values["output_root"]).expanduser()
     if values.get("transport") not in (None,"local","ssh"):
         raise ValueError("environment transport must be local or ssh")
     host = values.get("host") or options.get("host")
+    if host and values.get("transport") is None:
+        values["transport"] = "ssh"
+        values["host"] = host
     if values.get("transport") == "ssh" and not host:
         raise ValueError("SSH environment requires a host alias")
     if values.get("transport") == "local" and host:
@@ -51,6 +57,8 @@ def describe_environment(environment):
     values = asdict(environment)
     if values["intent_root"] is not None:
         values["intent_root"] = str(values["intent_root"])
+    if values["output_root"] is not None:
+        values["output_root"] = str(values["output_root"])
     return values
 
 

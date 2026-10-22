@@ -1,16 +1,16 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from types import SimpleNamespace
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
     q = torch.randn((8, 128, 32), dtype=torch.float32)
     (k, v) = (torch.randn_like(q), torch.randn_like(q))
     reference = _mojo_reference(context, 'corpus/cpu/baselines/mojo/intentdsl/attention/linear/linear_runtime.py', (q, k, v))
-    return Side(reference_launch(reference), Tolerance(0.0002, 1e-05), device_type='cpu', owners=locals())
+    return checked_call(reference_launch(reference), Tolerance(0.0002, 1e-05), device_type='cpu', owners=locals())
 
 def _mojo_reference(context, relative_path, arguments):
     runtime = load_module(context.project_root / relative_path, 'intent_bangc_mojo_' + relative_path.split('/')[-2])

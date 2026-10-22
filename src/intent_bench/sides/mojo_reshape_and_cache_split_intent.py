@@ -1,9 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.variants.decomposition import reshape_key_cache, reshape_value_cache
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent.examples.kernels.variants.decomposition import reshape_key_cache, reshape_value_cache
+from intent_bench.implementations.context import Tolerance
+from intent_bench.implementations.prepared import IntentSequence
 BLOCKS = 2048
 BLOCK_SIZE = 16
 HEADS = 8
@@ -14,7 +15,7 @@ def prepare(context):
     key = torch.randn((TOKENS, HEADS, HEAD_DIMENSION), dtype=torch.float16)
     value = torch.randn_like(key)
     slots = torch.randperm(BLOCKS * BLOCK_SIZE, dtype=torch.int64)[:TOKENS].to(torch.int32)
-    (key_program, value_program) = (intent.compile(definition, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options) for definition in (reshape_key_cache, reshape_value_cache))
+    (key_program, value_program) = (context.compile(definition) for definition in (reshape_key_cache, reshape_value_cache))
 
     def pipeline(key_cache, value_cache):
         key_program.run(key, slots, key_cache)
@@ -26,5 +27,8 @@ def prepare(context):
         def prepare():
             for cache in caches:
                 cache.zero_()
-        return PreparedLaunch(lambda : function(*caches), lambda : caches, prepare=prepare)
-    return Side(side(pipeline), Tolerance(atol=0.0), cuda_graph=False, device_type='cpu', note='原T4096/H8/D128/2048x16 cache两kernel变体，随机唯一i32 slots，f16复制精确比较；双cache独立，清零不计时；计key/value两次kernel完整host调用。', owners=locals())
+        sequence = IntentSequence()
+        sequence.add(key_program, key, slots, caches[0])
+        sequence.add(value_program, value, slots, caches[1])
+        return sequence.prepared(lambda: caches, reset=prepare, host_run=lambda: function(*caches))
+    return checked_call(side(pipeline), Tolerance(atol=0.0), cuda_graph=False, device_type='cpu', note='原T4096/H8/D128/2048x16 cache两kernel变体，随机唯一i32 slots，f16复制精确比较；双cache独立，清零不计时；默认计key/value两次kernel的完整native执行。', owners=locals())

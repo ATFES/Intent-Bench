@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import runtime_module
 BLOCK_SIZE = 128
 
@@ -21,8 +21,8 @@ def prepare(context):
     def source_launch():
         runtime.source.invoke_fused_moe_kernel(hidden_states, weights, source_output, None, None, topk_weights, topk_ids, sorted_ids, expert_ids, padded_tokens, False, topk, config, torch.bfloat16, False)
     initial_launch(source_launch, side='source')
-    source = PreparedLaunch(source_launch, lambda : source_output)
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 使用预计算 block ownership', owners=locals())
+    source = PreparedCall(source_launch, lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 使用预计算 block ownership', owners=locals())
 
 def _runtime(context):
     return runtime_module(context, 'corpus/gpu/baselines/cutile/tilegym/moe/fused/moe_runtime.py', 'intent_v2_cutile_moe_runtime')

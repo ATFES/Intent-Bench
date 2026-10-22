@@ -1,9 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.cache.reshape_and_cache import reshape_and_cache
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent.examples.kernels.cache.reshape_and_cache import reshape_and_cache
+from intent_bench.implementations.context import Tolerance
+from intent_bench.implementations.prepared import intent_call
 BLOCKS = 2048
 BLOCK_SIZE = 16
 HEADS = 8
@@ -17,12 +18,12 @@ def prepare(context):
     cache_shape = (BLOCKS, BLOCK_SIZE, HEADS, HEAD_DIMENSION)
     generated_key_cache = torch.zeros(cache_shape, dtype=torch.float16)
     generated_value_cache = torch.zeros_like(generated_key_cache)
-    artifact = intent.compile(reshape_and_cache, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    artifact = context.compile(reshape_and_cache)
 
     def generated_prepare():
         generated_key_cache.zero_()
         generated_value_cache.zero_()
 
-    def generated_launch():
-        artifact.run(key, value, slots, generated_key_cache, generated_value_cache)
-    return Side(PreparedLaunch(generated_launch, lambda : (generated_key_cache, generated_value_cache), prepare=generated_prepare), (Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有reshape-and-cache；T4096、H8、D128、2048x16 cache，随机i32 slot mapping；双f16 InOut cache独立恢复，完整host调用。', owners=locals())
+    generated = intent_call(artifact, (key, value, slots, generated_key_cache, generated_value_cache),
+        observe=lambda _: (generated_key_cache, generated_value_cache), reset=generated_prepare)
+    return checked_call(generated, (Tolerance(atol=0.0), Tolerance(atol=0.0)), device_type='cpu', note='Prepared reshape-and-cache; original T4096/H8/D128 and cache layout. Cache restoration outside timing.', owners=locals())

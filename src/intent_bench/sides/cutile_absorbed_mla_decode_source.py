@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -15,4 +15,4 @@ def prepare(context):
     scale = 1.0 / math.sqrt(latent + rope)
     source_module = tilegym_source(context, 'corpus/gpu/baselines/cutile/tilegym/attention/mla_decode/mla_decoding.py', 'absorbed_mla_decode')
     source = functional_launch(lambda : source_module.mla_decoding(q, qpe, cache, cache_pe, scale)[0])
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用近似除法并额外输出 LSE', owners=locals())
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用近似除法并额外输出 LSE', owners=locals())

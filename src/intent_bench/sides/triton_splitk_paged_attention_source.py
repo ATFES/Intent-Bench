@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (16, 32, 8, 128)
@@ -20,4 +20,4 @@ def prepare(context):
     runtime = load_module(context.project_root / 'corpus/gpu/baselines/triton/xformers/attention/splitk/splitk_kernels_runtime.py', 'intent_v2_triton_xformers_splitk_runtime')
     arguments = (q, key_cache, value_cache, page_offsets, page_indices, lengths, scale)
     source = functional_launch(lambda : runtime.upstream(arguments))
-    return Side(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, owners=locals())
+    return checked_call(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, owners=locals())

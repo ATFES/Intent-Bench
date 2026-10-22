@@ -19,7 +19,11 @@ def list_workloads(query: str = '', family: str = '') -> list[dict]:
 
 @server.tool()
 def describe_workload(workload: str) -> dict:
-    """Show available implementations and input cases for an operator or absolute file.py:bench."""
+    """Describe implementation roles, named cases and parameter keys for an operator or absolute file.py:bench.
+
+    Empty parameter_keys means a fixed original profile; null means no declared key
+    whitelist. Use actual case parameters for sweeps. Does not prepare or run operators.
+    """
     return discovery.describe_workload(workload)
 
 
@@ -35,23 +39,32 @@ def run_benchmark(workload: str, implementations: list[str], environment: str | 
                   baseline: str | None = None, check_only: bool = False,
                   throughput: str | None = None, cache: str = 'flush',
                   device: str | None = None, intent_root: str | None = None,
-                  compiler: str | None = None, options: dict | None = None) -> dict:
+                  compiler: str | None = None, options: dict | None = None,
+                  timing: str = 'auto', scope: str = 'operator') -> dict:
     """Start an operator comparison using the ordinary bench CLI. Returns a run path immediately.
 
-    Choose implementations explicitly, e.g. torch,triton,intent:triton. Environment
-    selects execution settings independently. Use run_status to retrieve the result.
+    Choose participants explicitly. Both Intent GPU backends can share one baseline:
+    implementations=["intent:triton", "intent:cutile", "triton"], baseline="triton".
+    The baseline must be a participant; no default pairing or extra opponent is added.
+    Environment selects execution settings independently. Select one named case before
+    a parameter sweep; list parameter values form a Cartesian product. CUDA defaults to
+    graph replay with device timing event nodes and cache flushing outside the graph.
+    scope="host_call" explicitly measures Python/framework entry-to-completion time;
+    use only when requested. Use run_status to retrieve the result without rerunning.
     A custom workload file executes user Python code just as the CLI does.
     """
     if not implementations:raise ValueError('select at least one implementation')
-    arguments=['run',workload,'--impl',','.join(implementations),'--cache',cache]
-    for flag,value in [('--env',environment),('--baseline',baseline),('--throughput',throughput),
-                       ('--device',device),('--intent-root',intent_root),('--compiler',compiler)]:
-        if value is not None:arguments.extend([flag,value])
-    if check_only:arguments.append('--check-only')
-    for case in cases or []:arguments.extend(['--case',case])
-    for key,value in (parameters or {}).items():arguments.extend(['--param',key+'='+json.dumps(value)])
-    for key,value in (options or {}).items():arguments.extend(['--option',key+'='+json.dumps(value)])
-    return jobs.start(arguments)
+    if baseline is not None and baseline not in implementations:
+        raise ValueError('baseline must be included in implementations')
+    from .model import Measurement
+    from .request import RunRequest
+    from .environments import load_environment
+    env = load_environment(environment, device=device, intent_root=Path(intent_root) if intent_root else None,
+                           compiler=compiler, options=options)
+    measurement = Measurement(method=timing, scope=scope, cache=cache, throughput=throughput,
+                              enabled=not check_only)
+    return jobs.start(RunRequest(workload, tuple(implementations), env, measurement,
+                                baseline, tuple(cases or ()), parameters or {}))
 
 
 @server.tool()
@@ -70,43 +83,26 @@ def compare_runs(before: str, after: str) -> list[dict]:
 
 
 @server.tool()
-def check_mainline(intent_root: str, target: str, programs: list[str] | None = None,
+def check_mainline(backend: str, intent_root: str | None = None, programs: list[str] | None = None,
                    environment: str | None = None, compiler: str | None = None,
                    stage: str = 'run') -> dict:
     """Run the mainline author's programs through intent-bench check; returns a background run."""
-    arguments=['check','--intent-root',intent_root,'--target',target,'--stage',stage]
-    if environment:arguments.extend(['--env',environment])
-    if compiler:arguments.extend(['--compiler',compiler])
-    for program in programs or []:arguments.extend(['--program',program])
-    return jobs.start(arguments)
+    from intent.examples import PROGRAMS
+    from .request import RunRequest
+    from .model import Measurement
+    from .environments import load_environment
+    env = load_environment(environment, compiler=compiler,
+                           intent_root=Path(intent_root) if intent_root else None)
+    names = programs or tuple(PROGRAMS)
+    if set(names)-PROGRAMS.keys():
+        raise ValueError("unknown author program")
+    return jobs.start([RunRequest(f"mainline/{backend}/{name}", ("intent:"+backend,),
+                                 env, Measurement(enabled=False), kind="program", stage=stage)
+                       for name in names])
 
 
 def main():
-    import argparse
-    import sys
-    parser=argparse.ArgumentParser(prog='intent-bench-mcp')
-    parser.add_argument('--component',choices=('bench','manual','compiler'),default='bench')
-    parser.add_argument('--intent-root',type=Path)
-    args,remaining=parser.parse_known_args()
-    if args.component=='bench':
-        if remaining:parser.error('unrecognized arguments: '+' '.join(remaining))
-        server.run(transport='stdio')
-    else:
-        from .loading import intent_environment
-        from .model import Environment
-        from importlib import import_module
-        intent_environment(Environment(intent_root=args.intent_root))
-        sys.argv=[sys.argv[0],*remaining]
-        if args.component=='manual' and args.intent_root is not None and '--corpus' not in remaining:
-            import tempfile
-            from intent.tools.manual import snapshot
-            with tempfile.TemporaryDirectory(prefix='intent-bench-manual-') as directory:
-                corpus=Path(directory)/'manual.json'
-                corpus.write_text(json.dumps(snapshot(args.intent_root)))
-                sys.argv.extend(['--corpus',str(corpus)])
-                import_module('intent.mcp.manual').main()
-            return
-        import_module('intent.mcp.'+args.component).main()
+    server.run(transport='stdio')
 
 
 if __name__=='__main__':main()

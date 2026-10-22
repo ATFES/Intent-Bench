@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (tokens, hidden, output, experts, topk) = (2048, 4096, 14336, 8, 2)
@@ -30,5 +30,5 @@ def prepare(context):
     def launch():
         source_module.invoke_fused_moe_kernel(x, weight, source_output, routed_weight, ids, sorted_ids, expert_ids, padded, False, topk, config)
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : source_output, prepare=source_output.zero_ if 'splitk' == 'splitk' else None)
-    return Side(source, Tolerance(atol=2.5 if 'splitk' == 'splitk' else 0.1, rtol=0.05), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : source_output, reset=source_output.zero_ if 'splitk' == 'splitk' else None)
+    return checked_call(source, Tolerance(atol=2.5 if 'splitk' == 'splitk' else 0.1, rtol=0.05), cuda_graph=False, owners=locals())

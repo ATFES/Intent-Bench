@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -27,5 +27,5 @@ def prepare(context):
     source_prepare()
     initial_launch(source_launch, side='source')
     source_prepare()
-    source = PreparedLaunch(source_launch, lambda : (source_query, source_key), source_prepare)
-    return Side(source, (Tolerance(atol=0.02, rtol=0.01), Tolerance(atol=0.02, rtol=0.01)), cuda_graph=False, note='同算法；source 保留 bf16 中间舍入；Intent 通过 mutable custom op 与 torch.compile(fullgraph=True) 调用，计完整执行，含框架产生的状态处理', owners=locals())
+    source = PreparedCall(source_launch, lambda : (source_query, source_key), source_prepare)
+    return checked_call(source, (Tolerance(atol=0.02, rtol=0.01), Tolerance(atol=0.02, rtol=0.01)), cuda_graph=True, note='Native cuTile RoPE; original bf16 intermediate rounding preserved. Input restoration outside timing.', owners=locals())

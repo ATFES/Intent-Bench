@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.regularization.dropout import xor_shift_dropout
+from intent.examples.kernels.regularization.dropout import xor_shift_dropout
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -14,4 +14,4 @@ def prepare(context):
     mixed_seed = source_module._mix_seed(seed)
     inverse_keep = 1.0 / (1.0 - probability)
     (_, generated) = compile_single(context, xor_shift_dropout, (x, mixed_seed, probability, inverse_keep))
-    return Side(generated, Tolerance(atol=0.0), cuda_graph=True, owners=locals())
+    return checked_call(generated, Tolerance(atol=0.0), cuda_graph=True, owners=locals())

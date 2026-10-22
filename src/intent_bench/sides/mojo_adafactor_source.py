@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     gradient = torch.randn((4096, 4096), dtype=torch.float32) * 0.01
@@ -16,5 +17,5 @@ def prepare(context):
         def prepare():
             for (destination, source) in zip(state, initial):
                 destination.copy_(source)
-        return PreparedLaunch(lambda : function(gradient, *state, decay, learning_rate, epsilon), lambda : state, prepare=prepare)
-    return Side(side(runtime.adafactor), (Tolerance(atol=2e-05), Tolerance(atol=2e-07), Tolerance(atol=2e-07), Tolerance(atol=2e-07)), cuda_graph=False, device_type='cpu', note='既有4096x4096 f32 Adafactor三kernel完整调用，含原子row mean和parameter/row/column状态；单NUMA8核，PyTorch CPU reference；每次恢复初始状态且恢复不计时。', owners=locals())
+        return PreparedCall(lambda : function(gradient, *state, decay, learning_rate, epsilon), lambda : state, reset=prepare)
+    return checked_call(side(runtime.adafactor), (Tolerance(atol=2e-05), Tolerance(atol=2e-07), Tolerance(atol=2e-07), Tolerance(atol=2e-07)), cuda_graph=False, device_type='cpu', note='既有4096x4096 f32 Adafactor三kernel完整调用，含原子row mean和parameter/row/column状态；单NUMA8核，PyTorch CPU reference；每次恢复初始状态且恢复不计时。', owners=locals())

@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.references.torch_ops import group_norm_backward
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, channels, spatial, groups) = (32, 256, 1024, 32)
@@ -13,4 +13,4 @@ def prepare(context):
     mean = torch.randn((batch, groups), device='cuda', dtype=torch.float16)
     rstd = torch.rand((batch, groups), device='cuda', dtype=torch.float16) + 0.5
     source = functional_launch(lambda : group_norm_backward(*(x, grad_y, weight, mean, rstd)))
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, owners=locals())
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, owners=locals())

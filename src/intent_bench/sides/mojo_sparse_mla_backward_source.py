@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, sequence, key_value_sequence) = (1, 4096, 8192)
@@ -23,4 +24,4 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = source_backward()
-    return Side(PreparedLaunch(source_launch, lambda : source_state['output']), (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；计入 f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_state['output']), (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；计入 f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())

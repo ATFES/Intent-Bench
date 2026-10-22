@@ -5,16 +5,18 @@ import os
 from pathlib import Path
 import shlex
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
+import traceback
 from dataclasses import replace
 
 import numpy as np
 
 
 class Workspace:
-    def __init__(self, environment):
+    def __init__(self, environment, *, directory=None):
         self.host = environment.host or environment.options.get("host")
         self.transport = environment.transport or ("ssh" if self.host else "local")
         self.python = environment.python or environment.options.get("python") or ("python3" if self.host else sys.executable)
@@ -22,10 +24,12 @@ class Workspace:
             raise ValueError("SSH execution requires a host")
         if self.transport == "local" and self.host:
             raise ValueError("local execution must not specify a host")
-        root = Path(os.environ.get("XDG_CACHE_HOME", Path.home()/".cache"))/"intent-bench/workers"
+        from .output import worker_root
+        root = Path(directory) if directory is not None else worker_root()
         root.mkdir(parents=True, exist_ok=True)
         self.local = Path(tempfile.mkdtemp(prefix="run-", dir=root))
         self.remote = None
+        self.remote_root = environment.remote_output_root
 
     def copy(self, files):
         for item in files:
@@ -38,16 +42,23 @@ class Workspace:
     def stage(self, timeout=600):
         if self.transport == "local":
             return str(self.local)
-        self.remote = subprocess.check_output(["ssh","-o","BatchMode=yes",self.host,
-            "mktemp -d /tmp/intent-bench.XXXXXX"], text=True, timeout=30).strip()
-        subprocess.run(["scp","-qr",*[str(p) for p in self.local.iterdir()],self.host+":"+self.remote+"/"],
-                       check=True, timeout=timeout)
+        if not self.remote_root:
+            raise ValueError("SSH environments require remote_output_root")
+        work = self.remote_root.rstrip('/')+'/work'
+        command = 'mkdir -p '+shlex.quote(work+'/tmp')+' && mktemp -d '+shlex.quote(work+'/worker-XXXXXX')
+        self.remote = subprocess.check_output(["ssh","-o","BatchMode=yes",self.host, command],
+                                             text=True, timeout=30).strip()
+        files = [str(p) for p in self.local.iterdir()]
+        if files:
+            subprocess.run(["scp","-qr",*files,self.host+":"+self.remote+"/"],
+                           check=True, timeout=timeout)
         return self.remote
 
     def start(self, arguments, **kwargs):
         if self.transport == "local":
             return subprocess.Popen(arguments, cwd=self.local, **kwargs)
-        command = "cd " + shlex.quote(self.remote) + " && " + shlex.join(arguments)
+        command = "cd " + shlex.quote(self.remote) + " && " + shlex.join([
+            "env", "PYTHONDONTWRITEBYTECODE=1", "TMPDIR="+self.remote_root.rstrip('/')+"/work/tmp", *arguments])
         return subprocess.Popen(["ssh","-o","BatchMode=yes",self.host,command], **kwargs)
 
     def fetch(self, name, destination):
@@ -62,16 +73,18 @@ class Workspace:
     def device(self, name):
         return self.host+"/"+name if self.transport == "ssh" else name
 
-    def close(self):
+    def close(self, *, keep_local=False):
         if self.remote:
             subprocess.run(["ssh","-o","BatchMode=yes",self.host,
                 shlex.join(["rm","-rf","--",self.remote])], timeout=30, check=True)
             self.remote = None
+        if not keep_local:
+            shutil.rmtree(self.local)
 
 
 class WorkerSession:
     def __init__(self, environment, worker, files, request, inputs):
-        self.workspace = Workspace(environment)
+        self.workspace = Workspace(environment, directory=Path(os.environ["INTENT_BENCH_RUN_DIR"])/"artifacts")
         self.local = self.workspace.local
         self.process = None
         self.log = None
@@ -137,59 +150,98 @@ class WorkerSession:
             self.process.stdout.close()
         if self.log is not None:
             self.log.close()
-        self.workspace.close()
+        self.workspace.close(keep_local=True)
 
 
-def dispatch_cli(arguments, args, environment):
-    """Run Python operators in the chosen host/interpreter; native adapters use workers."""
-    native = args.command == 'run' and (
-        getattr(args,'suite',None) in ('mlu','rvv') or
-        (getattr(args,'workload',None) or '').startswith(('mlu/','rvv/','corpus/bangc/','corpus/weft/')))
-    remote = environment.transport == 'ssh' and not native
-    interpreter = environment.controller_python or (environment.python if environment.transport != 'ssh' else None)
-    local_python = (not remote and interpreter and
-                    str(Path(shutil.which(interpreter) or interpreter).absolute()) != str(Path(sys.executable).absolute()))
-    if not remote and not local_python:
-        return None
-    workspace = Workspace(environment)
-    try:
-        workspace.copy([Path(__file__).parent])
-        if local_python:
-            process_env = dict(os.environ)
-            process_env['PYTHONPATH'] = str(workspace.local)+os.pathsep+process_env.get('PYTHONPATH','')
-            return subprocess.call([interpreter,'-m','intent_bench.cli',*arguments],env=process_env)
-        from .environments import describe_environment
-        from .results import read,save,table
-        forwarded=[]
-        skip=False
-        for item in arguments:
-            if skip:skip=False;continue
-            if item in ('--env','--output'):skip=True;continue
-            if item.startswith(('--env=','--output=')):continue
-            forwarded.append(item)
-        workload = getattr(args,'workload',None)
-        if workload:
-            filename,separator,symbol=workload.partition(':')
+def dispatch_request(request):
+    """Transport the same request; provider and workload names never select transport."""
+    from .model import Result
+    from .output import output_root, run_output
+    from .results import read, save
+    from .service import RunOutcome
+    environment = request.environment
+    remote = environment.transport == "ssh"
+    root = output_root(environment.output_root)
+    temporary = root/"work"/"tmp"
+    temporary.mkdir(parents=True, exist_ok=True)
+    with run_output(environment, request.workload, request.output, execution=False) as output:
+        workspace = Workspace(environment, directory=root/"work")
+        rows = []
+        try:
+            # The selected interpreter must have Bench and Intent installed.
+            # Only explicitly supplied user workloads are transferred.
+            workload = request.workload
+            filename, separator, symbol = workload.partition(":")
             if Path(filename).is_file():
                 workspace.copy([Path(filename).resolve()])
-                forwarded[forwarded.index(workload)]='./'+Path(filename).name+(separator+symbol if separator else '')
-        local_options={key:value for key,value in environment.options.items() if key not in ('host','python')}
-        local_env=replace(environment,transport='local',host=None,python=None,controller_python=None,options=local_options)
-        (workspace.local/'environment.json').write_text(json.dumps(describe_environment(local_env)))
-        workspace.stage()
-        output=Path(args.output or Path(os.environ.get('XDG_CACHE_HOME',Path.home()/'.cache'))/'intent-bench/runs'/workspace.local.name)
-        output.mkdir(parents=True,exist_ok=True)
-        with (output/'worker.log').open('w') as log:
-            process=workspace.start([workspace.python,'-m','intent_bench.cli',*forwarded,
-                                     '--env','environment.json','--output','output'],stdout=log,stderr=subprocess.STDOUT)
-            code=process.wait()
-        workspace.fetch('output',output)
-        rows=read(output)
-        for row in rows:
-            row['device']=workspace.device(row['device'])
-            row.setdefault('metadata',{}).update(transport='ssh',host=workspace.host)
-        save(rows,output,command=['intent-bench',*arguments])
-        print(table(rows));print(f'Results: {output.resolve()}')
-        return code
-    finally:
-        workspace.close()
+                workload = "./"+Path(filename).name+(separator+symbol if separator else "")
+            local_env = replace(environment, transport="local", host=None, python=None,
+                                output_root=Path(environment.remote_output_root) if remote else output_root(environment.output_root))
+            location = workspace.stage()
+            forwarded = replace(request, workload=workload, environment=local_env,
+                                output=Path(location)/"output")
+            payload = workspace.local/"request.json"
+            payload.write_text(json.dumps(forwarded.record()))
+            if remote:
+                subprocess.run(["scp","-q",str(payload),workspace.host+":"+location+"/request.json"],
+                               check=True,timeout=30)
+            with (output/"worker.log").open("w") as log:
+                arguments = [workspace.python,"-m","intent_bench.worker",location+"/request.json"]
+                # The remote supervisor also terminates descendants if SSH is interrupted.
+                if remote:
+                    arguments = ["timeout", "--signal=TERM", "--kill-after=5", str(request.timeout), *arguments]
+                process = workspace.start(arguments, stdout=log,stderr=subprocess.STDOUT,
+                                          start_new_session=True,
+                                          env={**os.environ, "PYTHONDONTWRITEBYTECODE":"1", "TMPDIR":str(temporary)})
+                try:
+                    code = process.wait(timeout=request.timeout + (10 if remote else 0))
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL)
+                        process.wait()
+                    code = 124
+            try:
+                workspace.fetch("output", output)
+                rows = read(output)
+                def relocate(value):
+                    if isinstance(value, str) and value.startswith(location+"/output/"):
+                        return str(output)+value[len(location+"/output"):]
+                    if isinstance(value, list):
+                        return [relocate(item) for item in value]
+                    if isinstance(value, dict):
+                        return {key:relocate(item) for key,item in value.items()}
+                    return value
+                rows = relocate(rows)
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                rows = [Result(request.workload,"requested",case,{},name,status="worker_failed",
+                               stage="worker",device=environment.device,
+                               error=f"worker exit {code}; log: {output/'worker.log'}")
+                        for case in request.cases or ("load",) for name in request.implementations]
+            for row in rows:
+                if isinstance(row,dict):
+                    row["device"] = workspace.device(row["device"])
+                    row.setdefault("metadata",{}).update(transport=workspace.transport, worker_log=str(output/"worker.log"))
+            if code and not any((r["status"] if isinstance(r,dict) else r.status) not in
+                                {"passed","unchecked","generated","compiled","executed"} for r in rows):
+                rows.append(Result(request.workload,"requested","worker",{},"worker",
+                                   status="worker_failed",stage="worker",device=environment.device,
+                                   error=f"worker exit {code}; log: {output/'worker.log'}"))
+            save(rows, output, command=request.record())
+            return RunOutcome(rows, output)
+        except Exception as error:
+            rows = [Result(request.workload,"requested",case,{},name,status="worker_failed",
+                           stage="transport",device=environment.device,error=str(error),
+                           traceback=traceback.format_exc())
+                    for case in request.cases or ("load",) for name in request.implementations]
+            save(rows, output, command=request.record())
+            return RunOutcome(rows, output)
+        finally:
+            try:
+                workspace.close()
+            except Exception as error:
+                rows.append(Result(request.workload,"requested","cleanup",{},"worker",status="cleanup_failed",
+                                   stage="cleanup",device=environment.device,error=str(error)))
+                save(rows, output, command=request.record())

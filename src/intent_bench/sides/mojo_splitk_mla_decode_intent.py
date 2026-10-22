@@ -1,21 +1,26 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
-from kernels.streaming.mla import splitk_mla_decode_partials
-from kernels.streaming.splitk_reduce import splitk_attention_reduce_f16
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent.examples.kernels.streaming.mla import splitk_mla_decode_partials
+from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_reduce_f16
+from intent_bench.implementations.context import Tolerance
+from intent_bench.implementations.prepared import IntentSequence
 
 def prepare(context):
     arguments = _absorbed_decode_inputs()
-    partials = intent.compile(splitk_mla_decode_partials, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options, constexprs={'SPLITS': 16, 'SPLIT_SIZE': 512})
-    reduction = intent.compile(splitk_attention_reduce_f16, target=context.target, compiler=context.compiler, tuning_config=context.tuning_config, options=context.compile_options)
+    partials = context.compile(splitk_mla_decode_partials, constexprs={'SPLITS': 16, 'SPLIT_SIZE': 512})
+    reduction = context.compile(splitk_attention_reduce_f16)
     (generated, source) = ({}, {})
 
     def launch():
         (lse, partial) = partials.run(*arguments)
         generated['output'] = reduction.run(partial, lse)
-    return Side(PreparedLaunch(launch, lambda : generated['output']), Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, device_type='cpu', note='原B8/H64/S8192/C512/R64 f16 split512/P16 MLA完整partial+reduce，含workspace分配；partial f16/LSE f32，CPU完整attention数学参考f32，最终f16，原容差。', owners=locals())
+    sequence = IntentSequence()
+    lse, partial = sequence.add(partials, *arguments)
+    output = sequence.add(reduction, partial, lse)
+    call = sequence.prepared(lambda: output, host_run=launch, host_result=lambda: generated['output'])
+    return checked_call(call, Tolerance(atol=0.1, rtol=0.05), device_type='cpu', note='Prepared B8/H64/S8192/C512/R64 f16 split512/P16 MLA partial+reduce; original partial f16/LSE f32 precision.', owners=locals())
 
 def _absorbed_decode_inputs():
     query = torch.randn((8, 64, 512), dtype=torch.float16)

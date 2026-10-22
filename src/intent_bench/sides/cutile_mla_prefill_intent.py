@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
-from kernels.streaming.attention import mla_prefill
+from intent.examples.kernels.streaming.attention import mla_prefill
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, heads, key_heads, sequence, dimension, rope) = (1, 128, 1, 2048, 128, 64)
@@ -15,4 +15,4 @@ def prepare(context):
     kpe = torch.randn((batch, 1, sequence, rope), device='cuda', dtype=torch.float16)
     scale = 1.0 / math.sqrt(dimension + rope)
     (_, generated) = compile_single(context, mla_prefill, (q, qpe, k, kpe, v, scale), constexprs={'HEAD_GROUP': heads // key_heads})
-    return Side(generated, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用 FTZ 与近似除法', owners=locals())
+    return checked_call(generated, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, note='同算法；source 使用 FTZ 与近似除法', owners=locals())

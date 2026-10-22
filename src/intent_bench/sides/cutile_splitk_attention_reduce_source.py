@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 from types import SimpleNamespace
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -18,5 +18,5 @@ def prepare(context):
     def source_launch():
         source_module.splitk_reduce(partial, partial_lse, source_output, 8192, tuning_configs=configs, compiler_timeout=context.compiler_timeout_seconds)
     initial_launch(source_launch, side='source')
-    source = PreparedLaunch(source_launch, lambda : source_output)
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, owners=locals())
+    source = PreparedCall(source_launch, lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=True, owners=locals())

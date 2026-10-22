@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (experts, rows, hidden, intermediate) = (8, 1024, 4096, 14336)
@@ -24,8 +24,8 @@ def prepare(context):
     def launch():
         source_autotuner[lambda meta: (meta['NUM_SM'],)](source_a_ptrs, source_b_ptrs, source_c_ptrs, source_sizes, source_lds, experts)
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : torch.cat(source_outputs, dim=0))
-    return Side(source, Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : torch.cat(source_outputs, dim=0))
+    return checked_call(source, Tolerance(atol=0.02, rtol=0.01), cuda_graph=False, owners=locals())
 
 def _runtime(context, path, name):
     return load_module(context.project_root / path, name)

@@ -1,12 +1,12 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.convolution.varlen import varlen_causal_conv1d_final_state
-from kernels.convolution.varlen import varlen_aligned_causal_depthwise_conv1d
+from intent.examples.kernels.convolution.varlen import varlen_causal_conv1d_final_state
+from intent.examples.kernels.convolution.varlen import varlen_aligned_causal_depthwise_conv1d
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     lengths = (2048, 1536, 1024, 512)
@@ -23,5 +23,5 @@ def prepare(context):
     def generated_launch():
         generated_forward.launch()
         generated_state.launch()
-    generated = PreparedLaunch(launch=generated_launch, outputs=lambda : (generated_forward.outputs(), generated_state.outputs()))
-    return Side(generated, (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())
+    generated = PreparedCall(launch=generated_launch, result=lambda : (generated_forward.result(), generated_state.result()))
+    return checked_call(generated, (Tolerance(atol=0.05, rtol=0.05), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())

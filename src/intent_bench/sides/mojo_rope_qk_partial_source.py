@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 PARTIAL_ROTARY_DIMENSION = 64
 
 def prepare(context):
@@ -26,5 +27,5 @@ def prepare(context):
     def restore_source():
         source_query.copy_(query_initial)
         source_key.copy_(key_initial)
-    source = PreparedLaunch(source_launch, lambda : (source_query, source_key), prepare=restore_source)
-    return Side(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002)), cuda_graph=False, device_type='cpu', note='既有 partial Q/K rotary f16 InOut；仅旋转前64维，PyTorch CPU reference 保持原f32乘法后f16写回；每次恢复 query/key，恢复不计时；双方计完整host调用。', owners=locals())
+    source = PreparedCall(source_launch, lambda : (source_query, source_key), reset=restore_source)
+    return checked_call(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002)), cuda_graph=False, device_type='cpu', note='既有 partial Q/K rotary f16 InOut；仅旋转前64维，PyTorch CPU reference 保持原f32乘法后f16写回；每次恢复 query/key，恢复不计时；双方计完整host调用。', owners=locals())

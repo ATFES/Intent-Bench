@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.streaming.mamba import mamba3_siso_forward as mamba3_siso_forward_kernel
+from intent.examples.kernels.streaming.mamba import mamba3_siso_forward as mamba3_siso_forward_kernel
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, sequence, qk_heads, heads) = (1, 2048, 4, 16)
@@ -23,5 +23,5 @@ def prepare(context):
     gate = torch.randn((batch, sequence, heads, value_dimension), device='cuda', dtype=dtype) * 0.1
     arguments = (query, key, value, adt, dt, trap, query_bias, key_bias, angles, residual, gate, torch.empty((batch, sequence, heads, qk_dimension), device='cuda', dtype=dtype), torch.empty((batch, sequence, heads, qk_dimension), device='cuda', dtype=dtype), torch.empty((batch, heads, sequence), device='cuda', dtype=torch.float32), torch.empty((batch, heads, sequence), device='cuda', dtype=torch.float32), torch.empty((batch, heads, sequence), device='cuda', dtype=torch.float32))
     (_, generated_base) = compile_single(context, mamba3_siso_forward_kernel, arguments, constexprs={'HEAD_GROUP': heads // qk_heads})
-    generated = PreparedLaunch(generated_base.launch, generated_base.outputs)
-    return Side(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用近似 sin/cos；完整调用计时包含其输出及 workspace 分配，generated 使用预分配缓冲', owners=locals())
+    generated = PreparedCall(generated_base.launch, generated_base.result)
+    return checked_call(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用近似 sin/cos；完整调用计时包含其输出及 workspace 分配，generated 使用预分配缓冲', owners=locals())

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 BWD_CAUSAL_CONV_BATCH = 8
 BWD_CAUSAL_CONV_CHANNELS = 2048
 BWD_CAUSAL_CONV_LENGTH = 4096
@@ -18,4 +19,4 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = runtime.causal_conv1d_backward(x, weight, grad_output)
-    return Side(PreparedLaunch(source_launch, lambda : source_state['output']), (Tolerance(atol=0.0025), Tolerance(atol=0.25), Tolerance(atol=0.25)), cuda_graph=False, device_type='cpu', note='既有B8-D2048-L4096-W4 f16 causal conv backward；partial kernel后接reduce kernel，PyTorch CPU reference同算法，双方完整host调用。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_state['output']), (Tolerance(atol=0.0025), Tolerance(atol=0.25), Tolerance(atol=0.25)), cuda_graph=False, device_type='cpu', note='既有B8-D2048-L4096-W4 f16 causal conv backward；partial kernel后接reduce kernel，PyTorch CPU reference同算法，双方完整host调用。', owners=locals())

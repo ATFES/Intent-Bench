@@ -1,13 +1,13 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.normalization.rms_norm import rms_norm_bf16
+from intent.examples.kernels.normalization.rms_norm import rms_norm_bf16
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     hidden = 4096
     x = torch.randn((8192, hidden), device='cuda', dtype=torch.bfloat16)
     weight = torch.randn((hidden,), device='cuda', dtype=torch.bfloat16)
     (_, generated) = compile_single(context, rms_norm_bf16, (x, weight, 1.0 / hidden, 1e-05))
-    return Side(generated, Tolerance(atol=0.02, rtol=0.01), cuda_graph=True, note='同算法；source 额外写 Rstd', owners=locals())
+    return checked_call(generated, Tolerance(atol=0.02, rtol=0.01), cuda_graph=True, note='同算法；source 额外写 Rstd', owners=locals())

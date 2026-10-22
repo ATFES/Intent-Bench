@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.contraction.block_scaled import block_scaled_matmul
+from intent.examples.kernels.contraction.block_scaled import block_scaled_matmul
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import official_source
 
 def prepare(context):
@@ -15,4 +15,4 @@ def prepare(context):
     rhs_scale = rhs_scale_rows.T
     arguments = (lhs.view(m, k // block, block), lhs_scale.view(torch.uint8), rhs.view(k // block, block, n), rhs_scale.view(torch.uint8))
     (artifact, generated) = compile_single(context, block_scaled_matmul, arguments)
-    return Side(generated, Tolerance(atol=1.0, rtol=0.02), cuda_graph=True, owners=locals())
+    return checked_call(generated, Tolerance(atol=1.0, rtol=0.02), cuda_graph=True, owners=locals())

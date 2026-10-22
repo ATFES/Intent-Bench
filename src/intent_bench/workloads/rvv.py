@@ -35,9 +35,9 @@ def build(name):
     def generated(case,data,env):
         from ..implementations.weft_intent import prepare
         if name=='gemm':
-            return prepare('kernels.contraction.gemm:gemm_f32',(data[1],data[0].T.copy()),env)
+            return prepare('intent.examples.kernels.contraction.gemm:gemm_f32',(data[1],data[0].T.copy()),env)
         if name=='rms_norm':
-            return prepare('kernels.normalization.rms_norm:rms_norm_f32',(data[1],1/data[1].shape[-1],1e-5),env)
+            return prepare('intent.examples.kernels.normalization.rms_norm:rms_norm_f32',(data[1],1/data[1].shape[-1],1e-5),env)
         prefix='intent_bench.implementations.rvv_definitions:'
         if name=='q8_quantize':
             call=prepare(prefix+name,(data[1].reshape(-1,256),),env)

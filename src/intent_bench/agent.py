@@ -92,7 +92,9 @@ def generate(args):
     row.update(reference_signature=row['entry']+str(inspect.signature(reference)),invocation=material.metadata(),
                return_contract=tasks.return_contract(material.call(reference)),
                timing=task.get('timing',suite['timing']))
-    args.output.mkdir(parents=True,exist_ok=False)
+    args.output.mkdir(parents=True, exist_ok=True)
+    if any(args.output.iterdir()):
+        raise FileExistsError("Agent generation requires a new experiment output directory")
     if args.codex:
         intent_environment(Environment(intent_root=args.intent_root))
         from .corpus.agent_tritonbench.generation import generate_trial
@@ -151,4 +153,10 @@ def main(argv):
             p.add_argument('--triton-ref',type=Path)
     args=parser.parse_args(argv)
     args.command_line=['intent-bench','agent',*argv]
-    return generate(args) if args.action=='generate' else evaluate(args)
+    from .output import output_root, run_output
+    root = output_root()
+    args.output = args.output.expanduser().resolve()
+    if not args.output.is_relative_to(root/"experiments"):
+        parser.error("Agent output must be under the configured output_root/experiments")
+    with run_output(Environment(name="agent", output_root=root), "agent/"+args.task, args.output):
+        return generate(args) if args.action=='generate' else evaluate(args)

@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (16, 32, 8, 128)
@@ -23,4 +24,4 @@ def prepare(context):
 
     def source_launch():
         source_state['output'] = runtime.paged_gqa_decode(q, key_cache, value_cache, page_offsets, page_indices, lengths, split_offsets, scale, page_size=page_size)
-    return Side(PreparedLaunch(source_launch, lambda : source_state['output']), Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 paged GQA partial+split-k pipeline；生成端输出及 partial 预分配，CPU reference 计入 page table 解码、临时分配和 attention。', owners=locals())
+    return checked_call(PreparedCall(source_launch, lambda : source_state['output']), Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 paged GQA partial+split-k pipeline；生成端输出及 partial 预分配，CPU reference 计入 page table 解码、临时分配和 attention。', owners=locals())

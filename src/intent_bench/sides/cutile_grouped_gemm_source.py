@@ -1,8 +1,8 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -14,4 +14,4 @@ def prepare(context):
     group_x_list = list(group_x)
     group_weight_list = list(group_weight)
     source = functional_launch(lambda : tuple(source_module.group_gemm(group_x_list, group_weight_list, static_persistent=True, transpose_b=False)))
-    return Side(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 使用 host group shapes', owners=locals())
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.02), cuda_graph=False, note='同算法；source 使用 host group shapes', owners=locals())

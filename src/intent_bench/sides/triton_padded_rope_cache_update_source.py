@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 import triton
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads) = (32, 32, 8)
@@ -39,5 +39,5 @@ def prepare(context):
     source_launch()
     source_key_view = source_key_cache.view(batch, padded_length, kv_heads, dimension)
     source_value_view = source_value_cache.view(batch, padded_length, kv_heads, dimension)
-    source = PreparedLaunch(launch=source_launch, outputs=lambda : (source_query_output.squeeze(0), source_key_view[:, position], source_value_view[:, position]))
-    return Side(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=source_launch, result=lambda : (source_query_output.squeeze(0), source_key_view[:, position], source_value_view[:, position]))
+    return checked_call(source, (Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.002, rtol=0.002), Tolerance(atol=0.0)), cuda_graph=False, owners=locals())

@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import time
+import shlex
 
 from ..loading import load
 from ..model import BenchError,EnvironmentUnavailable,PreparedCall
@@ -17,18 +18,23 @@ class SourceCompilationError(BenchError):
 
 
 def deployment(env,ime=False):
-    default=Path(__file__).parents[1]/'profiles'/('ime.json' if ime else 'rvv.json')
-    profile=json.loads(Path(env.options.get('deployment',default)).read_text())
-    for key in ('cc','cflags','cpus','march','vlen_bits'):
-        if key in env.options:profile[key]=env.options[key]
-    return profile
+    from weft.runtime.driver import Toolchain
+    from weft.runtime.target import NativeTarget
+    compiler = env.options.get('weft_compiler') or os.environ.get('INTENT_WEFT_COMPILER')
+    native = NativeTarget.discover(Toolchain(compiler=compiler))
+    extensions = [name for name,cpus in native.matrix_extensions if native.cpus.issubset(cpus)]
+    if ime and len(extensions) != 1:
+        raise EnvironmentUnavailable('this workload requires one available native Weft matrix extension')
+    command = env.options.get('cc') or shlex.split(os.environ.get('CC','cc'))
+    if isinstance(command,str):
+        command = shlex.split(command)
+    return {**native.build_target.to_dict(), 'cpus':sorted(native.cpus), 'cc':command,
+            'cflags':env.options.get('cflags',[]), 'matrix_extension':extensions[0] if ime else None}
 
 
 def prepare(reference,arguments,outputs,bindings,dimensions,env,*,ime=False,meta=(),matrix_extension=True):
-    if env.options.get('weft_root'):
-        sys.path.insert(0,str(Path(env.options['weft_root'])/'python'))
     try:import weft
-    except ImportError as error:raise EnvironmentUnavailable('install Weft or supply --option weft_root="CHECKOUT"') from error
+    except ImportError as error:raise EnvironmentUnavailable('install Weft in the execution environment') from error
     compiler=env.options.get('weft_compiler') or os.environ.get('INTENT_WEFT_COMPILER') or shutil.which('weft-compile')
     if not compiler:raise EnvironmentUnavailable('select --option weft_compiler="/path/to/weft-compile"')
     profile=deployment(env,ime)

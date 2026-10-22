@@ -1,12 +1,12 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
-from kernels.streaming.gated_delta import chunk_gated_delta_prepare
-from kernels.streaming.gated_delta import chunk_gated_delta_recurrence
+from intent.examples.kernels.streaming.gated_delta import chunk_gated_delta_prepare
+from intent.examples.kernels.streaming.gated_delta import chunk_gated_delta_recurrence
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, sequence, heads, key_dimension, value_dimension) = (2, 2048, 8, 128, 128)
@@ -17,12 +17,12 @@ def prepare(context):
     beta = torch.sigmoid(torch.randn_like(gate))
     scale = 1.0 / math.sqrt(key_dimension)
     (_, prepare) = compile_single(context, chunk_gated_delta_prepare, (query, key, value, gate, beta, scale))
-    intermediate_outputs = prepare.outputs()
+    intermediate_outputs = prepare.result()
     (_, recurrence) = compile_single(context, chunk_gated_delta_recurrence, intermediate_outputs)
 
     def generated_launch():
         prepare.launch()
         recurrence.launch()
-    generated = PreparedLaunch(generated_launch, recurrence.outputs)
+    generated = PreparedCall(generated_launch, recurrence.result)
     tolerance = Tolerance(atol=0.1, rtol=0.05)
-    return Side(generated, (tolerance, tolerance), cuda_graph=False, note='同算法；generated 使用 BF16 矩阵输入、FP32 累加与状态，source 使用 TF32 矩阵输入', owners=locals())
+    return checked_call(generated, (tolerance, tolerance), cuda_graph=False, note='同算法；generated 使用 BF16 矩阵输入、FP32 累加与状态，source 使用 TF32 矩阵输入', owners=locals())

@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
-from kernels.streaming.gated_delta import recurrent_gated_delta_fwd
+from intent.examples.kernels.streaming.gated_delta import recurrent_gated_delta_fwd
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, sequence, heads, key_dimension, value_dimension) = (2, 2048, 8, 128, 128)
@@ -15,4 +15,4 @@ def prepare(context):
     beta = torch.sigmoid(torch.randn_like(gate))
     scale = 1.0 / math.sqrt(key_dimension)
     (_, generated) = compile_single(context, recurrent_gated_delta_fwd, (query, key, value, gate, beta, scale), constexprs={'HEAD_GROUP': 1})
-    return Side(generated, (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, owners=locals())
+    return checked_call(generated, (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, owners=locals())

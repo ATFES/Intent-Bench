@@ -1,10 +1,10 @@
 {
-  "description": "Compile on the controller; execute native calls on MLU",
+  "description": "Run ordinary Intent JIT and CNNL on the MLU execution host",
   "transport": "ssh",
   "host": "mlu-server",
   "python": "/path/to/worker-venv/bin/python",
-  "controller_python": "/path/to/controller-venv/bin/python",
-  "intent_root": "/path/to/intentdsl/on/controller",
-  "compiler": "/path/to/intent-compile/on/controller",
-  "options": {"device": 0, "neuware": "/usr/local/neuware"}
+  "remote_output_root": "/path/to/intentdsl_bench/output",
+  "compiler": "/path/to/intent-compile/on/server",
+  "device": "mlu:0",
+  "options": {"neuware": "/usr/local/neuware"}
 }

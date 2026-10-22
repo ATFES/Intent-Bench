@@ -12,7 +12,7 @@ import re
 
 import torch
 
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 SUITE_PATH = Path(__file__).with_name("suite.json")
 

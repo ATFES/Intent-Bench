@@ -3,6 +3,7 @@
   "transport": "ssh",
   "host": "gpu-server",
   "python": "/path/to/cuda-venv/bin/python",
+  "remote_output_root": "/path/to/intentdsl_bench/output",
   "intent_root": "/path/to/intentdsl/on/server",
   "compiler": "/path/to/intent-compile/on/server",
   "device": "cuda:0",

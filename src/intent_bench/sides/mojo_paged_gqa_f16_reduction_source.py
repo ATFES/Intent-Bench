@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     _inlined_paged_gqa_split_q = torch.randn((16, 32, 128), dtype=torch.float16)
@@ -19,7 +20,7 @@ def prepare(context):
 
         def _inlined_paged_gqa_split_reference():
             _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime.paged_gqa_decode_bf16(*_inlined_paged_gqa_split_arguments)
-        _inlined_paged_gqa_split_source_launch = PreparedLaunch(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
+        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
         (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
         _inlined_paged_gqa_split_note = '原B16/HQ32/HK8/K8192/D128/page16/split8 f16输入，BF16 partial+weighted BF16 reduce完整调用含workspace分配；CPU参考page-table attention f32概率后直接转BF16，原容差。'
     else:
@@ -27,7 +28,7 @@ def prepare(context):
 
         def _inlined_paged_gqa_split_reference():
             _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime._paged_gqa_decode(_inlined_paged_gqa_split_q, _inlined_paged_gqa_split_key, _inlined_paged_gqa_split_value, _inlined_paged_gqa_split_offsets, _inlined_paged_gqa_split_indices, _inlined_paged_gqa_split_lengths, 128 ** (-0.5)).half()
-        _inlined_paged_gqa_split_source_launch = PreparedLaunch(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
+        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
         (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
         _inlined_paged_gqa_split_note = 'BF16 partials with f16 final reduction; complete page-table attention checked against independent f32 CPU reference, preserving the existing BF16-partial tolerance.'
-    return Side(_inlined_paged_gqa_split_source_launch, _inlined_paged_gqa_split_tolerance, cuda_graph=False, status=_inlined_paged_gqa_split_status, device_type='cpu', note=_inlined_paged_gqa_split_note, owners=locals())
+    return checked_call(_inlined_paged_gqa_split_source_launch, _inlined_paged_gqa_split_tolerance, cuda_graph=False, status=_inlined_paged_gqa_split_status, device_type='cpu', note=_inlined_paged_gqa_split_note, owners=locals())

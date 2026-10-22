@@ -18,7 +18,7 @@ def pack_q4(inputs,env):
 
 def cnnl(name,case,inputs,env):
     root=Path(__file__).parents[1]/"native"
-    request={"operation":name,"arity":len(inputs),"device":env.options.get("device",0),"neuware":env.options.get("neuware","/usr/local/neuware")}
+    request={"operation":name,"arity":len(inputs),"device":int(env.device.split(":")[1]),"neuware":env.options.get("neuware","/usr/local/neuware")}
     session=WorkerSession(env,"cnnl_worker.py",[root/"cnnl_worker.py",root/"cnnl_ops.cpp"],request,inputs)
     return PreparedCall(lambda:session.call("run"),session.result,close=session.close,
         native_measure=lambda settings:session.call("measure",samples=settings.samples,warmup=settings.warmup),

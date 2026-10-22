@@ -26,18 +26,22 @@ jobs:
       BENCH_PYTHON: ${{ inputs.python }}
       INTENT_ROOT: ${{ vars.INTENT_ROOT }}
       INTENT_COMPILER: ${{ vars.INTENT_COMPILER }}
+      INTENT_BENCH_OUTPUT_ROOT: ${{ runner.temp }}/intent-bench/output
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v4
-      - name: Install in the job's temporary directory
-        run: '"$BENCH_PYTHON" -m pip install --no-deps --target "$RUNNER_TEMP/intent-bench-package" .'
+      - name: Install Bench in the selected execution environment
+        run: |
+          mkdir -p "$INTENT_BENCH_OUTPUT_ROOT/build/source" "$INTENT_BENCH_OUTPUT_ROOT/work/tmp"
+          rsync -a --exclude=.git --exclude=output ./ "$INTENT_BENCH_OUTPUT_ROOT/build/source/"
+          TMPDIR="$INTENT_BENCH_OUTPUT_ROOT/work/tmp" "$BENCH_PYTHON" -m pip install --no-deps "$INTENT_BENCH_OUTPUT_ROOT/build/source"
       - name: Run explicit device checks
         run: |
-          export PYTHONPATH="$RUNNER_TEMP/intent-bench-package"
           "$BENCH_PYTHON" - <<'PY'
           import json, os
           from intent_bench.cli import main
           args=['run','--suite',os.environ['BENCH_SUITE'],'--check-only','--threads','8',
-                '--output',os.environ['RUNNER_TEMP']+'/intent-bench-results']
+                '--output',os.environ['INTENT_BENCH_OUTPUT_ROOT']+'/latest/device-check']
           for option,key in [('--impl','BENCH_IMPLS'),('--intent-root','INTENT_ROOT'),('--compiler','INTENT_COMPILER')]:
               if os.environ[key]:args.extend([option,os.environ[key]])
           for key,value in json.loads(os.environ['BENCH_OPTIONS']).items():
@@ -48,4 +52,4 @@ jobs:
         if: always()
         with:
           name: device-check-results
-          path: ${{ runner.temp }}/intent-bench-results
+          path: ${{ runner.temp }}/intent-bench/output/latest/device-check

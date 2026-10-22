@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     slots = 65536
@@ -16,5 +17,5 @@ def prepare(context):
 
     def source_launch():
         (_, source_outputs['previous']) = runtime.claim_zero_slots(source_state)
-    source = PreparedLaunch(source_launch, lambda : (source_state, source_outputs['previous']), prepare=restore_source)
-    return Side(source, (Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有 claim_zero_slots i32 N65536 InOut/Out；每次调用前恢复 state，恢复不计时；双方计完整 host 调用。', owners=locals())
+    source = PreparedCall(source_launch, lambda : (source_state, source_outputs['previous']), reset=restore_source)
+    return checked_call(source, (Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, device_type='cpu', note='既有 claim_zero_slots i32 N65536 InOut/Out；每次调用前恢复 state，恢复不计时；双方计完整 host 调用。', owners=locals())

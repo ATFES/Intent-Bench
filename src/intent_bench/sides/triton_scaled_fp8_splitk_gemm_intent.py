@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.contraction.block_scaled import scaled_fp8_splitk_matmul
+from intent.examples.kernels.contraction.block_scaled import scaled_fp8_splitk_matmul
 from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (m, n, k, splits, block) = (4096, 14336, 4096, 4, 256)
@@ -15,5 +15,5 @@ def prepare(context):
     rhs = rhs_storage.view(iterations, splits, block, n)
     generated_output = torch.zeros((m, n), device='cuda', dtype=torch.float16)
     (_, generated_base) = compile_single(context, scaled_fp8_splitk_matmul, (lhs, rhs, generated_output, 1.0, 1.0))
-    generated = PreparedLaunch(launch=generated_base.launch, outputs=lambda : generated_output, prepare=lambda : generated_output.zero_())
-    return Side(generated, Tolerance(atol=0.5, rtol=0.01), cuda_graph=False, owners=locals())
+    generated = PreparedCall(launch=generated_base.launch, result=lambda : generated_output, reset=lambda : generated_output.zero_())
+    return checked_call(generated, Tolerance(atol=0.5, rtol=0.01), cuda_graph=False, owners=locals())

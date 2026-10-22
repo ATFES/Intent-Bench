@@ -21,6 +21,10 @@ class ImplementationMissing(BenchError):
     status = "implementation_missing"
 
 
+class DeviceBusy(BenchError):
+    status = "skipped_busy"
+
+
 @dataclass(frozen=True)
 class Case:
     name: str
@@ -37,7 +41,10 @@ class Environment:
     transport: str | None = None
     host: str | None = None
     python: str | None = None
-    controller_python: str | None = None
+    name: str = "local"
+    output_root: Path | None = None
+    remote_output_root: str | None = None
+    cpus: tuple[int, ...] | None = None
 
 
 @dataclass(frozen=True)
@@ -45,7 +52,7 @@ class Measurement:
     method: str = "auto"
     samples: int | None = None
     warmup: int | None = None
-    scope: str = "prepared_call"
+    scope: str = "operator"
     enabled: bool = True
     cache: str = "flush"
     warmup_ms: float = 25
@@ -53,6 +60,8 @@ class Measurement:
     throughput: str | None = None
 
     def __post_init__(self):
+        if self.scope == "prepared_call":
+            object.__setattr__(self, "scope", "operator")
         if (self.samples is not None and self.samples < 1) or (self.warmup is not None and self.warmup < 0):
             raise ValueError("samples must be positive and warmup nonnegative")
         if self.warmup_ms < 0 or self.rep_ms <= 0:
@@ -63,13 +72,15 @@ class Measurement:
             raise ValueError("throughput must be tflops or gbps")
         if self.method not in {"auto", "host", "cuda_event", "cuda_graph", "native"}:
             raise ValueError(f"unknown timing method: {self.method}")
-        if self.scope not in {"prepared_call", "host_call"}:
-            raise ValueError("scope must be prepared_call or host_call")
+        if self.scope not in {"operator", "host_call"}:
+            raise ValueError("scope must be operator or host_call")
+        if self.scope == "host_call" and self.method not in {"auto", "host"}:
+            raise ValueError("host_call measures Python entry-to-completion time; use auto or host timing")
 
 
 @dataclass
 class PreparedCall:
-    run: Callable[[], Any]
+    launch: Callable[[], Any]
     result: Callable[[], Any]
     reset: Callable[[], None] | None = None
     compile: Callable[[], None] | None = None
@@ -79,9 +90,14 @@ class PreparedCall:
     device: str = "cpu"
     timing: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-    scopes: tuple[str, ...] = ("prepared_call",)
+    scopes: tuple[str, ...] = ("operator",)
     host_run: Callable[[], Any] | None = None
     host_result: Callable[[], Any] | None = None
+    tolerance: Any = None
+    owners: Any = None
+
+    def __post_init__(self):
+        self.scopes = tuple("operator" if scope == "prepared_call" else scope for scope in self.scopes)
 
 
 @dataclass(frozen=True)

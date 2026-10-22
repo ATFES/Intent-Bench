@@ -1,10 +1,10 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import torch
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.corpus._common.measurement import functional_launch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, heads, sequence, dimension) = (4, 32, 4096, 128)
@@ -18,4 +18,4 @@ def prepare(context):
     source_function = runtime.load_attention()
     warp_specialize = capability_major >= 10
     source = functional_launch(lambda : source_function(q, k, v, True, scale, warp_specialize))
-    return Side(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='同算法；CUDA graph 设备执行计时；source 额外写 f32 M 辅助结果。', owners=locals())
+    return checked_call(source, Tolerance(atol=0.02, rtol=0.02), cuda_graph=True, note='同算法；CUDA graph 设备执行计时；source 额外写 f32 M 辅助结果。', owners=locals())

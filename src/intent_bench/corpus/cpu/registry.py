@@ -1,4 +1,4 @@
-from intent_bench.corpus._common.model import Entry
+from intent_bench.implementations.context import Entry
 
 
 MOJO = (

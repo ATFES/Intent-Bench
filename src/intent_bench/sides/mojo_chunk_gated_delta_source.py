@@ -1,8 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch, Tolerance
+from intent_bench.implementations.context import Tolerance
+from intent_bench.model import PreparedCall
 
 def prepare(context):
     query = torch.randn((2, 2048, 8, 128), dtype=torch.bfloat16) * 0.1
@@ -15,4 +16,4 @@ def prepare(context):
 
     def reference():
         source['output'] = runtime.chunk_gated_delta_fwd(*arguments)
-    return Side(PreparedLaunch(reference, lambda : source['output']), (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, device_type='cpu', note='原B2/S2048/H8/K128/V128 BF16 chunk64 gated-delta完整prepare+recurrence，含中间buffer分配，比较output和f32 final state；CPU参考保留source guarded Neumann/serial triangular solve和chunk recurrence，BF16中间ABI，matmul使用f32而非原GPU TF32或Intent显式BF16输入转换，原容差。', owners=locals())
+    return checked_call(PreparedCall(reference, lambda : source['output']), (Tolerance(atol=0.1, rtol=0.05), Tolerance(atol=0.1, rtol=0.05)), cuda_graph=False, device_type='cpu', note='原B2/S2048/H8/K128/V128 BF16 chunk64 gated-delta完整prepare+recurrence，含中间buffer分配，比较output和f32 final state；CPU参考保留source guarded Neumann/serial triangular solve和chunk recurrence，BF16中间ABI，matmul使用f32而非原GPU TF32或Intent显式BF16输入转换，原容差。', owners=locals())

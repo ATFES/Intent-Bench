@@ -1,11 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import math
 import cuda.tile as ct
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import tilegym_source
 
 def prepare(context):
@@ -25,5 +25,5 @@ def prepare(context):
         ct.launch(torch.cuda.current_stream(), ((heads + 15) // 16, batch, splits), source_module._naive_absorb_mla_transpose_kernel, (query, query_rope, cache, cache, cache_rope, source_partial_output, source_partial_lse, scale, batch, heads, sequence, splits, split_size, latent, 16, 128, rope, True))
         source_module.splitk_reduce(source_partial_output, source_partial_lse, source_output, sequence)
     initial_launch(source_launch, side='source')
-    source = PreparedLaunch(source_launch, lambda : source_output)
-    return Side(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())
+    source = PreparedCall(source_launch, lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, note='同算法；source 使用 FTZ 与近似除法', owners=locals())

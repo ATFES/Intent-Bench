@@ -20,14 +20,13 @@ def build(row,entries):
         import torch
         torch.set_num_threads(env.threads)
         from .corpus import PROJECT_ROOT
-        from .corpus._common.model import Context
+        from .implementations.context import Context
         from .corpus._common.measurement import observe_stages
         from .measurement import device_window
         index=int(env.device.split(':')[-1]) if env.device.startswith('cuda:') else 0
         if side=='intent':
             intent_environment(env)
-            from intent.tools.backends import make_target
-            selected_target=make_target(target,{'device':index} if target in ('triton','cutile','bangc') else {'workers':env.threads})
+            selected_target=SimpleNamespace(device=index,workers=env.threads)
         else:
             selected_target=SimpleNamespace(device=index,workers=env.threads)
         context=Context(env.compiler,PROJECT_ROOT,selected_target,target,compiler_timeout_seconds=60,
@@ -38,34 +37,36 @@ def build(row,entries):
             now=time.perf_counter();phases[stage]=phases.get(stage,0)+now-started
             stage,started=next_stage,now
         with ExitStack() as stack:
-            if provider in ('triton','cutile','bangc'):
+            if provider in ('triton','cutile'):
                 stack.enter_context(device_window(f'cuda:{index}'))
                 stack.enter_context(torch.cuda.device(index))
-            stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile','bangc') else []))
+            stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile') else []))
             stack.enter_context(observe_stages(observe))
             factory=load(entries[side])
             torch.manual_seed(seed)
             prepared=factory(context)
         observe('ready')
-        if prepared.launch is None:raise ExpressionGap(prepared.note or 'no implementation supplied')
+        if not isinstance(prepared,PreparedCall):
+            raise TypeError('implementation must return the public PreparedCall contract')
+        compilers = list(dict.fromkeys(call.compile for call in context.prepared_calls if call.compile))
+        if prepared.compile is not None and prepared.compile not in compilers:
+            compilers.append(prepared.compile)
+        if compilers:
+            def compile_calls():
+                for compile_call in compilers:
+                    compile_call()
+            prepared.compile = compile_calls
         artifacts = list(context.artifacts)
         for owner in (prepared.owners or {}).values():
             directory = getattr(owner, 'cache_directory', None)
             if directory is not None and str(directory) not in artifacts:
                 artifacts.append(str(directory))
         tolerances[case.name]=prepared.tolerance
-        launch=prepared.launch
-        if isinstance(launch,PreparedCall):
-            launch.metadata.update(source=entries[side],input_seed=seed,preparation_stages_seconds=phases,
-                                   compiler_artifacts=artifacts)
-            return launch
-        # Some upstream calls hold pointer tables rather than Tensor owners.
-        # Keep the whole prepared side alive until the final synchronization.
-        return PreparedCall(lambda:prepared.launch.launch(),lambda:prepared.launch.outputs(),reset=launch.prepare,
-                            device=f'cuda:{index}' if prepared.device_type=='cuda' else 'cpu',
-                            scopes=('prepared_call','host_call'),
-                            metadata={'note':prepared.note,'preparation_stages_seconds':phases,
-                                      'input_seed':seed,'source':entries[side],'artifacts':artifacts})
+        if prepared.device == 'cuda':
+            prepared.device=f'cuda:{index}'
+        prepared.metadata.update(source=entries[side],input_seed=seed,preparation_stages_seconds=phases,
+                                 compiler_artifacts=artifacts)
+        return prepared
     source_name='torch' if provider=='mojo' else 'reference:cuda' if provider=='bangc' else provider
     if provider=='bangc' and row['kernel'] in {'causal_attention_f32','causal_linear_attention_f32'}:
         source_name='reference:mojo'

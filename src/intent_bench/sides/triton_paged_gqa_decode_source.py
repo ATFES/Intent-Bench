@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (16, 32, 8, 128)
@@ -26,5 +26,5 @@ def prepare(context):
     def launch():
         source_module.decode_attention_fwd(q, key_cache, value_cache, source_output, source_lse, page_table, lengths, workspace, splits, scale, page_size=page_size)
     launch()
-    source = PreparedLaunch(launch=launch, outputs=lambda : source_output)
-    return Side(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, owners=locals())
+    source = PreparedCall(launch=launch, result=lambda : source_output)
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, owners=locals())

@@ -1,9 +1,9 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.measurement import initial_launch
-from intent_bench.corpus._common.model import PreparedLaunch
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.model import PreparedCall
+from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import runtime_module
 BLOCK_SIZE = 128
 EXPERTS = 64
@@ -21,8 +21,8 @@ def prepare(context):
         (sorted_ids, expert_ids, total, _, _) = source_state['outputs']
         return _canonical_alignment(sorted_ids, expert_ids, total)
     initial_launch(source_launch, side='source')
-    source = PreparedLaunch(source_launch, source_outputs)
-    return Side(source, (Tolerance(atol=0.0), Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, note='同算法计数/前缀和/散射/标记；workspace初始化与辅助输出计入调用', owners=locals())
+    source = PreparedCall(source_launch, source_outputs)
+    return checked_call(source, (Tolerance(atol=0.0), Tolerance(atol=0.0), Tolerance(atol=0.0)), cuda_graph=False, note='同算法计数/前缀和/散射/标记；workspace初始化与辅助输出计入调用', owners=locals())
 
 def _runtime(context):
     return runtime_module(context, 'corpus/gpu/baselines/cutile/tilegym/moe/fused/moe_runtime.py', 'intent_v2_cutile_moe_runtime')

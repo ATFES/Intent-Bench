@@ -1,11 +1,11 @@
 from __future__ import annotations
-from intent_bench.sides import Side
+from intent_bench.implementations.prepared import checked_call
 import torch
-from kernels.streaming.paged_attention import splitk_paged_gqa_decode_partials
-from kernels.streaming.splitk_reduce import splitk_attention_weighted_sum_reduce
-from programs.composition import PagedDecode
+from intent.examples.kernels.streaming.paged_attention import splitk_paged_gqa_decode_partials
+from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_weighted_sum_reduce
+from intent.examples.programs.composition import PagedDecode
 from intent_bench.corpus._common.measurement import compile_kernel, prepare_program
-from intent_bench.corpus._common.model import Tolerance
+from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (16, 32, 8, 128)
@@ -24,4 +24,4 @@ def prepare(context):
     partials = compile_kernel(context, splitk_paged_gqa_decode_partials, constexprs={'PAGE_SIZE': page_size, 'HEAD_GROUP': query_heads // kv_heads, 'SPLITS': splits})
     reduction = compile_kernel(context, splitk_attention_weighted_sum_reduce)
     generated = prepare_program(PagedDecode(partials, reduction), (q, key_cache, value_cache, page_offsets, page_indices, lengths, split_offsets, scale))
-    return Side(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, owners=locals())
+    return checked_call(generated, Tolerance(atol=0.1, rtol=0.05), cuda_graph=False, owners=locals())
