@@ -292,6 +292,7 @@
     "intent": "intent_bench.sides.cutile_splitk_mla_decode_intent:prepare"
   },
   "corpus/cutile/block_scaled_gemm": {
+    "oracle": "intent_bench.sides.gpu_quantization_oracles:block_scaled",
     "source": "intent_bench.sides.cutile_block_scaled_gemm_source:prepare",
     "intent": "intent_bench.sides.cutile_block_scaled_gemm_intent:prepare"
   },
@@ -360,6 +361,7 @@
     "intent": "intent_bench.sides.cutile_chunk_gated_delta_intent:prepare"
   },
   "corpus/cutile/nvfp4_quantize": {
+    "oracle": "intent_bench.sides.gpu_quantization_oracles:nvfp4",
     "source": "intent_bench.sides.cutile_nvfp4_quantize_source:prepare",
     "intent": "intent_bench.sides.cutile_nvfp4_quantize_intent:prepare"
   },
