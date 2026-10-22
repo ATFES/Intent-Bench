@@ -4,7 +4,7 @@ import math
 import platform
 import time
 import traceback
-from dataclasses import replace
+from dataclasses import asdict, replace
 from contextlib import nullcontext
 import sys
 from typing import Sequence
@@ -68,11 +68,14 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                          metadata={"seed": seed, "machine": platform.node(), "platform": platform.platform(),
                                    "controller_machine": platform.node(),
                                    "threads": env.threads, "compiler": env.compiler})
+            if oracle_error is not None:
+                row.metadata["reference_error"] = f"{type(oracle_error).__name__}: {oracle_error}"
             call = None
             try:
                 if input_error is not None:
                     raise input_error
                 row.stage = "prepare"
+                if observer: observer(row)
                 started = time.perf_counter()
                 call = impl.prepare(case, clone(inputs), env)
                 if settings.scope == "host_call" and call.host_run is not None:
@@ -89,6 +92,7 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                 if settings.scope not in call.scopes:
                     raise ValueError("implementation does not support the selected call scope")
                 row.stage = "native_compile"
+                if observer: observer(row)
                 started = time.perf_counter()
                 if call.compile is not None:
                     call.compile()
@@ -98,6 +102,7 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     row.stages_seconds["native_compile"] = call.metadata["native_compile_seconds"]
                 with device_window(call.device):
                     row.stage = "first_call"
+                    if observer: observer(row)
                     reset(call)
                     started = time.perf_counter()
                     call.launch()
@@ -105,6 +110,7 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     row.stages_seconds["first_call"] = time.perf_counter() - started
                     if settings.enabled:
                         row.stage = "measurement"
+                        if observer: observer(row)
                         samples, row.method = measure(call, settings)
                         row.metadata.update(call.metadata)
                         if not samples or any(not math.isfinite(x) or x <= 0 for x in samples):
@@ -151,6 +157,9 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                                   else "compilation_failed")
                 row.error = f"{type(error).__name__}: {error}"
                 row.traceback = traceback.format_exc()
+                observation = getattr(error, "observation", None)
+                if observation is not None:
+                    row.metadata["compiler_observation"] = asdict(observation)
             finally:
                 if call is not None and call.close:
                     try:
@@ -160,6 +169,7 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                         if row.status in {"passed", "unchecked"}:
                             row.status, row.error = "cleanup_failed", str(error)
             case_results.append(row)
+            if observer: observer(row)
         anchors = [r for r in case_results if r.implementation == baseline and r.correctness == "passed" and r.median_ms]
         if anchors:
             anchor = anchors[0]

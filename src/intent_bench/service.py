@@ -59,8 +59,20 @@ def execute_local(request):
                         name = ",".join(f"{k}={v}" for k, v in parameters.items())
                         cases[name] = Case(name, parameters)
                 workload = replace(workload, cases=list(cases.values()))
+            # Keep completed participants when a later native compiler or worker
+            # reaches its deadline. This is the same current result, not a log.
+            partial = {(case.name, name): Result(workload.name, workload.family,
+                        case.name, dict(case.parameters), name, stage="waiting",
+                        device=request.environment.device, scope=request.measurement.scope,
+                        baseline=request.baseline)
+                       for case in workload.cases for name in request.implementations}
+            def observe(row):
+                partial[row.case, row.implementation] = row
+                save(list(partial.values()), directory, command=request.record())
+            save(list(partial.values()), directory, command=request.record())
             rows = benchmark(workload, request.implementations, environment=request.environment,
-                             measurement=request.measurement, baseline=request.baseline, seed=request.seed)
+                             measurement=request.measurement, baseline=request.baseline, seed=request.seed,
+                             observer=observe)
         except Exception as error:
             status = "environment_missing" if isinstance(error, ImportError) else getattr(error, "status", "preparation_failed")
             rows = [Result(request.workload, "requested", case, {}, name, status=status,

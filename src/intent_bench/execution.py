@@ -222,6 +222,9 @@ def dispatch_request(request):
                         for case in request.cases or ("load",) for name in request.implementations]
             for row in rows:
                 if isinstance(row,dict):
+                    if code and row.get("status") == "pending":
+                        row["status"] = "worker_failed"
+                        row["error"] = f"worker exit {code} during {row['stage']}; log: {output/'worker.log'}"
                     row["device"] = workspace.device(row["device"])
                     row.setdefault("metadata",{}).update(transport=workspace.transport, worker_log=str(output/"worker.log"))
             if code and not any((r["status"] if isinstance(r,dict) else r.status) not in
