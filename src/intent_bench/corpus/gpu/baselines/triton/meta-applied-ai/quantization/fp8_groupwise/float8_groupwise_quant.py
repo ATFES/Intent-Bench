@@ -13,8 +13,8 @@ import triton.language as tl
 from triton import Config
 
 # global constants
-FP8_MAX: tl.constexpr = 448.0
-EPSILON: tl.constexpr = 1e-12
+FP8_MAX = tl.constexpr(448.0)
+EPSILON = tl.constexpr(1e-12)
 
 
 @triton.jit
