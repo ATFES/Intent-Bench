@@ -22,9 +22,10 @@ def prepare(context):
     source_output = torch.empty_like(q)
     source_lse = torch.empty((batch, query_heads), device='cuda', dtype=torch.float32)
     workspace = torch.empty((batch, query_heads, splits, dimension + 1), device='cuda', dtype=torch.float32)
+    cache_scale = torch.ones((), device='cuda', dtype=torch.float32)
 
     def launch():
-        source_module.decode_attention_fwd(q, key_cache, value_cache, source_output, source_lse, page_table, lengths, workspace, splits, scale, page_size=page_size)
+        source_module.decode_attention_fwd(q, key_cache, value_cache, source_output, source_lse, page_table, lengths, workspace, splits, scale, page_size=page_size, k_scale=cache_scale, v_scale=cache_scale)
     launch()
     source = PreparedCall(launch=launch, result=lambda : source_output)
     return checked_call(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, owners=locals())

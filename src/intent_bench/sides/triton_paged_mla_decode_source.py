@@ -27,9 +27,10 @@ def prepare(context):
     source_output = torch.empty((batch, query_heads, latent_dimension), device='cuda', dtype=torch.float16)
     source_lse = torch.empty((batch, query_heads), device='cuda', dtype=torch.float32)
     workspace = torch.empty((batch, query_heads, splits, latent_dimension + 1), device='cuda', dtype=torch.float32)
+    cache_scale = torch.ones((), device='cuda', dtype=torch.float32)
 
     def launch():
-        source_module.decode_attention_fwd(q, key, latent_cache, source_output, source_lse, page_table, lengths, workspace, splits, scale, page_size=page_size, is_mla=True)
+        source_module.decode_attention_fwd(q, key, latent_cache, source_output, source_lse, page_table, lengths, workspace, splits, scale, page_size=page_size, is_mla=True, k_scale=cache_scale, v_scale=cache_scale)
     launch()
     source = PreparedCall(launch=launch, result=lambda : source_output)
-    return checked_call(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, note='同算法；source 使用 packed KV/page-table ABI 并写辅助 LSE；输入布局适配在计时前完成，完整 source 调用含 scale 分配', owners=locals())
+    return checked_call(source, Tolerance(atol=0.05, rtol=0.05), cuda_graph=True, note='同算法；source 使用 packed KV/page-table ABI 并写辅助 LSE；输入布局与固定 scale 在准备阶段绑定，计时包含完整两阶段算子', owners=locals())
