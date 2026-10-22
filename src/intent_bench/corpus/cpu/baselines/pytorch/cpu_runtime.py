@@ -1179,6 +1179,17 @@ def mamba_chunk_state_fwd(state_basis, x, dt, cumulative_decay):
     return torch.einsum("bclhn,bhcl,bhcl,bclhp->bchpn", basis, decay.to(x.dtype), dt, values)
 
 
+def causal_attention_f32(q, k, v, scale):
+    return torch.nn.functional.scaled_dot_product_attention(
+        q, k, v, is_causal=True, scale=scale)
+
+
+def causal_linear_attention_f32(q, k, v):
+    output, final = linear_attention_forward(
+        q.unsqueeze(2), k.unsqueeze(2), v.unsqueeze(2), 1.0)
+    return output.squeeze(2), final.squeeze(1)
+
+
 def linear_attention_forward(q, k, v, scale):
     batch, sequence, heads, dimension = q.shape
     chunk = 64

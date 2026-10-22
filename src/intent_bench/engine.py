@@ -147,7 +147,8 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                 # Preserve compiler-provided stages without classifying unsupported lowering as missing hardware.
                 if getattr(error, "stage", None):
                     row.stage = str(error.stage)
-                    row.status = "compilation_failed"
+                    row.status = ("execution_failed" if row.stage in {"provider_invocation", "provider_tuning"}
+                                  else "compilation_failed")
                 row.error = f"{type(error).__name__}: {error}"
                 row.traceback = traceback.format_exc()
             finally:

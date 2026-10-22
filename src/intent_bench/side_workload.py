@@ -13,6 +13,19 @@ def mappings():
     return json.loads((Path(__file__).parent/'sides/catalog.json').read_text())
 
 
+def prepare_input_oracle(specification):
+    """Use a registered input factory and independent CPU numerical function."""
+    from .corpus.cpu.baselines.pytorch import cpu_runtime
+    data = load(specification['inputs'])()
+    function = getattr(cpu_runtime, specification.get('reference', data.reference))
+    state = {}
+    def launch():
+        state['output'] = function(*data.arguments)
+    return PreparedCall(launch, lambda: state['output'], device='cpu',
+                        tolerance=data.tolerance,
+                        metadata={'numerical_reference': function.__name__})
+
+
 def build(row,entries):
     provider=row['provider'];tolerances={}
     targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
@@ -42,9 +55,10 @@ def build(row,entries):
                 stack.enter_context(torch.cuda.device(index))
             stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile') else []))
             stack.enter_context(observe_stages(observe))
-            factory=load(entries[side])
             torch.manual_seed(seed)
-            prepared=factory(context)
+            entry=entries[side]
+            prepared=(prepare_input_oracle(entry) if isinstance(entry,dict)
+                      else load(entry)(context))
         observe('ready')
         if not isinstance(prepared,PreparedCall):
             raise TypeError('implementation must return the public PreparedCall contract')
@@ -81,5 +95,6 @@ def build(row,entries):
             actual,expected=cpu(actual),cpu(expected)
         compare_outputs(actual,expected,next(iter(tolerances.values())))
     return Workload(row['name'],[Case(row['case'],{'profile':'original'})],lambda case,seed:seed,impls,
-                    oracle=Implementation('oracle',lambda case,seed,env:prepare('source',provider,case,seed,env)),
+                    oracle=Implementation('oracle',lambda case,seed,env:prepare(
+                        'oracle' if 'oracle' in entries else 'source',provider,case,seed,env)),
                     check=check,family=row['family'],parameter_keys=())

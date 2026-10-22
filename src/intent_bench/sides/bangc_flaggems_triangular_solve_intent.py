@@ -13,5 +13,5 @@ def prepare(context):
     initial = torch.randn((batch, size), device='cpu', dtype=torch.float32)
     solution = initial.clone()
     sequence = LocalSequence(context)
-    sequence.add(batched_lower_triangular_solve, {'lower': lower, 'solution': solution})
+    solution = sequence.add(batched_lower_triangular_solve, {'lower': lower, 'solution': solution})['solution']
     return checked_call(prepare_sequence(sequence, solution), Tolerance(atol=0.0001, rtol=0.0001), device_type='mlu', owners=locals())

@@ -30,14 +30,24 @@ def check_program(request):
         inputs.seed([request.seed,list(PROGRAMS).index(name)])
         load_program(name)(context)
         row.status = {"source":"generated","native":"compiled","run":"executed"}[request.stage]
-        row.metadata["artifacts"] = [str(a.cache_directory) for a in context.artifacts]
         row.metadata["note"] = "Author entry check; execution alone does not establish numerical correctness."
     except Exception as error:
-        row.status = "compilation_failed" if hasattr(error,"stage") else "execution_failed"
         row.stage = getattr(error,"stage",request.stage)
+        row.status = ("execution_failed" if row.stage in {"run", "provider_invocation", "provider_tuning"}
+                      else "compilation_failed")
         row.error = str(error)
         row.traceback = traceback.format_exc()
     finally:
         row.stages_seconds[request.stage] = time.perf_counter()-start
-        context.close()
+        row.metadata["artifacts"] = [str(a.cache_directory) for a in context.artifacts]
+        try:
+            context.close()
+        except Exception as error:
+            cleanup_traceback = traceback.format_exc()
+            if row.error:
+                row.metadata["cleanup_error"] = str(error)
+                row.metadata["cleanup_traceback"] = cleanup_traceback
+            else:
+                row.status, row.stage = "cleanup_failed", "cleanup"
+                row.error, row.traceback = str(error), cleanup_traceback
     return row
