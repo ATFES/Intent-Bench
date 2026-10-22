@@ -4,6 +4,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import replace
 import fcntl
+import gc
 import math
 import os
 from pathlib import Path
@@ -26,7 +27,18 @@ def device_window(device):
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             raise DeviceBusy(f"another Bench invocation owns device {device}") from None
-        yield
+        # SDK dispatchers can own CUDA libraries through Python cycles. Their
+        # destructors must not unload a library inside another provider's graph
+        # capture (including capture performed by its first-call autotuner).
+        collecting = device.startswith("cuda") and gc.isenabled()
+        if collecting:
+            gc.collect()
+            gc.disable()
+        try:
+            yield
+        finally:
+            if collecting:
+                gc.enable()
 
 
 def reset(call):
