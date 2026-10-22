@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 from intent_bench.implementations.prepared import checked_call
 import intent
 import torch
@@ -23,6 +24,9 @@ def prepare(context):
     grad_output = torch.randn_like(q) * 0.05
     runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference_attention_backward')
     (output, lse, source_backward) = runtime.prepare_attention_backward(q, k, v, grad_output, ATTENTION_SCALE)
+    # The retained reference helper exports log2 LSE; the product kernels take
+    # natural-log LSE and apply LOG2E themselves when reconstructing probability.
+    lse = lse * math.log(2.0)
     delta_artifact = context.compile(attention_backward_delta)
     constexprs = {'HEAD_GROUP': ATTENTION_HEAD_GROUP, 'CAUSAL': True}
     dkdv_artifact = context.compile(attention_backward_dkdv, constexprs=constexprs)
