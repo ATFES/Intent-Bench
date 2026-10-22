@@ -58,6 +58,9 @@ SSH 只传输请求和显式的用户 workload 文件，普通运行不会复制
 `intent_root` 仅检查已安装的 editable checkout，不修改导入路径。
 CPU 的 `cpus` 选择允许的执行集合，`threads` 是线程预算，ISA/VLEN 由产品探测。
 MLU 使用 `device: "mlu:0"`，工具链位置放入 options。
+`options.triton_ptxas` 和 `options.triton_ptxas_blackwell` 分别传给 Triton 的
+`TRITON_PTXAS_PATH` 与 `TRITON_PTXAS_BLACKWELL_PATH`，路径属于执行主机。
+它们显式选择该 worker 中所有 Triton 实现使用的汇编器，不在失败后切换工具链。
 GGML/CNNL 等独立 baseline 的 library/header 路径仍由各自环境配置。
 
 超时按请求处理；失败保留阶段和日志，不自动换后端或计时方式。

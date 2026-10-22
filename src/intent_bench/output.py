@@ -68,6 +68,8 @@ def run_output(environment, workload, explicit=None, *, execution=True):
         Path(variables["TMPDIR"]).mkdir(parents=True, exist_ok=True)
         for option, names in (("mojo", ("INTENT_MOJO", "INTENT_BENCH_MOJO")),
                               ("weft_compiler", ("INTENT_WEFT_COMPILER", "WEFT_COMPILER")),
+                              ("triton_ptxas", ("TRITON_PTXAS_PATH",)),
+                              ("triton_ptxas_blackwell", ("TRITON_PTXAS_BLACKWELL_PATH",)),
                               ("cncc", ("INTENT_BANGC_CNCC",))):
             if option in environment.options:
                 for name in names:
