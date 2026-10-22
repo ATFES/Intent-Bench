@@ -45,10 +45,8 @@ def _prepare(name, implementation, case, inputs, env):
         from intent.examples.kernels.normalization.softmax import stable_softmax, stable_softmax_f16
         definition = stable_softmax if x.dtype == torch.float32 else stable_softmax_f16
     else:
-        if x.dtype != torch.float16:
-            raise ExpressionGap("the mainline relu_forward example currently declares f16 input")
-        from intent.examples.kernels.activation.pointwise import relu_forward
-        definition = relu_forward
+        from intent.examples.kernels.activation.pointwise import relu_forward, relu_forward_f32
+        definition = relu_forward_f32 if x.dtype == torch.float32 else relu_forward
     from ..implementations.intent import make_kernel
     from ..implementations.prepared import intent_call
     artifact = make_kernel(definition, env, target)
