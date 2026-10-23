@@ -14,7 +14,7 @@ OPERATIONS = {name: index for index, name in enumerate((
     "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
-    "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt"))}
+    "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero"))}
 
 
 @cache
@@ -138,6 +138,15 @@ def prepare(name, arguments, environment):
     if name.startswith("batched_gemm"):
         metadata["library"] = "ATen CPU batched GEMM"
         metadata["scope_note"] += " Transposed views and any library packing are inside the native interval; input dtype is unchanged."
+    if name == "causal_convolution":
+        metadata["library"] = "ATen CPU grouped conv1d and SiLU"
+        metadata["scope_note"] = ("FP16 inputs widened to FP32 to preserve source products and accumulation; "
+                                  "conversion, grouped convolution, causal slicing, SiLU and FP16 output all timed. "
+                                  "The native library's convolution allocation is included.")
+    if name == "nonzero":
+        metadata["library"] = "ATen CPU nonzero and bincount"
+        metadata["scope_note"] = ("Native stable coordinate extraction, row counts, INT32 index conversion and "
+                                  "padding to the author's fixed row capacity all timed, including library temporary allocations.")
     prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):

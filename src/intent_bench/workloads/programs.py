@@ -51,6 +51,8 @@ BASELINES["attention"]["aten:cpu"] = "ATen CPU Flash Attention, causal grouped q
 BASELINES["int8_gemm"]["aten:cpu"] = "ATen CPU INT8 GEMM, including INT32 bias addition"
 BASELINES["histogram"]["aten:cpu"] = "ATen CPU bincount, including signed conversion, excluded bins and INT32 output"
 BASELINES["jagged_mean"]["aten:cpu"] = "ATen CPU segment_reduce(mean), including runtime segment offsets"
+BASELINES["causal_convolution"]["aten:cpu"] = "ATen CPU grouped conv1d and SiLU, including FP32 widening and output conversion"
+BASELINES["nonzero"]["aten:cpu"] = "ATen CPU nonzero and bincount, including stable row packing and padding"
 
 
 def backends(name):

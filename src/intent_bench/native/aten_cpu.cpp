@@ -90,6 +90,19 @@ void initialize(Call &call) {
                 "jagged mean requires values [T,D] and segment offsets [B+1]");
     o.push_back(at::empty({a[1].numel()-1, a[0].size(1)}, a[0].options()));
     break;
+  case 22:
+    TORCH_CHECK(a[0].dim()==3 && a[1].dim()==2 && a[2].dim()==1 &&
+                a[1].size(0)==a[0].size(1) && a[2].size(0)==a[0].size(1),
+                "causal convolution requires X[B,D,L], W[D,W] and bias[D]");
+    o.push_back(at::empty_like(a[0]));
+    for (const auto &input : a)
+      w.push_back(at::empty(input.sizes(), input.options().dtype(at::kFloat)));
+    break;
+  case 23:
+    TORCH_CHECK(a[0].dim()==2, "row compaction requires a matrix");
+    o.push_back(at::empty(a[0].sizes(), a[0].options().dtype(at::kInt)));
+    o.push_back(at::empty({a[0].size(0)}, a[0].options().dtype(at::kInt)));
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -177,6 +190,29 @@ void execute(Call &call) {
   case 18:
     at::segment_reduce_out(o[0], a[0], "mean", std::nullopt, std::nullopt, a[1]);
     break;
+  case 22: {
+    for (size_t i=0; i<a.size(); ++i) w[i].copy_(a[i]);
+    auto convolution = at::conv1d(w[0], w[1].unsqueeze(1), w[2],
+        {1}, {a[1].size(1)-1}, {1}, a[0].size(1));
+    auto causal = convolution.narrow(2, 0, a[0].size(2));
+    at::silu_out(causal, causal);
+    o[0].copy_(causal);
+    break;
+  }
+  case 23: {
+    auto coordinates = at::nonzero(a[0]);
+    auto counts = at::bincount(coordinates.select(1, 0), std::nullopt, a[0].size(0));
+    o[0].fill_(-1);
+    o[1].copy_(counts);
+    auto columns = coordinates.select(1, 1).to(at::kInt);
+    const int64_t *sizes = counts.const_data_ptr<int64_t>();
+    int64_t begin = 0;
+    for (int64_t row=0; row<a[0].size(0); ++row) {
+      o[0][row].narrow(0, 0, sizes[row]).copy_(columns.narrow(0, begin, sizes[row]));
+      begin += sizes[row];
+    }
+    break;
+  }
   }
 }
 }
