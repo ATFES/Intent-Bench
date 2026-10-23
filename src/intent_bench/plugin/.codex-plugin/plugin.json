@@ -1,7 +1,19 @@
 {
   "name": "intentdsl",
-  "version": "0.1.0",
-  "description": "IntentDSL language, compiler and operator benchmarks",
+  "version": "0.2.0",
+  "description": "IntentDSL operator development, GPU comparisons and native baselines",
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
+  "mcpServers": "./.mcp.json",
+  "requires_local_executor": true,
+  "interface": {
+    "displayName": "IntentDSL Bench",
+    "shortDescription": "算子开发、后端比较与性能分析",
+    "longDescription": "选择 Intent 后端、原生 baseline、输入与运行环境，使用统一工具测量延时和吞吐。附带 Intent 语言手册和编译器入口。",
+    "category": "Developer Tools",
+    "defaultPrompt": [
+      "把 softmax 的两个 Intent GPU 后端与一个原生 baseline 比较，只看延时。",
+      "把我写的算子接入 bench，复用已有输入和 baseline。",
+      "查看可用的算子、输入配置和运行环境。"
+    ]
+  }
 }
