@@ -4,13 +4,14 @@ jobs:
   core:
     runs-on: ubuntu-latest
     env:
-      INTENT_BENCH_OUTPUT_ROOT: ${{ runner.temp }}/intent-bench/output
       PYTHONDONTWRITEBYTECODE: '1'
     strategy:
       matrix:
         python: ['3.10', '3.12']
     steps:
       - uses: actions/checkout@v4
+      - name: Configure output directory
+        run: echo "INTENT_BENCH_OUTPUT_ROOT=$RUNNER_TEMP/intent-bench/output" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}

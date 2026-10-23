@@ -26,10 +26,11 @@ jobs:
       BENCH_PYTHON: ${{ inputs.python }}
       INTENT_ROOT: ${{ vars.INTENT_ROOT }}
       INTENT_COMPILER: ${{ vars.INTENT_COMPILER }}
-      INTENT_BENCH_OUTPUT_ROOT: ${{ runner.temp }}/intent-bench/output
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - uses: actions/checkout@v4
+      - name: Configure output directory
+        run: echo "INTENT_BENCH_OUTPUT_ROOT=$RUNNER_TEMP/intent-bench/output" >> "$GITHUB_ENV"
       - name: Install Bench in the selected execution environment
         run: |
           mkdir -p "$INTENT_BENCH_OUTPUT_ROOT/build/source" "$INTENT_BENCH_OUTPUT_ROOT/work/tmp"
