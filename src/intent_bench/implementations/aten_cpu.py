@@ -13,7 +13,7 @@ from ..output import output_root
 OPERATIONS = {name: index for index, name in enumerate((
     "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
-    "csr_spmv", "ragged_gemm"))}
+    "csr_spmv", "ragged_gemm", "int8_gemm", "attention"))}
 
 
 @cache
@@ -61,7 +61,7 @@ def prepare(name, arguments, environment):
         raise ValueError("ATen native CPU comparisons require device=cpu")
     tensors = [value for value in arguments if isinstance(value, torch.Tensor)]
     scalars = [value for value in arguments if not isinstance(value, torch.Tensor)]
-    dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32)
+    dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32, torch.int8)
     if any(value.device.type != "cpu" or not value.is_contiguous() for value in tensors):
         raise ValueError("this ATen native binding requires contiguous CPU inputs")
     if name == "adamw" and (scalars[3] != 1-scalars[1] or scalars[4] != 1-scalars[2]):
@@ -120,6 +120,13 @@ def prepare(name, arguments, environment):
                 "scope_note": "Prepared native ATen operations; output/workspace allocation and Python submission excluded."}
     if name == "ragged_gemm":
         metadata["scope_note"] += " Reading group offsets, slicing views and every group GEMM are inside the native interval."
+    if name == "int8_gemm":
+        metadata["library"] = "ATen CPU INT8 GEMM with INT32 bias"
+        metadata["scope_note"] += " Integer GEMM and bias addition are both timed."
+    if name == "attention":
+        metadata["library"] = "ATen CPU Flash Attention, causal grouped queries"
+        metadata["scope_note"] = ("Public native CPU flash-attention operator on original grouped Q/K/V; "
+                                  "packing, output/LSE allocation and auxiliary LSE are included. Python submission is excluded.")
     prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):

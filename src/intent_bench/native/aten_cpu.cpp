@@ -20,6 +20,7 @@ at::ScalarType dtype(int kind) {
   case 2: return at::kBFloat16;
   case 3: return at::kLong;
   case 4: return at::kInt;
+  case 5: return at::kChar;
   default: TORCH_CHECK(false, "unsupported baseline input dtype");
   }
 }
@@ -59,6 +60,17 @@ void initialize(Call &call) {
     o.push_back(at::empty({a[0].size(0), a[2].size(2)}, a[0].options()));
     break;
   }
+  case 15:
+    o.push_back(at::empty({a[0].size(0), a[1].size(1)}, a[0].options().dtype(at::kInt)));
+    break;
+  case 16:
+    TORCH_CHECK(a[0].dim()==4 && a[1].dim()==4 && a[2].sizes()==a[1].sizes(),
+                "CPU flash attention requires [B,H,T,D] Q/K/V");
+    TORCH_CHECK(a[0].size(0)==a[1].size(0) && a[0].size(3)==a[1].size(3) &&
+                a[1].size(1)>0 && a[0].size(1)%a[1].size(1)==0,
+                "CPU flash attention requires compatible grouped query heads");
+    o.push_back(at::empty_like(a[0]));
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -119,6 +131,13 @@ void execute(Call &call) {
     }
     break;
   }
+  case 15: at::_int_mm_out(o[0], a[0], a[1]); o[0].add_(a[2]); break;
+  case 16:
+    // The public CPU flash-attention API owns output/LSE allocation. Keep its
+    // complete native call, including packing and allocation, inside the timer.
+    o[0] = std::get<0>(at::_scaled_dot_product_flash_attention_for_cpu(
+        a[0], a[1], a[2], 0.0, true, std::nullopt, s[0]));
+    break;
   }
 }
 }
@@ -153,7 +172,7 @@ extern "C" void *bench_aten_output(void *opaque, int output, int64_t *rank, int6
   const auto &tensor = static_cast<Call *>(opaque)->outputs.at(output);
   *rank = tensor.dim();
   for (int64_t i = 0; i < *rank; ++i) sizes[i] = tensor.size(i);
-  for (int kind = 0; kind <= 4; ++kind)
+  for (int kind = 0; kind <= 5; ++kind)
     if (tensor.scalar_type() == dtype(kind)) *type = kind;
   return tensor.data_ptr();
 }

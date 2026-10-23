@@ -30,7 +30,8 @@ BASELINES = {
     "attention": {"cutile": "NVIDIA TileGym causal grouped-query FMHA"},
     "paged_decode": {"triton": "vLLM split-K paged GQA decode, including merge"},
     "mamba_chunk_state": {"triton": "state-spaces/mamba chunk state, FP32 states"},
-    "gated_delta": {"cutile": "NVIDIA TileGym recurrent gated delta, including final state"},
+    "gated_delta": {"cutile": "NVIDIA TileGym recurrent gated delta, including final state",
+                    "ggml": "GGML native recurrent gated delta, including BF16 conversions, grouped heads and final state"},
     "csr_spmv": {"torch": "ATen/cuSPARSE CSR matrix-vector product"},
     "ragged_gemm": {"cutile": "NVIDIA TileGym grouped GEMM, unequal groups and prebound output slices",
                     "triton": "Triton grouped TMA GEMM, including required weight transpose"},
@@ -46,6 +47,8 @@ BASELINES = {
 from ..implementations.aten_cpu import OPERATIONS as CPU_PROGRAMS
 for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
     BASELINES[_name]["aten:cpu"] = "Native libtorch/ATen CPU " + _name
+BASELINES["attention"]["aten:cpu"] = "ATen CPU Flash Attention, causal grouped queries and auxiliary LSE"
+BASELINES["int8_gemm"]["aten:cpu"] = "ATen CPU INT8 GEMM, including INT32 bias addition"
 
 
 def backends(name):
@@ -298,6 +301,17 @@ def _reference(name, seed, env, implementation="torch"):
             if implementation == "aten:cpu":
                 from ..implementations.aten_cpu import prepare
                 return self.bind(prepare(name, arguments, env), arguments, mutable)
+            if implementation == "ggml":
+                from ..implementations.native_libraries import ggml
+                if name != "gated_delta":
+                    raise NotImplementedError((name, implementation))
+                *values, scale = arguments
+                if scale != values[0].shape[-1]**-0.5:
+                    raise ValueError("GGML gated delta uses inverse-square-root query scaling")
+                if any(value.dtype != torch.bfloat16 or not value.is_contiguous() for value in values):
+                    raise ValueError("GGML gated delta binding requires contiguous BF16 inputs")
+                bits = tuple(value.view(torch.uint16).numpy() for value in values)
+                return self.bind(ggml(name, None, bits, env), arguments, mutable)
             if implementation == "cnnl":
                 from ..implementations.native_libraries import cnnl
                 operation = "matmul" if name == "gemm" else name
