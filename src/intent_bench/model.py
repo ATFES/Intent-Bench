@@ -147,6 +147,7 @@ class Result:
     median_ms: float | None = None
     iqr_ms: float | None = None
     baseline: str | None = None
+    baseline_ms: float | None = None
     speedup: float | None = None
     stages_seconds: dict[str, float] = field(default_factory=dict)
     metrics: dict[str, float] = field(default_factory=dict)

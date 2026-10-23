@@ -5,21 +5,96 @@ constexprs and multi-kernel composition remain in intent.examples; this module
 only binds comparison implementations and observes their declared outputs.
 """
 from ..model import Case, EnvironmentUnavailable, Implementation, PreparedCall, Workload
+from dataclasses import dataclass
 
 
 BASELINES = {
-    "relu": ("cutile", "torch"), "softmax": ("triton", "torch"), "transpose": ("torch",),
-    "embedding": ("triton", "torch"), "layer_norm": ("triton", "torch", "mojo"),
-    "gemm": ("triton", "torch"), "batched_gemm": ("cutile", "torch"), "histogram": ("cub",),
+    "relu": {"cutile": "NVIDIA TileGym ReLU", "torch": "ATen ReLU", "cnnl": "CNNL ReLU"},
+    "softmax": {"triton": "Triton fused-softmax tutorial", "torch": "ATen softmax", "cnnl": "CNNL softmax"},
+    "transpose": {"torch": "ATen transpose materialization"},
+    "embedding": {"triton": "Liger embedding lookup", "torch": "ATen embedding lookup"},
+    "layer_norm": {"triton": "Triton layer-norm tutorial", "torch": "ATen LayerNorm",
+                   "mojo": "MAX rowwise LayerNorm moments"},
+    "gemm": {"triton": "Triton matrix-multiplication tutorial", "torch": "ATen GEMM", "cnnl": "CNNL matmul"},
+    "batched_gemm": {"cutile": "NVIDIA TileGym batched GEMM", "torch": "ATen batched GEMM"},
+    "histogram": {"cub": "NVIDIA CUB DeviceHistogram, including initialization and merge"},
+    "swiglu": {"triton": "Liger fused SwiGLU", "torch": "ATen SiLU and multiply composition"},
+    "rope": {"triton": "Liger RoPE, including layout conversion and InOut writeback"},
+    "jagged_mean": {"triton": "TritonBench jagged mean", "torch": "ATen segment_reduce"},
+    "cumsum": {"torch": "ATen cumsum"},
+    "batch_norm": {"torch": "ATen native_batch_norm, including running-state updates"},
+    "group_norm_backward": {"torch": "ATen native_group_norm_backward"},
+    "adamw": {"torch": "ATen fused AdamW"},
+    "cholesky": {"torch": "ATen/cuSOLVER Cholesky, InOut"},
+    "dropout": {"cutile": "NVIDIA TileGym xorshift dropout"},
+    "attention": {"cutile": "NVIDIA TileGym causal grouped-query FMHA"},
+    "paged_decode": {"triton": "vLLM split-K paged GQA decode, including merge"},
+    "mamba_chunk_state": {"triton": "state-spaces/mamba chunk state, FP32 states"},
+    "gated_delta": {"cutile": "NVIDIA TileGym recurrent gated delta, including final state"},
 }
+from ..implementations.aten_cpu import OPERATIONS as CPU_PROGRAMS
+for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
+    BASELINES[_name]["aten:cpu"] = "Native libtorch/ATen CPU " + _name
+
+
+def backends(name):
+    result = ["triton", "cutile"]
+    if "mojo" in BASELINES[name] or "aten:cpu" in BASELINES[name]: result.append("mojo")
+    if "cnnl" in BASELINES[name]: result.append("bangc")
+    return result
+
+
+def _tree(value, leaf):
+    if isinstance(value, tuple):
+        return tuple(_tree(item, leaf) for item in value)
+    if isinstance(value, list):
+        return [_tree(item, leaf) for item in value]
+    if isinstance(value, dict):
+        return {key: _tree(item, leaf) for key, item in value.items()}
+    return leaf(value)
+
+
+def _capture_results(value, getter, bindings):
+    if isinstance(value, (tuple, list)):
+        for index, item in enumerate(value):
+            _capture_results(item, lambda index=index: getter()[index], bindings)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _capture_results(item, lambda key=key: getter()[key], bindings)
+    else:
+        bindings[id(value)] = getter
+
+
+@dataclass
+class _Definition:
+    definition: object
+
+
+def _mutable_arguments(program):
+    from intent.language.annotations import ConstexprSpec, ViewKind, ViewSpec
+    if not isinstance(program, _Definition):
+        # Product compositions used here have read-only public inputs; their
+        # workspace initialization belongs to the full prepared invocation.
+        from intent.examples.programs.composition import Histogram, GroupNormBackward, PagedDecode
+        if isinstance(program, (Histogram, GroupNormBackward, PagedDecode)):
+            return ()
+        raise NotImplementedError("declare public effects for this author composition")
+    parameters = [p.annotation for p in program.definition.signature.parameters.values()
+                  if not isinstance(p.annotation, ConstexprSpec)
+                  and not (isinstance(p.annotation, ViewSpec) and p.annotation.kind is ViewKind.OUT)]
+    return tuple(i for i, p in enumerate(parameters)
+                 if isinstance(p, ViewSpec) and p.kind is ViewKind.INOUT)
 
 
 def _device(env, backend=None):
-    device = ("cpu" if backend == "mojo" else "cuda:0") if env.device == "auto" else env.device
+    device = ("cpu" if backend in {"mojo", "aten:cpu"} else
+              "mlu:0" if backend in {"bangc", "cnnl"} else "cuda:0") if env.device == "auto" else env.device
     if backend in {"triton", "cutile", "cub"} and not device.startswith("cuda:"):
         raise EnvironmentUnavailable(f"{backend} requires a CUDA execution environment")
-    if backend == "mojo" and device != "cpu":
-        raise EnvironmentUnavailable("Mojo CPU comparison requires a CPU execution environment")
+    if backend in {"mojo", "aten:cpu"} and device != "cpu":
+        raise EnvironmentUnavailable(f"{backend} requires a CPU execution environment")
+    if backend in {"bangc", "cnnl"} and not device.startswith("mlu:"):
+        raise EnvironmentUnavailable(f"{backend} requires an MLU execution environment")
     return device
 
 
@@ -44,25 +119,58 @@ def _intent(name, backend, seed, env):
                 raise NotImplementedError("register complete multi-call author orchestration before benchmarking it")
             self.buffers.begin()
             self.invocation = program.prepare(*arguments)
+            return self.invocation.result()
 
     context = PrepareContext(backend, _device(env, backend), compiler=env.compiler, stage="native",
                              workers=env.threads if backend == "mojo" else None,
                              backend_options=backend_options(env, backend))
     try:
         _seed(name, seed)
-        load_program(name)(context)
+        output = load_program(name)(context)
         if context.invocation is None:
             raise ValueError("author program did not submit its complete call")
         call = context.invocation
+        from intent.examples.programs.inputs import Array
+        # Author returns can include original InOut arrays alongside Out values.
+        # Resolve those arrays to the same resident buffers already bound above.
+        output = _tree(output, lambda value: context.buffers.input(value, element=value.dtype)
+                       if isinstance(value, Array) else value)
         restore = tuple(context.buffers.resetters.values())
         metadata = {"author_program": name, "input_profile": "installed author program",
                     "compiler_artifacts": [str(a.cache_directory) for a in context.artifacts]}
         reset = lambda: [function() for function in restore]
+        if backend == "bangc":
+            from types import SimpleNamespace
+            from intent.runtime.bangc import Queue
+            from ..implementations.bangc import prepare_sequence
+            queue = Queue(device=int(context.device.split(':')[1]),
+                          neuware=env.options.get("neuware", "/usr/local/neuware"))
+            def close():
+                try:
+                    queue.close()
+                finally:
+                    context.close()
+            sequence = SimpleNamespace(queue=queue, device=queue.device, reset=reset,
+                enqueue=lambda: call.enqueue(queue), launch=call.launch, compile=call.compile, close=close)
+            prepared = prepare_sequence(sequence, output)
+            prepared.metadata.update(metadata)
+            return prepared
         native_measure = None
         if backend == "mojo":
-            from ..implementations.native_sampling import sample
-            native_measure = lambda settings: sample(call, settings, reset, metadata=metadata)
-        return PreparedCall(call.launch, call.result, compile=call.compile,
+            from ..implementations.prepared import intent_sequence
+            components = {"histogram": ("partials", "merge"), "group_norm_backward": ("dx", "affine")}
+            calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
+            native = intent_sequence(calls, lambda: output, reset=reset, metadata=metadata)
+            def close():
+                try:
+                    native.close()
+                finally:
+                    context.close()
+            from dataclasses import replace
+            return replace(native, close=close, owners=context,
+                compiler_observations=lambda: [a.observation for k in context.kernels for a in k.artifacts
+                                                if a.observation is not None])
+        return PreparedCall(call.launch, lambda: output, compile=call.compile,
             reset=reset, close=context.close, native_measure=native_measure,
             timing="cpu_native_monotonic" if native_measure else None,
             device=context.device, owners=context,
@@ -81,15 +189,21 @@ def _reference(name, seed, env, implementation="torch"):
     from ..corpus._common.measurement import functional_launch
 
     device = _device(env, implementation)
+    if implementation in {"cnnl", "oracle"} and device.startswith("mlu:"):
+        device = "cpu"
     dtypes = {"f16": torch.float16, "f32": torch.float32, "bf16": torch.bfloat16,
               "i32": torch.int32, "i64": torch.int64}
+    buffers, results = {}, {}
 
     def tensor(value):
         if not isinstance(value, Array):
             return value
+        if id(value) in buffers:
+            return buffers[id(value)]
         # Preserve BF16 storage bits; NumPy's BF16 is not a torch.from_numpy dtype.
         data = torch.frombuffer(value.data, dtype=dtypes[value.dtype]).reshape(value.shape)
-        return data.to(device)
+        buffers[id(value)] = data.to(device)
+        return buffers[id(value)]
 
     class ReferenceContext:
         invocation = None
@@ -97,16 +211,41 @@ def _reference(name, seed, env, implementation="torch"):
         def compile(self, definition, *, constexprs=None):
             # Author construction still describes its composition; the independent
             # library call does not compile or interpret Intent kernel definitions.
-            return None
+            return _Definition(definition)
+
+        def bind(self, call, arguments, mutable):
+            self.invocation = call
+            initial = [(arguments[i], arguments[i].clone()) for i in mutable]
+            if initial:
+                call.reset = lambda: [value.copy_(saved) for value, saved in initial]
+            # Some library APIs allocate their output lazily. One unmeasured
+            # invocation establishes the author's return-tree projections.
+            try:
+                call.launch()
+            except Exception:
+                if call.close:
+                    call.close()
+                raise
+            output = call.result()
+            _capture_results(output, call.result, results)
+            return output
 
         def call(self, program, *arguments):
             if self.invocation is not None:
                 raise NotImplementedError("register the full author sequence before benchmarking it")
             arguments = tuple(tensor(value) for value in arguments)
+            mutable = _mutable_arguments(program)
+            if implementation == "aten:cpu":
+                from ..implementations.aten_cpu import prepare
+                return self.bind(prepare(name, arguments, env), arguments, mutable)
+            if implementation == "cnnl":
+                from ..implementations.native_libraries import cnnl
+                operation = "matmul" if name == "gemm" else name
+                call = cnnl(operation, None, tuple(value.numpy() for value in arguments), env)
+                return self.bind(call, arguments, mutable)
             if name == "histogram":
                 from ..implementations.cub import histogram
-                self.invocation = histogram(arguments[0], env)
-                return
+                return self.bind(histogram(arguments[0], env), arguments, mutable)
             if implementation == "mojo":
                 from types import SimpleNamespace
                 from ..corpus.cpu.baselines.mojo.modular.normalization.layer_norm.layer_norm_runtime import prepare
@@ -115,10 +254,17 @@ def _reference(name, seed, env, implementation="torch"):
                                  *arguments)
                 metadata = {"library": "MAX rowwise LayerNorm moments",
                             "reference_source": "corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm.mojo"}
-                self.invocation = PreparedCall(native.launch, native.result, device=device,
+                call = PreparedCall(native.launch, native.result, device=device,
                     timing="cpu_native_monotonic", owners=native, metadata=metadata,
                     native_measure=lambda settings: sample_timer(native, settings, lambda: None, metadata=metadata))
-                return
+                return self.bind(call, arguments, mutable)
+            from ..references.author_programs import prepare as prepare_additional
+            if name in {"attention", "paged_decode", "mamba_chunk_state", "gated_delta"}:
+                from ..references.author_streaming import prepare
+                return self.bind(prepare(name, implementation, arguments, env), arguments, mutable)
+            if name in {"swiglu", "rope", "jagged_mean", "cumsum", "batch_norm",
+                        "group_norm_backward", "adamw", "cholesky", "dropout"}:
+                return self.bind(prepare_additional(name, implementation, arguments, env), arguments, mutable)
             x = arguments[0]
             source = "PyTorch ATen "+("CUDA" if device.startswith("cuda:") else "CPU")
             if implementation == "triton":
@@ -172,18 +318,24 @@ def _reference(name, seed, env, implementation="torch"):
                 function = lambda: torch.bmm(x, arguments[1])
             else:
                 raise NotImplementedError(name)
-            self.invocation = functional_launch(function)
-            self.invocation.device = device
-            self.invocation.owners = arguments
-            self.invocation.metadata["library"] = source
+            call = functional_launch(function)
+            call.device = device
+            call.owners = arguments
+            call.metadata["library"] = source
+            return self.bind(call, arguments, mutable)
 
     _seed(name, seed)
     context = ReferenceContext()
-    load_program(name)(context)
+    output = load_program(name)(context)
     if context.invocation is None:
         raise ValueError("author program did not submit its complete call")
     context.invocation.metadata.update(author_program=name, input_profile="installed author program")
-    return context.invocation
+    from dataclasses import replace
+    def observe(value):
+        if isinstance(value, Array):
+            return buffers[id(value)]
+        return results[id(value)]() if id(value) in results else value
+    return replace(context.invocation, result=lambda: _tree(output, observe))
 
 
 def build(name):
@@ -192,12 +344,20 @@ def build(name):
     from ..implementations.context import Tolerance
     from ..numeric import compare_outputs
     tolerances = {"softmax": Tolerance(.01, .01), "layer_norm": Tolerance(5e-5, 1e-5),
-                  "gemm": Tolerance(.01, .01), "batched_gemm": Tolerance(.05, .02)}
+                  "gemm": Tolerance(.01, .01), "batched_gemm": Tolerance(.05, .02),
+                  "swiglu": Tolerance(.02, .01), "rope": (Tolerance(.002, .002),)*2,
+                  "jagged_mean": Tolerance(2e-5, 1e-5), "cumsum": Tolerance(.002, 1e-5),
+                  "group_norm_backward": Tolerance(.05, .02), "adamw": Tolerance(1e-5, 1e-5),
+                  "cholesky": Tolerance(.0002),
+                  "attention": Tolerance(.05, .02), "paged_decode": Tolerance(.03),
+                  "mamba_chunk_state": Tolerance(.02, .02),
+                  "gated_delta": (Tolerance(.1, .05),)*2,
+                  "batch_norm": (Tolerance(.02, .01), *((Tolerance(.0001, .0001),)*4))}
     tolerance = tolerances.get(name, Tolerance(0))
     implementations = {baseline: Implementation(baseline,
-        lambda case, seed, env, baseline=baseline: _reference(name, seed, env, baseline))
-        for baseline in BASELINES[name]}
-    for backend in (("triton", "cutile", "mojo") if name == "layer_norm" else ("triton", "cutile")):
+        lambda case, seed, env, baseline=baseline: _reference(name, seed, env, baseline), description)
+        for baseline, description in BASELINES[name].items()}
+    for backend in backends(name):
         implementations["intent:"+backend] = Implementation("intent:"+backend,
             lambda case, seed, env, backend=backend: _intent(name, backend, seed, env))
     # Histogram's independent CPU oracle also checks excluded bins in the author
@@ -215,8 +375,12 @@ def build(name):
         _seed(name, seed)
         return load_program(name)(Context())
     oracle = histogram_oracle if name == "histogram" else Implementation(
-        "oracle", lambda case, seed, env: _reference(name, seed, env))
+        "oracle", lambda case, seed, env: _reference(name, seed, env, "oracle"))
     def check(actual, expected):
+        import numpy as np
+        import torch
+        tensor = lambda value: torch.from_numpy(value) if isinstance(value, np.ndarray) else value
+        actual, expected = _tree(actual, tensor), _tree(expected, tensor)
         if name == "histogram":
             expected = expected.to(actual.device)
         compare_outputs(actual, expected, tolerance)

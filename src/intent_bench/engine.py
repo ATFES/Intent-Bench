@@ -175,14 +175,16 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                             row.status, row.error = "cleanup_failed", str(error)
             case_results.append(row)
             if observer: observer(row)
-        anchors = [r for r in case_results if r.implementation == baseline and r.correctness == "passed" and r.median_ms]
+        anchors = [r for r in case_results if r.implementation == baseline
+                   and r.status == "passed" and r.correctness == "passed" and r.median_ms]
         if anchors:
             anchor = anchors[0]
             for row in case_results:
-                if (row.correctness == "passed" and row.median_ms and row.device == anchor.device
+                if (row.status == "passed" and row.correctness == "passed" and row.median_ms and row.device == anchor.device
                         and row.method == anchor.method and row.scope == anchor.scope
                         and row.metadata.get("cache_policy") == anchor.metadata.get("cache_policy")
                         and row.metadata.get("timing_boundary") == anchor.metadata.get("timing_boundary")):
+                    row.baseline_ms = anchor.median_ms
                     row.speedup = anchor.median_ms / row.median_ms
         results.extend(case_results)
         if observer:

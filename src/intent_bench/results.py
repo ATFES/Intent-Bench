@@ -28,7 +28,7 @@ def save(results, directory=None, *, command=None):
         "created_at": datetime.now(timezone.utc).isoformat(), "command": command,
         "results": rows}, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
     temporary.replace(directory/'results.json')
-    fields = ["workload", "case", "implementation", "status", "latency_ms", "throughput", "unit",
+    fields = ["workload", "case", "implementation", "status", "latency_ms", "baseline", "baseline_ms", "speedup", "throughput", "unit",
               "device", "method", "scope", "cache"]
     with (directory / "results.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
@@ -74,8 +74,12 @@ def _groups(results):
     return groups
 
 
-def _cells(row, with_throughput):
+def _cells(row, with_throughput, with_baseline):
     values = [f"{row['workload']}/{row['case']}", row["implementation"], row["status"], _number(row.get("median_ms"))]
+    if with_baseline:
+        speedup = row.get("speedup")
+        values.extend((row.get("baseline") or "—", _number(row.get("baseline_ms")),
+                       "—" if speedup is None else f"{speedup:.3f}x"))
     if with_throughput:
         value, unit = throughput(row)
         values.append(f"{_number(value)} {unit}".rstrip())
@@ -86,10 +90,13 @@ def table(results):
     lines = []
     for key, rows in _groups(results).items():
         with_throughput = any(throughput(row)[0] is not None for row in rows)
+        with_baseline = any(row.get("baseline") for row in rows)
         lines.append(" / ".join(part for part in key if part))
-        lines.append("workload / case | implementation | status | latency ms" + (" | throughput" if with_throughput else ""))
+        lines.append("workload / case | implementation | status | latency ms"
+                     + (" | baseline | baseline ms | speedup" if with_baseline else "")
+                     + (" | throughput" if with_throughput else ""))
         for row in rows:
-            lines.append(" | ".join(_cells(row, with_throughput)))
+            lines.append(" | ".join(_cells(row, with_throughput, with_baseline)))
             if row.get("error"):
                 lines.append("  " + row["error"].splitlines()[0][:250])
     return "\n".join(lines)
@@ -138,12 +145,15 @@ def write_html(results, path, *, source=None):
     sections = []
     for key, rows in _groups(results).items():
         with_throughput = any(throughput(row)[0] is not None for row in rows)
+        with_baseline = any(row.get("baseline") for row in rows)
         columns = ["Workload / case", "Implementation", "Status", "Latency (ms)"]
+        if with_baseline:
+            columns.extend(("Baseline", "Baseline (ms)", "Speedup"))
         if with_throughput:
             columns.append("Throughput")
         body = []
         for row in rows:
-            cells = _cells(row, with_throughput)
+            cells = _cells(row, with_throughput, with_baseline)
             if row.get("error"):
                 cells[2] = esc(cells[2]) + "<details><summary>Error</summary><pre>" + esc(row["error"]) + "</pre></details>"
                 rendered = [esc(value) if index != 2 else value for index, value in enumerate(cells)]
@@ -161,6 +171,6 @@ def write_html(results, path, *, source=None):
         source_link = '<p>Source records: <a href="' + esc(reference) + '">' + esc(Path(source).name) + '</a></p>'
     Path(path).write_text('''<!doctype html><html lang="en"><meta charset="utf-8"><title>Intent Bench</title>
 <style>body{font:14px system-ui;margin:32px;color:#182331}h1{font-size:26px}h2{font-size:14px;font-weight:500;color:#526173}section{margin:24px 0;overflow:auto}table{border-collapse:collapse;width:100%}td,th{padding:10px;text-align:left;border-bottom:1px solid #ddd}th{background:#f4f6f8}pre{white-space:pre-wrap;max-width:600px}input{padding:8px;width:320px}</style>
-<h1>Operator latency</h1><p>Median latency. Operator execution and optional Python host calls are shown separately by scope. Throughput is optional. Failed or unchecked rows are diagnostic measurements.</p>
+<h1>Operator latency</h1><p>Median latency. Speedup is selected baseline latency / implementation latency; above 1 is faster. Operator execution and optional Python host calls are shown separately by scope. Throughput is optional. Failed or unchecked rows are diagnostic measurements.</p>
 <input id="filter" placeholder="Filter workload, implementation or status">
 ''' + source_link + "".join(sections) + '''<script>document.querySelector('#filter').oninput=e=>{for(const r of document.querySelectorAll('tbody tr'))r.hidden=!r.textContent.toLowerCase().includes(e.target.value.toLowerCase())}</script></html>''')

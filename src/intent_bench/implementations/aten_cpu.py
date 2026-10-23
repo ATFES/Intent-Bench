@@ -1,0 +1,136 @@
+"""Prepared ATen CPU calls through libtorch, timed without Python submission."""
+import ctypes as C
+from functools import cache
+from pathlib import Path
+import subprocess
+import tempfile
+from types import SimpleNamespace
+
+from ..model import PreparedCall
+from ..output import output_root
+
+
+OPERATIONS = {name: index for index, name in enumerate((
+    "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
+    "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward"))}
+
+
+@cache
+def library(root, compiler):
+    import torch
+    from torch.utils.cpp_extension import include_paths, library_paths
+    parent = root/"build/native"
+    parent.mkdir(parents=True, exist_ok=True)
+    build = Path(tempfile.mkdtemp(prefix="aten-cpu-", dir=parent))
+    source = Path(__file__).parents[1]/"native/aten_cpu.cpp"
+    command = [compiler, "-std=c++17", "-O3", "-shared", "-fPIC",
+               "-D_GLIBCXX_USE_CXX11_ABI="+str(int(torch.compiled_with_cxx11_abi())), str(source),
+               "-o", str(build/"aten.so")]
+    command += ["-I"+path for path in include_paths()]
+    command += [option for path in library_paths() for option in ("-L"+path, "-Wl,-rpath,"+path)]
+    command += ["-ltorch_cpu", "-lc10"]
+    result = subprocess.run(command, text=True, capture_output=True, timeout=180)
+    (build/"compile.log").write_text(result.stdout+result.stderr)
+    if result.returncode:
+        from ..corpus._common.measurement import PipelineStageError
+        raise PipelineStageError("source_native_compilation", f"ATen binding build failed: {build/'compile.log'}\n{result.stderr}")
+    native = C.CDLL(str(build/"aten.so"))
+    native.bench_aten_create.argtypes = [C.c_int, C.c_int, C.c_int, C.POINTER(C.c_void_p),
+        C.POINTER(C.c_int), C.POINTER(C.c_int64), C.POINTER(C.c_int64), C.POINTER(C.c_int64),
+        C.c_int, C.POINTER(C.c_double)]
+    native.bench_aten_create.restype = C.c_void_p
+    native.bench_aten_run.argtypes = [C.c_void_p]
+    native.bench_aten_run.restype = None
+    native.bench_aten_error.argtypes = [C.c_void_p]
+    native.bench_aten_error.restype = C.c_char_p
+    native.bench_aten_outputs.argtypes = [C.c_void_p]
+    native.bench_aten_outputs.restype = C.c_int
+    native.bench_aten_output.argtypes = [C.c_void_p, C.c_int, C.POINTER(C.c_int64), C.POINTER(C.c_int64), C.POINTER(C.c_int)]
+    native.bench_aten_output.restype = C.c_void_p
+    native.bench_aten_destroy.argtypes = [C.c_void_p]
+    native.bench_aten_destroy.restype = None
+    return native, build
+
+
+def prepare(name, arguments, environment):
+    import torch
+    from .native_sampling import sample_timer
+    from .native_sequence import NativeSequence
+    if environment.device != "cpu":
+        raise ValueError("ATen native CPU comparisons require device=cpu")
+    tensors = [value for value in arguments if isinstance(value, torch.Tensor)]
+    scalars = [value for value in arguments if not isinstance(value, torch.Tensor)]
+    dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32)
+    if any(value.device.type != "cpu" or not value.is_contiguous() for value in tensors):
+        raise ValueError("this ATen native binding requires contiguous CPU inputs")
+    if name == "adamw" and (scalars[3] != 1-scalars[1] or scalars[4] != 1-scalars[2]):
+        raise ValueError("the standard AdamW case requires first-step bias correction")
+    native, build = library(output_root(environment.output_root), environment.options.get("cxx", "c++"))
+    dimensions = [size for tensor in tensors for size in tensor.shape]
+    strides = [stride for tensor in tensors for stride in tensor.stride()]
+    state = C.c_void_p(native.bench_aten_create(OPERATIONS[name], environment.threads, len(tensors),
+        (C.c_void_p*len(tensors))(*(tensor.data_ptr() for tensor in tensors)),
+        (C.c_int*len(tensors))(*(dtypes.index(tensor.dtype) for tensor in tensors)),
+        (C.c_int64*len(tensors))(*(tensor.ndim for tensor in tensors)),
+        (C.c_int64*len(dimensions))(*dimensions), (C.c_int64*len(strides))(*strides),
+        len(scalars), (C.c_double*len(scalars))(*scalars)))
+
+    def checked():
+        if not state.value:
+            raise RuntimeError("ATen native call has been closed")
+        error = native.bench_aten_error(state)
+        if error:
+            raise RuntimeError(error.decode())
+
+    class Call:
+        def native_call(self):
+            checked()
+            return SimpleNamespace(function=native.bench_aten_run, argument_types=(C.c_void_p,),
+                                   arguments=(state,), owners=(native, tensors), validate=checked)
+        def launch(self):
+            checked()
+            native.bench_aten_run(state)
+            checked()
+        def result(self):
+            checked()
+            outputs = []
+            for index in range(native.bench_aten_outputs(state)):
+                rank, shape, kind = C.c_int64(), (C.c_int64*16)(), C.c_int()
+                pointer = native.bench_aten_output(state, index, C.byref(rank), shape, C.byref(kind))
+                sizes = tuple(shape[:rank.value])
+                from math import prod
+                count = prod(sizes)
+                width = torch.empty((), dtype=dtypes[kind.value]).element_size()
+                storage = (C.c_ubyte*(count*width)).from_address(pointer)
+                outputs.append(torch.frombuffer(storage, dtype=dtypes[kind.value]).reshape(sizes).clone())
+            return outputs[0] if len(outputs) == 1 else tuple(outputs)
+        def close(self):
+            if state.value:
+                native.bench_aten_destroy(state)
+                state.value = None
+
+    call = Call()
+    try:
+        checked()
+    except Exception:
+        call.close()
+        raise
+    metadata = {"library": "PyTorch libtorch/ATen CPU", "native_build": str(build),
+                "scope_note": "Prepared native ATen operations; output/workspace allocation and Python submission excluded."}
+    prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
+        device="cpu", timing="cpu_native_monotonic", metadata=metadata)
+    def measure(settings):
+        timer = NativeSequence((call,))
+        def interval():
+            elapsed = timer.run()
+            # C++ exceptions are retained across the C ABI. Surface them after
+            # every interval, including the final sample, outside its timing.
+            checked()
+            return elapsed
+        try:
+            return sample_timer(SimpleNamespace(run=interval), settings,
+                                prepared.reset or (lambda: None), metadata=metadata)
+        finally:
+            timer.close()
+    prepared.native_measure = measure
+    return prepared

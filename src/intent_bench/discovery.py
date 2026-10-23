@@ -20,7 +20,10 @@ def describe_workload(name):
         row = {'name': value.name, 'family': value.family, 'description': value.description,
                'implementations': list(value.implementations), 'parameter_keys': value.parameter_keys,
                'cases': [{'name': case.name, 'parameters': dict(case.parameters)} for case in value.cases]}
-    row['implementation_details'] = [describe_implementation(item) for item in row['implementations']]
+    descriptions = row.pop('implementation_descriptions', {})
+    row['implementation_details'] = [
+        {**describe_implementation(item), **({'description': descriptions[item]} if item in descriptions else {})}
+        for item in row['implementations']]
     return row
 
 
@@ -39,6 +42,7 @@ def describe_implementation(name):
         'numpy': 'Independent NumPy implementation.', 'cnnl': 'Native CNNL implementation on MLU.',
         'ggml': 'Independent GGML implementation.', 'weft': 'Authored Weft source implementation.',
         'cub': 'NVIDIA CUB device primitives, compiled for the executing GPU.',
+        'aten:cpu': 'Native libtorch/ATen CPU operations; outputs bound in advance and timed without Python submission.',
     }
     return {'name': name, 'kind': 'library' if name in descriptions else 'custom',
             'description': descriptions.get(name, 'User-provided implementation; inspect its workload contract.')}

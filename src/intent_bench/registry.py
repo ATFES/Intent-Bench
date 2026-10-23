@@ -32,11 +32,12 @@ def workloads():
             "intent_bench.workloads.elementwise:build", name)
     for row in catalog():
         add(row, "intent_bench.corpus_adapter:build", row["name"])
-    from .workloads.programs import BASELINES as PROGRAM_BASELINES
+    from .workloads.programs import BASELINES as PROGRAM_BASELINES, backends as program_backends
     for name,baselines in PROGRAM_BASELINES.items():
         add({"name":"program/"+name, "family":"program", "case":"author",
              "description":"Installed author program with its original inputs and complete call",
-             "implementations":[*baselines,"intent:triton","intent:cutile",*(["intent:mojo"] if "mojo" in baselines else [])]},
+             "implementation_descriptions":dict(baselines),
+             "implementations":[*baselines,*("intent:"+backend for backend in program_backends(name))]},
             "intent_bench.workloads.programs:build", name)
     for group, names, implementations in (
         ("advanced", ADVANCED_OPERATIONS, ["torch","mojo","intent:mojo"]),
