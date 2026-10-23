@@ -1,12 +1,11 @@
 from __future__ import annotations
-from intent_bench.implementations.prepared import checked_call
+from intent_bench.implementations.prepared import checked_call, intent_sequence
 import intent
 import torch
 from intent.examples.programs.composition import PagedDecode
 from intent.examples.kernels.streaming.paged_attention import paged_gqa_decode_partials
 from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_f32_to_f16_reduce
 from intent_bench.implementations.context import Tolerance
-from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, query_heads, kv_heads, dimension) = (16, 32, 8, 128)
@@ -24,12 +23,14 @@ def prepare(context):
     scale = dimension ** (-0.5)
     partials = context.compile(paged_gqa_decode_partials, constexprs={'PAGE_SIZE': page_size, 'HEAD_GROUP': query_heads // kv_heads, 'SPLITS': splits})
     reduction = context.compile(splitk_attention_f32_to_f16_reduce)
-    partial_lse = torch.empty((batch, query_heads, splits), dtype=torch.float32)
-    partial_output = torch.empty((batch, query_heads, splits, dimension), dtype=torch.float32)
-    output = torch.empty((batch, query_heads, dimension), dtype=torch.float16)
     program = PagedDecode(partials, reduction)
+    call = program.prepare(q, key_cache, value_cache, page_offsets, page_indices,
+                           lengths, split_offsets, scale)
+    partial_lse, partial_output = call.partials.result()
+    output = call.result()
 
     def generated_launch():
         program.into(q, key_cache, value_cache, page_offsets, page_indices, lengths, split_offsets, partial_lse, partial_output, output, scale)
-    generated = PreparedCall(generated_launch, lambda : output)
-    return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 paged GQA partial+split-k pipeline；生成端输出及 partial 预分配，CPU reference 计入 page table 解码、临时分配和 attention。', owners=locals())
+    generated = intent_sequence((call.partials, call.merge), call.result,
+                                host_run=generated_launch, host_result=call.result)
+    return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 paged GQA partial+split-k native序列；输出及 partial 预绑定，CPU reference 计入 page table 解码、临时分配和 attention。', owners=locals())

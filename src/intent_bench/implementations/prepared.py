@@ -65,26 +65,31 @@ class IntentSequence:
         self.artifacts.append(artifact)
         return call.result()
 
-    def prepared(self, result, *, reset=None, host_run=None, host_result=None):
+    def prepared(self, result, *, reset=None, host_run=None, host_result=None, initializations=()):
         return intent_sequence(self.calls, result, reset=reset, host_run=host_run, host_result=host_result,
-                               metadata={'artifacts': [str(a.cache_directory) for kernel in self.artifacts for a in kernel.artifacts]})
+                               metadata={'artifacts': [str(a.cache_directory) for kernel in self.artifacts for a in kernel.artifacts]},
+                               initializations=initializations)
 
 
-def intent_sequence(calls, result, *, reset=None, host_run=None, host_result=None, metadata=None):
+def intent_sequence(calls, result, *, reset=None, host_run=None, host_result=None, metadata=None,
+                    initializations=()):
     calls = tuple(calls)
+    initializations = tuple(initializations)
     native = {}
     restore = reset or (lambda: None)
     call_metadata = {**(metadata or {}), 'operator_entry': 'prepared_native_sequence',
-                     'kernel_count': len(calls)}
+                     'kernel_count': len(calls), 'initialization_count': len(initializations)}
 
     def run():
+        for buffer, value in initializations:
+            buffer.fill_(value)
         for call in calls:
             call.launch()
 
     def measure(settings):
         if not native:
             from .native_sequence import NativeSequence
-            native['timer'] = NativeSequence(calls)
+            native['timer'] = NativeSequence(calls, initializations=initializations)
         from .native_sampling import sample_timer
         call_metadata['cache_policy'] = 'flush_cpu_64m' if settings.cache == 'flush' else 'warm'
         return sample_timer(native['timer'], settings, restore)

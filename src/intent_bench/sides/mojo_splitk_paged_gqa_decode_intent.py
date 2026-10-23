@@ -4,9 +4,7 @@ import intent
 import torch
 from intent.examples.kernels.streaming.paged_attention import splitk_paged_gqa_decode_partials
 from intent.examples.kernels.streaming.splitk_reduce import splitk_attention_weighted_sum_reduce
-from intent_bench.corpus._common.loading import load_module
 from intent_bench.implementations.context import Tolerance
-from intent_bench.model import PreparedCall
 from intent_bench.implementations.prepared import IntentSequence
 
 def prepare(context):
@@ -20,30 +18,14 @@ def prepare(context):
     _inlined_paged_gqa_split_arguments = (_inlined_paged_gqa_split_q, _inlined_paged_gqa_split_key, _inlined_paged_gqa_split_value, _inlined_paged_gqa_split_offsets, _inlined_paged_gqa_split_indices, _inlined_paged_gqa_split_lengths, _inlined_paged_gqa_split_splits, 128 ** (-0.5))
     _inlined_paged_gqa_split_partials = context.compile(splitk_paged_gqa_decode_partials, constexprs={'PAGE_SIZE': 16, 'HEAD_GROUP': 4, 'SPLITS': 8})
     _inlined_paged_gqa_split_reduction = context.compile(splitk_attention_weighted_sum_reduce)
-    (_inlined_paged_gqa_split_generated, _inlined_paged_gqa_split_source) = ({}, {})
+    _inlined_paged_gqa_split_generated = {}
 
     def _inlined_paged_gqa_split_launch():
         (_inlined_paged_gqa_split_lse, _inlined_paged_gqa_split_partial) = _inlined_paged_gqa_split_partials.run(*_inlined_paged_gqa_split_arguments)
         _inlined_paged_gqa_split_generated['output'] = _inlined_paged_gqa_split_reduction.run(_inlined_paged_gqa_split_partial, _inlined_paged_gqa_split_lse)
-    if True:
-        _inlined_paged_gqa_split_runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference')
-
-        def _inlined_paged_gqa_split_reference():
-            _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime.paged_gqa_decode_bf16(*_inlined_paged_gqa_split_arguments)
-        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
-        (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
-        _inlined_paged_gqa_split_note = '原B16/HQ32/HK8/K8192/D128/page16/split8 f16输入，BF16 partial+weighted BF16 reduce完整调用含workspace分配；CPU参考page-table attention f32概率后直接转BF16，原容差。'
-    else:
-        _inlined_paged_gqa_split_runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference')
-
-        def _inlined_paged_gqa_split_reference():
-            _inlined_paged_gqa_split_source['output'] = _inlined_paged_gqa_split_runtime._paged_gqa_decode(_inlined_paged_gqa_split_q, _inlined_paged_gqa_split_key, _inlined_paged_gqa_split_value, _inlined_paged_gqa_split_offsets, _inlined_paged_gqa_split_indices, _inlined_paged_gqa_split_lengths, 128 ** (-0.5)).half()
-        _inlined_paged_gqa_split_source_launch = PreparedCall(_inlined_paged_gqa_split_reference, lambda : _inlined_paged_gqa_split_source['output'])
-        (_inlined_paged_gqa_split_tolerance, _inlined_paged_gqa_split_status) = (Tolerance(atol=0.1, rtol=0.05), 'pass')
-        _inlined_paged_gqa_split_note = 'BF16 partials with f16 final reduction; complete page-table attention checked against independent f32 CPU reference, preserving the existing BF16-partial tolerance.'
     sequence = IntentSequence()
     lse, partial = sequence.add(_inlined_paged_gqa_split_partials, *_inlined_paged_gqa_split_arguments)
     output = sequence.add(_inlined_paged_gqa_split_reduction, partial, lse)
     call = sequence.prepared(lambda: output, host_run=_inlined_paged_gqa_split_launch,
                              host_result=lambda: _inlined_paged_gqa_split_generated['output'])
-    return checked_call(call, _inlined_paged_gqa_split_tolerance, status=_inlined_paged_gqa_split_status, device_type='cpu', note='Prepared split-K paged GQA; original BF16 partial+weighted reduction and output contract.', owners=locals())
+    return checked_call(call, Tolerance(atol=0.1, rtol=0.05), device_type='cpu', note='Prepared split-K paged GQA; original BF16 partial+weighted reduction and output contract.', owners=locals())

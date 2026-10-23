@@ -1,11 +1,10 @@
 from __future__ import annotations
-from intent_bench.implementations.prepared import checked_call
+from intent_bench.implementations.prepared import checked_call, IntentSequence
 import intent
 import torch
 from intent.examples.kernels.streaming.block_sparse_attention import block_sparse_gqa_decode_combine
 from intent.examples.kernels.streaming.block_sparse_attention import block_sparse_gqa_decode_partials
 from intent_bench.implementations.context import Tolerance
-from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, query_heads, key_heads, sequence, dimension) = (8, 32, 8, 8192, 128)
@@ -26,5 +25,9 @@ def prepare(context):
     def generated_launch():
         partials(q, k, v, selected, lengths, split_offsets, partial_lse, partial_output, scale)
         combine(partial_lse, partial_output, output)
-    generated = PreparedCall(generated_launch, lambda : output)
-    return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 block-sparse GQA partial+combine pipeline；保持原倒序 selected blocks；生成端输出及 partial 预分配，CPU reference 计入 block gather、临时分配和 attention。', owners=locals())
+    sequence = IntentSequence()
+    sequence.add(partials, q, k, v, selected, lengths, split_offsets, scale,
+                 outputs=(partial_lse, partial_output))
+    sequence.add(combine, partial_lse, partial_output, outputs=(output,))
+    generated = sequence.prepared(lambda: output, host_run=generated_launch)
+    return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 block-sparse GQA partial+combine native序列；保持原倒序 selected blocks；输出及 partial 预绑定，CPU reference 计入 block gather、临时分配和 attention。', owners=locals())

@@ -21,8 +21,25 @@ class _Call(ct.Structure):
     _fields_ = [('function', ct.c_void_p), ('arguments', ct.POINTER(ct.c_void_p)), ('signature', ct.c_size_t)]
 
 
+class _Fill(ct.Structure):
+    _fields_ = [('data', ct.c_void_p), ('count', ct.c_size_t),
+                ('width', ct.c_size_t), ('value', ct.c_ubyte * 8)]
+
+
 class NativeSequence:
-    def __init__(self, calls):
+    def __init__(self, calls, *, initializations=()):
+        import torch
+        self.initializations = tuple(initializations)
+        fills = []
+        for buffer, value in self.initializations:
+            if buffer.device.type != 'cpu' or not buffer.is_contiguous():
+                raise NotImplementedError('native sequence initialization requires a contiguous CPU buffer')
+            width = buffer.element_size()
+            if width not in (1, 2, 4, 8):
+                raise NotImplementedError('native sequence initialization requires a 1, 2, 4 or 8 byte element')
+            encoded = torch.tensor([value], dtype=buffer.dtype).view(torch.uint8).tolist()
+            fills.append(_Fill(buffer.data_ptr(), buffer.numel(), width, (ct.c_ubyte * 8)(*encoded)))
+        self.fills = (_Fill * len(fills))(*fills)
         signatures, entries, owners = [], [], []
         for call in calls:
             binding = call.native_call()
@@ -44,9 +61,25 @@ class NativeSequence:
         source = '''#include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 struct Call { void* function; void** arguments; size_t signature; };
-extern "C" double measure(Call* calls, size_t count) {
+struct Fill { void* data; size_t count; size_t width; unsigned char value[8]; };
+template<size_t Width> void initialize(const Fill& fill) {
+    auto* data = static_cast<unsigned char*>(fill.data);
+    for (size_t i = 0; i < fill.count; ++i)
+        std::memcpy(data + i * Width, fill.value, Width);
+}
+extern "C" double measure(Call* calls, size_t count, Fill* fills, size_t fill_count) {
     auto begin = std::chrono::steady_clock::now();
+    for (size_t i = 0; i < fill_count; ++i) {
+        const auto& fill = fills[i];
+        switch (fill.width) {
+        case 1: initialize<1>(fill); break;
+        case 2: initialize<2>(fill); break;
+        case 4: initialize<4>(fill); break;
+        case 8: initialize<8>(fill); break;
+        }
+    }
     for (size_t i = 0; i < count; ++i) {
         const auto& call = calls[i];
         switch (call.signature) {
@@ -68,13 +101,13 @@ extern "C" double measure(Call* calls, size_t count) {
             raise RuntimeError(f'native sequence timer compilation failed; see {path}: ' + result.stderr)
         self.library = ct.CDLL(str(path / 'timer.so'))
         self.measure = self.library.measure
-        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t]
+        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t, ct.POINTER(_Fill), ct.c_size_t]
         self.measure.restype = ct.c_double
 
     def run(self):
         for binding, _, _ in self.owners:
             binding.validate()
-        return self.measure(self.calls, len(self.calls))
+        return self.measure(self.calls, len(self.calls), self.fills, len(self.fills))
 
     def close(self):
         self.measure = None

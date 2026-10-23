@@ -1,11 +1,10 @@
 from __future__ import annotations
-from intent_bench.implementations.prepared import checked_call
+from intent_bench.implementations.prepared import checked_call, IntentSequence
 import intent
 import torch
 from intent.examples.kernels.backward.sparse_mla import sparse_mla_backward_delta, sparse_mla_backward_main, sparse_mla_grad_kv_cast
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.implementations.context import Tolerance
-from intent_bench.model import PreparedCall
 
 def prepare(context):
     (batch, sequence, key_value_sequence) = (1, 4096, 8192)
@@ -30,12 +29,17 @@ def prepare(context):
     grad_key_value = torch.zeros_like(key_value, dtype=torch.float32)
     grad_query = torch.empty_like(query)
     grad_key_value_bf16 = torch.empty_like(key_value)
-    generated_state = {}
 
     def generated_launch():
         grad_key_value.zero_()
         delta_artifact(output, grad_output, delta)
         main_artifact(query, key_value, grad_output, selected_indices, lse, delta, grad_key_value, grad_query, scale)
         cast_artifact(grad_key_value, grad_key_value_bf16)
-        generated_state['output'] = (grad_query, grad_key_value_bf16)
-    return checked_call(PreparedCall(generated_launch, lambda : generated_state['output']), (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；计入 f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())
+    sequence = IntentSequence()
+    sequence.add(delta_artifact, output, grad_output, outputs=(delta,))
+    sequence.add(main_artifact, query, key_value, grad_output, selected_indices, lse, delta,
+                 grad_key_value, scale, outputs=(grad_query,))
+    sequence.add(cast_artifact, grad_key_value, outputs=(grad_key_value_bf16,))
+    generated = sequence.prepared(lambda: (grad_query, grad_key_value_bf16), host_run=generated_launch,
+                                  initializations=((grad_key_value, 0),))
+    return checked_call(generated, (Tolerance(atol=0.25, rtol=0.05), Tolerance(atol=0.25, rtol=0.05)), cuda_graph=False, device_type='cpu', note='既有B1-S4096-SKV8192-H64-DQ576-DV512-topk2048 bf16 sparse MLA backward；f32 gradKV workspace 清零及 delta/main/gradKV cast 三kernel在同一native计时间隔内；CPU reference 同样重算概率并保持 bf16 dScore/P 转换，前向 output/LSE 准备不计入反向时间。', owners=locals())
