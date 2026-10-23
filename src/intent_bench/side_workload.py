@@ -29,7 +29,7 @@ def prepare_input_oracle(specification):
 def build(row,entries):
     provider=row['provider'];tolerances={}
     targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
-    def prepare(side,target,case,seed,env):
+    def prepare(side,target,case,seed,env,entry=None):
         import torch
         torch.set_num_threads(env.threads)
         from .corpus import PROJECT_ROOT
@@ -56,7 +56,7 @@ def build(row,entries):
             stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile') else []))
             stack.enter_context(observe_stages(observe))
             torch.manual_seed(seed)
-            entry=entries[side]
+            entry=entries[side] if entry is None else entry
             prepared=(prepare_input_oracle(entry) if isinstance(entry,dict)
                       else load(entry)(context))
         observe('ready')
@@ -78,7 +78,7 @@ def build(row,entries):
         tolerances[case.name]=prepared.tolerance
         if prepared.device == 'cuda':
             prepared.device=f'cuda:{index}'
-        prepared.metadata.update(source=entries[side],input_seed=seed,preparation_stages_seconds=phases,
+        prepared.metadata.update(source=entry,input_seed=seed,preparation_stages_seconds=phases,
                                  compiler_artifacts=artifacts)
         if context.kernels:
             def compiler_observations():
@@ -93,6 +93,11 @@ def build(row,entries):
     impls={source_name:Implementation(source_name,lambda case,seed,env:prepare('source',provider,case,seed,env))}
     impls.update({'intent:'+target:Implementation('intent:'+target,
         lambda case,seed,env,target=target:prepare('intent',target,case,seed,env)) for target in targets})
+    for name,entry in entries.get('alternatives',{}).items():
+        if name in impls or name.startswith('intent:'):
+            raise ValueError(f'duplicate or reserved implementation name: {name}')
+        impls[name]=Implementation(name,lambda case,seed,env,name=name,entry=entry:
+            prepare(name,provider,case,seed,env,entry))
     def check(actual,expected):
         from .numeric import compare_outputs
         if provider=='bangc':

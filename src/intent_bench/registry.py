@@ -32,6 +32,12 @@ def workloads():
             "intent_bench.workloads.elementwise:build", name)
     for row in catalog():
         add(row, "intent_bench.corpus_adapter:build", row["name"])
+    from .workloads.programs import BASELINES as PROGRAM_BASELINES
+    for name,baselines in PROGRAM_BASELINES.items():
+        add({"name":"program/"+name, "family":"program", "case":"author",
+             "description":"Installed author program with its original inputs and complete call",
+             "implementations":[*baselines,"intent:triton","intent:cutile",*(["intent:mojo"] if "mojo" in baselines else [])]},
+            "intent_bench.workloads.programs:build", name)
     for group, names, implementations in (
         ("advanced", ADVANCED_OPERATIONS, ["torch","mojo","intent:mojo"]),
         ("cpu", CPU_NAMES, ["numpy","mojo"]),

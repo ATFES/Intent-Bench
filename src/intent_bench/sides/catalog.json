@@ -209,7 +209,10 @@
   },
   "corpus/triton/flaggems_histogram": {
     "source": "intent_bench.sides.triton_flaggems_histogram_source:prepare",
-    "intent": "intent_bench.sides.triton_flaggems_histogram_intent:prepare"
+    "intent": "intent_bench.sides.triton_flaggems_histogram_intent:prepare",
+    "alternatives": {
+      "cub": "intent_bench.sides.triton_flaggems_histogram_cub:prepare"
+    }
   },
   "corpus/triton/flaggems_max_pool2d_with_indices": {
     "source": "intent_bench.sides.triton_flaggems_max_pool2d_with_indices_source:prepare",

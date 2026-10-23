@@ -38,6 +38,7 @@ def describe_implementation(name):
         'mojo': 'Native Mojo implementation.', 'torch': 'Independent PyTorch implementation.',
         'numpy': 'Independent NumPy implementation.', 'cnnl': 'Native CNNL implementation on MLU.',
         'ggml': 'Independent GGML implementation.', 'weft': 'Authored Weft source implementation.',
+        'cub': 'NVIDIA CUB device primitives, compiled for the executing GPU.',
     }
     return {'name': name, 'kind': 'library' if name in descriptions else 'custom',
             'description': descriptions.get(name, 'User-provided implementation; inspect its workload contract.')}

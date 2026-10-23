@@ -8,6 +8,8 @@ ADVANCED_OPERATIONS=('scaled_fp8_gemm','fused_linear_cross_entropy','flash_atten
 
 
 def catalog():
+    from .side_workload import mappings
+    sides = mappings()
     path=Path(__file__).with_name("catalog.json")
     rows=json.loads(path.read_text()) if path.exists() else []
     for row in rows:
@@ -23,6 +25,7 @@ def catalog():
         if 'source_implementation' in row:
             targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
             row['implementations']=[row['source_implementation'],*('intent:'+target for target in targets)]
+        row['implementations'].extend(sides.get(row['name'], {}).get('alternatives', {}))
     return rows
 
 
