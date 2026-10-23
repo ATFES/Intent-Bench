@@ -601,7 +601,7 @@ def inputs_sorted_nucleus_cutoff():
 
 def inputs_histogram():
     samples = torch.randint(0, 256, (8 * 1024 * 1024,), dtype=torch.int32).to(torch.float32)
-    return InputBundle((samples,), 'intent.examples.kernels.statistics.histogram:histogram_256', 'histogram', Tolerance(atol=0.0), None, ())
+    return InputBundle((samples,), 'intent.examples.kernels.statistics.histogram:histogram_partials', 'histogram', Tolerance(atol=0.0), None, ())
 
 def inputs_flash_cross_entropy_bf16():
     logits = torch.randn((8192, 32768), dtype=torch.bfloat16)

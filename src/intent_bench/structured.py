@@ -64,7 +64,7 @@ def cpu_workload(row,factory):
         return PreparedCall(run,lambda:state['output'],reset=lambda:restore(data.arguments,initial),
                             metadata={'reference_function':data.reference},scopes=("prepared_call","host_call"))
     def generated(case,data,env):
-        if row['kernel'] in {'fused_linear_cross_entropy','paged_gqa_f16_reduction'}:
+        if row['kernel'] in {'fused_linear_cross_entropy','paged_gqa_f16_reduction','histogram'}:
             from .implementations.advanced_intent import prepare
             return prepare(row['kernel'],data.arguments,env)
         intent=intent_environment(env)

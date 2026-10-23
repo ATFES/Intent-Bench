@@ -53,7 +53,7 @@ TRITON = (
     Entry("flaggems_addcmul", "B64-C128-L4096-bf16", "flaggems_addcmul", ("activation/pointwise.py:addcmul_broadcast_bf16",), "references/torch_ops.py"),
     Entry("flaggems_fp8_mqa_logits", "Q256-K4096-H32-D128-e4m3", "flaggems_fp8_mqa_logits", ("routing/mqa_logits.py:fp8_mqa_logits",), "references/torch_ops.py"),
     Entry("flaggems_cumsum", "8192x8192-fp32-axis1", "flaggems_cumsum", ("streaming/ordered_prefix.py:row_cumsum_f32",), "references/torch_ops.py"),
-    Entry("flaggems_histogram", "N8388608-bins256-fp32", "flaggems_histogram", ("statistics/histogram.py:histogram_256",), "references/torch_ops.py"),
+    Entry("flaggems_histogram", "N8388608-bins256-fp32", "flaggems_histogram", ("statistics/histogram.py:histogram_partials", "statistics/histogram.py:histogram_merge"), "references/torch_ops.py"),
     Entry("flaggems_max_pool2d_with_indices", "B8-C32-H128-W128-K3-S2-P1-fp16", "flaggems_max_pool2d_with_indices", ("vision/max_pool_with_indices.py:max_pool2d_with_indices",), "references/torch_ops.py"),
     Entry("legacy_flash_attention_bias", "B4-H32-S4096-D128-fp16-vector-bias", "legacy_flash_attention_bias", ("streaming/attention.py:flash_attention_bias_fwd",), "corpus/gpu/baselines/triton/flash-attention/attention/fused/flash_attn_triton_runtime.py"),
 )

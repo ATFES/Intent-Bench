@@ -61,7 +61,7 @@ MOJO = (
     Entry("causal_conv1d_backward", "B8-C2048-L4096-W4-f16-8cores-host", "causal_conv1d_backward", ("backward/causal_conv.py:causal_conv1d_backward_partials", "backward/causal_conv.py:causal_conv1d_backward_reduce"), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
     Entry("batch_norm_training", "B32-C64-S4096-fp16-8cores-host", "batch_norm_training", ("normalization/batch_norm.py:batch_norm_training",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
     Entry("insertion_top_k", "1024x4093-k8-fp32-8cores-host", "insertion_top_k", ("sampling/top_k.py:insertion_top_k",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
-    Entry("histogram", "N8388608-bins256-f32-to-i32-8cores-host", "histogram_256", ("statistics/histogram.py:histogram_256",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
+    Entry("histogram", "N8388608-bins256-f32-to-i32-8cores-host", "histogram_partials", ("statistics/histogram.py:histogram_partials", "statistics/histogram.py:histogram_merge"), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
     Entry("cholesky", "B256-N16-fp32-8cores-host", "batched_cholesky_lower", ("factorization/cholesky.py:batched_cholesky_lower",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
     Entry("householder_qr", "B128-R32-C16-fp32-8cores-host", "batched_householder_qr", ("factorization/householder_qr.py:batched_householder_qr",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),
     Entry("causal_conv_update", "B64-D4096-W4-fp16-8cores-host", "causal_depthwise_conv1d_update", ("convolution/direct.py:causal_depthwise_conv1d_update",), "corpus/cpu/baselines/pytorch/cpu_runtime.py"),

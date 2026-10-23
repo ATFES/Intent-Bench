@@ -914,7 +914,8 @@
     "description": "flaggems_histogram",
     "source_runtime": "references/torch_ops.py",
     "examples": [
-      "statistics/histogram.py:histogram_256"
+      "statistics/histogram.py:histogram_partials",
+      "statistics/histogram.py:histogram_merge"
     ],
     "source_implementation": "torch",
     "historical_source": "FlagGems"
@@ -2564,10 +2565,11 @@
       "intent:mojo",
       "torch"
     ],
-    "description": "histogram_256",
+    "description": "Partitioned histogram and count merge",
     "source_runtime": "corpus/cpu/baselines/pytorch/cpu_runtime.py",
     "examples": [
-      "statistics/histogram.py:histogram_256"
+      "statistics/histogram.py:histogram_partials",
+      "statistics/histogram.py:histogram_merge"
     ]
   },
   {
