@@ -95,6 +95,7 @@ class PreparedCall:
     host_result: Callable[[], Any] | None = None
     tolerance: Any = None
     owners: Any = None
+    compiler_observations: Callable[[], Sequence[Any]] | None = None
 
     def __post_init__(self):
         self.scopes = tuple("operator" if scope == "prepared_call" else scope for scope in self.scopes)

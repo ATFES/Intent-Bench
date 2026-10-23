@@ -73,7 +73,9 @@ def cpu_workload(row,factory):
         return PreparedCall(call.launch,lambda:observed(call.result(),data),compile=call.compile,reset=reset,
                             native_measure=lambda settings:sample(call,settings,reset),timing='cpu_native_monotonic',
                             metadata={'artifacts':[str(a.cache_directory) for a in artifact.artifacts]},host_run=host_run,
-                            host_result=lambda:observed(host_state['output'],data))
+                            host_result=lambda:observed(host_state['output'],data),
+                            compiler_observations=lambda: tuple(
+                                a.observation for a in artifact.artifacts if a.observation is not None))
     def native_advanced(case,data,env):
         from .implementations.advanced_mojo import prepare
         call=prepare(row['kernel'],data.arguments,env)

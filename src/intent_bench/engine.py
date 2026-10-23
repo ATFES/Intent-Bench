@@ -142,11 +142,16 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                             row.error = str(error)
                     row.status = {"passed": "passed", "failed": "numerical_failed",
                                   "unchecked": "unchecked", "reference_failed": "reference_failed"}[row.correctness]
+                    if call.compiler_observations is not None:
+                        row.stage = "observation"
+                        row.metadata["compiler_observations"] = [
+                            asdict(observation) for observation in call.compiler_observations()]
                     row.stage = "complete"
             except Exception as error:
                 row.status = getattr(error, "status", {
                     "inputs": "input_failed", "prepare": "preparation_failed", "native_compile": "compilation_failed",
                     "first_call": "execution_failed", "correctness": "validation_failed", "measurement": "measurement_failed",
+                    "observation": "observation_failed",
                 }.get(row.stage, "execution_failed"))
                 if isinstance(error,(ImportError,ModuleNotFoundError)):
                     row.status='environment_missing'

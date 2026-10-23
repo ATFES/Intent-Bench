@@ -80,6 +80,11 @@ def build(row,entries):
             prepared.device=f'cuda:{index}'
         prepared.metadata.update(source=entries[side],input_seed=seed,preparation_stages_seconds=phases,
                                  compiler_artifacts=artifacts)
+        if context.kernels:
+            def compiler_observations():
+                return [artifact.observation for kernel in context.kernels for artifact in kernel.artifacts
+                        if artifact.observation is not None]
+            prepared.compiler_observations = compiler_observations
         return prepared
     source_name='torch' if provider=='mojo' else 'reference:cuda' if provider=='bangc' else provider
     if provider=='bangc' and row['kernel'] in {'causal_attention_f32','causal_linear_attention_f32'}:
