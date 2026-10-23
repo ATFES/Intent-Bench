@@ -28,8 +28,9 @@ class _Fill(ct.Structure):
 
 class NativeSequence:
     def __init__(self, calls, *, initializations=()):
-        import torch
         self.initializations = tuple(initializations)
+        if self.initializations:
+            import torch
         fills = []
         for buffer, value in self.initializations:
             if buffer.device.type != 'cpu' or not buffer.is_contiguous():

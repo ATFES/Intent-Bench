@@ -25,9 +25,41 @@ def prepare(name, implementation, arguments, environment):
                 output, state = cpu_runtime.recurrent_gated_delta_fwd(
                     q, k, v.cpu(), gate.cpu(), beta.cpu(), scale)
                 return output.to(device), state.to(device)
+        elif name == "causal_linear_attention":
+            run = lambda: tuple(value.to(device) for value in
+                cpu_runtime.causal_linear_attention_f32(*(value.cpu() for value in arguments)))
+        elif name == "fp8_gemm":
+            run = lambda: cpu_runtime.block_scaled_matmul(*(value.cpu() for value in arguments)).to(device)
         else:
             raise NotImplementedError(name)
         library = "Independent numerical oracle"
+    elif name == "causal_linear_attention" and implementation == "triton":
+        source = load_module(PROJECT_ROOT / "corpus/gpu/baselines/triton/tritonbench/attention/linear/chunk_linear_attn.py",
+                             "author_chunk_linear_attention")
+        q, k, v = (value.unsqueeze(1) for value in arguments)
+        def run():
+            output, state = source.chunk_linear_attn(q, k, v, scale=1.0,
+                output_final_state=True, normalize=False)
+            return output.squeeze(1), state.squeeze(1)
+        owners = arguments, q, k, v
+        library = "TritonBench chunk linear attention, both forward kernels and FP32 final state"
+    elif name == "fp8_gemm" and implementation == "torch":
+        from ..corpus.cpu.baselines.pytorch import cpu_runtime
+        run = lambda: cpu_runtime.block_scaled_matmul(*arguments)
+        library = "ATen scale decoding and cuBLAS FP32 GEMM, including all conversions"
+    elif name == "fp8_gemm" and implementation == "cutile":
+        from ..implementations.context import Context
+        from ..source_support import official_source
+        context = Context(environment.compiler, PROJECT_ROOT, None, "cutile", environment=environment)
+        source = official_source(context,
+            "corpus/gpu/baselines/cutile/cutile-python/gemm/block_scaled/BlockScaledMatMul_runtime.py", "author_fp8_gemm")
+        lhs, lhs_scale, rhs, rhs_scale = arguments
+        a, b = lhs.flatten(1), rhs.flatten(0, 1)
+        a_scale = lhs_scale.view(torch.float8_e8m0fnu)
+        b_scale = rhs_scale.view(torch.float8_e8m0fnu)
+        run = lambda: source.cutile_block_scaled_matmul(a, a_scale, b, b_scale, compiler_timeout=60)
+        owners = arguments, a, b, a_scale, b_scale
+        library = "NVIDIA cuTile block-scaled E4M3 GEMM, original E8M0 scale bytes"
     elif name in {"attention", "gated_delta"} and implementation == "cutile":
         from ..implementations.context import Context
         from ..source_support import tilegym_source

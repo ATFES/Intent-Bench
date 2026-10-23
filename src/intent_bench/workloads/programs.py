@@ -31,6 +31,17 @@ BASELINES = {
     "paged_decode": {"triton": "vLLM split-K paged GQA decode, including merge"},
     "mamba_chunk_state": {"triton": "state-spaces/mamba chunk state, FP32 states"},
     "gated_delta": {"cutile": "NVIDIA TileGym recurrent gated delta, including final state"},
+    "csr_spmv": {"torch": "ATen/cuSPARSE CSR matrix-vector product"},
+    "ragged_gemm": {"cutile": "NVIDIA TileGym grouped GEMM, unequal groups and prebound output slices",
+                    "triton": "Triton grouped TMA GEMM, including required weight transpose"},
+    "int8_gemm": {"torch": "ATen/cuBLAS INT8 GEMM with INT32 bias addition"},
+    "causal_convolution": {"triton": "Meta Applied AI fused causal depthwise convolution and SiLU"},
+    "moe_alignment": {"cutile": "NVIDIA TileGym MoE alignment, including workspace initialization and all stages"},
+    "nonzero": {"triton": "Triton kernels stable masked compaction, including mask packing and row counts"},
+    "causal_linear_attention": {"triton": "TritonBench chunk linear attention, FP32 output and final state"},
+    "fp8_gemm": {"cutile": "NVIDIA cuTile block-scaled E4M3 GEMM with E8M0 scales",
+                 "torch": "ATen scale decoding and cuBLAS FP32 GEMM; all conversions included"},
+    "q4_projection": {"ggml": "GGML Q4_K projection using original packed weights; activation quantization inside call"},
 }
 from ..implementations.aten_cpu import OPERATIONS as CPU_PROGRAMS
 for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
@@ -40,6 +51,7 @@ for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
 def backends(name):
     result = ["triton", "cutile"]
     if "mojo" in BASELINES[name] or "aten:cpu" in BASELINES[name]: result.append("mojo")
+    if "ggml" in BASELINES[name]: result.extend(("mojo", "weft"))
     if "cnnl" in BASELINES[name]: result.append("bangc")
     return result
 
@@ -75,8 +87,8 @@ def _mutable_arguments(program):
     if not isinstance(program, _Definition):
         # Product compositions used here have read-only public inputs; their
         # workspace initialization belongs to the full prepared invocation.
-        from intent.examples.programs.composition import Histogram, GroupNormBackward, PagedDecode
-        if isinstance(program, (Histogram, GroupNormBackward, PagedDecode)):
+        from intent.examples.programs.composition import Histogram, GroupNormBackward, PagedDecode, MoEAlignment
+        if isinstance(program, (Histogram, GroupNormBackward, PagedDecode, MoEAlignment)):
             return ()
         raise NotImplementedError("declare public effects for this author composition")
     parameters = [p.annotation for p in program.definition.signature.parameters.values()
@@ -87,11 +99,11 @@ def _mutable_arguments(program):
 
 
 def _device(env, backend=None):
-    device = ("cpu" if backend in {"mojo", "aten:cpu"} else
+    device = ("cpu" if backend in {"mojo", "weft", "ggml", "aten:cpu"} else
               "mlu:0" if backend in {"bangc", "cnnl"} else "cuda:0") if env.device == "auto" else env.device
     if backend in {"triton", "cutile", "cub"} and not device.startswith("cuda:"):
         raise EnvironmentUnavailable(f"{backend} requires a CUDA execution environment")
-    if backend in {"mojo", "aten:cpu"} and device != "cpu":
+    if backend in {"mojo", "weft", "ggml", "aten:cpu"} and device != "cpu":
         raise EnvironmentUnavailable(f"{backend} requires a CPU execution environment")
     if backend in {"bangc", "cnnl"} and not device.startswith("mlu:"):
         raise EnvironmentUnavailable(f"{backend} requires an MLU execution environment")
@@ -122,7 +134,7 @@ def _intent(name, backend, seed, env):
             return self.invocation.result()
 
     context = PrepareContext(backend, _device(env, backend), compiler=env.compiler, stage="native",
-                             workers=env.threads if backend == "mojo" else None,
+                             workers=env.threads if backend in {"mojo", "weft"} else None,
                              backend_options=backend_options(env, backend))
     try:
         _seed(name, seed)
@@ -156,11 +168,16 @@ def _intent(name, backend, seed, env):
             prepared.metadata.update(metadata)
             return prepared
         native_measure = None
-        if backend == "mojo":
+        if backend in {"mojo", "weft"}:
             from ..implementations.prepared import intent_sequence
             components = {"histogram": ("partials", "merge"), "group_norm_backward": ("dx", "affine")}
             calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
-            native = intent_sequence(calls, lambda: output, reset=reset, metadata=metadata)
+            def result():
+                if backend != "weft":
+                    return output
+                from intent.examples.programs.native import host_result
+                return _tree(output, lambda value: host_result(value, contents=True).data)
+            native = intent_sequence(calls, result, reset=reset, metadata=metadata)
             def close():
                 try:
                     native.close()
@@ -182,7 +199,39 @@ def _intent(name, backend, seed, env):
         raise
 
 
+def _q4_reference(seed, env, implementation):
+    from intent.examples import load_program
+    from ..workloads.weft import q4_projection_reference
+
+    class Context:
+        invocation = None
+        def compile(self, *args, **kwargs):
+            return None
+        def call(self, program, weights, activation):
+            if implementation == "ggml":
+                from dataclasses import replace
+                from ..implementations.native_libraries import ggml
+                call = ggml("q4_projection_packed", None, (weights.data, activation.data), env)
+                get_output = call.result
+                self.invocation = replace(call, result=lambda: get_output().reshape(-1))
+            elif implementation == "oracle":
+                self.invocation = PreparedCall(lambda: None,
+                    lambda: q4_projection_reference(weights.data, activation.data), device="cpu")
+            else:
+                raise NotImplementedError(("q4_projection", implementation))
+            return None
+
+    _device(env, implementation)
+    _seed("q4_projection", seed)
+    context = Context()
+    load_program("q4_projection")(context)
+    context.invocation.metadata.update(author_program="q4_projection", input_profile="installed author program")
+    return context.invocation
+
+
 def _reference(name, seed, env, implementation="torch"):
+    if name == "q4_projection":
+        return _q4_reference(seed, env, implementation)
     import torch
     from intent.examples import load_program
     from intent.examples.programs.inputs import Array
@@ -192,7 +241,8 @@ def _reference(name, seed, env, implementation="torch"):
     if implementation in {"cnnl", "oracle"} and device.startswith("mlu:"):
         device = "cpu"
     dtypes = {"f16": torch.float16, "f32": torch.float32, "bf16": torch.bfloat16,
-              "i32": torch.int32, "i64": torch.int64}
+              "i8": torch.int8, "u8": torch.uint8, "i32": torch.int32, "i64": torch.int64,
+              "f8e4m3fn": torch.float8_e4m3fn}
     buffers, results = {}, {}
 
     def tensor(value):
@@ -269,7 +319,10 @@ def _reference(name, seed, env, implementation="torch"):
                     native_measure=lambda settings: sample_timer(native, settings, lambda: None, metadata=metadata))
                 return self.bind(call, arguments, mutable)
             from ..references.author_programs import prepare as prepare_additional
-            if name in {"attention", "paged_decode", "mamba_chunk_state", "gated_delta"}:
+            if name in {"csr_spmv", "ragged_gemm", "int8_gemm", "causal_convolution", "moe_alignment", "nonzero"}:
+                from ..references.author_irregular import prepare
+                return self.bind(prepare(name, implementation, arguments, env), arguments, mutable)
+            if name in {"attention", "paged_decode", "mamba_chunk_state", "gated_delta", "causal_linear_attention", "fp8_gemm"}:
                 from ..references.author_streaming import prepare
                 return self.bind(prepare(name, implementation, arguments, env), arguments, mutable)
             if name in {"swiglu", "rope", "jagged_mean", "cumsum", "batch_norm",
@@ -362,6 +415,11 @@ def build(name):
                   "attention": Tolerance(.05, .02), "paged_decode": Tolerance(.03),
                   "mamba_chunk_state": Tolerance(.02, .02),
                   "gated_delta": (Tolerance(.1, .05),)*2,
+                  "csr_spmv": Tolerance(2e-5), "ragged_gemm": Tolerance(.02, .01),
+                  "causal_convolution": Tolerance(.003),
+                  "causal_linear_attention": (Tolerance(.0002, 1e-5),)*2,
+                  "fp8_gemm": Tolerance(1.0, .02),
+                  "q4_projection": Tolerance(1e-4, .002),
                   "batch_norm": (Tolerance(.02, .01), *((Tolerance(.0001, .0001),)*4))}
     tolerance = tolerances.get(name, Tolerance(0))
     implementations = {baseline: Implementation(baseline,
@@ -388,9 +446,25 @@ def build(name):
         "oracle", lambda case, seed, env: _reference(name, seed, env, "oracle"))
     def check(actual, expected):
         import numpy as np
+        if name == "q4_projection":
+            if hasattr(actual, "detach"):
+                actual = actual.detach().cpu().numpy()
+            np.testing.assert_allclose(actual, expected, atol=tolerance.atol, rtol=tolerance.rtol)
+            return
         import torch
         tensor = lambda value: torch.from_numpy(value) if isinstance(value, np.ndarray) else value
         actual, expected = _tree(actual, tensor), _tree(expected, tensor)
+        if name == "nonzero":
+            actual = actual["indices"], actual["counts"]
+            expected = expected["indices"], expected["counts"]
+        if name == "moe_alignment":
+            from ..sides.cutile_moe_alignment_source import _canonical_alignment
+            if actual["block_size"] != expected["block_size"]:
+                raise AssertionError("MoE alignment block size differs")
+            def canonical(output):
+                return _canonical_alignment(output["route_ids"], output["expert_blocks"],
+                                            output["total_padded"])
+            actual, expected = canonical(actual), canonical(expected)
         if name == "histogram":
             expected = expected.to(actual.device)
         compare_outputs(actual, expected, tolerance)

@@ -26,8 +26,15 @@ class Worker:
         self.lib.bench_error.argtypes=[];self.lib.bench_error.restype=C.c_char_p
         self.lib.bench_packed_weight.argtypes=[C.c_void_p,C.c_void_p];self.lib.bench_packed_weight.restype=None
         self.a=np.load(root/"input0.npy");self.b=np.load(root/"input1.npy")
+        self.kind={"gemm":0,"q4_projection":1,"rms_norm":2,"q4_dot":3,"q8_quantize":4,
+                   "q4_projection_packed":5}[request["operation"]]
+        if self.kind==5:
+            if self.a.dtype!=np.uint8 or self.a.ndim!=3 or self.a.shape[-1]!=144 or self.b.dtype!=np.float32:
+                raise ValueError('packed Q4_K projection requires [N,G,144] bytes and FP32 activation')
+            n,groups,_=self.a.shape
+            if self.b.shape!=(groups,256):raise ValueError('activation must match the Q4_K groups')
+            self.b=self.b.reshape(1,-1)
         m,k=self.b.shape;n=self.a.shape[0]
-        self.kind={"gemm":0,"q4_projection":1,"rms_norm":2,"q4_dot":3,"q8_quantize":4}[request["operation"]]
         self.context=self.lib.bench_create(self.kind,self.a.ctypes.data,self.b.ctypes.data,m,n,k,request["threads"])
         if not self.context:raise RuntimeError(self.lib.bench_error().decode())
         self.output=np.empty((m,n),dtype="float32") if self.kind!=4 else np.empty(m*k//256*292,dtype="uint8")
@@ -46,12 +53,16 @@ class Worker:
         self.lib.bench_packed_weight(self.context,weights.ctypes.data)
         return {'shape':list(weights.shape),'dtype':'uint8','data':base64.b64encode(weights.tobytes()).decode()}
 
-    def measure(self,samples,warmup):
+    def measure(self,samples,warmup,cache):
         for _ in range(warmup):self.run()
-        pilot=self.lib.bench_measure(self.context,1)
-        if pilot<=0:raise RuntimeError(self.lib.bench_error().decode())
-        repeat=max(1,min(10000,int(5/pilot)))
-        return [self.lib.bench_measure(self.context,repeat) for _ in range(samples)]
+        eviction=np.empty(64*1024*1024,dtype=np.uint8) if cache=='flush' else None
+        values=[]
+        for _ in range(samples):
+            if eviction is not None:eviction.fill(0)
+            elapsed=self.lib.bench_measure(self.context,1)
+            if elapsed<=0:raise RuntimeError(self.lib.bench_error().decode())
+            values.append(elapsed)
+        return values
 
     def close(self):self.lib.bench_destroy(self.context)
 

@@ -4,13 +4,13 @@ from pathlib import Path
 import torch
 
 
-def load_grouped_gemm():
+def load_grouped_gemm(*, tma=False):
     source_path = Path(__file__).with_name("08-grouped-gemm.py")
     tree = ast.parse(source_path.read_text(), filename=str(source_path))
-    tree.body = [node for node in tree.body if node.end_lineno <= 213]
+    tree.body = [node for node in tree.body if node.end_lineno <= (369 if tma else 213)]
     namespace = {"__file__": str(source_path), "__name__": "triton_grouped_gemm_source"}
     exec(compile(tree, str(source_path), "exec"), namespace)
-    return namespace["group_gemm_fn"]
+    return namespace["group_gemm_tma_fn" if tma else "group_gemm_fn"]
 
 
 def main():

@@ -35,9 +35,15 @@ def ggml(name,case,inputs,env,*,reference=False):
     request={"operation":name,"source":env.options["ggml_source"],"libraries":env.options["ggml_libraries"],
              "threads":env.threads,"reference":reference,"cxx":env.options.get("cxx","c++")}
     session=WorkerSession(env,"ggml_worker.py",[root/"cnnl_worker.py",root/"ggml_worker.py",root/"ggml_ops.cpp"],request,inputs)
+    metadata={**session.metadata(),
+              "weights":"preencoded Q4_K input bytes" if name=="q4_projection_packed" else
+                        "Q4_K weights encoded once outside timing" if name.startswith("q4") else "f32",
+              "activation_quantization":"inside graph call" if name in {"q4_projection","q4_projection_packed"}
+                                        else "preencoded" if name=="q4_dot" else "not applicable"}
+    def measure(settings):
+        metadata['cache_policy']='flush_cpu_64m' if settings.cache=='flush' else 'warm'
+        return session.call("measure",samples=settings.samples,warmup=settings.warmup,cache=settings.cache)
     return PreparedCall(lambda:session.call("run"),session.result,close=session.close,
-        native_measure=lambda settings:session.call("measure",samples=settings.samples,warmup=settings.warmup),
+        native_measure=measure,
         device=session.device("cpu"),timing="cpu_native_monotonic",
-        metadata={**session.metadata(),
-                  "weights":"Q4_K weights encoded once outside timing" if name.startswith("q4") else "f32",
-                  "activation_quantization":"inside graph call" if name=="q4_projection" else "preencoded" if name=="q4_dot" else "not applicable"})
+        metadata=metadata)
