@@ -5,6 +5,7 @@ from pathlib import Path
 ADVANCED_OPERATIONS=('scaled_fp8_gemm','fused_linear_cross_entropy','flash_attention_bias','flash_varlen_attention',
     'chunk_retention','flash_attention_inline','flash_attention_select','flash_attention_full_causal_stream',
     'mamba3_siso_step','mamba3_siso_forward','paged_gqa_f16_reduction')
+ATEN_BATCHED_OPERATIONS=('batched_gemm','batched_gemm_tn','batched_gemm_nt','batched_gemm_tt')
 
 
 def catalog():
@@ -25,6 +26,8 @@ def catalog():
         if 'source_implementation' in row:
             targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
             row['implementations']=[row['source_implementation'],*('intent:'+target for target in targets)]
+        if provider=='mojo' and row['kernel'] in ATEN_BATCHED_OPERATIONS:
+            row['implementations'].append('aten:cpu')
         row['implementations'].extend(sides.get(row['name'], {}).get('alternatives', {}))
     return rows
 

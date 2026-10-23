@@ -13,7 +13,8 @@ from ..output import output_root
 OPERATIONS = {name: index for index, name in enumerate((
     "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
-    "csr_spmv", "ragged_gemm", "int8_gemm", "attention"))}
+    "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
+    "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt"))}
 
 
 @cache
@@ -127,6 +128,16 @@ def prepare(name, arguments, environment):
         metadata["library"] = "ATen CPU Flash Attention, causal grouped queries"
         metadata["scope_note"] = ("Public native CPU flash-attention operator on original grouped Q/K/V; "
                                   "packing, output/LSE allocation and auxiliary LSE are included. Python submission is excluded.")
+    if name == "histogram":
+        metadata["library"] = "ATen CPU bincount"
+        metadata["scope_note"] = ("Complete native signed-index conversion, excluded-bin mapping, bincount and INT32 output. "
+                                  "The library's count allocation is included; external workspace and Python submission are excluded.")
+    if name == "jagged_mean":
+        metadata["library"] = "ATen CPU segment_reduce(mean)"
+        metadata["scope_note"] += " Segment offsets are read by the native library inside every interval."
+    if name.startswith("batched_gemm"):
+        metadata["library"] = "ATen CPU batched GEMM"
+        metadata["scope_note"] += " Transposed views and any library packing are inside the native interval; input dtype is unchanged."
     prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):

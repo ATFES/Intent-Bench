@@ -35,7 +35,13 @@ void initialize(Call &call) {
   case 2: o.push_back(at::empty({a[0].size(1), a[0].size(0)}, a[0].options())); break;
   case 3: o.push_back(at::empty({a[1].numel(), a[0].size(1)}, a[0].options())); break;
   case 5: o.push_back(at::empty({a[0].size(0), a[1].size(1)}, a[0].options())); break;
-  case 6: o.push_back(at::empty({a[0].size(0), a[0].size(1), a[1].size(2)}, a[0].options())); break;
+  case 6: case 19: case 20: case 21: {
+    bool leftTranspose = call.operation == 19 || call.operation == 21;
+    bool rightTranspose = call.operation == 20 || call.operation == 21;
+    o.push_back(at::empty({a[0].size(0), a[0].size(leftTranspose ? 2 : 1),
+                          a[1].size(rightTranspose ? 1 : 2)}, a[0].options()));
+    break;
+  }
   case 9:
     o = {a[1], a[2], a[3]};
     w.push_back(at::ones({}, a[0].options()));
@@ -71,6 +77,19 @@ void initialize(Call &call) {
                 "CPU flash attention requires compatible grouped query heads");
     o.push_back(at::empty_like(a[0]));
     break;
+  case 17:
+    TORCH_CHECK(a[0].dim()==1 && a[0].scalar_type()==at::kFloat,
+                "the author histogram requires a one-dimensional FP32 input");
+    o.push_back(at::empty({256}, a[0].options().dtype(at::kInt)));
+    w.push_back(at::empty(a[0].sizes(), a[0].options().dtype(at::kInt)));
+    w.push_back(at::empty(a[0].sizes(), a[0].options().dtype(at::kBool)));
+    w.push_back(at::empty_like(w[1]));
+    break;
+  case 18:
+    TORCH_CHECK(a[0].dim()==2 && a[1].dim()==1 && a[1].numel()>0,
+                "jagged mean requires values [T,D] and segment offsets [B+1]");
+    o.push_back(at::empty({a[1].numel()-1, a[0].size(1)}, a[0].options()));
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -99,7 +118,12 @@ void execute(Call &call) {
   case 3: at::index_select_out(o[0], a[0], 0, a[1]); break;
   case 4: at::native_layer_norm_out(o[0], w[0], w[1], a[0], {a[0].size(-1)}, a[1], a[2], s[1]); break;
   case 5: at::mm_out(o[0], a[0], a[1]); break;
-  case 6: at::bmm_out(o[0], a[0], a[1]); break;
+  case 6: case 19: case 20: case 21: {
+    auto left = call.operation == 19 || call.operation == 21 ? a[0].transpose(-1, -2) : a[0];
+    auto right = call.operation == 20 || call.operation == 21 ? a[1].transpose(-1, -2) : a[1];
+    at::bmm_out(o[0], left, right);
+    break;
+  }
   case 7:
     w[0].copy_(a[0]); w[1].copy_(a[1]);
     at::silu_out(w[0], w[0]);
@@ -137,6 +161,21 @@ void execute(Call &call) {
     // complete native call, including packing and allocation, inside the timer.
     o[0] = std::get<0>(at::_scaled_dot_product_flash_attention_for_cpu(
         a[0], a[1], a[2], 0.0, true, std::nullopt, s[0]));
+    break;
+  case 17: {
+    // Match the author's signed truncation and exclusion before counting. A
+    // sentinel bin retains the complete input without data-dependent packing.
+    w[0].copy_(a[0]);
+    at::lt_out(w[1], w[0], 0);
+    at::ge_out(w[2], w[0], 256);
+    w[1].logical_or_(w[2]);
+    w[0].masked_fill_(w[1], 256);
+    auto counts = at::bincount(w[0], std::nullopt, 257);
+    o[0].copy_(counts.narrow(0, 0, 256));
+    break;
+  }
+  case 18:
+    at::segment_reduce_out(o[0], a[0], "mean", std::nullopt, std::nullopt, a[1]);
     break;
   }
 }

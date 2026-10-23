@@ -49,6 +49,8 @@ for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
     BASELINES[_name]["aten:cpu"] = "Native libtorch/ATen CPU " + _name
 BASELINES["attention"]["aten:cpu"] = "ATen CPU Flash Attention, causal grouped queries and auxiliary LSE"
 BASELINES["int8_gemm"]["aten:cpu"] = "ATen CPU INT8 GEMM, including INT32 bias addition"
+BASELINES["histogram"]["aten:cpu"] = "ATen CPU bincount, including signed conversion, excluded bins and INT32 output"
+BASELINES["jagged_mean"]["aten:cpu"] = "ATen CPU segment_reduce(mean), including runtime segment offsets"
 
 
 def backends(name):
