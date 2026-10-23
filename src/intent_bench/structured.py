@@ -25,6 +25,7 @@ class InputBundle:
     tolerance: object
     constexprs: dict | None = None
     mutable_positions: tuple[int, ...] = ()
+    prequantized_reference: str | None = None
 
 
 def cpu_workload(row,factory):
@@ -36,8 +37,13 @@ def cpu_workload(row,factory):
             torch.manual_seed(seed)
             data=factory()
         last['tolerance']=data.tolerance
+        last['prequantized']=None
         return data
     def oracle(case,data):
+        if data.prequantized_reference is not None:
+            accumulator = getattr(cpu_runtime, data.prequantized_reference)(*data.arguments)
+            last['prequantized'] = accumulator
+            return accumulator.to(data.arguments[0].dtype)
         output = getattr(cpu_runtime,data.reference)(*data.arguments)
         return observed(output, data)
     def observed(output, data):
@@ -52,7 +58,7 @@ def cpu_workload(row,factory):
                 native_measure=lambda settings:call.samples(settings.samples,settings.warmup),timing='cpu_native_monotonic',
                 metadata={'reference_source':data.reference})
         state={};initial=clone(data.arguments)
-        def run():state['output']=oracle(case,data)
+        def run():state['output']=observed(getattr(cpu_runtime,data.reference)(*data.arguments),data)
         return PreparedCall(run,lambda:state['output'],reset=lambda:restore(data.arguments,initial),
                             metadata={'reference_function':data.reference},scopes=("prepared_call","host_call"))
     def generated(case,data,env):
@@ -70,9 +76,12 @@ def cpu_workload(row,factory):
         from .implementations.native_sampling import sample
         reset=lambda:restore(data.arguments,initial)
         def host_run():host_state['output']=artifact.run(*data.arguments)
+        metadata = {'artifacts':[str(a.cache_directory) for a in artifact.artifacts]}
+        if data.prequantized_reference is not None:
+            metadata['numerical_check'] = 'fp32_accumulation_interval_then_e4m3fn_rne'
         return PreparedCall(call.launch,lambda:observed(call.result(),data),compile=call.compile,reset=reset,
                             native_measure=lambda settings:sample(call,settings,reset),timing='cpu_native_monotonic',
-                            metadata={'artifacts':[str(a.cache_directory) for a in artifact.artifacts]},host_run=host_run,
+                            metadata=metadata,host_run=host_run,
                             host_result=lambda:observed(host_state['output'],data),
                             compiler_observations=lambda: tuple(
                                 a.observation for a in artifact.artifacts if a.observation is not None))
@@ -84,7 +93,12 @@ def cpu_workload(row,factory):
         return call
     def check(actual,expected):
         from .numeric import compare_outputs, NumericalComparisonError
-        try:compare_outputs(actual,expected,last['tolerance'])
+        try:
+            if last['prequantized'] is not None:
+                from .numeric import compare_fp8_accumulation
+                compare_fp8_accumulation(actual,last['prequantized'],last['tolerance'])
+            else:
+                compare_outputs(actual,expected,last['tolerance'])
         except NumericalComparisonError as error:raise AssertionError(str(error)) from error
     native_source='/baselines/mojo/' in (row.get('source_runtime') or '')
     reference=Implementation('oracle',source) if native_source else oracle

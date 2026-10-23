@@ -9,6 +9,44 @@ COMPARISON_CHUNK_ELEMENTS = 1048576
 class NumericalComparisonError(AssertionError):
     pass
 
+def compare_fp8_accumulation(generated: torch.Tensor, accumulator: torch.Tensor,
+                             tolerance: Tolerance) -> None:
+    """Check finite E4M3FN output against an FP32 accumulation error interval.
+
+    RNE conversion is monotone on the finite format domain. Quantizing both
+    endpoints therefore describes exactly the FP8 values reachable from the
+    permitted FP32 interval, including ties at quantization boundaries.
+    """
+    if accumulator.dtype != torch.float32:
+        raise TypeError("FP8 accumulation comparison requires an FP32 oracle")
+    if generated.dtype != torch.float8_e4m3fn:
+        raise NumericalComparisonError("FP8 accumulation comparison requires E4M3FN output")
+    if generated.shape != accumulator.shape or generated.device != accumulator.device:
+        raise NumericalComparisonError("FP8 output and accumulator shape/device differ")
+    actual, expected = generated.reshape(-1), accumulator.reshape(-1)
+    bound = torch.finfo(generated.dtype).max
+    for begin in range(0, actual.numel(), COMPARISON_CHUNK_ELEMENTS):
+        end = begin + COMPARISON_CHUNK_ELEMENTS
+        reference = expected[begin:end]
+        value = actual[begin:end].float()
+        if not (torch.isfinite(value).all() and torch.isfinite(reference).all()):
+            raise NumericalComparisonError("finite FP8 accumulation check received non-finite values")
+        if torch.any(reference.abs() > bound):
+            raise NumericalComparisonError("FP32 oracle exceeds the finite E4M3FN conversion domain")
+        error = tolerance.atol + tolerance.rtol * reference.abs()
+        lower = (reference - error).clamp(-bound, bound).to(generated.dtype).float()
+        upper = (reference + error).clamp(-bound, bound).to(generated.dtype).float()
+        invalid = (value < lower) | (value > upper)
+        if invalid.any():
+            index = int(torch.nonzero(invalid)[0, 0])
+            raise NumericalComparisonError(
+                f"FP8 output is outside the permitted accumulation/rounding interval: "
+                f"first_failure={begin + index}, generated={value[index].item()}, "
+                f"accumulator={reference[index].item()}, atol={tolerance.atol}, "
+                f"rtol={tolerance.rtol}, quantized_interval="
+                f"[{lower[index].item()}, {upper[index].item()}]"
+            )
+
 def _leaves(value: TensorTree) -> Iterable[torch.Tensor]:
     if isinstance(value, torch.Tensor):
         yield value

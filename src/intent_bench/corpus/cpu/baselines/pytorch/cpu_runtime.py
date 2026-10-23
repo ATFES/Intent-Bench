@@ -98,6 +98,10 @@ def fp8_matmul(lhs, rhs_transposed):
     return (lhs.float() @ rhs_transposed.float().T).to(lhs.dtype)
 
 
+def fp8_matmul_accumulator(lhs, rhs_transposed):
+    return lhs.float() @ rhs_transposed.float().T
+
+
 def quantized_gemm(lhs, rhs, bias, residual, scale):
     accumulator = lhs.float() @ rhs.float()
     fused = torch.relu(accumulator + bias) + residual.float()

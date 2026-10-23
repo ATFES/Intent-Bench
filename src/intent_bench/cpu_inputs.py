@@ -153,7 +153,7 @@ def inputs_gated_dual_gemm():
 def inputs_fp8_gemm():
     lhs = torch.randn((4096, 4096), dtype=torch.float16).to(torch.float8_e4m3fn)
     rhs = torch.randn((14336, 4096), dtype=torch.float16).to(torch.float8_e4m3fn)
-    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.weight_only_int4:fp8_e4m3_matmul', 'fp8_matmul', Tolerance(atol=0.5, rtol=0.05), None, ())
+    return InputBundle((lhs, rhs), 'intent.examples.kernels.contraction.weight_only_int4:fp8_e4m3_matmul', 'fp8_matmul', Tolerance(atol=0.5, rtol=0.05), None, (), prequantized_reference='fp8_matmul_accumulator')
 
 def inputs_fp8_e5m2_gemm():
     lhs = torch.randn((1024, 1024), dtype=torch.float16).to(torch.float8_e5m2)
