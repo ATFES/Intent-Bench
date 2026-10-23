@@ -5,6 +5,7 @@ import torch
 
 from ..model import PreparedCall, ImplementationMissing
 from ..corpus.cpu.baselines.mojo.source import prepare_source,view,scalar
+from .native_sampling import sample_timer
 
 
 def bind(entry,tensors,scalars,outputs,env):
@@ -18,9 +19,10 @@ def bind(entry,tensors,scalars,outputs,env):
         declarations.append(scalar('scalar'+str(i),dtype));arguments.append(value)
     target=SimpleNamespace(workers=env.threads,executable=env.options.get('mojo'))
     call=prepare_source(Path(__file__).parents[1]/'native/advanced.mojo',entry,declarations,target,tuple(arguments),required_workers=None)
+    metadata={'native_language':'Mojo','workers':env.threads}
     return PreparedCall(call.launch,lambda:outputs[0] if len(outputs)==1 else tuple(outputs),
-                        native_measure=lambda settings:call.samples(settings.samples,settings.warmup),
-                        timing='cpu_native_monotonic',metadata={'native_language':'Mojo','workers':env.threads})
+                        native_measure=lambda settings:sample_timer(call,settings,lambda:None,metadata=metadata),
+                        timing='cpu_native_monotonic',metadata=metadata)
 
 
 def prepare(name,args,env):

@@ -97,10 +97,12 @@ def prepare_source(path: Path, entry: str, parameters, target, arguments, *, req
             bound.append(types[slot["carrier"]][1](raw))
     addresses=(ctypes.c_void_p*len(bound))(*(ctypes.addressof(v) for v in bound))
     class Call:
-        def launch(self):
-            # Tensor owners remain reachable for the entire bound call lifetime.
+        def __init__(self):
             self.owners=values
+        def launch(self):
             function(*bound)
+        def run(self):
+            return timer.measure(function,addresses,1)
         def result(self):return outputs[0] if len(outputs)==1 else tuple(outputs)
         def samples(self,count=7,warmup=3):
             for _ in range(warmup):self.launch()

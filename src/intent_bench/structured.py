@@ -54,9 +54,11 @@ def cpu_workload(row,factory):
             from .corpus import PROJECT_ROOT
             prepare=load(str(PROJECT_ROOT/data.reference)+':prepare')
             call=prepare(SimpleNamespace(workers=env.threads,executable=env.options.get('mojo')), *data.arguments)
+            from .implementations.native_sampling import sample_timer
+            metadata={'reference_source':data.reference}
             return PreparedCall(call.launch,call.result,
-                native_measure=lambda settings:call.samples(settings.samples,settings.warmup),timing='cpu_native_monotonic',
-                metadata={'reference_source':data.reference})
+                native_measure=lambda settings:sample_timer(call,settings,lambda:None,metadata=metadata),
+                timing='cpu_native_monotonic',metadata=metadata)
         state={};initial=clone(data.arguments)
         def run():state['output']=observed(getattr(cpu_runtime,data.reference)(*data.arguments),data)
         return PreparedCall(run,lambda:state['output'],reset=lambda:restore(data.arguments,initial),
@@ -80,7 +82,7 @@ def cpu_workload(row,factory):
         if data.prequantized_reference is not None:
             metadata['numerical_check'] = 'fp32_accumulation_interval_then_e4m3fn_rne'
         return PreparedCall(call.launch,lambda:observed(call.result(),data),compile=call.compile,reset=reset,
-                            native_measure=lambda settings:sample(call,settings,reset),timing='cpu_native_monotonic',
+                            native_measure=lambda settings:sample(call,settings,reset,metadata=metadata),timing='cpu_native_monotonic',
                             metadata=metadata,host_run=host_run,
                             host_result=lambda:observed(host_state['output'],data),
                             compiler_observations=lambda: tuple(
