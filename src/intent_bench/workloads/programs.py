@@ -405,7 +405,6 @@ def build(name):
     if name not in BASELINES:
         raise KeyError(name)
     from ..implementations.context import Tolerance
-    from ..numeric import compare_outputs
     tolerances = {"softmax": Tolerance(.01, .01), "layer_norm": Tolerance(5e-5, 1e-5),
                   "gemm": Tolerance(.01, .01), "batched_gemm": Tolerance(.05, .02),
                   "swiglu": Tolerance(.02, .01), "rope": (Tolerance(.002, .002),)*2,
@@ -452,6 +451,7 @@ def build(name):
             np.testing.assert_allclose(actual, expected, atol=tolerance.atol, rtol=tolerance.rtol)
             return
         import torch
+        from ..numeric import compare_outputs
         tensor = lambda value: torch.from_numpy(value) if isinstance(value, np.ndarray) else value
         actual, expected = _tree(actual, tensor), _tree(expected, tensor)
         if name == "nonzero":
