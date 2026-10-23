@@ -46,6 +46,19 @@ void initialize(Call &call) {
   case 12:
     o = {at::empty_like(a[0]), at::empty_like(a[2]), at::empty_like(a[2])};
     break;
+  case 13:
+    o.push_back(at::empty({a[0].numel()-1}, a[2].options()));
+    w.push_back(at::sparse_csr_tensor(a[0], a[1], a[2],
+                                    {a[0].numel()-1, a[3].numel()},
+                                    a[2].options().layout(at::kSparseCsr)));
+    break;
+  case 14: {
+    TORCH_CHECK(a[1].numel() == a[2].size(0)+1, "group offsets must match grouped weights");
+    TORCH_CHECK(a[1].scalar_type() == at::kInt || a[1].scalar_type() == at::kLong,
+                "group offsets require i32 or i64 storage");
+    o.push_back(at::empty({a[0].size(0), a[2].size(2)}, a[0].options()));
+    break;
+  }
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -90,6 +103,22 @@ void execute(Call &call) {
   case 12: at::native_group_norm_backward_out(o[0], o[1], o[2], a[1], a[0], a[3], a[4], a[2],
                                              a[0].size(0), a[0].size(1), a[0].size(2), a[3].size(1),
                                              {true, true, true}); break;
+  case 13: at::mv_out(o[0], w[0], a[3]); break;
+  case 14: {
+    auto boundary = [&](int64_t group) -> int64_t {
+      return a[1].scalar_type() == at::kLong ? a[1].const_data_ptr<int64_t>()[group]
+                                           : a[1].const_data_ptr<int32_t>()[group];
+    };
+    TORCH_CHECK(boundary(0) == 0 && boundary(a[2].size(0)) == a[0].size(0),
+                "group offsets must cover the complete input");
+    for (int64_t group=0; group<a[2].size(0); ++group) {
+      int64_t begin = boundary(group), end = boundary(group+1);
+      TORCH_CHECK(0 <= begin && begin <= end && end <= a[0].size(0), "invalid group offsets");
+      auto output = o[0].slice(0, begin, end);
+      at::mm_out(output, a[0].slice(0, begin, end), a[2][group]);
+    }
+    break;
+  }
   }
 }
 }

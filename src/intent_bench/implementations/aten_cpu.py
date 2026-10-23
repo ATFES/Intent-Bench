@@ -12,7 +12,8 @@ from ..output import output_root
 
 OPERATIONS = {name: index for index, name in enumerate((
     "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
-    "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward"))}
+    "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
+    "csr_spmv", "ragged_gemm"))}
 
 
 @cache
@@ -117,6 +118,8 @@ def prepare(name, arguments, environment):
         raise
     metadata = {"library": "PyTorch libtorch/ATen CPU", "native_build": str(build),
                 "scope_note": "Prepared native ATen operations; output/workspace allocation and Python submission excluded."}
+    if name == "ragged_gemm":
+        metadata["scope_note"] += " Reading group offsets, slicing views and every group GEMM are inside the native interval."
     prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):
