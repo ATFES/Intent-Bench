@@ -215,9 +215,19 @@ def _reference(name, seed, env, implementation="torch"):
 
         def bind(self, call, arguments, mutable):
             self.invocation = call
-            initial = [(arguments[i], arguments[i].clone()) for i in mutable]
+            initial = []
+            for index in mutable:
+                value = arguments[index]
+                if value.device.type == "cpu":
+                    import numpy as np
+                    contents = value.detach().view(torch.uint8).numpy()
+                    saved = contents.copy()
+                    initial.append(lambda contents=contents, saved=saved: np.copyto(contents, saved))
+                else:
+                    saved = value.clone()
+                    initial.append(lambda value=value, saved=saved: value.copy_(saved))
             if initial:
-                call.reset = lambda: [value.copy_(saved) for value, saved in initial]
+                call.reset = lambda: [restore() for restore in initial]
             # Some library APIs allocate their output lazily. One unmeasured
             # invocation establishes the author's return-tree projections.
             try:
