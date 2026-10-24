@@ -43,6 +43,8 @@ def describe_implementation(name):
         'ggml': 'Independent GGML implementation.', 'weft': 'Authored Weft source implementation.',
         'cub': 'NVIDIA CUB device primitives, compiled for the executing GPU.',
         'aten:cpu': 'Native libtorch/ATen CPU operations; outputs bound in advance and timed without Python submission.',
+        'inductor:cpu': 'PyTorch AOTInductor CPU kernel; native package execution with prebound output.',
+        'vllm:cpu': 'Native vLLM CPU implementation; required initialization and all stages are timed.',
     }
     return {'name': name, 'kind': 'library' if name in descriptions else 'custom',
             'description': descriptions.get(name, 'User-provided implementation; inspect its workload contract.')}

@@ -1,5 +1,8 @@
 #include <ATen/ATen.h>
 #include <ATen/Parallel.h>
+#ifdef INTENT_BENCH_AOTI
+#include <torch/csrc/inductor/aoti_package/model_package_loader.h>
+#endif
 #include <cstdint>
 #include <memory>
 #include <limits>
@@ -13,6 +16,9 @@ extern "C" const char *bench_dnnl_matmul_implementation(void *);
 extern "C" void bench_dnnl_matmul_run(void *);
 extern "C" void bench_dnnl_matmul_destroy(void *);
 #endif
+#ifdef INTENT_BENCH_VLLM
+extern "C" int bench_vllm_moe_align(int32_t *, int32_t *, int32_t *, int32_t *, int32_t *, int32_t *, int, int, int);
+#endif
 
 namespace {
 struct Call {
@@ -20,6 +26,9 @@ struct Call {
   std::vector<at::Tensor> inputs, outputs, workspace;
   std::vector<double> scalars;
   std::string error;
+#ifdef INTENT_BENCH_AOTI
+  std::unique_ptr<torch::inductor::AOTIModelPackageLoader> package;
+#endif
 #ifdef INTENT_BENCH_ONEDNN
   void *matrix = nullptr;
   ~Call() { bench_dnnl_matmul_destroy(matrix); }
@@ -177,6 +186,27 @@ void initialize(Call &call) {
     o.push_back(at::empty({a[0].size(0), a[0].size(2), a[2].size(2)}, a[0].options()));
     w.push_back(at::empty({a[0].size(0), a[0].size(1), a[0].size(1)}, a[0].options()));
     break;
+#ifdef INTENT_BENCH_AOTI
+  case 28:
+    TORCH_CHECK(a.size() == 2, "compiled CPU comparison requires input and prebound output");
+    o.push_back(a[1]);
+    break;
+#endif
+#ifdef INTENT_BENCH_VLLM
+  case 29: {
+    TORCH_CHECK(a.size() == 1 && a[0].dim() == 2 && a[0].scalar_type() == at::kInt &&
+                call.scalars.size() == 3 && call.scalars[1] == 128,
+                "vLLM CPU alignment requires INT32 routes and block size 128");
+    int experts = call.scalars[0], capacity = call.scalars[2], workers = at::get_num_threads();
+    TORCH_CHECK(experts > 0 && capacity >= a[0].numel() + experts * 127,
+                "vLLM alignment requires worst-case padded capacity");
+    o = {at::empty({capacity}, a[0].options()), at::empty({capacity / 128 + 1}, a[0].options()),
+         at::empty({1}, a[0].options())};
+    w = {at::empty({workers + 1, experts}, a[0].options()),
+         at::empty({experts + 1}, a[0].options()), at::empty({capacity / 128 + 2}, a[0].options())};
+    break;
+  }
+#endif
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -353,6 +383,23 @@ void execute(Call &call) {
     at::bmm_out(o[0], w[0], a[2]);
     at::bmm_out(o[1], a[1].transpose(1, 2), a[2]);
     break;
+#ifdef INTENT_BENCH_AOTI
+  case 28:
+    TORCH_CHECK(call.package, "compiled CPU package has not been loaded");
+    call.package->run(a);
+    break;
+#endif
+#ifdef INTENT_BENCH_VLLM
+  case 29:
+    w[0].zero_();
+    o[0].fill_(a[0].numel());
+    o[1].fill_(-1);
+    o[2].data_ptr<int32_t>()[0] = bench_vllm_moe_align(
+        o[0].data_ptr<int32_t>(), o[1].data_ptr<int32_t>(), a[0].data_ptr<int32_t>(),
+        w[0].data_ptr<int32_t>(), w[1].data_ptr<int32_t>(), w[2].data_ptr<int32_t>(),
+        s[0], a[0].numel(), at::get_num_threads());
+    break;
+#endif
   }
 }
 }
@@ -381,6 +428,14 @@ extern "C" void bench_aten_run(void *opaque) {
   try { execute(call); }
   catch (const std::exception &error) { call.error = error.what(); }
 }
+#ifdef INTENT_BENCH_AOTI
+extern "C" void bench_aten_load_package(void *opaque, const char *path) {
+  auto &call = *static_cast<Call *>(opaque);
+  try {
+    call.package = std::make_unique<torch::inductor::AOTIModelPackageLoader>(path);
+  } catch (const std::exception &error) { call.error = error.what(); }
+}
+#endif
 extern "C" const char *bench_aten_error(void *opaque) { return static_cast<Call *>(opaque)->error.c_str(); }
 extern "C" const char *bench_aten_implementation(void *opaque) {
 #ifdef INTENT_BENCH_ONEDNN

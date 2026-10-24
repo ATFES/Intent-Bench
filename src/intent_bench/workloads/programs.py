@@ -27,7 +27,8 @@ BASELINES = {
     "group_norm_backward": {"torch": "ATen native_group_norm_backward"},
     "adamw": {"torch": "ATen fused AdamW"},
     "cholesky": {"torch": "ATen/cuSOLVER Cholesky, InOut"},
-    "dropout": {"cutile": "NVIDIA TileGym xorshift dropout"},
+    "dropout": {"cutile": "NVIDIA TileGym xorshift dropout",
+                "inductor:cpu": "Native AOTInductor fused xorshift dropout with the same RNG and FP16 rounding"},
     "attention": {"cutile": "NVIDIA TileGym causal grouped-query FMHA"},
     "paged_decode": {"triton": "vLLM split-K paged GQA decode, including merge"},
     "mamba_chunk_state": {"triton": "state-spaces/mamba chunk state, FP32 states"},
@@ -38,7 +39,8 @@ BASELINES = {
                     "triton": "Triton grouped TMA GEMM, including required weight transpose"},
     "int8_gemm": {"torch": "ATen/cuBLAS INT8 GEMM with INT32 bias addition"},
     "causal_convolution": {"triton": "Meta Applied AI fused causal depthwise convolution and SiLU"},
-    "moe_alignment": {"cutile": "NVIDIA TileGym MoE alignment, including workspace initialization and all stages"},
+    "moe_alignment": {"cutile": "NVIDIA TileGym MoE alignment, including workspace initialization and all stages",
+                      "vllm:cpu": "vLLM/SGLang native CPU MoE alignment, including workspace clearing and padding"},
     "nonzero": {"triton": "Triton kernels stable masked compaction, including mask packing and row counts"},
     "causal_linear_attention": {"triton": "TritonBench chunk linear attention, FP32 output and final state"},
     "fp8_gemm": {"cutile": "NVIDIA cuTile block-scaled E4M3 GEMM with E8M0 scales",
@@ -62,7 +64,7 @@ BASELINES["fp8_gemm"]["aten:cpu"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM; 
 
 def backends(name):
     result = ["triton", "cutile"]
-    if "mojo" in BASELINES[name] or "aten:cpu" in BASELINES[name]: result.append("mojo")
+    if any(item in BASELINES[name] for item in ("mojo", "aten:cpu", "inductor:cpu", "vllm:cpu")): result.append("mojo")
     if "ggml" in BASELINES[name]: result.extend(("mojo", "weft"))
     if "cnnl" in BASELINES[name]: result.append("bangc")
     return result
@@ -111,7 +113,7 @@ def _mutable_arguments(program):
 
 
 def _device(env, backend=None):
-    device = ("cpu" if backend in {"mojo", "weft", "ggml", "aten:cpu"} else
+    device = ("cpu" if backend in {"mojo", "weft", "ggml", "aten:cpu", "inductor:cpu", "vllm:cpu"} else
               "mlu:0" if backend in {"bangc", "cnnl"} else "cuda:0") if env.device == "auto" else env.device
     if backend in {"triton", "cutile", "cub"} and not device.startswith("cuda:"):
         raise EnvironmentUnavailable(f"{backend} requires a CUDA execution environment")
@@ -183,14 +185,16 @@ def _intent(name, backend, seed, env):
         if backend in {"mojo", "weft"}:
             from ..implementations.prepared import intent_sequence
             components = {"histogram": ("partials", "merge"), "paged_decode": ("partials", "merge"),
-                          "group_norm_backward": ("dx", "affine")}
+                          "group_norm_backward": ("dx", "affine"),
+                          "moe_alignment": ("count", "prefix", "scatter", "mark")}
             calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
             def result():
                 if backend != "weft":
                     return output
                 from intent.examples.programs.native import host_result
                 return _tree(output, lambda value: host_result(value, contents=True).data)
-            native = intent_sequence(calls, result, reset=reset, metadata=metadata)
+            native = intent_sequence(calls, result, reset=reset, metadata=metadata,
+                initializations=call.initializations if name == "moe_alignment" else ())
             def close():
                 try:
                     native.close()
@@ -311,6 +315,14 @@ def _reference(name, seed, env, implementation="torch"):
             if implementation == "aten:cpu":
                 from ..implementations.aten_cpu import prepare
                 return self.bind(prepare(name, arguments, env), arguments, mutable)
+            if implementation == "inductor:cpu":
+                from ..implementations.aoti_cpu import prepare
+                return self.bind(prepare(name, arguments, env), arguments, mutable)
+            if implementation == "vllm:cpu":
+                from ..implementations.aten_cpu import prepare
+                from intent.examples.kernels.routing.moe_align import EXPERTS, BLOCK_SIZE, PADDED_ROUTES
+                return self.bind(prepare("vllm_moe_alignment",
+                    (*arguments, EXPERTS, BLOCK_SIZE, PADDED_ROUTES), env), arguments, mutable)
             if implementation == "ggml":
                 from ..implementations.native_libraries import ggml
                 if name != "gated_delta":

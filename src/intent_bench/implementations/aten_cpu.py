@@ -15,11 +15,11 @@ OPERATIONS = {name: index for index, name in enumerate((
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
-    "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention"))}
+    "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention", "aoti", "vllm_moe_alignment"))}
 
 
 @cache
-def library(root, compiler, onednn=False, dnnl_prefix=None):
+def library(root, compiler, onednn=False, dnnl_prefix=None, *, aoti=False, vllm=False):
     import torch
     from torch.utils.cpp_extension import include_paths, library_paths
     parent = root/"build/native"
@@ -30,6 +30,13 @@ def library(root, compiler, onednn=False, dnnl_prefix=None):
                "-D_GLIBCXX_USE_CXX11_ABI="+str(int(torch.compiled_with_cxx11_abi())), str(source),
                "-o", str(build/"aten.so")]
     command += ["-I"+path for path in include_paths()]
+    if aoti:
+        command += ["-DINTENT_BENCH_AOTI"]
+    if vllm:
+        command += ["-DINTENT_BENCH_VLLM", "-fopenmp", "-march=native", str(source.with_name("vllm_moe.cpp"))]
+        capability = torch.backends.cpu.get_cpu_capability()
+        if capability in {"AVX2", "AVX512"}:
+            command += ["-DCPU_CAPABILITY_"+capability]
     command += [option for path in library_paths() for option in ("-L"+path, "-Wl,-rpath,"+path)]
     command += ["-ltorch_cpu", "-lc10"]
     if onednn:
@@ -62,6 +69,9 @@ def library(root, compiler, onednn=False, dnnl_prefix=None):
     native.bench_aten_create.restype = C.c_void_p
     native.bench_aten_run.argtypes = [C.c_void_p]
     native.bench_aten_run.restype = None
+    if aoti:
+        native.bench_aten_load_package.argtypes = [C.c_void_p, C.c_char_p]
+        native.bench_aten_load_package.restype = None
     native.bench_aten_error.argtypes = [C.c_void_p]
     native.bench_aten_error.restype = C.c_char_p
     native.bench_aten_implementation.argtypes = [C.c_void_p]
@@ -75,12 +85,14 @@ def library(root, compiler, onednn=False, dnnl_prefix=None):
     return native, build
 
 
-def prepare(name, arguments, environment):
+def prepare(name, arguments, environment, *, package=None):
     import torch
     from .native_sampling import sample_timer
     from .native_sequence import NativeSequence
     if environment.device != "cpu":
         raise ValueError("ATen native CPU comparisons require device=cpu")
+    if (name == "aoti") != (package is not None):
+        raise ValueError("AOTInductor comparison requires an explicit compiled package")
     tensors = [value for value in arguments if isinstance(value, torch.Tensor)]
     scalars = [value for value in arguments if not isinstance(value, torch.Tensor)]
     dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32, torch.int8,
@@ -90,7 +102,8 @@ def prepare(name, arguments, environment):
     if name == "adamw" and (scalars[3] != 1-scalars[1] or scalars[4] != 1-scalars[2]):
         raise ValueError("the standard AdamW case requires first-step bias correction")
     native, build = library(output_root(environment.output_root), environment.options.get("cxx", "c++"),
-                            name == "mamba_chunk_state", environment.options.get("dnnl_prefix"))
+                            name == "mamba_chunk_state", environment.options.get("dnnl_prefix"),
+                            aoti=name == "aoti", vllm=name == "vllm_moe_alignment")
     dimensions = [size for tensor in tensors for size in tensor.shape]
     strides = [stride for tensor in tensors for stride in tensor.stride()]
     state = C.c_void_p(native.bench_aten_create(OPERATIONS[name], environment.threads, len(tensors),
@@ -137,6 +150,9 @@ def prepare(name, arguments, environment):
     call = Call()
     try:
         checked()
+        if package is not None:
+            native.bench_aten_load_package(state, str(package).encode())
+            checked()
     except Exception:
         call.close()
         raise
@@ -169,6 +185,11 @@ def prepare(name, arguments, environment):
                                   "score V and final K^T V. Full score materialization is timed; "
                                   "reusable allocation and Python submission are outside. "
                                   "This is a BLAS composition, not a dedicated linear-attention kernel.")
+    if name == "vllm_moe_alignment":
+        metadata["library"] = "vLLM/SGLang native CPU MoE block alignment"
+        metadata["source"] = "https://github.com/vllm-project/vllm/blob/main/csrc/cpu/sgl-kernels/moe.cpp"
+        metadata["scope_note"] = ("Upstream native routing, per-thread counts/prefix, scatter, block IDs and auxiliary offsets; "
+                                  "workspace clearing and output padding are timed. Reusable allocation is outside.")
     if name == "histogram":
         metadata["library"] = "ATen CPU bincount"
         metadata["scope_note"] = ("Complete native signed-index conversion, excluded-bin mapping, bincount and INT32 output. "
