@@ -106,13 +106,13 @@ def cpu_workload(row,factory):
     reference=Implementation('oracle',source) if native_source else oracle
     source_name='mojo' if native_source else 'torch'
     implementations={source_name:Implementation(source_name,source),'intent:mojo':Implementation('intent:mojo',generated)}
-    from .catalog import ATEN_BATCHED_OPERATIONS
-    if row['kernel'] in ATEN_BATCHED_OPERATIONS:
-        def native_batched(case, data, env):
+    from .catalog import ATEN_NATIVE_OPERATIONS
+    if row['kernel'] in ATEN_NATIVE_OPERATIONS:
+        def native_aten(case, data, env):
             from .implementations.aten_cpu import prepare
-            return prepare(row['kernel'], data.arguments, env)
-        implementations['aten:cpu'] = Implementation('aten:cpu', native_batched,
-            'Native ATen CPU batched GEMM on original dtype, including transpose views and library packing')
+            return prepare(ATEN_NATIVE_OPERATIONS[row['kernel']], data.arguments, env)
+        implementations['aten:cpu'] = Implementation('aten:cpu', native_aten,
+            'Native ATen CPU operations on original inputs, including required preparation and final state')
     if row['kernel'] in {'scaled_fp8_gemm','flash_attention_bias','flash_varlen_attention','chunk_retention',
                          'flash_attention_inline','flash_attention_select','flash_attention_full_causal_stream',
                          'mamba3_siso_step','mamba3_siso_forward','fused_linear_cross_entropy','paged_gqa_f16_reduction'}:
