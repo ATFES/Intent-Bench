@@ -15,11 +15,11 @@ OPERATIONS = {name: index for index, name in enumerate((
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
-    "fp8_gemm", "paged_decode"))}
+    "fp8_gemm", "paged_decode", "mamba_chunk_state"))}
 
 
 @cache
-def library(root, compiler):
+def library(root, compiler, onednn=False, dnnl_prefix=None):
     import torch
     from torch.utils.cpp_extension import include_paths, library_paths
     parent = root/"build/native"
@@ -32,6 +32,24 @@ def library(root, compiler):
     command += ["-I"+path for path in include_paths()]
     command += [option for path in library_paths() for option in ("-L"+path, "-Wl,-rpath,"+path)]
     command += ["-ltorch_cpu", "-lc10"]
+    if onednn:
+        # Compile against the system oneDNN headers separately from libtorch's
+        # bundled private headers. The bridge exposes only its own plain C ABI.
+        matrix_source=source.with_name("onednn_matmul.cpp")
+        matrix_object=build/"onednn_matmul.o"
+        include=["-I"+str(Path(dnnl_prefix)/"include")] if dnnl_prefix else []
+        result=subprocess.run([compiler,"-std=c++17","-O3","-fPIC",*include,"-c",str(matrix_source),
+                               "-o",str(matrix_object)],text=True,capture_output=True,timeout=180)
+        (build/"onednn-compile.log").write_text(result.stdout+result.stderr)
+        if result.returncode:
+            from ..corpus._common.measurement import PipelineStageError
+            raise PipelineStageError("source_native_compilation",
+                f"oneDNN 3.x development headers are required (environment option dnnl_prefix); "
+                f"see {build/'onednn-compile.log'}\n{result.stderr}")
+        if dnnl_prefix:
+            directory=str(Path(dnnl_prefix)/"lib")
+            command += ["-L"+directory,"-Wl,-rpath,"+directory]
+        command += ["-DINTENT_BENCH_ONEDNN",str(matrix_object),"-ldnnl"]
     result = subprocess.run(command, text=True, capture_output=True, timeout=180)
     (build/"compile.log").write_text(result.stdout+result.stderr)
     if result.returncode:
@@ -46,6 +64,8 @@ def library(root, compiler):
     native.bench_aten_run.restype = None
     native.bench_aten_error.argtypes = [C.c_void_p]
     native.bench_aten_error.restype = C.c_char_p
+    native.bench_aten_implementation.argtypes = [C.c_void_p]
+    native.bench_aten_implementation.restype = C.c_char_p
     native.bench_aten_outputs.argtypes = [C.c_void_p]
     native.bench_aten_outputs.restype = C.c_int
     native.bench_aten_output.argtypes = [C.c_void_p, C.c_int, C.POINTER(C.c_int64), C.POINTER(C.c_int64), C.POINTER(C.c_int)]
@@ -69,7 +89,8 @@ def prepare(name, arguments, environment):
         raise ValueError("this ATen native binding requires contiguous CPU inputs")
     if name == "adamw" and (scalars[3] != 1-scalars[1] or scalars[4] != 1-scalars[2]):
         raise ValueError("the standard AdamW case requires first-step bias correction")
-    native, build = library(output_root(environment.output_root), environment.options.get("cxx", "c++"))
+    native, build = library(output_root(environment.output_root), environment.options.get("cxx", "c++"),
+                            name == "mamba_chunk_state", environment.options.get("dnnl_prefix"))
     dimensions = [size for tensor in tensors for size in tensor.shape]
     strides = [stride for tensor in tensors for stride in tensor.stride()]
     state = C.c_void_p(native.bench_aten_create(OPERATIONS[name], environment.threads, len(tensors),
@@ -136,6 +157,12 @@ def prepare(name, arguments, environment):
                                   "layout preparation, CPU flash attention and output writeback are all timed. "
                                   "This is a native library composition, not a dedicated paged-attention kernel. "
                                   "The library's packed KV and auxiliary LSE allocations are included.")
+    if name == "mamba_chunk_state":
+        metadata["library"] = "ATen chunk scaling and oneDNN BF16 matmul with FP32 output"
+        metadata["matmul_implementation"] = native.bench_aten_implementation(state).decode()
+        metadata["scope_note"] = ("Complete native library composition: FP32 decay/scale, grouped basis expansion, "
+                                  "BF16 weighted-basis rounding, X transpose and BF16 x BF16 -> FP32 oneDNN matmul. "
+                                  "All data preparation is timed; primitive construction and reusable allocation are outside.")
     if name == "histogram":
         metadata["library"] = "ATen CPU bincount"
         metadata["scope_note"] = ("Complete native signed-index conversion, excluded-bin mapping, bincount and INT32 output. "

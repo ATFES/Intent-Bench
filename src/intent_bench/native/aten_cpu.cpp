@@ -6,12 +6,24 @@
 #include <string>
 #include <vector>
 
+#ifdef INTENT_BENCH_ONEDNN
+extern "C" void *bench_dnnl_matmul_create(int64_t, int64_t, int64_t, int64_t, void *, void *, void *);
+extern "C" const char *bench_dnnl_matmul_error(void *);
+extern "C" const char *bench_dnnl_matmul_implementation(void *);
+extern "C" void bench_dnnl_matmul_run(void *);
+extern "C" void bench_dnnl_matmul_destroy(void *);
+#endif
+
 namespace {
 struct Call {
   int operation;
   std::vector<at::Tensor> inputs, outputs, workspace;
   std::vector<double> scalars;
   std::string error;
+#ifdef INTENT_BENCH_ONEDNN
+  void *matrix = nullptr;
+  ~Call() { bench_dnnl_matmul_destroy(matrix); }
+#endif
 };
 
 at::ScalarType dtype(int kind) {
@@ -132,6 +144,29 @@ void initialize(Call &call) {
                 "paged attention requires INT32 page offsets, indices, lengths and split offsets");
     o.push_back(at::empty({a[0].size(0), a[0].size(1), a[2].size(3)}, a[0].options()));
     break;
+#ifdef INTENT_BENCH_ONEDNN
+  case 26: {
+    TORCH_CHECK(a.size()==4 && a[0].dim()==4 && a[1].dim()==4 && a[2].dim()==4 && a[3].dim()==4 &&
+                a[0].scalar_type()==at::kBFloat16 && a[1].scalar_type()==at::kBFloat16 &&
+                a[2].scalar_type()==at::kFloat && a[3].scalar_type()==at::kFloat,
+                "chunk state requires BF16 basis/X and FP32 dt/decay");
+    auto batch=a[1].size(0), heads=a[1].size(2), groups=a[0].size(2);
+    auto chunks=a[2].size(2), size=a[2].size(3), width=a[1].size(3), states=a[0].size(3);
+    TORCH_CHECK(groups>0 && heads%groups==0 && size>0 && a[0].size(0)==batch &&
+                a[0].size(1)==chunks*size && a[1].size(1)==chunks*size &&
+                a[2].size(0)==batch && a[2].size(1)==heads && a[3].sizes()==a[2].sizes(),
+                "chunk state shapes must describe complete chunks and grouped heads");
+    o.push_back(at::empty({batch,chunks,heads,width,states}, a[2].options()));
+    w.push_back(at::empty_like(a[2]));
+    w.push_back(at::empty({batch,chunks,groups,heads/groups,size,states}, a[2].options()));
+    w.push_back(at::empty(w[1].sizes(), a[0].options()));
+    w.push_back(at::empty({batch,chunks,heads,width,size}, a[1].options()));
+    call.matrix=bench_dnnl_matmul_create(batch*chunks*heads,width,states,size,
+        w[3].data_ptr(),w[2].data_ptr(),o[0].data_ptr());
+    TORCH_CHECK(call.matrix, "oneDNN matmul preparation: ", bench_dnnl_matmul_error(nullptr));
+    break;
+  }
+#endif
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -285,6 +320,23 @@ void execute(Call &call) {
     }
     break;
   }
+#ifdef INTENT_BENCH_ONEDNN
+  case 26: {
+    auto batch=a[1].size(0), heads=a[1].size(2), groups=a[0].size(2);
+    auto chunks=a[2].size(2), size=a[2].size(3), width=a[1].size(3), states=a[0].size(3);
+    at::sub_out(w[0],a[3].select(3,size-1).unsqueeze(3),a[3]);
+    w[0].clamp_max_(0).exp_().mul_(a[2]);
+    auto basis=a[0].view({batch,chunks,size,groups,states}).permute({0,1,3,2,4}).unsqueeze(3);
+    w[1].copy_(basis);
+    auto scale=w[0].permute({0,2,1,3}).reshape({batch,chunks,groups,heads/groups,size,1});
+    w[1].mul_(scale);
+    w[2].copy_(w[1]); // Preserve the author's BF16 rounding before contraction.
+    w[3].copy_(a[1].view({batch,chunks,size,heads,width}).permute({0,1,3,4,2}));
+    bench_dnnl_matmul_run(call.matrix);
+    TORCH_CHECK(!*bench_dnnl_matmul_error(call.matrix), bench_dnnl_matmul_error(call.matrix));
+    break;
+  }
+#endif
   }
 }
 }
@@ -314,6 +366,13 @@ extern "C" void bench_aten_run(void *opaque) {
   catch (const std::exception &error) { call.error = error.what(); }
 }
 extern "C" const char *bench_aten_error(void *opaque) { return static_cast<Call *>(opaque)->error.c_str(); }
+extern "C" const char *bench_aten_implementation(void *opaque) {
+#ifdef INTENT_BENCH_ONEDNN
+  auto &call=*static_cast<Call *>(opaque);
+  if (call.matrix) return bench_dnnl_matmul_implementation(call.matrix);
+#endif
+  return "ATen";
+}
 extern "C" int bench_aten_outputs(void *opaque) { return static_cast<Call *>(opaque)->outputs.size(); }
 extern "C" void *bench_aten_output(void *opaque, int output, int64_t *rank, int64_t *sizes, int *type) {
   const auto &tensor = static_cast<Call *>(opaque)->outputs.at(output);
