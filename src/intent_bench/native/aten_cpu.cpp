@@ -167,6 +167,16 @@ void initialize(Call &call) {
     break;
   }
 #endif
+  case 27:
+    TORCH_CHECK(a.size() == 3 && a[0].dim() == 3 && a[1].dim() == 3 && a[2].dim() == 3 &&
+                a[0].scalar_type() == at::kFloat && a[1].scalar_type() == at::kFloat &&
+                a[2].scalar_type() == at::kFloat && a[0].sizes() == a[1].sizes() &&
+                a[0].size(0) == a[2].size(0) && a[0].size(1) == a[2].size(1),
+                "causal linear attention requires matching FP32 batch/token axes");
+    o.push_back(at::empty_like(a[2]));
+    o.push_back(at::empty({a[0].size(0), a[0].size(2), a[2].size(2)}, a[0].options()));
+    w.push_back(at::empty({a[0].size(0), a[0].size(1), a[0].size(1)}, a[0].options()));
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -337,6 +347,12 @@ void execute(Call &call) {
     break;
   }
 #endif
+  case 27:
+    at::bmm_out(w[0], a[0], a[1].transpose(1, 2));
+    w[0].tril_();
+    at::bmm_out(o[0], w[0], a[2]);
+    at::bmm_out(o[1], a[1].transpose(1, 2), a[2]);
+    break;
   }
 }
 }

@@ -51,6 +51,7 @@ for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
 BASELINES["attention"]["aten:cpu"] = "ATen CPU Flash Attention, causal grouped queries and auxiliary LSE"
 BASELINES["paged_decode"]["aten:cpu"] = "ATen page gathering and CPU Flash Attention; complete native library composition"
 BASELINES["mamba_chunk_state"]["aten:cpu"] = "ATen chunk scaling and oneDNN BF16 matmul with FP32 output; all data preparation included"
+BASELINES["causal_linear_attention"]["aten:cpu"] = "ATen FP32 causal score contractions and final state; complete native BLAS composition"
 BASELINES["int8_gemm"]["aten:cpu"] = "ATen CPU INT8 GEMM, including INT32 bias addition"
 BASELINES["histogram"]["aten:cpu"] = "ATen CPU bincount, including signed conversion, excluded bins and INT32 output"
 BASELINES["jagged_mean"]["aten:cpu"] = "ATen CPU segment_reduce(mean), including runtime segment offsets"
