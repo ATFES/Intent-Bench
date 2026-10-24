@@ -94,11 +94,13 @@ def prepare_source(path: Path, entry: str, parameters, target, arguments, *, req
     for parameter,value in zip(parameters,values,strict=True):
         for slot in parameter.slots:
             raw=value.data_ptr() if slot["role"]=="pointer" else value.shape[slot["axis"]] if slot["role"]=="extent" else value.stride(slot["axis"]) if slot["role"]=="stride" else value
-            bound.append(types[slot["carrier"]][1](raw))
+            carrier = types[slot["carrier"]][1]
+            bound.append(raw if isinstance(raw, carrier) else carrier(raw))
     addresses=(ctypes.c_void_p*len(bound))(*(ctypes.addressof(v) for v in bound))
     class Call:
         def __init__(self):
             self.owners=values
+            self.library=library
         def launch(self):
             function(*bound)
         def run(self):

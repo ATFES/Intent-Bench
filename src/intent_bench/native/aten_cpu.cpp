@@ -2,6 +2,7 @@
 #include <ATen/Parallel.h>
 #include <cstdint>
 #include <memory>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -21,6 +22,8 @@ at::ScalarType dtype(int kind) {
   case 3: return at::kLong;
   case 4: return at::kInt;
   case 5: return at::kChar;
+  case 6: return at::kByte;
+  case 7: return at::kFloat8_e4m3fn;
   default: TORCH_CHECK(false, "unsupported baseline input dtype");
   }
 }
@@ -102,6 +105,20 @@ void initialize(Call &call) {
     TORCH_CHECK(a[0].dim()==2, "row compaction requires a matrix");
     o.push_back(at::empty(a[0].sizes(), a[0].options().dtype(at::kInt)));
     o.push_back(at::empty({a[0].size(0)}, a[0].options().dtype(at::kInt)));
+    break;
+  case 24:
+    TORCH_CHECK(a.size()==4 && a[0].dim()==3 && a[2].dim()==3 &&
+                a[0].scalar_type()==at::kFloat8_e4m3fn && a[2].scalar_type()==at::kFloat8_e4m3fn &&
+                a[1].scalar_type()==at::kByte && a[3].scalar_type()==at::kByte &&
+                a[0].size(1)==a[2].size(0) && a[0].size(2)==a[2].size(1) &&
+                a[1].sizes()==at::IntArrayRef({a[0].size(0), a[0].size(1)}) &&
+                a[3].sizes()==at::IntArrayRef({a[2].size(0), a[2].size(2)}),
+                "block-scaled GEMM requires E4M3 A[M,G,K], B[G,K,N] and E8M0 byte scales[M,G]/[G,N]");
+    o.push_back(at::empty({a[0].size(0), a[2].size(2)}, a[0].options().dtype(at::kFloat)));
+    for (const auto &input : a)
+      w.push_back(at::empty(input.sizes(), input.options().dtype(at::kFloat)));
+    w.push_back(at::empty(a[1].sizes(), a[1].options().dtype(at::kBool)));
+    w.push_back(at::empty(a[3].sizes(), a[3].options().dtype(at::kBool)));
     break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
@@ -213,6 +230,18 @@ void execute(Call &call) {
     }
     break;
   }
+  case 24:
+    for (size_t i=0; i<a.size(); ++i) w[i].copy_(a[i]);
+    // E8M0 byte 255 is NaN; byte zero denotes 2^-127, not zero.
+    for (int i : {1, 3}) {
+      w[i].sub_(127.0).exp2_();
+      at::eq_out(w[4 + i/2], a[i], 255);
+      w[i].masked_fill_(w[4 + i/2], std::numeric_limits<float>::quiet_NaN());
+    }
+    w[0].mul_(w[1].unsqueeze(-1));
+    w[2].mul_(w[3].unsqueeze(1));
+    at::mm_out(o[0], w[0].flatten(1), w[2].flatten(0, 1));
+    break;
   }
 }
 }
@@ -247,7 +276,7 @@ extern "C" void *bench_aten_output(void *opaque, int output, int64_t *rank, int6
   const auto &tensor = static_cast<Call *>(opaque)->outputs.at(output);
   *rank = tensor.dim();
   for (int64_t i = 0; i < *rank; ++i) sizes[i] = tensor.size(i);
-  for (int kind = 0; kind <= 5; ++kind)
+  for (int kind = 0; kind <= 7; ++kind)
     if (tensor.scalar_type() == dtype(kind)) *type = kind;
   return tensor.data_ptr();
 }

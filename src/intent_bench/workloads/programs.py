@@ -19,7 +19,8 @@ BASELINES = {
     "batched_gemm": {"cutile": "NVIDIA TileGym batched GEMM", "torch": "ATen batched GEMM"},
     "histogram": {"cub": "NVIDIA CUB DeviceHistogram, including initialization and merge"},
     "swiglu": {"triton": "Liger fused SwiGLU", "torch": "ATen SiLU and multiply composition"},
-    "rope": {"triton": "Liger RoPE, including layout conversion and InOut writeback"},
+    "rope": {"triton": "Liger RoPE, including layout conversion and InOut writeback",
+             "mojo": "MAX native split-half RoPE for Q/K, including phase interleaving"},
     "jagged_mean": {"triton": "TritonBench jagged mean", "torch": "ATen segment_reduce"},
     "cumsum": {"torch": "ATen cumsum"},
     "batch_norm": {"torch": "ATen native_batch_norm, including running-state updates"},
@@ -53,6 +54,7 @@ BASELINES["histogram"]["aten:cpu"] = "ATen CPU bincount, including signed conver
 BASELINES["jagged_mean"]["aten:cpu"] = "ATen CPU segment_reduce(mean), including runtime segment offsets"
 BASELINES["causal_convolution"]["aten:cpu"] = "ATen CPU grouped conv1d and SiLU, including FP32 widening and output conversion"
 BASELINES["nonzero"]["aten:cpu"] = "ATen CPU nonzero and bincount, including stable row packing and padding"
+BASELINES["fp8_gemm"]["aten:cpu"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM; all conversions included"
 
 
 def backends(name):
@@ -325,6 +327,9 @@ def _reference(name, seed, env, implementation="torch"):
                 from ..implementations.cub import histogram
                 return self.bind(histogram(arguments[0], env), arguments, mutable)
             if implementation == "mojo":
+                if name == "rope":
+                    from ..implementations.max_rope import prepare
+                    return self.bind(prepare(arguments, env), arguments, mutable)
                 from types import SimpleNamespace
                 from ..corpus.cpu.baselines.mojo.modular.normalization.layer_norm.layer_norm_runtime import prepare
                 from ..implementations.native_sampling import sample_timer

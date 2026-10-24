@@ -14,7 +14,8 @@ OPERATIONS = {name: index for index, name in enumerate((
     "relu", "softmax", "transpose", "embedding", "layer_norm", "gemm", "batched_gemm",
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
-    "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero"))}
+    "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
+    "fp8_gemm"))}
 
 
 @cache
@@ -62,7 +63,8 @@ def prepare(name, arguments, environment):
         raise ValueError("ATen native CPU comparisons require device=cpu")
     tensors = [value for value in arguments if isinstance(value, torch.Tensor)]
     scalars = [value for value in arguments if not isinstance(value, torch.Tensor)]
-    dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32, torch.int8)
+    dtypes = (torch.float32, torch.float16, torch.bfloat16, torch.int64, torch.int32, torch.int8,
+              torch.uint8, torch.float8_e4m3fn)
     if any(value.device.type != "cpu" or not value.is_contiguous() for value in tensors):
         raise ValueError("this ATen native binding requires contiguous CPU inputs")
     if name == "adamw" and (scalars[3] != 1-scalars[1] or scalars[4] != 1-scalars[2]):
@@ -147,6 +149,11 @@ def prepare(name, arguments, environment):
         metadata["library"] = "ATen CPU nonzero and bincount"
         metadata["scope_note"] = ("Native stable coordinate extraction, row counts, INT32 index conversion and "
                                   "padding to the author's fixed row capacity all timed, including library temporary allocations.")
+    if name == "fp8_gemm":
+        metadata["library"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM"
+        metadata["scope_note"] = ("Original E4M3 inputs and E8M0 scale bytes; decoding, scale application and native FP32 GEMM "
+                                  "all timed. Reusable output/workspace allocation is outside the interval. "
+                                  "This is a library composition, not a fused native FP8 matrix instruction.")
     prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):
