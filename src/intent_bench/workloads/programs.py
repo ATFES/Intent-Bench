@@ -49,6 +49,7 @@ from ..implementations.aten_cpu import OPERATIONS as CPU_PROGRAMS
 for _name in BASELINES.keys() & CPU_PROGRAMS.keys():
     BASELINES[_name]["aten:cpu"] = "Native libtorch/ATen CPU " + _name
 BASELINES["attention"]["aten:cpu"] = "ATen CPU Flash Attention, causal grouped queries and auxiliary LSE"
+BASELINES["paged_decode"]["aten:cpu"] = "ATen page gathering and CPU Flash Attention; complete native library composition"
 BASELINES["int8_gemm"]["aten:cpu"] = "ATen CPU INT8 GEMM, including INT32 bias addition"
 BASELINES["histogram"]["aten:cpu"] = "ATen CPU bincount, including signed conversion, excluded bins and INT32 output"
 BASELINES["jagged_mean"]["aten:cpu"] = "ATen CPU segment_reduce(mean), including runtime segment offsets"
@@ -179,7 +180,8 @@ def _intent(name, backend, seed, env):
         native_measure = None
         if backend in {"mojo", "weft"}:
             from ..implementations.prepared import intent_sequence
-            components = {"histogram": ("partials", "merge"), "group_norm_backward": ("dx", "affine")}
+            components = {"histogram": ("partials", "merge"), "paged_decode": ("partials", "merge"),
+                          "group_norm_backward": ("dx", "affine")}
             calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
             def result():
                 if backend != "weft":

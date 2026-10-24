@@ -15,7 +15,7 @@ OPERATIONS = {name: index for index, name in enumerate((
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
-    "fp8_gemm"))}
+    "fp8_gemm", "paged_decode"))}
 
 
 @cache
@@ -130,6 +130,12 @@ def prepare(name, arguments, environment):
         metadata["library"] = "ATen CPU Flash Attention, causal grouped queries"
         metadata["scope_note"] = ("Public native CPU flash-attention operator on original grouped Q/K/V; "
                                   "packing, output/LSE allocation and auxiliary LSE are included. Python submission is excluded.")
+    if name == "paged_decode":
+        metadata["library"] = "ATen page gathering and CPU Flash Attention"
+        metadata["scope_note"] = ("Original FP16 paged KV and grouped queries; runtime page-table reads, page gathering, "
+                                  "layout preparation, CPU flash attention and output writeback are all timed. "
+                                  "This is a native library composition, not a dedicated paged-attention kernel. "
+                                  "The library's packed KV and auxiliary LSE allocations are included.")
     if name == "histogram":
         metadata["library"] = "ATen CPU bincount"
         metadata["scope_note"] = ("Complete native signed-index conversion, excluded-bin mapping, bincount and INT32 output. "

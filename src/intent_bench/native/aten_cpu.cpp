@@ -120,6 +120,18 @@ void initialize(Call &call) {
     w.push_back(at::empty(a[1].sizes(), a[1].options().dtype(at::kBool)));
     w.push_back(at::empty(a[3].sizes(), a[3].options().dtype(at::kBool)));
     break;
+  case 25:
+    TORCH_CHECK(a.size()==7 && a[0].dim()==3 && a[1].dim()==4 && a[2].dim()==4 &&
+                a[0].size(2)==a[1].size(3) && a[1].sizes().slice(0, 3)==a[2].sizes().slice(0, 3) &&
+                a[1].size(1)>0 && a[1].size(2)>0 && a[0].size(1)%a[1].size(2)==0,
+                "paged attention requires compatible Q[B,HQ,D] and KV[P,PS,HK,D]");
+    TORCH_CHECK(a[3].dim()==1 && a[3].numel()==a[0].size(0)+1 && a[4].dim()==1 &&
+                a[5].dim()==1 && a[5].numel()==a[0].size(0) && a[6].dim()==1 &&
+                a[3].scalar_type()==at::kInt && a[4].scalar_type()==at::kInt &&
+                a[5].scalar_type()==at::kInt && a[6].scalar_type()==at::kInt,
+                "paged attention requires INT32 page offsets, indices, lengths and split offsets");
+    o.push_back(at::empty({a[0].size(0), a[0].size(1), a[2].size(3)}, a[0].options()));
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -242,6 +254,37 @@ void execute(Call &call) {
     w[2].mul_(w[3].unsqueeze(1));
     at::mm_out(o[0], w[0].flatten(1), w[2].flatten(0, 1));
     break;
+  case 25: {
+    const int32_t *offsets = a[3].const_data_ptr<int32_t>();
+    const int32_t *lengths = a[5].const_data_ptr<int32_t>();
+    const int32_t *splitOffsets = a[6].const_data_ptr<int32_t>();
+    TORCH_CHECK(a[0].size(0)>0 && a[6].numel()>1 && (a[6].numel()-1)%a[0].size(0)==0,
+                "split offsets must describe the same number of partitions for each sequence");
+    const int64_t splits = (a[6].numel()-1)/a[0].size(0);
+    const int64_t pageSize = a[1].size(1), heads = a[1].size(2);
+    for (int64_t batch=0; batch<a[0].size(0); ++batch) {
+      int64_t begin = offsets[batch], end = offsets[batch+1], length = lengths[batch];
+      TORCH_CHECK(0<=begin && begin<=end && end<=a[4].numel() &&
+                  0<=length && length<=(end-begin)*pageSize, "invalid paged sequence bounds");
+      TORCH_CHECK(splitOffsets[batch*splits]==begin && splitOffsets[(batch+1)*splits]==end,
+                  "split partitions must cover each sequence's page table");
+      for (int64_t split=0; split<splits; ++split)
+        TORCH_CHECK(splitOffsets[batch*splits+split]<=splitOffsets[batch*splits+split+1],
+                    "split partitions must preserve page order");
+      if (!length) { o[0][batch].zero_(); continue; }
+      auto pages = a[4].narrow(0, begin, (length+pageSize-1)/pageSize);
+      auto gather = [&](const at::Tensor &cache) {
+        return at::index_select(cache, 0, pages).view({-1, heads, cache.size(3)})
+            .narrow(0, 0, length).permute({1, 0, 2}).unsqueeze(0);
+      };
+      auto key = gather(a[1]), value = gather(a[2]);
+      auto query = a[0][batch].unsqueeze(0).unsqueeze(2);
+      auto output = std::get<0>(at::_scaled_dot_product_flash_attention_for_cpu(
+          query, key, value, 0.0, false, std::nullopt, s[0]));
+      o[0][batch].copy_(output.squeeze(0).squeeze(1));
+    }
+    break;
+  }
   }
 }
 }
