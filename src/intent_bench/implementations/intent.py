@@ -5,7 +5,7 @@ from ..loading import intent_environment
 def backend_options(environment, backend):
     provider_options = {}
     names = {"mojo": {"mojo": "compiler"},
-             "weft": {"weft_compiler": "compiler", "cc": "cc", "cflags": "cflags"},
+             "weft": {"weft_options": "options"},
              "bangc": {"neuware": "neuware", "cncc": "compiler"}}.get(backend, {})
     for field, argument in names.items():
         if field in environment.options:

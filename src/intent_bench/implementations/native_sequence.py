@@ -108,7 +108,10 @@ extern "C" double measure(Call* calls, size_t count, Fill* fills, size_t fill_co
     def run(self):
         for binding, _, _ in self.owners:
             binding.validate()
-        return self.measure(self.calls, len(self.calls), self.fills, len(self.fills))
+        elapsed = self.measure(self.calls, len(self.calls), self.fills, len(self.fills))
+        for binding, _, _ in self.owners:
+            binding.complete()
+        return elapsed
 
     def close(self):
         self.measure = None

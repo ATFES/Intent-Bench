@@ -64,10 +64,10 @@ BASELINES["fp8_gemm"]["aten:cpu"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM; 
 
 def backends(name):
     result = ["triton", "cutile"]
-    if any(item in BASELINES[name] for item in ("mojo", "aten:cpu", "inductor:cpu", "vllm:cpu")): result.append("mojo")
+    if any(item in BASELINES[name] for item in ("mojo", "aten:cpu", "inductor:cpu", "vllm:cpu")): result.extend(("mojo", "weft"))
     if "ggml" in BASELINES[name]: result.extend(("mojo", "weft"))
     if "cnnl" in BASELINES[name]: result.append("bangc")
-    return result
+    return list(dict.fromkeys(result))
 
 
 def _tree(value, leaf):

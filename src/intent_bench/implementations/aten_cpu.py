@@ -124,7 +124,7 @@ def prepare(name, arguments, environment, *, package=None):
         def native_call(self):
             checked()
             return SimpleNamespace(function=native.bench_aten_run, argument_types=(C.c_void_p,),
-                                   arguments=(state,), owners=(native, tensors), validate=checked)
+                                   arguments=(state,), owners=(native, tensors), validate=checked, complete=checked)
         def launch(self):
             checked()
             native.bench_aten_run(state)
