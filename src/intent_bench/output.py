@@ -16,7 +16,9 @@ def output_root(explicit=None):
             selected = json.loads(config.read_text()).get("output_root")
     if not selected:
         raise ValueError("configure intent-bench output_root or set INTENT_BENCH_OUTPUT_ROOT")
-    return Path(selected).expanduser().resolve()
+    # Keep the configured spelling through symlinks. Expanding a storage mount
+    # can exceed AF_UNIX's path limit in provider multiprocessing workers.
+    return Path(selected).expanduser().absolute()
 
 
 def component(value):
@@ -27,7 +29,7 @@ def component(value):
 
 def destination(environment, workload, explicit=None):
     if explicit is not None:
-        return Path(explicit).expanduser().resolve()
+        return Path(explicit).expanduser().absolute()
     return output_root(environment.output_root)/"latest"/component(environment.name)/component(workload)
 
 

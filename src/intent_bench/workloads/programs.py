@@ -187,9 +187,8 @@ def _intent(name, backend, seed, env):
                           "moe_alignment": ("count", "prefix", "scatter", "mark")}
             calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
             def result():
-                from intent.examples.programs.native import host_result
-                return _tree(output, lambda value: host_result(value, contents=True).data
-                             if callable(getattr(value, "to_host", None)) else value)
+                from ..implementations.outputs import native_result
+                return native_result(output)
             native = intent_sequence(calls, result, reset=reset, metadata=metadata,
                 initializations=call.initializations if name == "moe_alignment" else ())
             def close():

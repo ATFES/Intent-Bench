@@ -1,25 +1,10 @@
 """MLU operator timing over a product-owned queue and prepared calls."""
 import ctypes as C
-import torch
 from ..model import PreparedCall
-from intent.integrations.torch import torch_dtype
-from intent.language.dtypes import dtype
+from .outputs import native_result
 
 
 def prepare_sequence(sequence, outputs):
-    def decode(value):
-        if isinstance(value, tuple):
-            return tuple(decode(item) for item in value)
-        if isinstance(value, list):
-            return [decode(item) for item in value]
-        if isinstance(value, dict):
-            return {key: decode(item) for key, item in value.items()}
-        if not callable(getattr(value, "to_host", None)):
-            return value
-        if not value.nbytes:
-            return torch.empty(value.shape, dtype=torch_dtype(dtype(value.dtype)))
-        return torch.frombuffer(value.to_host(), dtype=torch_dtype(dtype(value.dtype))).reshape(value.shape).clone()
-
     def measure(settings):
         queue = sequence.queue
         runtime = queue.runtime
@@ -46,7 +31,7 @@ def prepare_sequence(sequence, outputs):
         finally:
             for notifier in notifiers:
                 runtime.invoke("cnrtNotifierDestroy", notifier)
-    return PreparedCall(sequence.launch, lambda:decode(outputs), reset=sequence.reset,
+    return PreparedCall(sequence.launch, lambda:native_result(outputs), reset=sequence.reset,
                         compile=sequence.compile, close=sequence.close, native_measure=measure,
                         device=f"mlu:{sequence.device}", timing="cnrt_notifier", owners=sequence,
                         metadata={"execution":"local_jit", "scope_note":"Complete authored sequence; transfers and state restoration excluded"})
