@@ -2,16 +2,23 @@
 import ctypes as C
 import torch
 from ..model import PreparedCall
-from .bangc_sequence import TORCH_DTYPES
+from intent.integrations.torch import torch_dtype
+from intent.language.dtypes import dtype
 
 
 def prepare_sequence(sequence, outputs):
     def decode(value):
         if isinstance(value, tuple):
             return tuple(decode(item) for item in value)
-        if value is None:
-            return None
-        return torch.frombuffer(bytearray(value.to_host()), dtype=TORCH_DTYPES[value.dtype]).reshape(value.shape).clone()
+        if isinstance(value, list):
+            return [decode(item) for item in value]
+        if isinstance(value, dict):
+            return {key: decode(item) for key, item in value.items()}
+        if not callable(getattr(value, "to_host", None)):
+            return value
+        if not value.nbytes:
+            return torch.empty(value.shape, dtype=torch_dtype(dtype(value.dtype)))
+        return torch.frombuffer(value.to_host(), dtype=torch_dtype(dtype(value.dtype))).reshape(value.shape).clone()
 
     def measure(settings):
         queue = sequence.queue

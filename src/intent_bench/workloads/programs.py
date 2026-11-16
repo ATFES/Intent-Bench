@@ -63,11 +63,8 @@ BASELINES["fp8_gemm"]["aten:cpu"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM; 
 
 
 def backends(name):
-    result = ["triton", "cutile"]
-    if any(item in BASELINES[name] for item in ("mojo", "aten:cpu", "inductor:cpu", "vllm:cpu")): result.extend(("mojo", "weft"))
-    if "ggml" in BASELINES[name]: result.extend(("mojo", "weft"))
-    if "cnnl" in BASELINES[name]: result.append("bangc")
-    return list(dict.fromkeys(result))
+    from intent.targets.components import COMPONENTS
+    return tuple(COMPONENTS)
 
 
 def _tree(value, leaf):
@@ -135,7 +132,7 @@ def _intent(name, backend, seed, env):
     intent_environment(env)
     from intent.examples import load_program
     from intent.examples.programs.common import ExampleContext
-    from ..implementations.intent import backend_options
+    from ..implementations.intent import backend_options, execution
 
     class PrepareContext(ExampleContext):
         invocation = None
@@ -147,8 +144,9 @@ def _intent(name, backend, seed, env):
             self.invocation = program.prepare(*arguments)
             return self.invocation.result()
 
-    context = PrepareContext(backend, _device(env, backend), compiler=env.compiler, stage="native",
-                             workers=env.threads if backend in {"mojo", "weft"} else None,
+    device, workers = execution(env, backend)
+    context = PrepareContext(backend, device, compiler=env.compiler, stage="native",
+                             workers=workers,
                              backend_options=backend_options(env, backend))
     try:
         _seed(name, seed)
@@ -182,17 +180,16 @@ def _intent(name, backend, seed, env):
             prepared.metadata.update(metadata)
             return prepared
         native_measure = None
-        if backend in {"mojo", "weft"}:
+        if device == "cpu":
             from ..implementations.prepared import intent_sequence
             components = {"histogram": ("partials", "merge"), "paged_decode": ("partials", "merge"),
                           "group_norm_backward": ("dx", "affine"),
                           "moe_alignment": ("count", "prefix", "scatter", "mark")}
             calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
             def result():
-                if backend != "weft":
-                    return output
                 from intent.examples.programs.native import host_result
-                return _tree(output, lambda value: host_result(value, contents=True).data)
+                return _tree(output, lambda value: host_result(value, contents=True).data
+                             if callable(getattr(value, "to_host", None)) else value)
             native = intent_sequence(calls, result, reset=reset, metadata=metadata,
                 initializations=call.initializations if name == "moe_alignment" else ())
             def close():
@@ -255,7 +252,7 @@ def _reference(name, seed, env, implementation="torch"):
     from ..corpus._common.measurement import functional_launch
 
     device = _device(env, implementation)
-    if implementation in {"cnnl", "oracle"} and device.startswith("mlu:"):
+    if implementation in {"cnnl", "oracle"} and device.startswith(("mlu:", "npu:")):
         device = "cpu"
     dtypes = {"f16": torch.float16, "f32": torch.float32, "bf16": torch.bfloat16,
               "i8": torch.int8, "u8": torch.uint8, "i32": torch.int32, "i64": torch.int64,

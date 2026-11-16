@@ -3,7 +3,7 @@ import time
 import traceback
 from .loading import intent_environment
 from .model import Result
-from .implementations.intent import backend_options
+from .implementations.intent import backend_options, execution
 
 def check_program(request):
     env = request.environment
@@ -17,14 +17,12 @@ def check_program(request):
     name = request.workload.rsplit("/",1)[-1]
     if name not in PROGRAMS:
         raise ValueError(f"unknown author program: {name}")
-    device = env.device
-    if device == "auto":
-        device = "cuda:0" if backend in {"triton","cutile"} else "mlu:0" if backend == "bangc" else "cpu"
+    device, workers = execution(env, backend)
     row = Result(request.workload,"mainline","author",{},request.implementations[0],
                  device=device,stage=request.stage)
     start = time.perf_counter()
     context = ExampleContext(backend,device,compiler=env.compiler,prepared=True,stage=request.stage,
-        workers=env.threads if backend in {"mojo","weft"} else None,
+        workers=workers,
         backend_options=backend_options(env, backend))
     try:
         inputs.seed([request.seed,list(PROGRAMS).index(name)])

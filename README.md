@@ -57,7 +57,11 @@ SSH 只传输请求和显式的用户 workload 文件，普通运行不会复制
 生成的 artifact 当作远端 JIT。compiler 路径若指定，也是执行机上的路径。
 `intent_root` 仅检查已安装的 editable checkout，不修改导入路径。
 CPU 的 `cpus` 选择允许的执行集合，`threads` 是线程预算，ISA/VLEN 由产品探测。
-MLU 使用 `device: "mlu:0"`，工具链位置放入 options。
+MLU 使用 `device: "mlu:0"`，NPU 使用 `device: "npu:0"`。Intent provider 选项按原样放在
+`options.intent.<backend>`，例如 `{"intent":{"mojo":{"compiler":"/path/to/mojo"}}}`
+或 `{"intent":{"bangc":{"neuware":"/usr/local/neuware"}}}`。新增 provider 不需要修改 Bench 的工具链映射。
+`check --backend` 使用安装的 Intent 组件登记；程序比较也公开这些组件，不以是否已有同设备 baseline 限制正确性检查。
+缺少设备计时适配器时明确报错，不以 Python 提交时间冒充算子时间。
 `options.triton_ptxas` 和 `options.triton_ptxas_blackwell` 分别传给 Triton 的
 `TRITON_PTXAS_PATH` 与 `TRITON_PTXAS_BLACKWELL_PATH`，路径属于执行主机。
 它们显式选择该 worker 中所有 Triton 实现使用的汇编器，不在失败后切换工具链。

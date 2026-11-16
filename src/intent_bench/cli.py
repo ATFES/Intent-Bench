@@ -57,7 +57,7 @@ def main(argv=None):
     run.add_argument("--scope",choices=("operator","host_call"),default="operator")
     check = commands.add_parser("check")
     check.add_argument("--suite",choices=("mainline",),default="mainline")
-    check.add_argument("--backend",required=True,choices=("triton","cutile","mojo","weft","bangc"))
+    check.add_argument("--backend",required=True,help="An explicit provider registered by the installed Intent package")
     check.add_argument("--program",action="append")
     check.add_argument("--stage",choices=("source","native","run"),default="run")
     for command in (run,check):

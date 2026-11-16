@@ -61,7 +61,11 @@ def method_for(call, settings):
         return "host"
     if call.native_measure is not None:
         return "native"
-    return "cuda_graph" if call.device.startswith("cuda") else "host"
+    if call.device.startswith("cuda"):
+        return "cuda_graph"
+    if call.device != "cpu":
+        raise NotImplementedError(f"{call.device} requires a registered device or native timing implementation")
+    return "host"
 
 
 def _counts(settings, estimate_ms):
@@ -87,7 +91,7 @@ def _cuda_flush(torch, call, settings):
 
 def measure(call: PreparedCall, settings: Measurement):
     method = method_for(call, settings)
-    if call.device.startswith("cuda") and method == "host" and settings.scope != "host_call":
+    if call.device != "cpu" and method == "host" and settings.scope != "host_call":
         raise ValueError("Python wall-clock timing requires --scope host_call")
     if method.startswith("cuda") and not call.device.startswith("cuda"):
         raise ValueError(f"{method} requires a CUDA implementation")
