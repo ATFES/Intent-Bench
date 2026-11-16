@@ -81,8 +81,9 @@ def intent_sequence(calls, result, *, reset=None, host_run=None, host_result=Non
                      'kernel_count': len(calls), 'initialization_count': len(initializations)}
 
     def run():
+        from intent.examples.programs.native import fill
         for buffer, value in initializations:
-            buffer.fill_(value)
+            fill(buffer, value)
         for call in calls:
             call.launch()
 

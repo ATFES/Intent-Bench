@@ -33,6 +33,17 @@ class NativeSequence:
             import torch
         fills = []
         for buffer, value in self.initializations:
+            if not isinstance(buffer, torch.Tensor):
+                from intent.runtime.weft.buffer import Buffer
+                from intent.language.dtypes import dtype
+                from intent.integrations.torch import torch_dtype
+                if not isinstance(buffer, Buffer):
+                    raise NotImplementedError('native sequence initialization requires public CPU storage')
+                if not buffer.nbytes:
+                    continue
+                # Borrow the public byte storage; never copy initialization to
+                # a different allocation from the one bound by the product.
+                buffer = torch.frombuffer(buffer.storage, dtype=torch_dtype(dtype(buffer.dtype))).view(buffer.shape)
             if buffer.device.type != 'cpu' or not buffer.is_contiguous():
                 raise NotImplementedError('native sequence initialization requires a contiguous CPU buffer')
             width = buffer.element_size()
