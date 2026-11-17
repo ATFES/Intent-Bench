@@ -26,6 +26,9 @@ class RunRequest:
             raise ValueError("baseline must be a selected implementation")
         if self.timeout <= 0:
             raise ValueError("timeout must be positive")
+        if self.kind != "workload" and self.oracle_environment is not None:
+            raise ValueError("oracle_environment requires a numerical workload request; "
+                             "use workload='program/<name>' with kind='workload' for an author program")
 
     def record(self):
         value = asdict(self)
