@@ -20,6 +20,9 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
               *, environment: Environment | None = None, measurement: Measurement | None = None,
               baseline: str | None = None, seed: int = 0, observer=None, oracle_output=None):
     env, settings = environment or Environment(), measurement or Measurement()
+    if oracle_output is not None and not workload.materialized_inputs:
+        raise NotImplementedError("this workload constructs inputs inside its implementation adapter; "
+                                  "expose actual workload inputs before selecting an oracle environment")
     if env.threads < 1:
         raise ValueError("threads must be positive")
     # Input construction and the oracle use the same CPU budget as candidates.

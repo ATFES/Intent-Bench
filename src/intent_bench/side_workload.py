@@ -107,4 +107,4 @@ def build(row,entries):
     return Workload(row['name'],[Case(row['case'],{'profile':'original'})],lambda case,seed:seed,impls,
                     oracle=Implementation('oracle',lambda case,seed,env:prepare(
                         'oracle' if 'oracle' in entries else 'source',provider,case,seed,env)),
-                    check=check,family=row['family'],parameter_keys=())
+                    check=check,family=row['family'],parameter_keys=(),materialized_inputs=False)
