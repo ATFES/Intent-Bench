@@ -7,13 +7,8 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
-    x = torch.randn((1, 2048, 32, 64), device='cuda', dtype=torch.bfloat16)
-    matrix = torch.randn((1, 2048, 8, 128), device='cuda', dtype=torch.bfloat16)
-    cb = torch.randn((1, 8, 8, 256, 256), device='cuda', dtype=torch.bfloat16) * 0.01
-    dt = torch.rand((1, 32, 8, 256), device='cuda', dtype=torch.float32) * 0.01
-    decay = -torch.rand_like(dt).cumsum(-1) * 0.01
-    previous = torch.randn((1, 8, 32, 64, 128), device='cuda', dtype=torch.float32) * 0.01
-    residual = torch.randn((32,), device='cuda', dtype=torch.float32) * 0.01
+    from intent_bench.trees import to_device
+    cb, x, dt, decay, matrix, previous, residual = to_device(context.inputs, 'cuda')
     source = _source(context, 'ssd_chunk_scan', '_chunk_scan_fwd')
     return checked_call(reference_launch(lambda : source(cb, x, dt, decay, matrix, previous, D=residual)[0]), Tolerance(atol=0.1, rtol=0.05), device_type='cuda', owners=locals())
 

@@ -6,8 +6,6 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
-    (batch, size) = (4096, 16)
-    lower = torch.tril(torch.randn((batch, size, size), device='cuda', dtype=torch.float32))
-    lower.diagonal(dim1=-2, dim2=-1).add_(2.0)
-    initial = torch.randn((batch, size), device='cuda', dtype=torch.float32)
+    from intent_bench.trees import to_device
+    lower, initial = to_device(context.inputs, 'cuda')
     return checked_call(reference_launch(lambda : triangular_solve(*(lower, initial.clone()))), Tolerance(atol=0.0001, rtol=0.0001), device_type='cuda', owners=locals())

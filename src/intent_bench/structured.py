@@ -40,6 +40,8 @@ def cpu_workload(row,factory):
         last['prequantized']=None
         return data
     def oracle(case,data):
+        last['tolerance'] = data.tolerance
+        last['prequantized'] = None
         if data.prequantized_reference is not None:
             accumulator = getattr(cpu_runtime, data.prequantized_reference)(*data.arguments)
             last['prequantized'] = accumulator

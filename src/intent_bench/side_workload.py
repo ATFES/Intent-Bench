@@ -13,10 +13,11 @@ def mappings():
     return json.loads((Path(__file__).parent/'sides/catalog.json').read_text())
 
 
-def prepare_input_oracle(specification):
+def prepare_input_oracle(specification, data=None):
     """Use a registered input factory and independent CPU numerical function."""
     from .corpus.cpu.baselines.pytorch import cpu_runtime
-    data = load(specification['inputs'])()
+    if data is None:
+        data = load(specification['inputs'])()
     function = getattr(cpu_runtime, specification.get('reference', data.reference))
     state = {}
     def launch():
@@ -28,8 +29,9 @@ def prepare_input_oracle(specification):
 
 def build(row,entries):
     provider=row['provider'];tolerances={}
+    factory = entries.get('inputs')
     targets=('triton','cutile') if provider in ('triton','cutile') else (provider,)
-    def prepare(side,target,case,seed,env,entry=None):
+    def prepare(side,target,case,payload,env,entry=None):
         import torch
         torch.set_num_threads(env.threads)
         from .corpus import PROJECT_ROOT
@@ -43,7 +45,8 @@ def build(row,entries):
         else:
             selected_target=SimpleNamespace(device=index,workers=env.threads)
         context=Context(env.compiler,PROJECT_ROOT,selected_target,target,compiler_timeout_seconds=60,
-                        intent_root=Path(env.intent_root).resolve() if env.intent_root else None,environment=env)
+                        intent_root=Path(env.intent_root).resolve() if env.intent_root else None,environment=env,
+                        inputs=payload.arguments if factory is not None else None)
         phases={};stage='input_preparation';started=time.perf_counter()
         def observe(next_stage):
             nonlocal stage,started
@@ -55,9 +58,10 @@ def build(row,entries):
                 stack.enter_context(torch.cuda.device(index))
             stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile') else []))
             stack.enter_context(observe_stages(observe))
-            torch.manual_seed(seed)
+            if factory is None:
+                torch.manual_seed(payload)
             entry=entries[side] if entry is None else entry
-            prepared=(prepare_input_oracle(entry) if isinstance(entry,dict)
+            prepared=(prepare_input_oracle(entry, payload if factory is not None else None) if isinstance(entry,dict)
                       else load(entry)(context))
         observe('ready')
         if not isinstance(prepared,PreparedCall):
@@ -78,7 +82,7 @@ def build(row,entries):
         tolerances[case.name]=prepared.tolerance
         if prepared.device == 'cuda':
             prepared.device=f'cuda:{index}'
-        prepared.metadata.update(source=entry,input_seed=seed,preparation_stages_seconds=phases,
+        prepared.metadata.update(source=entry,preparation_stages_seconds=phases,
                                  compiler_artifacts=artifacts)
         if context.kernels:
             def compiler_observations():
@@ -104,7 +108,14 @@ def build(row,entries):
             def cpu(tree):return tuple(cpu(v) for v in tree) if isinstance(tree,tuple) else tree.cpu()
             actual,expected=cpu(actual),cpu(expected)
         compare_outputs(actual,expected,next(iter(tolerances.values())))
-    return Workload(row['name'],[Case(row['case'],{'profile':'original'})],lambda case,seed:seed,impls,
+    def inputs(case, seed):
+        if factory is None:
+            return seed
+        import torch
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(seed)
+            return load(factory)()
+    return Workload(row['name'],[Case(row['case'],{'profile':'original'})],inputs,impls,
                     oracle=Implementation('oracle',lambda case,seed,env:prepare(
                         'oracle' if 'oracle' in entries else 'source',provider,case,seed,env)),
-                    check=check,family=row['family'],parameter_keys=(),materialized_inputs=False)
+                    check=check,family=row['family'],parameter_keys=(),materialized_inputs=factory is not None)

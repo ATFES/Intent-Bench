@@ -593,52 +593,62 @@
     "intent": "intent_bench.sides.mojo_paged_mla_decode_partials_intent:prepare"
   },
   "corpus/bangc/causal_attention_f32": {
+    "inputs": "intent_bench.cpu_inputs:inputs_causal_attention_f32",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_causal_attention_f32", "reference": "causal_attention_f32"},
     "source": "intent_bench.sides.bangc_causal_attention_f32_source:prepare",
     "intent": "intent_bench.sides.bangc_causal_attention_f32_intent:prepare"
   },
   "corpus/bangc/causal_linear_attention_f32": {
+    "inputs": "intent_bench.cpu_inputs:inputs_causal_linear_attention_f32",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_causal_linear_attention_f32", "reference": "causal_linear_attention_f32"},
     "source": "intent_bench.sides.bangc_causal_linear_attention_f32_source:prepare",
     "intent": "intent_bench.sides.bangc_causal_linear_attention_f32_intent:prepare"
   },
   "corpus/bangc/chunk_gated_delta": {
-    "oracle": "intent_bench.sides.mojo_chunk_gated_delta_source:prepare",
+    "inputs": "intent_bench.cpu_inputs:inputs_chunk_gated_delta",
+    "oracle": {"reference": "chunk_gated_delta_fwd"},
     "source": "intent_bench.sides.bangc_chunk_gated_delta_source:prepare",
     "intent": "intent_bench.sides.bangc_chunk_gated_delta_intent:prepare"
   },
   "corpus/bangc/recurrent_gated_delta": {
+    "inputs": "intent_bench.cpu_inputs:inputs_recurrent_gated_delta_fwd",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_recurrent_gated_delta_fwd"},
     "source": "intent_bench.sides.bangc_recurrent_gated_delta_source:prepare",
     "intent": "intent_bench.sides.bangc_recurrent_gated_delta_intent:prepare"
   },
   "corpus/bangc/jagged_mean": {
+    "inputs": "intent_bench.cpu_inputs:inputs_jagged_mean",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_jagged_mean"},
     "source": "intent_bench.sides.bangc_jagged_mean_source:prepare",
     "intent": "intent_bench.sides.bangc_jagged_mean_intent:prepare"
   },
   "corpus/bangc/flaggems_triangular_solve": {
-    "oracle": "intent_bench.sides.mojo_flaggems_triangular_solve_source:prepare",
+    "inputs": "intent_bench.cpu_inputs:inputs_batched_triangular_solve",
+    "oracle": {"reference": "triangular_solve"},
     "source": "intent_bench.sides.bangc_flaggems_triangular_solve_source:prepare",
     "intent": "intent_bench.sides.bangc_flaggems_triangular_solve_intent:prepare"
   },
   "corpus/bangc/mamba_chunk_state": {
+    "inputs": "intent_bench.cpu_inputs:inputs_mamba_chunk_state_bf16",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_mamba_chunk_state_bf16"},
     "source": "intent_bench.sides.bangc_mamba_chunk_state_source:prepare",
     "intent": "intent_bench.sides.bangc_mamba_chunk_state_intent:prepare"
   },
   "corpus/bangc/mamba_state_passing": {
+    "inputs": "intent_bench.cpu_inputs:inputs_mamba_state_passing",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_mamba_state_passing"},
     "source": "intent_bench.sides.bangc_mamba_state_passing_source:prepare",
     "intent": "intent_bench.sides.bangc_mamba_state_passing_intent:prepare"
   },
   "corpus/bangc/mamba_chunk_scan": {
+    "inputs": "intent_bench.cpu_inputs:inputs_mamba_chunk_scan_bf16",
     "oracle": {"inputs": "intent_bench.cpu_inputs:inputs_mamba_chunk_scan_bf16"},
     "source": "intent_bench.sides.bangc_mamba_chunk_scan_source:prepare",
     "intent": "intent_bench.sides.bangc_mamba_chunk_scan_intent:prepare"
   },
   "corpus/bangc/paged_gqa_decode": {
-    "oracle": "intent_bench.sides.mojo_paged_gqa_decode_source:prepare",
+    "inputs": "intent_bench.cpu_inputs:inputs_bangc_paged_decode",
+    "oracle": {"reference": "bench_paged_gqa_f16_reduction"},
     "source": "intent_bench.sides.bangc_paged_gqa_decode_source:prepare",
     "intent": "intent_bench.sides.bangc_paged_gqa_decode_intent:prepare"
   }

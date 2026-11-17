@@ -55,6 +55,7 @@ class Context:
     kernels: list = field(default_factory=list)
     prepared_calls: list = field(default_factory=list)
     environment: object | None = None
+    inputs: tuple | None = None
 
     @property
     def artifacts(self):

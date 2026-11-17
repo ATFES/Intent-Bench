@@ -56,6 +56,35 @@ def restore(destination, source):
         destination.copy_(source)
 
 
+def to_device(value, device):
+    """Move a tensor tree once, preserving repeated objects and storage aliases."""
+    import torch
+    tensors, allocations = {}, {}
+    def move(item):
+        if isinstance(item, torch.Tensor):
+            if id(item) in tensors:
+                return tensors[id(item)]
+            if item.layout != torch.strided or item.is_conj() or item.is_neg():
+                raise NotImplementedError("input transfer requires ordinary strided tensor storage")
+            storage = item.untyped_storage()
+            key = (str(item.device), storage.data_ptr(), storage.nbytes())
+            if key not in allocations:
+                raw = torch.empty(0, dtype=torch.uint8, device=item.device).set_(
+                    storage, 0, (storage.nbytes(),), (1,))
+                allocations[key] = raw.to(device)
+            result = allocations[key].view(item.dtype).as_strided(item.shape, item.stride(), item.storage_offset())
+            tensors[id(item)] = result
+            return result
+        if isinstance(item, tuple):
+            return tuple(move(v) for v in item)
+        if isinstance(item, list):
+            return [move(v) for v in item]
+        if isinstance(item, dict):
+            return {key: move(v) for key, v in item.items()}
+        return item
+    return move(value)
+
+
 def array(value):
     if hasattr(value, "detach"):
         value = value.detach().cpu()

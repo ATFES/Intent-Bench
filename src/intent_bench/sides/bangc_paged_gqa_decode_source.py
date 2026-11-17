@@ -10,12 +10,8 @@ def prepare(context):
     (length, page_size, splits) = (8192, 16, 8)
     pages_per_sequence = length // page_size
     pages = batch * pages_per_sequence
-    q = torch.randn((batch, query_heads, dimension), device='cuda', dtype=torch.float16)
-    keys = torch.randn((pages, page_size, kv_heads, dimension), device='cuda', dtype=torch.float16)
-    values = torch.randn_like(keys)
-    indices = torch.arange(pages, device='cuda', dtype=torch.int32)
-    lengths = torch.full((batch,), length, device='cuda', dtype=torch.int32)
-    scale = dimension ** (-0.5)
+    from intent_bench.trees import to_device
+    q, keys, values, offsets, indices, lengths, split_offsets, scale = to_device(context.inputs, 'cuda')
     runtime = load_module(context.project_root / 'corpus/gpu/baselines/triton/vllm/attention/paged_decode/paged_gqa_decode_runtime.py', 'intent_bangc_paged_gqa_runtime')
     source = runtime.RUNTIME.load_source(context.project_root / 'corpus/gpu/baselines/triton/vllm/attention/paged_decode/triton_decode_attention.py', 'intent_bangc_paged_gqa_source')
     source_output = torch.empty_like(q)

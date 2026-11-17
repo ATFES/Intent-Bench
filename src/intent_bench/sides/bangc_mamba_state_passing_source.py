@@ -7,9 +7,8 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
-    states = torch.randn((1, 8, 32, 8192), device='cuda', dtype=torch.float32) * 0.01
-    decay = -torch.rand((1, 32, 8), device='cuda', dtype=torch.float32) * 0.1
-    initial = torch.zeros((1, 32, 8192), device='cuda', dtype=torch.float32)
+    from intent_bench.trees import to_device
+    states, decay, initial = to_device(context.inputs, 'cuda')
     source = _source(context, 'ssd_state_passing', '_state_passing_fwd')
     return checked_call(reference_launch(lambda : source(states, decay, initial)), Tolerance(atol=1e-05, rtol=1e-05), device_type='cuda', owners=locals())
 

@@ -146,19 +146,9 @@ def _intent(name, backend, values, env):
                     "compiler_artifacts": [str(a.cache_directory) for a in context.artifacts]}
         reset = lambda: [function() for function in restore]
         if backend == "bangc":
-            from types import SimpleNamespace
-            from intent.runtime.bangc import Queue
             from ..implementations.bangc import prepare_sequence
-            queue = Queue(device=int(context.device.split(':')[1]),
-                          neuware=env.options.get("neuware", "/usr/local/neuware"))
-            def close():
-                try:
-                    queue.close()
-                finally:
-                    context.close()
-            sequence = SimpleNamespace(queue=queue, device=queue.device, reset=reset,
-                enqueue=lambda: call.enqueue(queue), launch=call.launch, compile=call.compile, close=close)
-            prepared = prepare_sequence(sequence, output)
+            prepared = prepare_sequence(call, output, environment=env, reset=reset,
+                                        close=context.close, owners=context)
             prepared.metadata.update(metadata)
             return prepared
         native_measure = None

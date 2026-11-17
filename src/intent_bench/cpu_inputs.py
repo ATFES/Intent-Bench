@@ -1021,6 +1021,26 @@ def inputs_paged_gqa_f16_reduction():
                        'bench_paged_gqa_f16_reduction', Tolerance(atol=1e-1, rtol=5e-2))
 
 
+def inputs_chunk_gated_delta():
+    from dataclasses import replace
+    data = inputs_recurrent_gated_delta_fwd()
+    return replace(data, arguments=(*data.arguments[:-1], 128 ** (-0.5)),
+                   kernel='', reference='chunk_gated_delta_fwd', constexprs=None)
+
+
+def inputs_batched_triangular_solve():
+    lower = torch.tril(torch.randn((4096, 16, 16), dtype=torch.float32))
+    lower.diagonal(dim1=-2, dim2=-1).add_(2.0)
+    initial = torch.randn((4096, 16), dtype=torch.float32)
+    return InputBundle((lower, initial), 'intent.examples.kernels.factorization.triangular_solve:batched_lower_triangular_solve',
+                       'triangular_solve', Tolerance(atol=0.0001, rtol=0.0001), mutable_positions=(1,))
+
+
+def inputs_bangc_paged_decode():
+    from dataclasses import replace
+    return replace(inputs_paged_gqa_f16_reduction(), tolerance=Tolerance(atol=0.05, rtol=0.05))
+
+
 FACTORIES = {
     'fused_linear_cross_entropy': inputs_fused_linear_cross_entropy,
     'paged_gqa_f16_reduction': inputs_paged_gqa_f16_reduction,

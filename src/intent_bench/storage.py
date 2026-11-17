@@ -2,8 +2,16 @@
 import json
 from pathlib import Path
 import sys
+from dataclasses import fields
 
 import numpy as np
+
+
+def record_types():
+    from .structured import InputBundle, KernelSymbol
+    from .implementations.context import Tolerance, IntegerTolerance, SimilarityTolerance
+    return {kind.__name__: kind for kind in
+            (InputBundle, KernelSymbol, Tolerance, IntegerTolerance, SimilarityTolerance)}
 
 
 def numpy_dtype(name):
@@ -74,6 +82,9 @@ def write_tree(value, directory):
             result.update(kind="tuple" if isinstance(item, tuple) else "list", items=[encode(v) for v in item])
         elif isinstance(item, dict):
             result.update(kind="dict", items=[[encode(k), encode(v)] for k, v in item.items()])
+        elif type(item) in record_types().values():
+            result.update(kind="record", name=type(item).__name__,
+                          fields={field.name: encode(getattr(item, field.name)) for field in fields(item)})
         else:
             raise TypeError(f"oracle transport does not support {type(item).__name__}")
         return result
@@ -130,6 +141,8 @@ def read_tree(directory, *, tensor_device="cpu"):
                 result = tuple(result)
         elif kind == "dict":
             result = {decode(k): decode(v) for k, v in item["items"]}
+        elif kind == "record":
+            result = record_types()[item["name"]](**{name: decode(value) for name, value in item["fields"].items()})
         else:
             raise ValueError(f"unknown transport value kind: {kind}")
         objects[item["id"]] = result

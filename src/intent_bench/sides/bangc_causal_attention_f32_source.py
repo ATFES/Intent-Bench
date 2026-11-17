@@ -7,9 +7,7 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
-    q = torch.randn((8, 128, 32), dtype=torch.float32)
-    (k, v) = (torch.randn_like(q), torch.randn_like(q))
-    scale = 32 ** (-0.5)
+    q, k, v, scale = context.inputs
     reference = _mojo_reference(context, 'corpus/cpu/baselines/mojo/intentdsl/attention/causal/causal_runtime.py', (q, k, v, scale))
     return checked_call(reference_launch(reference), Tolerance(0.0002, 1e-05), device_type='cpu', owners=locals())
 

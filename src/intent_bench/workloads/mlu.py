@@ -27,26 +27,28 @@ def build(name):
         import torch
         from ..corpus import PROJECT_ROOT
         from ..implementations.context import Context
-        from ..implementations.bangc_sequence import LocalSequence
-        from ..implementations.bangc import prepare_sequence
+        from ..implementations.bangc import prepare_program
         context=Context(env.compiler,PROJECT_ROOT,None,
                         'bangc',environment=env)
-        sequence=LocalSequence(context)
         x=torch.from_numpy(arrays[0])
         if name=='relu':
             from intent.examples.kernels.activation.pointwise import relu_forward
-            outputs=sequence.add(relu_forward,{'x':x})['output']
+            program=context.compile(relu_forward)
+            arguments=(x,)
         elif name=='softmax':
             from intent.examples.kernels.normalization.softmax import stable_softmax_f16
-            outputs=sequence.add(stable_softmax_f16,{'x':x})['y']
+            program=context.compile(stable_softmax_f16)
+            arguments=(x,)
         elif name=='matmul':
             from intent.examples.kernels.contraction.gemm import gemm,Activation
-            outputs=sequence.add(gemm,{'a':x,'b':torch.from_numpy(arrays[1])},constexprs={'ACTIVATION':Activation.NONE})['c']
+            program=context.compile(gemm,constexprs={'ACTIVATION':Activation.NONE})
+            arguments=(x,torch.from_numpy(arrays[1]))
         else:
             from intent.examples.kernels.normalization.layer_norm import layer_norm_f16
-            outputs=sequence.add(layer_norm_f16,{'x':x,'weight':torch.ones(x.shape[-1],dtype=torch.float16),
-                'bias':torch.zeros(x.shape[-1],dtype=torch.float16),'inverse_features':1/x.shape[-1],'epsilon':1e-5})['y']
-        return prepare_sequence(sequence,outputs)
+            program=context.compile(layer_norm_f16)
+            arguments=(x,torch.ones(x.shape[-1],dtype=torch.float16),
+                       torch.zeros(x.shape[-1],dtype=torch.float16),1/x.shape[-1],1e-5)
+        return prepare_program(context,program,arguments)
     return Workload("mlu/"+name,[Case("small",{"rows":16,"columns":128}),Case("large",{"rows":256,"columns":1024})],
                     inputs,{"cnnl":Implementation("cnnl",prepare),'intent:bangc':Implementation('intent:bangc',generated)},
                     oracle=oracle,atol=2e-2,rtol=2e-2,family="mlu/"+name)

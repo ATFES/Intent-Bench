@@ -7,10 +7,8 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.source_support import reference_launch
 
 def prepare(context):
-    x = torch.randn((1, 2048, 32, 64), device='cuda', dtype=torch.bfloat16)
-    basis = torch.randn((1, 2048, 8, 128), device='cuda', dtype=torch.bfloat16)
-    dt = torch.rand((1, 32, 8, 256), device='cuda', dtype=torch.float32) * 0.01
-    decay = -torch.rand_like(dt).cumsum(-1) * 0.01
+    from intent_bench.trees import to_device
+    basis, x, dt, decay = to_device(context.inputs, 'cuda')
     source = _source(context, 'ssd_chunk_state', '_chunk_state_fwd')
     return checked_call(reference_launch(lambda : source(basis, x, dt, decay, states_in_fp32=True)), Tolerance(atol=0.02, rtol=0.02), device_type='cuda', owners=locals())
 
