@@ -33,6 +33,8 @@ def make_kernel(definition, environment, backend, *, constexprs=None, tuning_con
     _, workers = execution(environment, backend)
     if options is None:
         options = compile_options(environment)
+    if tuning_config is None:
+        tuning_config = environment.options.get("tuning_config")
     return intent.jit(definition, backend=backend, device=device, compiler=environment.compiler,
                       constexprs=constexprs, tuning_config=tuning_config, options=options,
                       workers=workers,
