@@ -25,5 +25,5 @@ def prepare(context):
     affine_artifact = context.compile(group_norm_backward_weight_bias)
     program = GroupNormBackward(dx_artifact, affine_artifact)
     call = program.prepare(x, grad_y, weight, mean, rstd, inverse_group_elements)
-    generated = intent_sequence((call.dx, call.affine), call.result, host_run=call.launch)
+    generated = intent_sequence(call, call.result, host_run=call.launch)
     return checked_call(generated, (Tolerance(atol=0.02), Tolerance(atol=0.25), Tolerance(atol=0.25)), cuda_graph=False, device_type='cpu', note='既有B32-C256-S1024-G32 f16 GroupNorm backward；dx与weight/bias梯度两个kernel完整native序列，PyTorch CPU reference同算法。', owners=locals())

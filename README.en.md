@@ -44,6 +44,18 @@ CLI, Python API, MCP and suites share RunRequest and the execution service. Requ
 timeouts and preserve failure stages/logs. Overlapping device ownership reports skipped_busy.
 Check external device/process load before accepting performance measurements.
 
+Use `--oracle-env local-cpu` when the execution host lacks the registered oracle's
+dependencies. Intent still compiles and executes locally on the selected target.
+Bench transfers actual inputs, initial state and outputs, preserving dtype, strides
+and shared storage. The oracle environment runs the original oracle and checker;
+it does not recreate inputs from a seed or supply a cross-device timing baseline.
+Python's `RunRequest.oracle_environment` and the MCP parameter use the same service.
+
+```bash
+intent-bench run program/softmax --env rvv-native --impl intent:weft \
+  --oracle-env local-cpu --check-only
+```
+
 ```text
 output/
   latest/<environment>/<workload>/

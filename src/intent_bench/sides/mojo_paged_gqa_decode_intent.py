@@ -26,11 +26,5 @@ def prepare(context):
     program = PagedDecode(partials, reduction)
     call = program.prepare(q, key_cache, value_cache, page_offsets, page_indices,
                            lengths, split_offsets, scale)
-    partial_lse, partial_output = call.partials.result()
-    output = call.result()
-
-    def generated_launch():
-        program.into(q, key_cache, value_cache, page_offsets, page_indices, lengths, split_offsets, partial_lse, partial_output, output, scale)
-    generated = intent_sequence((call.partials, call.merge), call.result,
-                                host_run=generated_launch, host_result=call.result)
+    generated = intent_sequence(call, call.result, host_run=call.launch, host_result=call.result)
     return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=False, device_type='cpu', note='完整 paged GQA partial+split-k native序列；输出及 partial 预绑定，CPU reference 计入 page table 解码、临时分配和 attention。', owners=locals())

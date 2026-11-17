@@ -18,7 +18,8 @@ def _type(value):
 
 
 class _Call(ct.Structure):
-    _fields_ = [('function', ct.c_void_p), ('arguments', ct.POINTER(ct.c_void_p)), ('signature', ct.c_size_t)]
+    _fields_ = [('function', ct.c_void_p), ('arguments', ct.POINTER(ct.c_void_p)), ('signature', ct.c_size_t),
+                ('fill', ct.c_size_t)]
 
 
 class _Fill(ct.Structure):
@@ -27,34 +28,19 @@ class _Fill(ct.Structure):
 
 
 class NativeSequence:
-    def __init__(self, calls, *, initializations=()):
-        self.initializations = tuple(initializations)
-        if self.initializations:
-            import torch
+    def __init__(self, calls):
+        from intent import PreparedSequence, NativeMemoryFill
+        bindings = tuple(binding for call in calls for binding in
+                         (call.native_calls() if isinstance(call, PreparedSequence) else (call.native_call(),)))
         fills = []
-        for buffer, value in self.initializations:
-            if not isinstance(buffer, torch.Tensor):
-                from intent.runtime.weft.buffer import Buffer
-                from intent.language.dtypes import dtype
-                from intent.integrations.torch import torch_dtype
-                if not isinstance(buffer, Buffer):
-                    raise NotImplementedError('native sequence initialization requires public CPU storage')
-                if not buffer.nbytes:
-                    continue
-                # Borrow the public byte storage; never copy initialization to
-                # a different allocation from the one bound by the product.
-                buffer = torch.frombuffer(buffer.storage, dtype=torch_dtype(dtype(buffer.dtype))).view(buffer.shape)
-            if buffer.device.type != 'cpu' or not buffer.is_contiguous():
-                raise NotImplementedError('native sequence initialization requires a contiguous CPU buffer')
-            width = buffer.element_size()
-            if width not in (1, 2, 4, 8):
-                raise NotImplementedError('native sequence initialization requires a 1, 2, 4 or 8 byte element')
-            encoded = torch.tensor([value], dtype=buffer.dtype).view(torch.uint8).tolist()
-            fills.append(_Fill(buffer.data_ptr(), buffer.numel(), width, (ct.c_ubyte * 8)(*encoded)))
-        self.fills = (_Fill * len(fills))(*fills)
         signatures, entries, owners = [], [], []
-        for call in calls:
-            binding = call.native_call()
+        self.bindings = bindings
+        for binding in bindings:
+            if isinstance(binding, NativeMemoryFill):
+                fills.append(_Fill(binding.address, binding.count, len(binding.value),
+                                   (ct.c_ubyte * 8)(*binding.value)))
+                entries.append(_Call(None, None, 0, len(fills)))
+                continue
             function = binding.function
             types = binding.argument_types
             signature = tuple(_type(t) for t in types)
@@ -63,9 +49,10 @@ class NativeSequence:
             values = binding.arguments
             pointers = (ct.c_void_p * len(values))(*(ct.addressof(v) for v in values))
             owners.append((binding, values, pointers))
-            entries.append(_Call(ct.cast(function, ct.c_void_p), pointers, signatures.index(signature)))
+            entries.append(_Call(ct.cast(function, ct.c_void_p), pointers, signatures.index(signature), 0))
         self.owners = owners
         self.calls = (_Call * len(entries))(*entries)
+        self.fills = (_Fill * len(fills))(*fills)
         cases = []
         for index, types in enumerate(signatures):
             arguments = ', '.join(f'*static_cast<{t}*>(call.arguments[{i}])' for i, t in enumerate(types))
@@ -74,26 +61,27 @@ class NativeSequence:
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-struct Call { void* function; void** arguments; size_t signature; };
+struct Call { void* function; void** arguments; size_t signature; size_t fill; };
 struct Fill { void* data; size_t count; size_t width; unsigned char value[8]; };
 template<size_t Width> void initialize(const Fill& fill) {
     auto* data = static_cast<unsigned char*>(fill.data);
     for (size_t i = 0; i < fill.count; ++i)
         std::memcpy(data + i * Width, fill.value, Width);
 }
-extern "C" double measure(Call* calls, size_t count, Fill* fills, size_t fill_count) {
+extern "C" double measure(Call* calls, size_t count, Fill* fills) {
     auto begin = std::chrono::steady_clock::now();
-    for (size_t i = 0; i < fill_count; ++i) {
-        const auto& fill = fills[i];
-        switch (fill.width) {
-        case 1: initialize<1>(fill); break;
-        case 2: initialize<2>(fill); break;
-        case 4: initialize<4>(fill); break;
-        case 8: initialize<8>(fill); break;
-        }
-    }
     for (size_t i = 0; i < count; ++i) {
         const auto& call = calls[i];
+        if (call.fill) {
+            const auto& fill = fills[call.fill - 1];
+            switch (fill.width) {
+            case 1: initialize<1>(fill); break;
+            case 2: initialize<2>(fill); break;
+            case 4: initialize<4>(fill); break;
+            case 8: initialize<8>(fill); break;
+            }
+            continue;
+        }
         switch (call.signature) {
 ''' + '\n'.join(cases) + '''
         }
@@ -113,14 +101,14 @@ extern "C" double measure(Call* calls, size_t count, Fill* fills, size_t fill_co
             raise RuntimeError(f'native sequence timer compilation failed; see {path}: ' + result.stderr)
         self.library = ct.CDLL(str(path / 'timer.so'))
         self.measure = self.library.measure
-        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t, ct.POINTER(_Fill), ct.c_size_t]
+        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t, ct.POINTER(_Fill)]
         self.measure.restype = ct.c_double
 
     def run(self):
-        for binding, _, _ in self.owners:
+        for binding in self.bindings:
             binding.validate()
-        elapsed = self.measure(self.calls, len(self.calls), self.fills, len(self.fills))
-        for binding, _, _ in self.owners:
+        elapsed = self.measure(self.calls, len(self.calls), self.fills)
+        for binding in self.bindings:
             binding.complete()
         return elapsed
 

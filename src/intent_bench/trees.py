@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import fields, is_dataclass
 import numpy as np
 
 
@@ -32,6 +33,11 @@ def clone(value, memo=None):
     if isinstance(value, (list, tuple)):
         result = [clone(v, memo) for v in value]
         result = tuple(result) if isinstance(value, tuple) else result
+        memo[id(value)] = result
+        return result
+    if is_dataclass(value) and not isinstance(value, type):
+        result = type(value)(**{field.name: clone(getattr(value, field.name), memo)
+                               for field in fields(value) if field.init})
         memo[id(value)] = result
         return result
     return copy.deepcopy(value, memo)

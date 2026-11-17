@@ -40,7 +40,8 @@ def run_benchmark(workload: str, implementations: list[str], environment: str | 
                   throughput: str | None = None, cache: str = 'flush',
                   device: str | None = None, intent_root: str | None = None,
                   compiler: str | None = None, options: dict | None = None,
-                  timing: str = 'auto', scope: str = 'operator') -> dict:
+                  timing: str = 'auto', scope: str = 'operator',
+                  oracle_environment: str | None = None) -> dict:
     """Start an operator comparison using the ordinary bench CLI. Returns a run path immediately.
 
     Choose participants explicitly. Both Intent GPU backends can share one baseline:
@@ -52,6 +53,8 @@ def run_benchmark(workload: str, implementations: list[str], environment: str | 
     scope="host_call" explicitly measures Python/framework entry-to-completion time;
     use only when requested. Use run_status to retrieve the result without rerunning.
     A custom workload file executes user Python code just as the CLI does.
+    oracle_environment runs only the existing correctness check on actual transferred
+    inputs and results. Performance baselines remain on the execution device.
     """
     if not implementations:raise ValueError('select at least one implementation')
     if baseline is not None and baseline not in implementations:
@@ -64,7 +67,8 @@ def run_benchmark(workload: str, implementations: list[str], environment: str | 
     measurement = Measurement(method=timing, scope=scope, cache=cache, throughput=throughput,
                               enabled=not check_only)
     return jobs.start(RunRequest(workload, tuple(implementations), env, measurement,
-                                baseline, tuple(cases or ()), parameters or {}))
+                                baseline, tuple(cases or ()), parameters or {},
+                                oracle_environment=load_environment(oracle_environment) if oracle_environment else None))
 
 
 @server.tool()

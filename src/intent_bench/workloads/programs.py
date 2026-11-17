@@ -5,7 +5,7 @@ constexprs and multi-kernel composition remain in intent.examples; this module
 only binds comparison implementations and observes their declared outputs.
 """
 from ..model import Case, EnvironmentUnavailable, Implementation, PreparedCall, Workload
-from dataclasses import dataclass
+from .author_inputs import Definition as _Definition, inputs as author_inputs, invoke as invoke_author
 
 
 BASELINES = {
@@ -88,20 +88,10 @@ def _capture_results(value, getter, bindings):
         bindings[id(value)] = getter
 
 
-@dataclass
-class _Definition:
-    definition: object
-
-
 def _mutable_arguments(program):
     from intent.language.annotations import ConstexprSpec, ViewKind, ViewSpec
     if not isinstance(program, _Definition):
-        # Product compositions used here have read-only public inputs; their
-        # workspace initialization belongs to the full prepared invocation.
-        from intent.examples.programs.composition import Histogram, GroupNormBackward, PagedDecode, MoEAlignment
-        if isinstance(program, (Histogram, GroupNormBackward, PagedDecode, MoEAlignment)):
-            return ()
-        raise NotImplementedError("declare public effects for this author composition")
+        return tuple(program.mutable_inputs)
     parameters = [p.annotation for p in program.definition.signature.parameters.values()
                   if not isinstance(p.annotation, ConstexprSpec)
                   and not (isinstance(p.annotation, ViewSpec) and p.annotation.kind is ViewKind.OUT)]
@@ -121,18 +111,11 @@ def _device(env, backend=None):
     return device
 
 
-def _seed(name, seed):
-    from intent.examples import PROGRAMS
-    from intent.examples.programs import inputs
-    inputs.seed([seed, list(PROGRAMS).index(name)])
-
-
-def _intent(name, backend, seed, env):
+def _intent(name, backend, values, env):
     from ..loading import intent_environment
     intent_environment(env)
-    from intent.examples import load_program
     from intent.examples.programs.common import ExampleContext
-    from ..implementations.intent import backend_options, execution
+    from ..implementations.intent import backend_options, execution, compile_options
 
     class PrepareContext(ExampleContext):
         invocation = None
@@ -147,10 +130,9 @@ def _intent(name, backend, seed, env):
     device, workers = execution(env, backend)
     context = PrepareContext(backend, device, compiler=env.compiler, stage="native",
                              workers=workers,
-                             backend_options=backend_options(env, backend))
+                             backend_options=backend_options(env, backend), options=compile_options(env))
     try:
-        _seed(name, seed)
-        output = load_program(name)(context)
+        output = invoke_author(name, values, context)
         if context.invocation is None:
             raise ValueError("author program did not submit its complete call")
         call = context.invocation
@@ -182,15 +164,10 @@ def _intent(name, backend, seed, env):
         native_measure = None
         if device == "cpu":
             from ..implementations.prepared import intent_sequence
-            components = {"histogram": ("partials", "merge"), "paged_decode": ("partials", "merge"),
-                          "group_norm_backward": ("dx", "affine"),
-                          "moe_alignment": ("count", "prefix", "scatter", "mark")}
-            calls = tuple(getattr(call, part) for part in components[name]) if name in components else (call,)
             def result():
                 from ..implementations.outputs import native_result
                 return native_result(output)
-            native = intent_sequence(calls, result, reset=reset, metadata=metadata,
-                initializations=call.initializations if name == "moe_alignment" else ())
+            native = intent_sequence(call, result, reset=reset, metadata=metadata)
             def close():
                 try:
                     native.close()
@@ -212,8 +189,7 @@ def _intent(name, backend, seed, env):
         raise
 
 
-def _q4_reference(seed, env, implementation):
-    from intent.examples import load_program
+def _q4_reference(values, env, implementation):
     from ..workloads.weft import q4_projection_reference
 
     class Context:
@@ -235,18 +211,16 @@ def _q4_reference(seed, env, implementation):
             return None
 
     _device(env, implementation)
-    _seed("q4_projection", seed)
     context = Context()
-    load_program("q4_projection")(context)
+    invoke_author("q4_projection", values, context)
     context.invocation.metadata.update(author_program="q4_projection", input_profile="installed author program")
     return context.invocation
 
 
-def _reference(name, seed, env, implementation="torch"):
+def _reference(name, values, env, implementation="torch"):
     if name == "q4_projection":
-        return _q4_reference(seed, env, implementation)
+        return _q4_reference(values, env, implementation)
     import torch
-    from intent.examples import load_program
     from intent.examples.programs.inputs import Array
     from ..corpus._common.measurement import functional_launch
 
@@ -422,9 +396,8 @@ def _reference(name, seed, env, implementation="torch"):
             call.metadata["library"] = source
             return self.bind(call, arguments, mutable)
 
-    _seed(name, seed)
     context = ReferenceContext()
-    output = load_program(name)(context)
+    output = invoke_author(name, values, context)
     if context.invocation is None:
         raise ValueError("author program did not submit its complete call")
     context.invocation.metadata.update(author_program=name, input_profile="installed author program")
@@ -457,27 +430,25 @@ def build(name):
                   "batch_norm": (Tolerance(.02, .01), *((Tolerance(.0001, .0001),)*4))}
     tolerance = tolerances.get(name, Tolerance(0))
     implementations = {baseline: Implementation(baseline,
-        lambda case, seed, env, baseline=baseline: _reference(name, seed, env, baseline), description)
+        lambda case, values, env, baseline=baseline: _reference(name, values, env, baseline), description)
         for baseline, description in BASELINES[name].items()}
     for backend in backends(name):
         implementations["intent:"+backend] = Implementation("intent:"+backend,
-            lambda case, seed, env, backend=backend: _intent(name, backend, seed, env))
+            lambda case, values, env, backend=backend: _intent(name, backend, values, env))
     # Histogram's independent CPU oracle also checks excluded bins in the author
     # input; its output is integer, so no tolerance is applied to counts.
-    def histogram_oracle(case, seed):
+    def histogram_oracle(case, values):
         import numpy as np
         import torch
-        from intent.examples import load_program
         class Context:
             def compile(self, *args, **kwargs): return None
             def call(self, program, samples):
                 indices = samples.data.astype(np.int32)
                 counts = np.bincount(indices[(indices >= 0) & (indices < 256)], minlength=256).astype(np.int32)
                 return torch.from_numpy(counts)
-        _seed(name, seed)
-        return load_program(name)(Context())
+        return invoke_author(name, values, Context())
     oracle = histogram_oracle if name == "histogram" else Implementation(
-        "oracle", lambda case, seed, env: _reference(name, seed, env, "oracle"))
+        "oracle", lambda case, values, env: _reference(name, values, env, "oracle"))
     def check(actual, expected):
         import numpy as np
         if name == "q4_projection":
@@ -503,6 +474,6 @@ def build(name):
         if name == "histogram":
             expected = expected.to(actual.device)
         compare_outputs(actual, expected, tolerance)
-    return Workload("program/"+name, [Case("author")], lambda case, seed: seed,
+    return Workload("program/"+name, [Case("author")], lambda case, seed: author_inputs(name, seed),
         implementations, oracle=oracle, check=check,
         family="program", parameter_keys=())

@@ -6,6 +6,14 @@ def backend_options(environment, backend):
     return dict(environment.options.get("intent", {}).get(backend, {}))
 
 
+def compile_options(environment):
+    value = environment.options.get("compile_options")
+    if value is None:
+        return None
+    from intent import CompileOptions
+    return CompileOptions(**value)
+
+
 def execution(environment, backend):
     """Select the configured device using the product declaration, without a probe."""
     intent_environment(environment)
@@ -23,6 +31,8 @@ def make_kernel(definition, environment, backend, *, constexprs=None, tuning_con
     intent = intent_environment(environment)
     device = None if environment.device == "auto" else environment.device
     _, workers = execution(environment, backend)
+    if options is None:
+        options = compile_options(environment)
     return intent.jit(definition, backend=backend, device=device, compiler=environment.compiler,
                       constexprs=constexprs, tuning_config=tuning_config, options=options,
                       workers=workers,

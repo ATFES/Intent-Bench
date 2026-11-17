@@ -10,7 +10,12 @@ def native_result(value):
         return {key: native_result(item) for key, item in value.items()}
     if not callable(getattr(value, "to_host", None)):
         return value
-    import torch
+    import sys
+    torch = sys.modules.get("torch")
+    if torch is None:
+        import numpy as np
+        from intent.runtime.storage_types import numpy_dtype
+        return np.frombuffer(value.to_host(), dtype=numpy_dtype(value.dtype)).reshape(value.shape).copy()
     from intent.integrations.torch import torch_dtype
     from intent.language.dtypes import dtype
 

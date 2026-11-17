@@ -72,7 +72,8 @@ def execute_local(request):
             save(list(partial.values()), directory, command=request.record())
             rows = benchmark(workload, request.implementations, environment=request.environment,
                              measurement=request.measurement, baseline=request.baseline, seed=request.seed,
-                             observer=observe)
+                             observer=observe,
+                             oracle_output=directory / "artifacts" / "oracle" if request.oracle_environment is not None else None)
         except Exception as error:
             status = "environment_missing" if isinstance(error, ImportError) else getattr(error, "status", "preparation_failed")
             rows = [Result(request.workload, "requested", case, {}, name, status=status,

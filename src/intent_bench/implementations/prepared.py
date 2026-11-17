@@ -66,31 +66,27 @@ class IntentSequence:
         return call.result()
 
     def prepared(self, result, *, reset=None, host_run=None, host_result=None, initializations=()):
-        return intent_sequence(self.calls, result, reset=reset, host_run=host_run, host_result=host_result,
-                               metadata={'artifacts': [str(a.cache_directory) for kernel in self.artifacts for a in kernel.artifacts]},
-                               initializations=initializations)
+        from intent import PreparedSequence
+        fills = tuple(self.artifacts[0].prepare_fill(buffer, value) for buffer, value in initializations)
+        sequence = PreparedSequence((*fills, *self.calls), outputs=None, owners=self.artifacts)
+        return intent_sequence(sequence, result, reset=reset, host_run=host_run, host_result=host_result,
+                               metadata={'artifacts': [str(a.cache_directory) for kernel in self.artifacts for a in kernel.artifacts]})
 
 
-def intent_sequence(calls, result, *, reset=None, host_run=None, host_result=None, metadata=None,
-                    initializations=()):
-    calls = tuple(calls)
-    initializations = tuple(initializations)
+def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None, metadata=None):
+    from intent import PreparedSequence
+    if isinstance(call, (tuple, list)):
+        call = PreparedSequence(call, outputs=None)
     native = {}
     restore = reset or (lambda: None)
     call_metadata = {**(metadata or {}), 'operator_entry': 'prepared_native_sequence',
-                     'kernel_count': len(calls), 'initialization_count': len(initializations)}
-
-    def run():
-        from intent.examples.programs.native import fill
-        for buffer, value in initializations:
-            fill(buffer, value)
-        for call in calls:
-            call.launch()
+                     'kernel_count': call.kernel_count if isinstance(call, PreparedSequence) else 1,
+                     'initialization_count': call.initialization_count if isinstance(call, PreparedSequence) else 0}
 
     def measure(settings):
         if not native:
             from .native_sequence import NativeSequence
-            native['timer'] = NativeSequence(calls, initializations=initializations)
+            native['timer'] = NativeSequence((call,))
         from .native_sampling import sample_timer
         call_metadata['cache_policy'] = 'flush_cpu_64m' if settings.cache == 'flush' else 'warm'
         return sample_timer(native['timer'], settings, restore)
@@ -99,7 +95,7 @@ def intent_sequence(calls, result, *, reset=None, host_run=None, host_result=Non
         if native:
             native['timer'].close()
 
-    return PreparedCall(run, result, compile=lambda: [call.compile() for call in calls], reset=reset,
+    return PreparedCall(call.launch, result, compile=call.compile, reset=reset,
                         native_measure=measure, timing='cpu_native_monotonic', close=close,
-                        host_run=host_run or run, host_result=host_result or result,
-                        metadata=call_metadata)
+                        host_run=host_run or call.launch, host_result=host_result or result,
+                        metadata=call_metadata, owners=call)

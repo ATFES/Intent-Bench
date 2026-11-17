@@ -66,6 +66,11 @@ require changes to those components.
 - `timing="cuda_event"` explicitly chooses ordinary stream events; capture failures
   do not silently fall back to them. `cache="warm"` selects warm-cache runs. Clearing
   cache never means deleting compiler caches. SSH/startup are outside operator timing.
+- If the execution host lacks oracle dependencies, select `oracle_environment`
+  (CLI `--oracle-env`) explicitly. Bench transfers actual inputs, initial state and
+  outputs with dtype/stride/alias information, then runs the existing oracle and
+  checker there. Intent JIT and performance baselines remain on the execution host.
+  Never count this remote oracle as a same-device performance opponent.
 
 ## Run and explain
 

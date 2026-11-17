@@ -62,6 +62,18 @@ MLU 使用 `device: "mlu:0"`，NPU 使用 `device: "npu:0"`。Intent provider �
 或 `{"intent":{"bangc":{"neuware":"/usr/local/neuware"}}}`。新增 provider 不需要修改 Bench 的工具链映射。
 `check --backend` 使用安装的 Intent 组件登记；程序比较也公开这些组件，不以是否已有同设备 baseline 限制正确性检查。
 缺少设备计时适配器时明确报错，不以 Python 提交时间冒充算子时间。
+
+执行机缺少原 oracle 的依赖时，可显式选择 `--oracle-env local-cpu`。
+Bench 在执行机完成本机 JIT 和测量，回传实际输入、初始状态与输出；所选环境运行原
+oracle 和原检查器。传输保留 dtype、stride 和共享存储关系，不重新按 seed 猜测输入。
+这不会把 oracle 环境变成性能 baseline；性能对照仍必须在同一执行设备上计时。
+Python 的 `RunRequest.oracle_environment` 与 MCP 的同名参数使用相同服务。
+
+```bash
+intent-bench run program/softmax --env rvv-native --impl intent:weft \
+  --oracle-env local-cpu --check-only
+```
+
 `options.triton_ptxas` 和 `options.triton_ptxas_blackwell` 分别传给 Triton 的
 `TRITON_PTXAS_PATH` 与 `TRITON_PTXAS_BLACKWELL_PATH`，路径属于执行主机。
 它们显式选择该 worker 中所有 Triton 实现使用的汇编器，不在失败后切换工具链。

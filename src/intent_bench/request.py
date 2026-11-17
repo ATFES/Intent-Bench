@@ -17,6 +17,7 @@ class RunRequest:
     kind: str = "workload"
     stage: str = "run"
     timeout: float = 300
+    oracle_environment: Environment | None = None
 
     def __post_init__(self):
         if not self.implementations:
@@ -28,21 +29,24 @@ class RunRequest:
 
     def record(self):
         value = asdict(self)
-        for name in ("intent_root", "output_root"):
-            item = value["environment"][name]
-            if item is not None:
-                value["environment"][name] = str(item)
+        for environment in (value["environment"], value["oracle_environment"]):
+            if environment is not None:
+                for name in ("intent_root", "output_root"):
+                    if environment[name] is not None:
+                        environment[name] = str(environment[name])
         value["output"] = str(self.output) if self.output is not None else None
         return value
 
     @classmethod
     def read(cls, value):
         data = dict(value)
-        env = dict(data.pop("environment"))
-        for name in ("intent_root", "output_root"):
-            if env.get(name) is not None:
-                env[name] = Path(env[name])
-        data["environment"] = Environment(**env)
+        for field in ("environment", "oracle_environment"):
+            if data.get(field) is not None:
+                env = dict(data[field])
+                for name in ("intent_root", "output_root"):
+                    if env.get(name) is not None:
+                        env[name] = Path(env[name])
+                data[field] = Environment(**env)
         data["measurement"] = Measurement(**data["measurement"])
         data["implementations"] = tuple(data["implementations"])
         data["cases"] = tuple(data["cases"])

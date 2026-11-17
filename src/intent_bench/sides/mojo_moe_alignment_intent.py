@@ -22,9 +22,8 @@ def prepare(context):
     mark = context.compile(moe_mark_expert_blocks)
     program = MoEAlignment(count, prefix, scatter, mark)
     call = program.prepare(source_ids)
-    prepared = intent_sequence((call.count, call.prefix, call.scatter, call.mark),
+    prepared = intent_sequence(call,
                                lambda: _canonical_alignment(*call.result()),
-                               initializations=call.initializations,
                                host_run=call.launch, host_result=lambda: _canonical_alignment(*call.result()))
     return checked_call(prepared, tuple((Tolerance(atol=0.0) for _ in range(3))), cuda_graph=False, device_type='cpu', note='既有MoE alignment；T4096、top-k2、E64、block128；完整计数/前缀/散射/标记native调用，辅助workspace初始化计入同一原生计时间隔，输出为canonical三元组。', owners=locals())
 

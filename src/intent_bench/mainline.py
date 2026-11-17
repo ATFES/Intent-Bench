@@ -3,7 +3,7 @@ import time
 import traceback
 from .loading import intent_environment
 from .model import Result
-from .implementations.intent import backend_options, execution
+from .implementations.intent import backend_options, execution, compile_options
 
 def check_program(request):
     env = request.environment
@@ -23,7 +23,7 @@ def check_program(request):
     start = time.perf_counter()
     context = ExampleContext(backend,device,compiler=env.compiler,prepared=True,stage=request.stage,
         workers=workers,
-        backend_options=backend_options(env, backend))
+        backend_options=backend_options(env, backend), options=compile_options(env))
     try:
         inputs.seed([request.seed,list(PROGRAMS).index(name)])
         load_program(name)(context)

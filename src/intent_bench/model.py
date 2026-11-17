@@ -45,6 +45,7 @@ class Environment:
     output_root: Path | None = None
     remote_output_root: str | None = None
     cpus: tuple[int, ...] | None = None
+    launcher: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

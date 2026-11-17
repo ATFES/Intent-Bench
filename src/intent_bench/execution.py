@@ -20,6 +20,7 @@ class Workspace:
         self.host = environment.host or environment.options.get("host")
         self.transport = environment.transport or ("ssh" if self.host else "local")
         self.python = environment.python or environment.options.get("python") or ("python3" if self.host else sys.executable)
+        self.launcher = tuple(environment.launcher)
         if self.transport == "ssh" and not self.host:
             raise ValueError("SSH execution requires a host")
         if self.transport == "local" and self.host:
@@ -55,6 +56,7 @@ class Workspace:
         return self.remote
 
     def start(self, arguments, **kwargs):
+        arguments = [*self.launcher, *arguments]
         if self.transport == "local":
             return subprocess.Popen(arguments, cwd=self.local, **kwargs)
         command = "cd " + shlex.quote(self.remote) + " && " + shlex.join([
@@ -69,6 +71,24 @@ class Workspace:
             received.mkdir(exist_ok=True)
             subprocess.run(["scp","-qr",self.host+":"+self.remote+"/"+name,str(received)],check=True,timeout=600)
             shutil.copytree(received/name,destination,dirs_exist_ok=True)
+
+    def run(self, arguments, *, timeout, log, environment=None):
+        """Bound the selected worker and its descendants on either transport."""
+        if self.transport == "ssh":
+            arguments = ["timeout", "--signal=TERM", "--kill-after=5", str(timeout), *arguments]
+        with Path(log).open("w") as stream:
+            process = self.start(arguments, stdout=stream, stderr=subprocess.STDOUT,
+                                 start_new_session=True, env=environment)
+            try:
+                return process.wait(timeout=timeout + (10 if self.transport == "ssh" else 0))
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
+                return 124
 
     def device(self, name):
         return self.host+"/"+name if self.transport == "ssh" else name
@@ -185,24 +205,9 @@ def dispatch_request(request):
             if remote:
                 subprocess.run(["scp","-q",str(payload),workspace.host+":"+location+"/request.json"],
                                check=True,timeout=30)
-            with (output/"worker.log").open("w") as log:
-                arguments = [workspace.python,"-m","intent_bench.worker",location+"/request.json"]
-                # The remote supervisor also terminates descendants if SSH is interrupted.
-                if remote:
-                    arguments = ["timeout", "--signal=TERM", "--kill-after=5", str(request.timeout), *arguments]
-                process = workspace.start(arguments, stdout=log,stderr=subprocess.STDOUT,
-                                          start_new_session=True,
-                                          env={**os.environ, "PYTHONDONTWRITEBYTECODE":"1", "TMPDIR":str(temporary)})
-                try:
-                    code = process.wait(timeout=request.timeout + (10 if remote else 0))
-                except subprocess.TimeoutExpired:
-                    os.killpg(process.pid, signal.SIGTERM)
-                    try:
-                        process.wait(timeout=5)
-                    except subprocess.TimeoutExpired:
-                        os.killpg(process.pid, signal.SIGKILL)
-                        process.wait()
-                    code = 124
+            code = workspace.run([workspace.python,"-m","intent_bench.worker",location+"/request.json"],
+                                 timeout=request.timeout, log=output/"worker.log",
+                                 environment={**os.environ, "PYTHONDONTWRITEBYTECODE":"1", "TMPDIR":str(temporary)})
             try:
                 workspace.fetch("output", output)
                 rows = read(output)
@@ -232,6 +237,9 @@ def dispatch_request(request):
                 rows.append(Result(request.workload,"requested","worker",{},"worker",
                                    status="worker_failed",stage="worker",device=environment.device,
                                    error=f"worker exit {code}; log: {output/'worker.log'}"))
+            if request.oracle_environment is not None and request.kind == "workload":
+                from .oracle import validate_request
+                rows = validate_request(request, output, rows)
             save(rows, output, command=request.record())
             return RunOutcome(rows, output)
         except Exception as error:

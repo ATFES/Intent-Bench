@@ -18,7 +18,7 @@ from .trees import assert_close, clone
 
 def benchmark(workload: Workload, implementations: Sequence[str | Implementation] | None = None,
               *, environment: Environment | None = None, measurement: Measurement | None = None,
-              baseline: str | None = None, seed: int = 0, observer=None):
+              baseline: str | None = None, seed: int = 0, observer=None, oracle_output=None):
     env, settings = environment or Environment(), measurement or Measurement()
     if env.threads < 1:
         raise ValueError("threads must be positive")
@@ -34,14 +34,20 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
     if baseline is not None and baseline not in {i.name for i in selected}:
         raise ValueError(f"baseline {baseline!r} must be selected")
     results = []
-    for case in workload.cases:
+    for case_index, case in enumerate(workload.cases):
         inputs = expected = None
         input_error = oracle_error = None
         try:
             inputs = workload.inputs(case, seed)
+            if oracle_output is not None:
+                import json
+                from .storage import write_tree
+                captured = oracle_output / f"case-{case_index}"
+                write_tree(inputs, captured / "inputs")
+                (captured / "case.json").write_text(json.dumps({"name": case.name, "parameters": dict(case.parameters)}))
         except Exception as error:
             input_error = error
-        if input_error is None and workload.oracle is not None:
+        if input_error is None and workload.oracle is not None and oracle_output is None:
             reference_call = None
             try:
                 if isinstance(workload.oracle, Implementation):
@@ -62,7 +68,7 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     try:reference_call.close()
                     except Exception as error:oracle_error=error
         case_results = []
-        for impl in selected:
+        for impl_index, impl in enumerate(selected):
             row = Result(workload.name, workload.family, case.name, dict(case.parameters), impl.name,
                          scope=settings.scope, baseline=baseline,
                          metadata={"seed": seed, "machine": platform.node(), "platform": platform.platform(),
@@ -127,7 +133,11 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     # Observe the execution actually measured (including graph replay),
                     # rather than validating only the eager warmup before capture.
                     row.stage = "correctness"
-                    if oracle_error is not None:
+                    if oracle_output is not None:
+                        from .storage import write_tree
+                        write_tree(call.result(), captured / f"actual-{impl_index}")
+                        row.metadata["oracle_capture"] = {"case": f"case-{case_index}", "actual": f"actual-{impl_index}"}
+                    elif oracle_error is not None:
                         row.correctness = "reference_failed"
                         row.metadata["reference_error"] = f"{type(oracle_error).__name__}: {oracle_error}"
                     elif workload.oracle is not None:
@@ -175,19 +185,25 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                             row.status, row.error = "cleanup_failed", str(error)
             case_results.append(row)
             if observer: observer(row)
-        anchors = [r for r in case_results if r.implementation == baseline
-                   and r.status == "passed" and r.correctness == "passed" and r.median_ms]
-        if anchors:
-            anchor = anchors[0]
-            for row in case_results:
-                if (row.status == "passed" and row.correctness == "passed" and row.median_ms and row.device == anchor.device
-                        and row.method == anchor.method and row.scope == anchor.scope
-                        and row.metadata.get("cache_policy") == anchor.metadata.get("cache_policy")
-                        and row.metadata.get("timing_boundary") == anchor.metadata.get("timing_boundary")):
-                    row.baseline_ms = anchor.median_ms
-                    row.speedup = anchor.median_ms / row.median_ms
+        assign_speedups(case_results, baseline)
         results.extend(case_results)
         if observer:
             for row in case_results:
                 observer(row)
     return results
+
+
+def assign_speedups(rows, baseline):
+    """Use only a numerically checked baseline from the same measured device."""
+    for row in rows:
+        anchors = [anchor for anchor in rows if anchor.case == row.case and anchor.implementation == baseline
+                   and anchor.status == "passed" and anchor.correctness == "passed" and anchor.median_ms]
+        if not anchors:
+            continue
+        anchor = anchors[0]
+        if (row.status == "passed" and row.correctness == "passed" and row.median_ms and row.device == anchor.device
+                and row.method == anchor.method and row.scope == anchor.scope
+                and row.metadata.get("cache_policy") == anchor.metadata.get("cache_policy")
+                and row.metadata.get("timing_boundary") == anchor.metadata.get("timing_boundary")):
+            row.baseline_ms = anchor.median_ms
+            row.speedup = anchor.median_ms / row.median_ms

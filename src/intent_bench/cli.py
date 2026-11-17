@@ -48,6 +48,7 @@ def main(argv=None):
     run.add_argument("--case",action="append")
     run.add_argument("--param",action="append",default=[])
     run.add_argument("--check-only",action="store_true")
+    run.add_argument("--oracle-env",help="Run the existing correctness oracle on transported actual inputs/results")
     run.add_argument("--jobs",type=int,default=1)
     run.add_argument("--samples",type=int)
     run.add_argument("--warmup",type=int)
@@ -140,17 +141,19 @@ def main(argv=None):
     selected = tuple(name for group in args.impl or () for name in group.split(","))
     settings = Measurement(method=args.timing,samples=args.samples,warmup=args.warmup,scope=args.scope,
                            enabled=not args.check_only,cache=args.cache,throughput=args.throughput)
+    oracle_env = load_environment(args.oracle_env) if args.oracle_env else None
     if args.suite:
         if args.workload:
             parser.error("choose a workload or a suite")
         if args.jobs != 1 and not args.check_only:
             parser.error("performance runs are serial")
         from .suites import run_suite
-        return run_suite(args,env,settings,selected)
+        return run_suite(args,env,settings,selected,oracle_environment=oracle_env)
     if not args.workload or not selected:
         parser.error("run requires a workload and explicit --impl")
     outcome = execute(RunRequest(args.workload,selected,env,settings,args.baseline,
-        tuple(args.case or ()),dict(_assignment(item) for item in args.param),args.seed,args.output,timeout=args.timeout))
+        tuple(args.case or ()),dict(_assignment(item) for item in args.param),args.seed,args.output,
+        timeout=args.timeout,oracle_environment=oracle_env))
     print(results.table(outcome.results))
     print(f"Results: {outcome.directory}")
     return outcome.exit_code
