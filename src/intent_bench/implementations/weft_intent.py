@@ -5,7 +5,7 @@ from .intent import make_kernel
 from .prepared import intent_sequence
 
 
-def prepare(reference, args, env, *, ime=False):
+def prepare(reference, args, env):
     from intent.runtime.weft import Buffer
     from intent.examples.programs.inputs import numpy_dtype
     dtypes = {str(numpy_dtype(name)): name for name in

@@ -2,7 +2,17 @@
 import random
 import struct
 import numpy as np
-from ..model import Case,Implementation,Workload
+from ..model import Case,EnvironmentUnavailable,Implementation,Workload
+
+
+def check_execution(environment, requires_ime):
+    if environment.threads != 1:
+        raise EnvironmentUnavailable('the original Weft cases specify a single CPU worker')
+    if requires_ime:
+        from triton.backends.weft.driver import WeftDriver
+        target = WeftDriver().get_current_target()
+        if target.arch != 'riscv64' or target.matrix_extension in (None, 'none'):
+            raise EnvironmentUnavailable('the registered IME case requires a native RISC-V matrix extension on the selected CPUs')
 
 
 def q4_projection_reference(weights,activation):
@@ -43,28 +53,34 @@ def build(row):
         data=tuple(rng.normal(size=(8,128,32)).astype('float32') for _ in range(3))
         return data if linear else (*data,32**-.5)
     def source(case,args,env):
-        from ..implementations.weft_source import prepare
-        prefix='corpus/cpu/baselines/weft/'
+        from ..implementations.triton_weft_source import prepare
+        check_execution(env, ime)
+        prefix='corpus/cpu/baselines/triton_weft/'
         if projection:
             n,g,_=args[0].shape
-            return prepare((prefix+'tianchenrv/contraction/q4_k_projection/q4_k_projection.py','production_mul_mat_q4_k'),args,
-                [{'shape':[n],'dtype':'float32'}],[{'buffer':0},{'buffer':1},{'workspace':g*292},{'buffer':2}],{'M':1,'N':n,'K':g*256},env,ime=ime,matrix_extension=False)
+            return prepare((prefix+'q4_k_projection.py','production_mul_mat_q4_k'),args,
+                [{'shape':[n],'dtype':'float32'}],
+                [{'buffer':0,'shape':[n,g*256],'encoding':'Q4_K'},
+                 {'buffer':1,'shape':[1,g*256]},
+                 {'workspace':g*292,'shape':[1,g*256],'encoding':'Q8_K'},
+                 {'buffer':2,'shape':[1,n]}],env)
         if matrix:
             a,b,bias=args;m,k=a.shape;n=b.shape[1]
-            return prepare((prefix+'intentdsl/contraction/i8/i8.py','gemm_bias'),args,[{'shape':[m,n],'dtype':'int32'}],
-                [{'buffer':i} for i in range(4)],{'M':m,'N':n,'K':k},env,ime=ime,meta=(('MR',1 if m==1 else 4),))
+            return prepare((prefix+'i8.py','gemm_bias'),args,[{'shape':[m,n],'dtype':'int32'}],
+                [{'buffer':i} for i in range(4)],env,use_matrix=True,meta=(('MR',1 if m==1 else 4),))
         b,s,d=args[0].shape;dv=args[2].shape[-1]
         family='linear' if linear else 'causal';arguments=args if linear else (*args[:3],np.array([args[3]],dtype='float32'))
         outputs=[{'shape':[b,s,dv],'dtype':'float32'}]
         if linear:outputs.append({'shape':[b,d,dv],'dtype':'float32'})
         bindings=[{'buffer':i} for i in ([0,1,2,3,4] if linear else [0,1,2,4,3])]
-        return prepare((prefix+f'intentdsl/attention/{family}/{family}.py','causal_linear_attention' if linear else 'causal_attention'),
-            arguments,outputs,bindings,{'B':b,'S':s,'TQ':s,'TK':s,'D':d,'DV':dv},env)
+        return prepare((prefix+f'{family}.py','causal_linear_attention' if linear else 'causal_attention'),
+            arguments,outputs,bindings,env)
     def generated(case,args,env):
         from ..implementations.weft_intent import prepare
+        check_execution(env, ime)
         reference=('intent.examples.kernels.quantization.quantized_projection:quantized_projection' if projection else
                    'intent.examples.kernels.contraction.gemm:gemm_i8' if matrix else 'intent.examples.kernels.streaming.attention_f32:'+name)
-        return prepare(reference,args,env,ime=ime)
+        return prepare(reference,args,env)
     def oracle(case,args):
         if projection:return q4_projection_reference(*args)
         # Every i8 product and partial sum fits exactly in a float64 integer.
