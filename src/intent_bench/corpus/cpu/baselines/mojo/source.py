@@ -37,9 +37,13 @@ def scalar(name: str, dtype: str = "f32") -> SourceParameter:
                            ({"role": "scalar", "carrier": dtype},))
 
 
-def prepare_source(path: Path, entry: str, parameters, target, arguments, *, required_workers=8):
+def prepare_source(path: Path, entry: str, parameters, target, arguments, *, required_workers=8,
+                   runtime_pool=False):
     if required_workers is not None and target.workers != required_workers:
         raise NotImplementedError("the initial Mojo source corpus uses an explicit eight-worker budget")
+    if runtime_pool and len(os.sched_getaffinity(0)) != target.workers:
+        raise ValueError("MAX CPU contexts size their worker pool from process affinity; "
+                         f"select an environment with exactly {target.workers} CPUs for all implementations")
     import torch
     dtypes={"f32":torch.float32,"f16":torch.float16,"bf16":torch.bfloat16,"i64":torch.int64,
             "i32":torch.int32,"u8":torch.uint8,"f8e4m3fn":torch.float8_e4m3fn}
