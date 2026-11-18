@@ -30,10 +30,9 @@ def q4_projection_reference(weights,activation):
     for j in range(8):
         values=(qs[...,j//2*32:(j//2+1)*32] >> (4*(j%2))) & 15
         dequant[...,j*32:(j+1)*32]=d[...,None]*scales[...,j,None]*values-dmin[...,None]*minimum[...,j,None]
-    blocks=activation.reshape(g,256);indices=np.abs(blocks).argmax(-1);extreme=blocks[np.arange(g),indices]
-    inverse=np.divide(np.float32(-127),extreme,out=np.zeros_like(extreme),where=extreme!=0)
-    scale=np.divide(np.float32(1),inverse,out=np.zeros_like(inverse),where=inverse!=0)
-    quantized=np.clip(np.rint(blocks*inverse[:,None]),-128,127)*scale[:,None]
+    from ..references.quantization import q8_fields
+    scale, codes = q8_fields(activation)
+    quantized = codes * scale[:, None]
     return np.einsum('ngk,gk->n',dequant,quantized,dtype='float64').astype('float32')
 
 

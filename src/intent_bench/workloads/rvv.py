@@ -5,16 +5,15 @@ NAMES=("gemm","q4_projection","rms_norm","q4_dot","q8_quantize")
 
 
 def q8_reference(case,inputs):
-    x=inputs[1].reshape(-1,256)
-    records=[]
-    for row in x:
-        maximum=row[np.abs(row).argmax()]
-        scale=np.float32(-127)/maximum if maximum else np.float32(0)
-        values=np.minimum(127,np.rint(row*scale)).astype("int8")
-        sums=values.reshape(16,16).sum(1).astype("<i2")
-        d=np.array([np.float32(1)/scale if maximum else 0],dtype="<f4")
-        records.append(d.tobytes()+values.tobytes()+sums.tobytes())
-    return np.frombuffer(b"".join(records),dtype="uint8").copy()
+    from ..references.quantization import q8_fields
+    scale, codes = q8_fields(inputs[1])
+    count = len(scale)
+    records = np.empty((count, 292), dtype=np.uint8)
+    records[:, :4] = scale.astype("<f4").view(np.uint8).reshape(count, 4)
+    records[:, 4:260] = codes.view(np.uint8)
+    sums = codes.reshape(count, 16, 16).sum(axis=2, dtype=np.int16)
+    records[:, 260:] = sums.astype("<i2").view(np.uint8)
+    return records.ravel()
 
 
 def build(name):
