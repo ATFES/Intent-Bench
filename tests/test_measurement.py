@@ -61,6 +61,17 @@ def test_explicit_native_counts_remain_exact():
     assert counts == [(2, 11)] and samples == [0.001] * 11
 
 
+def test_slow_native_kernel_uses_requested_budget_after_pilot():
+    counts = []
+    def native(settings):
+        counts.append((settings.warmup, settings.samples))
+        return [23000.0] * settings.samples
+    samples, _ = measure(PreparedCall(lambda: None, lambda: None, native_measure=native),
+                         Measurement(samples=3))
+    assert counts == [(0, 1), (1, 3)]
+    assert samples == [23000.0] * 3
+
+
 def test_operator_does_not_fall_back_to_python_cpu_timing():
     def forbidden():
         raise AssertionError("unsupported timing must fail before calling Python")

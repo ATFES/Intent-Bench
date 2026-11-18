@@ -101,16 +101,20 @@ def measure(call: PreparedCall, settings: Measurement):
         if settings.samples is None or settings.warmup is None:
             # Prepare the native timing wrapper once before budgeting steady
             # sample cycles. Its compilation is neither a sample nor eviction.
-            call.native_measure(replace(settings, samples=1, warmup=0))
-            started = time.perf_counter_ns()
-            calibration = list(call.native_measure(replace(settings, samples=5, warmup=1)))
-            elapsed_ms = (time.perf_counter_ns() - started) / 1e6
-            if not calibration or any(not math.isfinite(x) or x <= 0 for x in calibration):
+            first = list(call.native_measure(replace(settings, samples=1, warmup=0)))
+            if len(first) != 1 or not math.isfinite(first[0]) or first[0] <= 0:
                 raise ValueError("native calibration requires finite positive latency samples")
-            # Budget complete sample cycles, including cache eviction and worker
-            # transport, as the GPU/Python paths already do. Only the native
-            # intervals remain in the returned operator latency samples.
-            estimate = max(statistics.median(calibration), elapsed_ms / len(calibration))
+            estimate = first[0]
+            if estimate < max(settings.warmup_ms, settings.rep_ms):
+                # Include eviction and transport in the budget for short kernels.
+                # A single native interval above both budgets already fixes each
+                # automatic count at one. Avoid six redundant full executions.
+                started = time.perf_counter_ns()
+                calibration = list(call.native_measure(replace(settings, samples=5, warmup=1)))
+                elapsed_ms = (time.perf_counter_ns() - started) / 1e6
+                if len(calibration) != 5 or any(not math.isfinite(x) or x <= 0 for x in calibration):
+                    raise ValueError("native calibration requires finite positive latency samples")
+                estimate = max(statistics.median(calibration), elapsed_ms / len(calibration))
             call.metadata['sampling_cycle_ms'] = estimate
         warmup, samples = _counts(settings, estimate)
         call.metadata.setdefault('cache_policy','native_default')
