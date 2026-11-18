@@ -11,7 +11,7 @@ from typing import Sequence
 
 import numpy as np
 
-from .model import Environment, Implementation, Measurement, Result, Workload
+from .model import DeviceBusy, Environment, Implementation, Measurement, Result, Workload
 from .measurement import device_window, measure, reset, synchronize
 from .trees import assert_close, clone
 
@@ -85,6 +85,9 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
             try:
                 if input_error is not None:
                     raise input_error
+                if isinstance(oracle_error, DeviceBusy):
+                    row.stage = "correctness"
+                    raise oracle_error
                 row.stage = "prepare"
                 if observer: observer(row)
                 started = time.perf_counter()

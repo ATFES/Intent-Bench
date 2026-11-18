@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import traceback
 
-from .model import Result
+from .model import DeviceBusy, Result
 
 
 def validate_request(request, directory, rows):
@@ -143,6 +143,8 @@ def validate_captured(request, root, participants):
                 row.update(status="passed", correctness="passed")
             except AssertionError as error:
                 row.update(status="numerical_failed", correctness="failed", error=str(error))
+        except DeviceBusy as error:
+            row.update(status=error.status, correctness="unchecked", error=str(error))
         except Exception as error:
             row.update(error=f"{type(error).__name__}: {error}", traceback=traceback.format_exc())
         finally:
