@@ -256,7 +256,7 @@ def _attn_fwd_inner(
         l_i = l_i * alpha + l_ij
         # update m_i and l_i
         m_i = m_ij
-        acc += tl.dot(p.to(V_block_ptr.type.element_ty), v)
+        acc += tl.dot(p.to(v.dtype), v)
         V_block_ptr = tl.advance(V_block_ptr, (BLOCK_N, 0))
         K_block_ptr = tl.advance(K_block_ptr, (0, BLOCK_N))
         if bias_ptr is not None:
@@ -442,7 +442,7 @@ def attn_fwd(
     qk_scale = sm_scale * 1.44269504089
     # Q is loaded once at the beginning and shared by all N blocks.
     q = load_fn(Q_block_ptr, True, padded_head, "zero")
-    q = (q * qk_scale).to(Q_block_ptr.type.element_ty)
+    q = (q * qk_scale).to(q.dtype)
 
     # Here we compute how many full and masked blocks we have.
     padded_block_k = n_extra_tokens != 0
