@@ -25,6 +25,7 @@ def prepare(reference, args, env, *, ime=False):
         if value is None:
             return None
         return np.frombuffer(value.storage, dtype=numpy_dtype(value.dtype)).reshape(value.shape).copy()
-    metadata = {"execution": "local_jit"}
+    metadata = {"execution": "local_jit",
+                "compiler_artifacts": [str(artifact.cache_directory) for artifact in kernel.artifacts]}
     return intent_sequence(call, lambda: decode(call.result()), reset=restore,
                            metadata=metadata, release=kernel.close)
