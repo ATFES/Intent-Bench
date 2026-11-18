@@ -55,22 +55,28 @@ struct Operation {
 static thread_local std::string last_error;
 extern "C" const char *bench_error() { return last_error.c_str(); }
 
-extern "C" void *bench_create(int kind, const void *weight_data, const float *b, int m, int n, int k, int threads) {
+extern "C" void *bench_create(int kind, const void *weight_data, const void *activation_data, int m, int n, int k, int threads) {
   try {
-    if (m<=0 || n<=0 || k<=0 || threads<=0 || kind<0 || kind>5)
+    const bool packed_dot = kind == 7;
+    const bool packed_weight = kind == 5 || packed_dot;
+    if (packed_dot) kind = 3;
+    if (m<=0 || n<=0 || k<=0 || threads<=0 || kind<0 || kind>5 || (kind==3 && m!=1))
       throw std::runtime_error("invalid GGML workload geometry");
     if ((kind==1 || kind==3 || kind==4 || kind==5) && k%256)
       throw std::runtime_error("Q4_K/Q8_K require K divisible by 256");
     auto op=std::make_unique<Operation>();op->kind=kind;op->m=m;op->n=n;op->k=k;
     const auto *a = static_cast<const float *>(weight_data);
+    const auto *b = static_cast<const float *>(activation_data);
     op->a.resize(n*k);
-    if (kind!=5) std::copy(a,a+n*k,op->a.begin());
-    op->b.assign(b,b+m*k);op->result.resize(m*n);op->reference.resize(m*n);
+    if (!packed_weight) std::copy(a,a+n*k,op->a.begin());
+    op->b.resize(m*k);
+    if (!packed_dot) std::copy(b,b+m*k,op->b.begin());
+    op->result.resize(m*n);op->reference.resize(m*n);
     ggml_cpu_init();
     ggml_type type=kind==1 || kind==3 || kind==5 ? GGML_TYPE_Q4_K : GGML_TYPE_F32;
     if (kind==1 || kind==3 || kind==5) {
       op->packed_weight.resize(ggml_row_size(type,k)*n);
-      if (kind==5) std::memcpy(op->packed_weight.data(),weight_data,op->packed_weight.size());
+      if (packed_weight) std::memcpy(op->packed_weight.data(),weight_data,op->packed_weight.size());
       else ggml_quantize_chunk(type,a,op->packed_weight.data(),0,n,k,nullptr);
       for (int row=0;row<n;++row)
         ggml_get_type_traits(type)->to_float(op->packed_weight.data()+row*ggml_row_size(type,k),op->a.data()+row*k,k);
@@ -79,7 +85,8 @@ extern "C" void *bench_create(int kind, const void *weight_data, const float *b,
       op->packed_input.resize(ggml_row_size(GGML_TYPE_Q8_K,k)*m);
       for (int row=0;row<m;++row) {
         auto *encoded=op->packed_input.data()+row*ggml_row_size(GGML_TYPE_Q8_K,k);
-        ggml_get_type_traits_cpu(GGML_TYPE_Q8_K)->from_float(b+row*k,encoded,k);
+        if (packed_dot) std::memcpy(encoded,activation_data,ggml_row_size(GGML_TYPE_Q8_K,k));
+        else ggml_get_type_traits_cpu(GGML_TYPE_Q8_K)->from_float(b+row*k,encoded,k);
         if(kind!=4) {
           // Q8_K is an intermediate dot format; its public to_float slot may be null.
           for(int block=0;block<k/256;++block) {
@@ -205,4 +212,8 @@ extern "C" void bench_destroy(void *ptr) {delete static_cast<Operation*>(ptr);}
 extern "C" void bench_packed_weight(void *ptr, void *out) {
   auto &op=*static_cast<Operation*>(ptr);
   std::memcpy(out,op.packed_weight.data(),op.packed_weight.size());
+}
+extern "C" void bench_packed_activation(void *ptr, void *out) {
+  auto &op=*static_cast<Operation*>(ptr);
+  std::memcpy(out,op.packed_input.data(),op.packed_input.size());
 }

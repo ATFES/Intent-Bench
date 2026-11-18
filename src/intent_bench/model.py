@@ -125,6 +125,7 @@ class Workload:
     default_baseline: str | None = None
     parameter_keys: tuple[str, ...] | None = None
     materialized_inputs: bool = True
+    prepare_inputs: Callable[[Case, Any, Environment], Any] | None = None
 
     def __post_init__(self):
         names = [case.name for case in self.cases]

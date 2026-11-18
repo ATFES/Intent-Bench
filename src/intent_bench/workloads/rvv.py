@@ -27,7 +27,8 @@ def build(name):
         return (rng.normal(size=(p["n"],p["k"])).astype("float32"),rng.normal(size=(p["m"],p["k"])).astype("float32"))
     def prepare(case,data,env,reference=False):
         from ..implementations.native_libraries import ggml
-        return ggml(name,case,data,env,reference=reference)
+        operation = name + "_packed" if name in {"q4_dot","q4_projection"} else name
+        return ggml(operation,case,data,env,reference=reference)
     if name=="q8_quantize":oracle=q8_reference
     elif name=="rms_norm":oracle=lambda case,x:x[1]/np.sqrt((x[1]**2).mean(-1,keepdims=True)+1e-5)
     elif name=="gemm":oracle=lambda case,x:x[1].astype("float64")@x[0].astype("float64").T
@@ -43,11 +44,14 @@ def build(name):
             call=prepare(prefix+name,(data[1].reshape(-1,256),),env)
             result=call.result;call.result=lambda:result().reshape(-1)
             return call
-        from ..implementations.native_libraries import pack_q4
-        weights=pack_q4(data,env)
-        if name=='q4_projection':args=(weights,data[1].reshape(data[1].shape[0],-1,256))
-        else:args=(weights[0],q8_reference(case,data).reshape(-1,292))
+        weights, activation = data
+        if name=='q4_projection':args=(weights,activation.reshape(activation.shape[0],-1,256))
+        else:args=(weights[0],activation.reshape(-1,292))
         return prepare(prefix+name,args,env)
+    def encode(case, data, env):
+        from ..implementations.native_libraries import pack_q4
+        return pack_q4(data,env,packed_activation=name=="q4_dot")
     return Workload("rvv/"+name,cases,inputs,{"ggml":Implementation("ggml",prepare),
                     "intent:weft":Implementation("intent:weft",generated)},oracle=oracle,
-                    atol=2e-3,rtol=2e-3,family="rvv/"+name)
+                    atol=2e-3,rtol=2e-3,family="rvv/"+name,
+                    prepare_inputs=encode if name in {"q4_dot","q4_projection"} else None)

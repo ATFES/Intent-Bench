@@ -42,6 +42,8 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
         input_error = oracle_error = None
         try:
             inputs = workload.inputs(case, seed)
+            if workload.prepare_inputs is not None:
+                inputs = workload.prepare_inputs(case, inputs, env)
             if oracle_output is not None:
                 import json
                 from .storage import write_tree

@@ -25,6 +25,7 @@ class Worker:
         self.lib.bench_destroy.argtypes=[C.c_void_p];self.lib.bench_destroy.restype=None
         self.lib.bench_error.argtypes=[];self.lib.bench_error.restype=C.c_char_p
         self.lib.bench_packed_weight.argtypes=[C.c_void_p,C.c_void_p];self.lib.bench_packed_weight.restype=None
+        self.lib.bench_packed_activation.argtypes=[C.c_void_p,C.c_void_p];self.lib.bench_packed_activation.restype=None
         self.lib.bench_gated_delta_create.argtypes=[C.POINTER(C.c_void_p)]+[C.c_int]*6
         self.lib.bench_gated_delta_create.restype=C.c_void_p
         self.lib.bench_state_output.argtypes=[C.c_void_p,C.c_void_p];self.lib.bench_state_output.restype=None
@@ -52,14 +53,26 @@ class Worker:
             return
         self.a=np.load(root/"input0.npy");self.b=np.load(root/"input1.npy")
         self.kind={"gemm":0,"q4_projection":1,"rms_norm":2,"q4_dot":3,"q8_quantize":4,
-                   "q4_projection_packed":5}[request["operation"]]
-        if self.kind==5:
-            if self.a.dtype!=np.uint8 or self.a.ndim!=3 or self.a.shape[-1]!=144 or self.b.dtype!=np.float32:
-                raise ValueError('packed Q4_K projection requires [N,G,144] bytes and FP32 activation')
+                   "q4_projection_packed":5,"q4_dot_packed":7}[request["operation"]]
+        if self.kind in (5,7):
+            if self.a.dtype!=np.uint8 or self.a.ndim!=3 or self.a.shape[-1]!=144 or not self.a.flags.c_contiguous:
+                raise ValueError('packed Q4_K weights require contiguous [N,G,144] bytes')
             n,groups,_=self.a.shape
-            if self.b.shape!=(groups,256):raise ValueError('activation must match the Q4_K groups')
-            self.b=self.b.reshape(1,-1)
-        m,k=self.b.shape;n=self.a.shape[0]
+            k=groups*256
+            if not self.b.flags.c_contiguous:
+                raise ValueError('the GGML activation must be contiguous')
+            if self.kind==7:
+                if self.b.dtype!=np.uint8 or self.b.shape!=(groups,292):
+                    raise ValueError('packed Q8_K dot input must be [G,292] bytes')
+                m=1
+            else:
+                if self.b.dtype!=np.float32 or self.b.ndim!=2 or not (
+                    self.b.shape==(groups,256) or self.b.shape[1]==k):
+                    raise ValueError('FP32 activation must match the packed Q4_K reduction extent')
+                self.b=self.b.reshape(-1,k)
+                m=self.b.shape[0]
+        else:
+            m,k=self.b.shape;n=self.a.shape[0]
         self.context=self.lib.bench_create(self.kind,self.a.ctypes.data,self.b.ctypes.data,m,n,k,request["threads"])
         if not self.context:raise RuntimeError(self.lib.bench_error().decode())
         self.output=np.empty((m,n),dtype="float32") if self.kind!=4 else np.empty(m*k//256*292,dtype="uint8")
@@ -84,7 +97,12 @@ class Worker:
         if self.kind not in (1,3):raise ValueError('only Q4_K weights have this packed-input contract')
         weights=np.empty((self.a.shape[0],self.a.shape[1]//256,144),dtype='uint8')
         self.lib.bench_packed_weight(self.context,weights.ctypes.data)
-        return {'shape':list(weights.shape),'dtype':'uint8','data':base64.b64encode(weights.tobytes()).decode()}
+        def record(data):
+            return {'shape':list(data.shape),'dtype':'uint8','data':base64.b64encode(data.tobytes()).decode()}
+        if self.kind==1:return record(weights)
+        activation=np.empty((self.b.shape[1]//256,292),dtype='uint8')
+        self.lib.bench_packed_activation(self.context,activation.ctypes.data)
+        return {'items':[record(weights),record(activation)]}
 
     def measure(self,samples,warmup,cache):
         for _ in range(warmup):self.run()

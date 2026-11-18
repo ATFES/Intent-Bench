@@ -5,14 +5,17 @@ from ..execution import WorkerSession
 from ..model import EnvironmentUnavailable, PreparedCall
 
 
-def pack_q4(inputs,env):
+def pack_q4(inputs,env,*,packed_activation=False):
     required=('ggml_source','ggml_libraries')
     if any(k not in env.options for k in required):raise EnvironmentUnavailable('Q4_K workload input encoding requires ggml_source and ggml_libraries options')
     root=Path(__file__).parents[1]/'native'
-    request={'operation':'q4_projection','source':env.options['ggml_source'],'libraries':env.options['ggml_libraries'],
+    request={'operation':'q4_dot' if packed_activation else 'q4_projection',
+             'source':env.options['ggml_source'],'libraries':env.options['ggml_libraries'],
              'threads':env.threads,'cxx':env.options.get('cxx','c++')}
     session=WorkerSession(env,'ggml_worker.py',[root/'cnnl_worker.py',root/'ggml_worker.py',root/'ggml_ops.cpp'],request,inputs)
-    try:return session.result('packed')
+    try:
+        packed = session.result('packed')
+        return packed if packed_activation else (packed, inputs[1])
     finally:session.close()
 
 
@@ -36,12 +39,12 @@ def ggml(name,case,inputs,env,*,reference=False):
              "threads":env.threads,"reference":reference,"cxx":env.options.get("cxx","c++")}
     session=WorkerSession(env,"ggml_worker.py",[root/"cnnl_worker.py",root/"ggml_worker.py",root/"ggml_ops.cpp"],request,inputs)
     metadata={**session.metadata(),
-              "execution":"prepared native graph plan and persistent threadpool" if name not in {"q4_dot","q8_quantize"}
+              "execution":"prepared native graph plan and persistent threadpool" if name not in {"q4_dot_packed","q8_quantize"}
                           else "native quantization/dot primitive",
-              "weights":"preencoded Q4_K input bytes" if name=="q4_projection_packed" else
+              "weights":"preencoded Q4_K input bytes" if name in {"q4_projection_packed","q4_dot_packed"} else
                         "Q4_K weights encoded once outside timing" if name.startswith("q4") else "f32",
               "activation_quantization":"inside graph call" if name in {"q4_projection","q4_projection_packed"}
-                                        else "preencoded" if name=="q4_dot" else "not applicable"}
+                                        else "preencoded" if name=="q4_dot_packed" else "not applicable"}
     if name=="gated_delta":
         metadata.update(library="GGML CPU ggml_gated_delta_net", weights="not applicable",
             scope_note="BF16 inputs; FP32 conversion, grouped Q/K expansion, native recurrence, "
