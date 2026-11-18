@@ -42,7 +42,7 @@ class Worker:
         for value in [*self.inputs,self.output]:
             pointer=C.c_void_p();self.cnrt("cnrtMalloc",C.byref(pointer),value.nbytes);self.buffers.append(pointer)
             if value is not self.output:self.cnrt("cnrtMemcpy",pointer,value.ctypes.data,value.nbytes,0)
-        self.cnnl(self.lib.source_create(C.byref(self.context),self.queue,{"relu":0,"softmax":1,"matmul":2,"layer_norm":3}[op],rows,columns,depth))
+        self.cnnl(self.lib.source_create(C.byref(self.context),self.queue,{"relu":0,"softmax":1,"matmul":2,"layer_norm":3,"gelu":4}[op],rows,columns,depth))
         for _ in range(2):
             event=C.c_void_p();self.cnrt("cnrtNotifierCreate",C.byref(event));self.notifiers.append(event)
 

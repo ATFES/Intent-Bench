@@ -1,7 +1,7 @@
 import numpy as np
 from ..model import Case,Implementation,Workload
 
-NAMES=("relu","softmax","matmul","layer_norm")
+NAMES=("relu","gelu","softmax","matmul","layer_norm")
 
 
 def build(name):
@@ -13,6 +13,10 @@ def build(name):
     def oracle(case,arrays):
         a=arrays[0].astype("float32")
         if name=="relu":return np.maximum(a,0).astype("float16")
+        if name == "gelu":
+            import torch
+            from ..corpus.cpu.baselines.pytorch.cpu_runtime import gelu
+            return gelu(torch.from_numpy(arrays[0])).numpy()
         if name=="softmax":
             exp=np.exp(a-a.max(-1,keepdims=True));return (exp/exp.sum(-1,keepdims=True)).astype("float16")
         if name=="layer_norm":
@@ -31,9 +35,9 @@ def build(name):
         context=Context(env.compiler,PROJECT_ROOT,None,
                         'bangc',environment=env)
         x=torch.from_numpy(arrays[0])
-        if name=='relu':
-            from intent.examples.kernels.activation.pointwise import relu_forward
-            program=context.compile(relu_forward)
+        if name in ("relu", "gelu"):
+            from intent.examples.kernels.activation.pointwise import gelu_tanh, relu_forward
+            program=context.compile(gelu_tanh if name == "gelu" else relu_forward)
             arguments=(x,)
         elif name=='softmax':
             from intent.examples.kernels.normalization.softmax import stable_softmax_f16
@@ -49,6 +53,10 @@ def build(name):
             arguments=(x,torch.ones(x.shape[-1],dtype=torch.float16),
                        torch.zeros(x.shape[-1],dtype=torch.float16),1/x.shape[-1],1e-5)
         return prepare_program(context,program,arguments)
-    return Workload("mlu/"+name,[Case("small",{"rows":16,"columns":128}),Case("large",{"rows":256,"columns":1024})],
+    cases = [Case("small",{"rows":16,"columns":128}),Case("large",{"rows":256,"columns":1024})]
+    if name == "gelu":
+        cases.append(Case("8192x4096-fp16-tanh", {"rows":8192, "columns":4096}))
+    tolerance = 1e-2 if name == "gelu" else 2e-2
+    return Workload("mlu/"+name,cases,
                     inputs,{"cnnl":Implementation("cnnl",prepare),'intent:bangc':Implementation('intent:bangc',generated)},
-                    oracle=oracle,atol=2e-2,rtol=2e-2,family="mlu/"+name)
+                    oracle=oracle,atol=tolerance,rtol=tolerance,family="mlu/"+name)

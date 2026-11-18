@@ -46,7 +46,7 @@ struct Operation {
 
 extern "C" int source_create(void **result, cnrtQueue_t queue, int kind,
                               int rows, int columns, int depth) {
-  if (!result || !queue || rows <= 0 || columns <= 0 || kind < 0 || kind > 3 ||
+  if (!result || !queue || rows <= 0 || columns <= 0 || kind < 0 || kind > 4 ||
       (kind == 2 && depth <= 0))
     return CNNL_STATUS_BAD_PARAM;
   auto operation = std::make_unique<Operation>();
@@ -105,11 +105,12 @@ extern "C" int source_create(void **result, cnrtQueue_t queue, int kind,
   int dimensions[] = {rows, 1, columns};
   CNNL_CHECK(cnnlSetTensorDescriptor(operation->tensor, CNNL_LAYOUT_ARRAY,
                                     CNNL_DTYPE_HALF, 3, dimensions));
-  if (kind == 0) {
+  if (kind == 0 || kind == 4) {
     CNNL_CHECK(cnnlCreateActivationDescriptor(&operation->activation));
     CNNL_CHECK(cnnlSetActivationDescriptor_v6(operation->activation,
-        CNNL_ACTIVATION_RELU, CNNL_ACTIVATION_HIGH_PRECISION, CNNL_PROPAGATE_NAN,
-        0.0f, 0, 1.0f, 1.0f, true, false));
+        kind == 4 ? CNNL_ACTIVATION_GELU : CNNL_ACTIVATION_RELU,
+        CNNL_ACTIVATION_HIGH_PRECISION, CNNL_PROPAGATE_NAN,
+        0.0f, 0, 1.0f, 1.0f, true, kind == 4));
   }
   *result = operation.release();
   return CNNL_STATUS_SUCCESS;
@@ -129,7 +130,7 @@ extern "C" int source_run(void *context, const void *input, const void *rhs, voi
         operation.tensor, output, operation.workspace, operation.workspaceBytes,
         operation.tensor, output);
   }
-  if (operation.kind == 0)
+  if (operation.kind == 0 || operation.kind == 4)
     return cnnlActivationForward(operation.handle, operation.activation, nullptr,
         operation.tensor, input, nullptr, operation.tensor, output);
   return cnnlSoftmaxForward(operation.handle, CNNL_SOFTMAX_ACCURATE,
