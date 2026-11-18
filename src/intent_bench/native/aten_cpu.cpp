@@ -3,6 +3,7 @@
 #ifdef INTENT_BENCH_AOTI
 #include <torch/csrc/inductor/aoti_package/model_package_loader.h>
 #endif
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <limits>
@@ -207,6 +208,21 @@ void initialize(Call &call) {
     break;
   }
 #endif
+  case 30:
+    TORCH_CHECK(a.size() == 6 && a[0].dim() == 4 && a[1].dim() == 4 &&
+                a[1].sizes() == a[2].sizes() && a[0].sizes() == a[3].sizes() &&
+                a[3].sizes() == a[4].sizes() && a[5].sizes() == a[0].sizes().slice(0, 3) &&
+                a[1].size(1) > 0 && a[0].size(1) % a[1].size(1) == 0 && call.scalars.size() == 1,
+                "grouped attention backward requires Q, K, V, output, grad_output, LSE and scale");
+    o = {at::empty_like(a[0]), at::empty_like(a[1]), at::empty_like(a[2])};
+    break;
+  case 31: case 32:
+    TORCH_CHECK(a.size() == 4 && a[0].dim() == 2 && a[1].dim() == 1 && a[1].numel() >= 2 &&
+                a[1].scalar_type() == at::kLong && a[2].dim() == 2 && a[2].size(1) > 0 &&
+                a[2].size(0) == a[0].size(1) && a[3].sizes() == a[2].sizes().slice(0, 1),
+                "segmented convolution requires X[T,D], offsets[B+1], W[D,K], bias[D]");
+    o = {at::empty_like(a[0]), at::empty({a[1].numel()-1, a[2].size(1), a[0].size(1)}, a[0].options())};
+    break;
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -400,6 +416,56 @@ void execute(Call &call) {
         s[0], a[0].numel(), at::get_num_threads());
     break;
 #endif
+  case 30: {
+    int64_t groups = a[0].size(1) / a[1].size(1);
+    auto key = groups == 1 ? a[1] : at::repeat_interleave(a[1], groups, 1);
+    auto value = groups == 1 ? a[2] : at::repeat_interleave(a[2], groups, 1);
+    auto [dq, dk, dv] = at::_scaled_dot_product_flash_attention_for_cpu_backward(
+        a[4], a[0], key, value, a[3], a[5], 0.0, true, std::nullopt, s[0]);
+    auto reduceHeads = [&](at::Tensor gradient) {
+      if (groups == 1) return gradient;
+      return gradient.reshape({gradient.size(0), a[1].size(1), groups,
+                               gradient.size(2), gradient.size(3)})
+          .sum(2, false, at::kFloat).to(gradient.scalar_type());
+    };
+    o = {dq, reduceHeads(dk), reduceHeads(dv)};
+    break;
+  }
+  case 31: case 32: {
+    int64_t width = a[2].size(1), segments = a[1].numel()-1;
+    std::vector<at::Tensor> pieces, histories;
+    const auto *offsets = a[1].const_data_ptr<int64_t>();
+    TORCH_CHECK(offsets[0] == 0 && offsets[segments] == a[0].size(0),
+                "sequence offsets must cover the input");
+    for (int64_t i=0; i<segments; ++i) {
+      int64_t begin = offsets[i], end = offsets[i+1];
+      TORCH_CHECK(begin >= 0 && begin <= end && end <= a[0].size(0), "invalid sequence offset");
+      int64_t length = end - begin, history = std::min(length, width);
+      auto values = a[0].narrow(0, begin, length);
+      if (call.operation == 32) {
+        auto padded = at::constant_pad_nd(values.to(at::kFloat), {0, 0, width-1, 0});
+        if (length) {
+          auto sum = (padded.unfold(0, width, 1) * a[2]).sum(-1) + a[3];
+          pieces.push_back((sum * at::sigmoid(sum)).to(a[0].scalar_type()));
+        } else {
+          pieces.push_back(values);
+        }
+        auto paddedHistory = at::constant_pad_nd(values, {0, 0, width-history, 0});
+        histories.push_back(paddedHistory.narrow(0, paddedHistory.size(0)-width, width));
+        continue;
+      }
+      auto state = o[1].select(0, i);
+      state.narrow(0, 0, width-history).zero_();
+      state.narrow(0, width-history, history).copy_(a[0].narrow(0, end-history, history));
+      if (!length) continue;
+      auto channels = values.to(at::kFloat).transpose(0, 1).unsqueeze(0);
+      auto convolution = at::conv1d(channels, a[2].unsqueeze(1), a[3],
+                                     {1}, {width-1}, {1}, a[0].size(1));
+      o[0].narrow(0, begin, length).copy_(at::silu(convolution.narrow(2, 0, length)).squeeze(0).transpose(0, 1));
+    }
+    if (call.operation == 32) o = {at::cat(pieces), at::stack(histories)};
+    break;
+  }
   }
 }
 }
@@ -445,10 +511,13 @@ extern "C" const char *bench_aten_implementation(void *opaque) {
   return "ATen";
 }
 extern "C" int bench_aten_outputs(void *opaque) { return static_cast<Call *>(opaque)->outputs.size(); }
-extern "C" void *bench_aten_output(void *opaque, int output, int64_t *rank, int64_t *sizes, int *type) {
+extern "C" void *bench_aten_output(void *opaque, int output, int64_t *rank,
+                                   const int64_t **sizes, const int64_t **strides, int *type) {
   const auto &tensor = static_cast<Call *>(opaque)->outputs.at(output);
   *rank = tensor.dim();
-  for (int64_t i = 0; i < *rank; ++i) sizes[i] = tensor.size(i);
+  *sizes = tensor.sizes().data();
+  *strides = tensor.strides().data();
+  *type = -1;
   for (int kind = 0; kind <= 7; ++kind)
     if (tensor.scalar_type() == dtype(kind)) *type = kind;
   return tensor.data_ptr();

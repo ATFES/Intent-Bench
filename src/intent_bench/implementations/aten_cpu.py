@@ -15,7 +15,8 @@ OPERATIONS = {name: index for index, name in enumerate((
     "swiglu", "cumsum", "adamw", "batch_norm", "cholesky", "group_norm_backward",
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
-    "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention", "aoti", "vllm_moe_alignment"))}
+    "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention", "aoti", "vllm_moe_alignment",
+    "attention_backward", "varlen_causal_conv1d", "varlen_unfold"))}
 
 
 @cache
@@ -78,7 +79,9 @@ def library(root, compiler, onednn=False, dnnl_prefix=None, *, aoti=False, vllm=
     native.bench_aten_implementation.restype = C.c_char_p
     native.bench_aten_outputs.argtypes = [C.c_void_p]
     native.bench_aten_outputs.restype = C.c_int
-    native.bench_aten_output.argtypes = [C.c_void_p, C.c_int, C.POINTER(C.c_int64), C.POINTER(C.c_int64), C.POINTER(C.c_int)]
+    axes = C.POINTER(C.c_int64)
+    native.bench_aten_output.argtypes = [C.c_void_p, C.c_int, axes, C.POINTER(axes),
+                                         C.POINTER(axes), C.POINTER(C.c_int)]
     native.bench_aten_output.restype = C.c_void_p
     native.bench_aten_destroy.argtypes = [C.c_void_p]
     native.bench_aten_destroy.restype = None
@@ -133,14 +136,23 @@ def prepare(name, arguments, environment, *, package=None):
             checked()
             outputs = []
             for index in range(native.bench_aten_outputs(state)):
-                rank, shape, kind = C.c_int64(), (C.c_int64*16)(), C.c_int()
-                pointer = native.bench_aten_output(state, index, C.byref(rank), shape, C.byref(kind))
-                sizes = tuple(shape[:rank.value])
-                from math import prod
-                count = prod(sizes)
-                width = torch.empty((), dtype=dtypes[kind.value]).element_size()
-                storage = (C.c_ubyte*(count*width)).from_address(pointer)
-                outputs.append(torch.frombuffer(storage, dtype=dtypes[kind.value]).reshape(sizes).clone())
+                rank, kind = C.c_int64(), C.c_int()
+                shape, strides = C.POINTER(C.c_int64)(), C.POINTER(C.c_int64)()
+                pointer = native.bench_aten_output(state, index, C.byref(rank), C.byref(shape),
+                                                   C.byref(strides), C.byref(kind))
+                if kind.value < 0:
+                    raise TypeError("unsupported native ATen result dtype")
+                sizes = tuple(shape[i] for i in range(rank.value))
+                steps = tuple(strides[i] for i in range(rank.value))
+                dtype = dtypes[kind.value]
+                if 0 in sizes:
+                    outputs.append(torch.empty_strided(sizes, steps, dtype=dtype))
+                    continue
+                span = 1 + sum((size - 1) * stride for size, stride in zip(sizes, steps))
+                width = torch.empty((), dtype=dtype).element_size()
+                storage = (C.c_ubyte * (span * width)).from_address(pointer)
+                view = torch.frombuffer(storage, dtype=dtype).as_strided(sizes, steps)
+                outputs.append(view.clone())
             return outputs[0] if len(outputs) == 1 else tuple(outputs)
         def close(self):
             if state.value:
@@ -209,6 +221,18 @@ def prepare(name, arguments, environment, *, package=None):
         metadata["library"] = "ATen CPU nonzero and bincount"
         metadata["scope_note"] = ("Native stable coordinate extraction, row counts, INT32 index conversion and "
                                   "padding to the author's fixed row capacity all timed, including library temporary allocations.")
+    if name == "attention_backward":
+        metadata["library"] = "ATen CPU flash attention backward"
+        metadata["scope_note"] = ("Three gradients from the supplied output and natural-log LSE. "
+                                  "KV expansion and FP32 grouped-gradient reduction are timed.")
+    if name == "varlen_causal_conv1d":
+        metadata["library"] = "ATen CPU grouped conv1d and SiLU"
+        metadata["scope_note"] = ("All segments, FP32 convolution, causal slicing, SiLU, BF16 output "
+                                  "and the padded final history are inside one native interval.")
+    if name == "varlen_unfold":
+        metadata["library"] = "ATen CPU pad, unfold and reduction"
+        metadata["scope_note"] = ("The retained reference tensor operations, including FP32 products, "
+                                  "activation, output conversion, concatenation and stacking of history.")
     if name == "fp8_gemm":
         metadata["library"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM"
         metadata["scope_note"] = ("Original E4M3 inputs and E8M0 scale bytes; decoding, scale application and native FP32 GEMM "

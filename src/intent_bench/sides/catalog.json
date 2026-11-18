@@ -450,6 +450,10 @@
   },
   "corpus/mojo/varlen_causal_conv1d": {
     "source": "intent_bench.sides.mojo_varlen_causal_conv1d_source:prepare",
+    "alternatives": {
+      "aten:cpu": "intent_bench.sides.mojo_varlen_causal_conv1d_source:prepare_native",
+      "aten:grouped_conv": "intent_bench.sides.mojo_varlen_causal_conv1d_source:prepare_grouped"
+    },
     "intent": "intent_bench.sides.mojo_varlen_causal_conv1d_intent:prepare"
   },
   "corpus/mojo/causal_conv_update": {
@@ -506,6 +510,7 @@
   },
   "corpus/mojo/attention_backward": {
     "source": "intent_bench.sides.mojo_attention_backward_source:prepare",
+    "alternatives": {"aten:cpu": "intent_bench.sides.mojo_attention_backward_source:prepare_native"},
     "intent": "intent_bench.sides.mojo_attention_backward_intent:prepare"
   },
   "corpus/mojo/sparse_mla_backward": {

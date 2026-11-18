@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 from intent_bench.implementations.prepared import checked_call
 import torch
 from intent_bench.corpus._common.loading import load_module
@@ -11,7 +12,7 @@ ATTENTION_QUERY_HEADS = 8
 ATTENTION_SCALE = 0.125
 ATTENTION_SEQUENCE = 1024
 
-def prepare(context):
+def _inputs(context):
     shape_q = (ATTENTION_BATCH, ATTENTION_QUERY_HEADS, ATTENTION_SEQUENCE, ATTENTION_HEAD_DIMENSION)
     shape_kv = (ATTENTION_BATCH, ATTENTION_KV_HEADS, ATTENTION_SEQUENCE, ATTENTION_HEAD_DIMENSION)
     q = torch.randn(shape_q, dtype=torch.float16) * 0.5
@@ -20,6 +21,17 @@ def prepare(context):
     grad_output = torch.randn_like(q) * 0.05
     runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference_attention_backward')
     (output, lse, source_backward) = runtime.prepare_attention_backward(q, k, v, grad_output, ATTENTION_SCALE)
+    return (q, k, v, output, grad_output, lse * math.log(2.0), ATTENTION_SCALE), source_backward
+
+def prepare_native(context):
+    from intent_bench.implementations.aten_cpu import prepare as native
+    arguments, _ = _inputs(context)
+    call = native('attention_backward', arguments, context.environment)
+    return checked_call(call, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)),
+                        device_type='cpu', owners={'inputs': arguments})
+
+def prepare(context):
+    _, source_backward = _inputs(context)
     source_state = {}
 
     def source_launch():
