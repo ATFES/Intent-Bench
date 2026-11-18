@@ -38,7 +38,7 @@ def build(name):
             return prepare('intent.examples.kernels.contraction.gemm:gemm_f32',(data[1],data[0].T.copy()),env)
         if name=='rms_norm':
             return prepare('intent.examples.kernels.normalization.rms_norm:rms_norm_f32',(data[1],1/data[1].shape[-1],1e-5),env)
-        prefix='intent_bench.implementations.rvv_definitions:'
+        prefix='intent.examples.kernels.quantization.quantized_projection:'
         if name=='q8_quantize':
             call=prepare(prefix+name,(data[1].reshape(-1,256),),env)
             result=call.result;call.result=lambda:result().reshape(-1)
