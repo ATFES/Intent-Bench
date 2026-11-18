@@ -94,7 +94,13 @@ def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None
         if release is not None:
             release()
 
+    def observations():
+        if isinstance(call, PreparedSequence):
+            return call.observations
+        current = call.observation
+        return () if current is None else (current,)
+
     return PreparedCall(call.launch, result, compile=call.compile, reset=reset,
                         native_measure=measure, timing='cpu_native_monotonic', close=close,
                         host_run=host_run or call.launch, host_result=host_result or result,
-                        metadata=call_metadata, owners=call)
+                        metadata=call_metadata, owners=call, compiler_observations=observations)

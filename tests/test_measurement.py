@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+import pytest
 
 from intent_bench import Measurement, PreparedCall
 from intent_bench.measurement import _measure_python, measure
@@ -58,6 +59,16 @@ def test_explicit_native_counts_remain_exact():
     samples, _ = measure(PreparedCall(lambda: None, lambda: None, native_measure=native),
                          Measurement(samples=11, warmup=2))
     assert counts == [(2, 11)] and samples == [0.001] * 11
+
+
+def test_operator_does_not_fall_back_to_python_cpu_timing():
+    def forbidden():
+        raise AssertionError("unsupported timing must fail before calling Python")
+    call = PreparedCall(forbidden, lambda: None)
+    with pytest.raises(NotImplementedError, match="native timer"):
+        measure(call, Measurement())
+    with pytest.raises(ValueError, match="host_call"):
+        measure(call, Measurement(method="host"))
 
 
 def test_default_output_is_latency_and_optional_single_throughput():
