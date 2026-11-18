@@ -130,7 +130,8 @@ def _intent(name, backend, values, env):
     device, workers = execution(env, backend)
     context = PrepareContext(backend, device, compiler=env.compiler, stage="native",
                              workers=workers,
-                             backend_options=backend_options(env, backend), options=compile_options(env))
+                             backend_options=backend_options(env, backend), options=compile_options(env),
+                             tuning_config=env.options.get('tuning_config'))
     try:
         output = invoke_author(name, values, context)
         if context.invocation is None:

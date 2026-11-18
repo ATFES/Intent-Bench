@@ -23,7 +23,8 @@ def check_program(request):
     start = time.perf_counter()
     context = ExampleContext(backend,device,compiler=env.compiler,prepared=True,stage=request.stage,
         workers=workers,
-        backend_options=backend_options(env, backend), options=compile_options(env))
+        backend_options=backend_options(env, backend), options=compile_options(env),
+        tuning_config=env.options.get('tuning_config'))
     try:
         inputs.seed([request.seed,list(PROGRAMS).index(name)])
         load_program(name)(context)

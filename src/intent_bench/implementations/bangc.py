@@ -72,5 +72,9 @@ def prepare_program(context, program, arguments=None, *, mutable_positions=(), r
                 kernel.close()
         finally:
             buffers.close()
-    return prepare_sequence(call, output, environment=environment, reset=buffers.reset,
-                            close=close, owners=(program, buffers))
+    prepared = prepare_sequence(call, output, environment=environment, reset=buffers.reset,
+                                close=close, owners=(program, buffers))
+    prepared.metadata['compiler_artifacts'] = context.artifacts
+    prepared.compiler_observations = lambda: [artifact.observation for kernel in context.kernels
+                                             for artifact in kernel.artifacts if artifact.observation is not None]
+    return prepared
