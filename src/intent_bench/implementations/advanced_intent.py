@@ -32,7 +32,7 @@ def prepare(name,args,env):
         program=Histogram(compile(prefix+'histogram_partials',{'CHUNK':chunk}),
                           compile(prefix+'histogram_merge'),chunk)
         invocation=program.prepare(*args)
-        calls=[invocation.partials,invocation.merge];result=invocation.result
+        calls=[invocation];result=invocation.result
     elif name=='fused_linear_cross_entropy':
         hidden,weight,labels=args;m=hidden.shape[0];n=weight.shape[0];chunk=min(m,1024)
         scratch=torch.empty((chunk,n),dtype=torch.bfloat16);loss=torch.empty(m);mean=torch.empty(1)
