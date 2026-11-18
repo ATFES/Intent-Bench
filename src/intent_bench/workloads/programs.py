@@ -62,9 +62,16 @@ BASELINES["nonzero"]["aten:cpu"] = "ATen CPU nonzero and bincount, including sta
 BASELINES["fp8_gemm"]["aten:cpu"] = "ATen CPU E4M3/E8M0 decoding and FP32 GEMM; all conversions included"
 
 
-def backends(name):
-    from intent.targets.components import COMPONENTS
-    return tuple(COMPONENTS)
+def backends():
+    from importlib.util import find_spec
+    import json
+    spec = find_spec("intent")
+    if spec is None:
+        return ()
+    # Use the package loader so editable installations and wheels expose the
+    # same product declaration, without executing intent's package initializer.
+    root = spec.loader.get_resource_reader("intent").files()
+    return tuple(json.loads(root.joinpath("targets").joinpath("components.json").read_text(encoding="utf-8")))
 
 
 def _tree(value, leaf):
@@ -423,7 +430,7 @@ def build(name):
     implementations = {baseline: Implementation(baseline,
         lambda case, values, env, baseline=baseline: _reference(name, values, env, baseline), description)
         for baseline, description in BASELINES[name].items()}
-    for backend in backends(name):
+    for backend in backends():
         implementations["intent:"+backend] = Implementation("intent:"+backend,
             lambda case, values, env, backend=backend: _intent(name, backend, values, env))
     # Histogram's independent CPU oracle also checks excluded bins in the author

@@ -104,6 +104,7 @@ A user file exports Workload. Implementation.prepare returns PreparedCall with l
 result and optional reset, compile, synchronize, close and native_measure. Prepare binds
 and allocates; compile builds; launch includes all required kernels. See
 [mutable CPU](examples/custom.py) and [GPU composition](examples/custom_softmax.py) examples.
+Run the Python callable example with `intent-bench run examples/custom.py:bench --impl mine --scope host_call`.
 
 ## Experiments and plugins
 

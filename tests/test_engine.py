@@ -17,7 +17,7 @@ def output_directory(tmp_path, monkeypatch):
 
 def test_custom_mutation_and_repeated_measurements(tmp_path):
     bench=load("examples/custom.py:bench")
-    rows=benchmark(bench,measurement=Measurement(samples=4,warmup=2))
+    rows=benchmark(bench,measurement=Measurement(scope="host_call",samples=4,warmup=2))
     assert all(r.correctness=="passed" and len(r.samples_ms)==4 for r in rows)
     path=save(rows,tmp_path)
     assert len(read(path))==2
@@ -36,7 +36,7 @@ def test_n_way_oracle_is_not_baseline():
     impls={name:callable_implementation(name,fn) for name,fn in {
         "good":lambda x:x+1,"also_good":lambda x:1+x,"wrong":lambda x:x+2}.items()}
     bench=Workload("add",[Case("one")],lambda c,s:(np.ones(4),),impls,oracle=lambda c,a:a[0]+1)
-    rows=benchmark(bench,baseline="good",measurement=Measurement(samples=2,warmup=0))
+    rows=benchmark(bench,baseline="good",measurement=Measurement(scope="host_call",samples=2,warmup=0))
     assert rows[0].speedup==1 and rows[1].speedup>0
     assert rows[2].status=="numerical_failed" and rows[2].speedup is None and rows[2].median_ms>0
 
@@ -50,9 +50,9 @@ def test_expression_gap_does_not_remove_workload():
 
 def test_cross_scope_comparison_not_merged(tmp_path):
     bench=load("examples/custom.py:bench")
-    rows=benchmark(bench,measurement=Measurement(samples=1,warmup=0))
+    rows=benchmark(bench,measurement=Measurement(scope="host_call",samples=1,warmup=0))
     left=read(save(rows,tmp_path/"a"))
-    right=json.loads(json.dumps(left));right[0]["scope"]="host_call"
+    right=json.loads(json.dumps(left));right[0]["scope"]="operator"
     changes=compare(left,right)
     assert sum(r["change"]=="removed" for r in changes)==1
     assert sum(r["change"]=="added" for r in changes)==1
@@ -79,7 +79,7 @@ def test_reference_failure_does_not_prevent_independent_candidate_measurement():
     def oracle(case,args):raise RuntimeError('reference dependency unavailable')
     bench=Workload('independent',[Case('one')],lambda c,s:(np.ones(1),),
                    {'candidate':callable_implementation('candidate',lambda x:x+1)},oracle=oracle)
-    row,=benchmark(bench,measurement=Measurement(samples=1,warmup=0))
+    row,=benchmark(bench,measurement=Measurement(scope="host_call",samples=1,warmup=0))
     assert row.status=='reference_failed' and row.median_ms>0 and row.speedup is None
 
 

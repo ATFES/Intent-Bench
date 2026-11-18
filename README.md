@@ -135,7 +135,7 @@ reset、compile、synchronize、close、native_measure。
 设备 SDK 由被选择的实现延迟导入。
 
 ```sh
-intent-bench run examples/custom.py:bench --impl mine
+intent-bench run examples/custom.py:bench --impl mine --scope host_call
 intent-bench compare output/daily/BEFORE output/latest/local-gpu/softmax
 intent-bench report output/latest/local-gpu/softmax
 ```
