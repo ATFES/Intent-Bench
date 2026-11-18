@@ -100,10 +100,19 @@ def measure(call: PreparedCall, settings: Measurement):
             raise ValueError("implementation does not supply native timing")
         estimate = 1.0
         if settings.samples is None or settings.warmup is None:
+            # Prepare the native timing wrapper once before budgeting steady
+            # sample cycles. Its compilation is neither a sample nor eviction.
+            call.native_measure(replace(settings, samples=1, warmup=0))
+            started = time.perf_counter_ns()
             calibration = list(call.native_measure(replace(settings, samples=5, warmup=1)))
+            elapsed_ms = (time.perf_counter_ns() - started) / 1e6
             if not calibration or any(not math.isfinite(x) or x <= 0 for x in calibration):
                 raise ValueError("native calibration requires finite positive latency samples")
-            estimate = statistics.median(calibration)
+            # Budget complete sample cycles, including cache eviction and worker
+            # transport, as the GPU/Python paths already do. Only the native
+            # intervals remain in the returned operator latency samples.
+            estimate = max(statistics.median(calibration), elapsed_ms / len(calibration))
+            call.metadata['sampling_cycle_ms'] = estimate
         warmup, samples = _counts(settings, estimate)
         call.metadata.setdefault('cache_policy','native_default')
         call.metadata.update(warmup_iterations=warmup, sample_count=samples)

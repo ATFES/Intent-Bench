@@ -214,20 +214,24 @@ def prepare(name, arguments, environment, *, package=None):
         metadata["scope_note"] = ("Original E4M3 inputs and E8M0 scale bytes; decoding, scale application and native FP32 GEMM "
                                   "all timed. Reusable output/workspace allocation is outside the interval. "
                                   "This is a library composition, not a fused native FP8 matrix instruction.")
-    prepared = PreparedCall(call.launch, call.result, close=call.close, owners=call,
+    timers = []
+    def close():
+        for timer in timers:
+            timer.close()
+        call.close()
+    prepared = PreparedCall(call.launch, call.result, close=close, owners=call,
         device="cpu", timing="cpu_native_monotonic", metadata=metadata)
     def measure(settings):
-        timer = NativeSequence((call,))
+        if not timers:
+            timers.append(NativeSequence((call,)))
+        timer = timers[0]
         def interval():
             elapsed = timer.run()
             # C++ exceptions are retained across the C ABI. Surface them after
             # every interval, including the final sample, outside its timing.
             checked()
             return elapsed
-        try:
-            return sample_timer(SimpleNamespace(run=interval), settings,
-                                prepared.reset or (lambda: None), metadata=metadata)
-        finally:
-            timer.close()
+        return sample_timer(SimpleNamespace(run=interval), settings,
+                            prepared.reset or (lambda: None), metadata=metadata)
     prepared.native_measure = measure
     return prepared

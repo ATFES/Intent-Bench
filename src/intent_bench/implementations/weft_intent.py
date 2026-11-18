@@ -1,9 +1,8 @@
 """Use the installed product on the executing RISC-V host."""
 import numpy as np
 from ..loading import load
-from ..model import PreparedCall
 from .intent import make_kernel
-from .native_sampling import sample
+from .prepared import intent_sequence
 
 
 def prepare(reference, args, env, *, ime=False):
@@ -27,9 +26,5 @@ def prepare(reference, args, env, *, ime=False):
             return None
         return np.frombuffer(value.storage, dtype=numpy_dtype(value.dtype)).reshape(value.shape).copy()
     metadata = {"execution": "local_jit"}
-    def measure(settings):
-        metadata["cache_policy"] = "flush_cpu_64m" if settings.cache == "flush" else "warm"
-        return sample(call, settings, restore)
-    return PreparedCall(call.launch, lambda: decode(call.result()), reset=restore, compile=call.compile,
-                        close=kernel.close, native_measure=measure, device="cpu",
-                        timing="cpu_native_monotonic", metadata=metadata, owners=(arguments, kernel))
+    return intent_sequence(call, lambda: decode(call.result()), reset=restore,
+                           metadata=metadata, release=kernel.close)

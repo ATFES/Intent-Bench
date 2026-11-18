@@ -35,19 +35,16 @@ def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None, 
             host['invoke'] = host_factory() if host_factory else lambda: artifact.run(*arguments)
         host['output'] = host['invoke']()
 
-    native_measure = None
     metadata = {'artifacts': [str(a.cache_directory) for a in artifact.artifacts],
                 'operator_entry': 'prepared_launch',
                 'host_entry': 'torch_compile_custom_op' if host_factory else 'artifact.run'}
     if device == 'cpu':
-        from .native_sampling import sample
-        def native_measure(settings):
-            metadata['cache_policy'] = 'flush_cpu_64m' if settings.cache == 'flush' else 'warm'
-            return sample(call, settings, reset or (lambda: None))
+        return intent_sequence(call, lambda: observe(call.result()), reset=reset,
+                               host_run=host_run, host_result=lambda: observe(host['output']),
+                               metadata=metadata)
     return PreparedCall(
         launch=call.launch, result=lambda: observe(call.result()), compile=call.compile,
-        reset=reset, device=device, native_measure=native_measure,
-        timing='cpu_native_monotonic' if native_measure else None,
+        reset=reset, device=device,
         metadata=metadata,
         host_run=host_run, host_result=lambda: observe(host['output']),
     )
@@ -73,7 +70,7 @@ class IntentSequence:
                                metadata={'artifacts': [str(a.cache_directory) for kernel in self.artifacts for a in kernel.artifacts]})
 
 
-def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None, metadata=None):
+def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None, metadata=None, release=None):
     from intent import PreparedSequence
     if isinstance(call, (tuple, list)):
         call = PreparedSequence(call, outputs=None)
@@ -94,6 +91,8 @@ def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None
     def close():
         if native:
             native['timer'].close()
+        if release is not None:
+            release()
 
     return PreparedCall(call.launch, result, compile=call.compile, reset=reset,
                         native_measure=measure, timing='cpu_native_monotonic', close=close,

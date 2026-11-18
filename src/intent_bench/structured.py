@@ -77,18 +77,18 @@ def cpu_workload(row,factory):
         call=artifact.prepare(*data.arguments)
         initial=clone(data.arguments)
         host_state={}
-        from .implementations.native_sampling import sample
+        from .implementations.prepared import intent_sequence
         reset=lambda:restore(data.arguments,initial)
         def host_run():host_state['output']=artifact.run(*data.arguments)
         metadata = {'artifacts':[str(a.cache_directory) for a in artifact.artifacts]}
         if data.prequantized_reference is not None:
             metadata['numerical_check'] = 'fp32_accumulation_interval_then_e4m3fn_rne'
-        return PreparedCall(call.launch,lambda:observed(call.result(),data),compile=call.compile,reset=reset,
-                            native_measure=lambda settings:sample(call,settings,reset,metadata=metadata),timing='cpu_native_monotonic',
-                            metadata=metadata,host_run=host_run,
-                            host_result=lambda:observed(host_state['output'],data),
-                            compiler_observations=lambda: tuple(
-                                a.observation for a in artifact.artifacts if a.observation is not None))
+        prepared = intent_sequence(call, lambda: observed(call.result(), data), reset=reset,
+                                   metadata=metadata, host_run=host_run,
+                                   host_result=lambda: observed(host_state['output'], data), release=artifact.close)
+        prepared.compiler_observations = lambda: tuple(
+            a.observation for a in artifact.artifacts if a.observation is not None)
+        return prepared
     def native_advanced(case,data,env):
         from .implementations.advanced_mojo import prepare
         call=prepare(row['kernel'],data.arguments,env)

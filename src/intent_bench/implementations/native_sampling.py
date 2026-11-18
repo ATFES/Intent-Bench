@@ -1,15 +1,4 @@
 """Sample one or more public product native invocations in a single interval."""
-from .native_sequence import NativeSequence
-
-
-def sample(call, settings, restore, *, metadata=None):
-    timer = NativeSequence((call,))
-    try:
-        return sample_timer(timer, settings, restore, metadata=metadata)
-    finally:
-        timer.close()
-
-
 def sample_timer(timer, settings, restore, *, metadata=None):
     import numpy as np
     if metadata is not None:

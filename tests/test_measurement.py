@@ -33,7 +33,31 @@ def test_native_calibration_stays_in_native_worker():
         raise AssertionError("do not time transport by calling run")
     call = PreparedCall(forbidden, lambda: None, native_measure=native, timing="cnrt_notifier")
     samples, method = measure(call, Measurement(warmup_ms=4, rep_ms=10))
-    assert counts == [(1, 5), (2, 5)] and len(samples) == 5 and method == "cnrt_notifier"
+    assert counts == [(0, 1), (1, 5), (2, 5)] and len(samples) == 5 and method == "cnrt_notifier"
+
+
+def test_native_sample_budget_includes_eviction_without_reporting_it(monkeypatch):
+    ticks = iter((0, 50_000_000))
+    monkeypatch.setattr("intent_bench.measurement.time.perf_counter_ns", lambda: next(ticks))
+    counts = []
+    def native(settings):
+        counts.append((settings.warmup, settings.samples))
+        return [0.001] * settings.samples
+    call = PreparedCall(lambda: None, lambda: None, native_measure=native)
+    samples, _ = measure(call, Measurement(warmup_ms=25, rep_ms=100))
+    assert counts == [(0, 1), (1, 5), (3, 10)]
+    assert samples == [0.001] * 10
+    assert call.metadata['sampling_cycle_ms'] == 10
+
+
+def test_explicit_native_counts_remain_exact():
+    counts = []
+    def native(settings):
+        counts.append((settings.warmup, settings.samples))
+        return [0.001] * settings.samples
+    samples, _ = measure(PreparedCall(lambda: None, lambda: None, native_measure=native),
+                         Measurement(samples=11, warmup=2))
+    assert counts == [(2, 11)] and samples == [0.001] * 11
 
 
 def test_default_output_is_latency_and_optional_single_throughput():
