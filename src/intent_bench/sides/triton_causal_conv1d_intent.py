@@ -10,5 +10,8 @@ def prepare(context):
     x = torch.randn((batch, sequence, channels), device='cuda', dtype=torch.bfloat16).transpose(1, 2)
     weight = torch.randn((channels, width), device='cuda', dtype=torch.bfloat16)
     bias = torch.randn((channels,), device='cuda', dtype=torch.bfloat16)
-    (_, generated) = compile_single(context, causal_depthwise_conv1d_bf16, (x, weight, bias), constexprs={'SILU': True})
+    # The reference returns a channel-contiguous tensor for this strided input.
+    output = torch.empty_like(x)
+    _, generated = compile_single(context, causal_depthwise_conv1d_bf16, (x, weight, bias),
+                                  constexprs={'SILU': True}, outputs=(output,))
     return checked_call(generated, Tolerance(atol=0.05, rtol=0.05), cuda_graph=True, owners=locals())

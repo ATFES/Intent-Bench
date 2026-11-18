@@ -63,11 +63,12 @@ def compile_kernel(
     return artifact
 
 
-def prepare_program(program, arguments: tuple[object, ...]) -> PreparedCall:
+def prepare_program(program, arguments: tuple[object, ...], *, outputs: tuple | None = None) -> PreparedCall:
     """Bind a complete author callable without compiling, tuning or executing it."""
     report_stage("generated_launcher_preparation")
     try:
-        call = program.prepare(*arguments)
+        call = (program.prepare(*arguments) if outputs is None
+                else program.prepare(*arguments, outputs=outputs))
     except Exception as error:
         raise PipelineStageError("generated_launcher_preparation", str(error)) from error
     report_stage("adapter_preparation")
@@ -80,9 +81,10 @@ def compile_single(
     arguments: tuple[object, ...],
     *,
     constexprs: dict[str, object] | None = None,
+    outputs: tuple | None = None,
 ) -> tuple[object, PreparedCall]:
     artifact = compile_kernel(context, definition, constexprs=constexprs)
-    call = prepare_program(artifact, arguments)
+    call = prepare_program(artifact, arguments, outputs=outputs)
     context.prepared_calls.append(call)
     return artifact, call
 
