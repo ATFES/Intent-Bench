@@ -5,9 +5,28 @@ from pathlib import Path
 ADVANCED_OPERATIONS=('scaled_fp8_gemm','fused_linear_cross_entropy','flash_attention_bias','flash_varlen_attention',
     'chunk_retention','flash_attention_inline','flash_attention_select','flash_attention_full_causal_stream',
     'mamba3_siso_step','mamba3_siso_forward','paged_gqa_f16_reduction')
-ATEN_NATIVE_OPERATIONS={name: name for name in
-    ('batched_gemm','batched_gemm_tn','batched_gemm_nt','batched_gemm_tt')}
-ATEN_NATIVE_OPERATIONS['causal_linear_attention_f32']='causal_linear_attention'
+# Corpus names retain each author's program and inputs. Names grouped below
+# have the same argument order and observable outputs at the ATen binding.
+ATEN_NATIVE_OPERATIONS = {
+    workload: operation
+    for operation, workloads in {
+        'relu': ('relu',),
+        'softmax': ('fused_softmax', 'chunked_softmax', 'streamed_online_softmax',
+                    'streamed_online_softmax_f16', 'stable_softmax_online',
+                    'streamed_online_softmax_inline'),
+        'transpose': ('flaggems_transpose_copy', 'matrix_transpose_scalar_domains',
+                      'matrix_transpose_product_domains'),
+        'embedding': ('embedding_lookup', 'embedding_lookup_f32', 'index_select'),
+        'cumsum': ('flaggems_cumsum',),
+        'gemm': ('dense_gemm', 'tilegym_dense_gemm', 'gemm_loop_interchange'),
+        'batched_gemm': ('batched_gemm',),
+        'batched_gemm_tn': ('batched_gemm_tn',),
+        'batched_gemm_nt': ('batched_gemm_nt',),
+        'batched_gemm_tt': ('batched_gemm_tt',),
+        'causal_linear_attention': ('causal_linear_attention_f32',),
+    }.items()
+    for workload in workloads
+}
 
 
 def catalog():
