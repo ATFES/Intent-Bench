@@ -1,9 +1,8 @@
 from __future__ import annotations
 import math
-from intent_bench.implementations.prepared import checked_call, IntentSequence
-import intent
+from intent_bench.implementations.prepared import checked_call, intent_call
 import torch
-from intent.examples.kernels.backward.attention import attention_backward_delta, attention_backward_dkdv, attention_backward_dq
+from intent.examples.programs.attention_backward import AttentionBackward
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.implementations.context import Tolerance
 ATTENTION_BATCH = 2
@@ -26,22 +25,12 @@ def prepare(context):
     # The retained reference helper exports log2 LSE; the product kernels take
     # natural-log LSE and apply LOG2E themselves when reconstructing probability.
     lse = lse * math.log(2.0)
-    delta_artifact = context.compile(attention_backward_delta)
-    constexprs = {'HEAD_GROUP': ATTENTION_HEAD_GROUP, 'CAUSAL': True}
-    dkdv_artifact = context.compile(attention_backward_dkdv, constexprs=constexprs)
-    dq_artifact = context.compile(attention_backward_dq, constexprs=constexprs)
+    program = AttentionBackward.from_jit(context.compile, head_group=ATTENTION_HEAD_GROUP, causal=True)
     delta = torch.empty(shape_q[:-1], dtype=torch.float32)
     grad_q = torch.empty_like(q)
     grad_k = torch.empty_like(k)
     grad_v = torch.empty_like(v)
 
-    def generated_launch():
-        delta_artifact(output, grad_output, delta)
-        dkdv_artifact(q, k, v, grad_output, lse, delta, grad_k, grad_v, ATTENTION_SCALE)
-        dq_artifact(q, k, v, grad_output, lse, delta, grad_q, ATTENTION_SCALE)
-    sequence = IntentSequence()
-    sequence.add(delta_artifact, output, grad_output, outputs=(delta,))
-    sequence.add(dkdv_artifact, q, k, v, grad_output, lse, delta, ATTENTION_SCALE, outputs=(grad_k, grad_v))
-    sequence.add(dq_artifact, q, k, v, grad_output, lse, delta, ATTENTION_SCALE, outputs=(grad_q,))
-    generated = sequence.prepared(lambda: (grad_q, grad_k, grad_v), host_run=generated_launch)
+    generated = intent_call(program, (q, k, v, output, grad_output, lse, ATTENTION_SCALE),
+                            bindings={'outputs': (grad_q, grad_k, grad_v), 'workspace': delta})
     return checked_call(generated, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=False, device_type='cpu', note='既有B2-HQ8-HK2-S1024-D64 f16 causal attention backward；delta、dkdv、dq三kernel完整native序列；CPU source为原f32 autograd参考，保留前向图及中间量，生成端仅接收output/lse并重算概率，双方前向准备不计时。', owners=locals())

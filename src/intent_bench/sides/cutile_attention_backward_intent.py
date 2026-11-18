@@ -1,11 +1,7 @@
 from __future__ import annotations
-from intent_bench.implementations.prepared import checked_call
+from intent_bench.implementations.prepared import checked_call, intent_call
 import torch
-from intent.examples.kernels.backward.attention import attention_backward_delta
-from intent.examples.kernels.backward.attention import attention_backward_dkdv
-from intent.examples.kernels.backward.attention import attention_backward_dq
-from intent_bench.corpus._common.measurement import compile_single
-from intent_bench.model import PreparedCall
+from intent.examples.programs.attention_backward import AttentionBackward
 from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
@@ -23,15 +19,6 @@ def prepare(context):
     lse = torch.logsumexp(scores, dim=-1)
     output = torch.matmul(torch.softmax(scores, dim=-1), repeated_value.float()).half()
     grad_output = torch.randn_like(output) * 0.05
-    (_, delta) = compile_single(context, attention_backward_delta, (output, grad_output))
-    common = (query, key, value, grad_output, lse, delta.result(), scale)
-    constexprs = {'HEAD_GROUP': query_heads // key_heads, 'CAUSAL': True}
-    (_, dkdv) = compile_single(context, attention_backward_dkdv, common, constexprs=constexprs)
-    (_, dq) = compile_single(context, attention_backward_dq, common, constexprs=constexprs)
-
-    def generated_launch():
-        delta.launch()
-        dkdv.launch()
-        dq.launch()
-    generated = PreparedCall(launch=generated_launch, result=lambda : (dq.result(), *dkdv.result()))
+    program = AttentionBackward.from_jit(context.compile, head_group=query_heads // key_heads, causal=True)
+    generated = intent_call(program, (query, key, value, output, grad_output, lse, scale), device='cuda')
     return checked_call(generated, (Tolerance(atol=0.125), Tolerance(atol=0.25), Tolerance(atol=0.125)), cuda_graph=True, note='同算法；中间精度和舍入不同', owners=locals())

@@ -25,17 +25,19 @@ def native_samples(measure):
     return sample
 
 
-def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None, host_factory=None):
-    call = artifact.prepare(*arguments)
+def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None,
+                host_factory=None, bindings=None):
+    bindings = {} if bindings is None else bindings
+    call = artifact.prepare(*arguments, **bindings)
     observe = observe or (lambda result: result)
     host = {}
 
     def host_run():
         if 'invoke' not in host:
-            host['invoke'] = host_factory() if host_factory else lambda: artifact.run(*arguments)
+            host['invoke'] = host_factory() if host_factory else lambda: artifact.run(*arguments, **bindings)
         host['output'] = host['invoke']()
 
-    metadata = {'artifacts': [str(a.cache_directory) for a in artifact.artifacts],
+    metadata = {'artifacts': [str(a.cache_directory) for a in getattr(artifact, 'artifacts', ())],
                 'operator_entry': 'prepared_launch',
                 'host_entry': 'torch_compile_custom_op' if host_factory else 'artifact.run'}
     if device == 'cpu':
