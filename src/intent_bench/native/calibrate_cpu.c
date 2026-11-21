@@ -82,6 +82,73 @@ int main(int argc, char **argv) {
         bandwidth(x,512*1024*atoi(argv[1]),"mid",trial);
         bandwidth(x,16ul<<20,"shared",trial);
         bandwidth(x,n*sizeof(float),"dram",trial);
+        // Visit short columns of a synthetic bank, then advance the starting
+        // lane. The gather and scatter experiments use the same addresses and
+        // demand copies. Adjacent workers can touch the same cache line.
+        for(int step=32;step<=512;step*=4) {
+            uint16_t *bank=(uint16_t*)x;
+            size_t block=(size_t)step*64, chunks=(1u<<20)/block;
+            uint16_t *buffer=aligned_alloc(256,2*block*chunks);
+            if(!buffer)return 1;
+            for(size_t i=0;i<block*chunks;i++)buffer[i]=(uint16_t)i;
+            for(int side=0;side<2;side++) {
+                int gather=side==(trial&1);
+                double start=omp_get_wtime();
+                #pragma omp parallel for schedule(static)
+                for(int lane=0;lane<step;lane++) {
+                    for(size_t b=0;b<chunks;b++) {
+                        uint16_t *s=bank+b*block+lane;
+                        uint16_t *d=buffer+b*block+lane*64;
+                        if(gather) {
+                            #pragma omp simd
+                            for(int j=0;j<64;j++)d[j]=s[j*step];
+                        } else {
+                            #pragma omp simd
+                            for(int j=0;j<64;j++)s[j*step]=d[j];
+                        }
+                    }
+                }
+                double elapsed=omp_get_wtime()-start;
+                printf("panel_%s_%d_bw %.9g\n",gather?"gather":"scatter",step,2.0*block*chunks/(elapsed*1e9));
+                sink+=gather?buffer[trial]:bank[trial];
+            }
+            free(buffer);
+        }
+        // Measure a sequence of adjacent spans before advancing to the
+        // next page bank. Odd pitches also sample non-power-of-two set maps.
+        const int pitches[]={31,32,127,128,511,512};
+        for(size_t pitch=0;pitch<sizeof(pitches)/sizeof(*pitches);pitch++) {
+            int step=pitches[pitch];
+            for(int span=32;span<=1024;span=(span==32?256:span*4)) {
+                size_t bank_words=(size_t)step*span;
+                int banks=(1u<<21)/bank_words;
+                uint16_t *scattered=(uint16_t*)x;
+                uint16_t *packed=malloc(2*bank_words*banks);
+                if(!packed)return 1;
+                for(size_t i=0;i<bank_words*banks;i++)packed[i]=(uint16_t)i;
+                for(int side=0;side<2;side++){
+                    int gather=side==(trial&1);
+                    double t=omp_get_wtime();
+                    #pragma omp parallel for schedule(static)
+                    for(int task=0;task<banks*step;task++) {
+                        size_t block=task/step, lane=task%step;
+                        uint16_t *s=scattered+block*bank_words+lane;
+                        uint16_t *d=packed+block*bank_words+lane*span;
+                        if(gather) {
+                            #pragma omp simd
+                            for(int j=0;j<span;j++)d[j]=s[j*step];
+                        }else{
+                            #pragma omp simd
+                            for(int j=0;j<span;j++)s[j*step]=d[j];
+                        }
+                    }
+                    double elapsed=omp_get_wtime()-t;
+                    printf("span_%s_%d_%d_bw %.9g\n",gather?"gather":"scatter",step,span,2.*bank_words*banks/(elapsed*1e9));
+                    sink+=gather?packed[trial]:scattered[trial];
+                }
+                free(packed);
+            }
+        }
         // A paired binary16 copy changes only the side carrying the stride.
         // Each strided and each contiguous stream touches the same array on
         // gather as on scatter. The checksum keeps the measured writes live.

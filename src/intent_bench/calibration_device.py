@@ -85,6 +85,14 @@ def mlu(root):
         data["dma_"+label+"_bw"]=rates;data["dma_"+label+"_latency"]=latencies
         data["dma_"+label+"_rmse"]=errors
     data["compute"]=[2048*512/v for v in elapsed(2048,1,4,512)]
+    # Difference across trip counts removes launch, input DMA and final drain.
+    for mode,name in ((6,"max"),(7,"sum"),(8,"exp"),(9,"quotient")):
+        for width in (64,512,2048):
+            short=elapsed(width,1,mode,16)
+            long=elapsed(width,1,mode,128)
+            data[f"compute_{name}_{width}"]=[(b-a)/112 for a,b in zip(short,long)]
+            if min(data[f"compute_{name}_{width}"])<=0:
+                raise ValueError(f"unresolved {name} timing at width {width}")
     data["sync"]=[max(0, v-start)/256 for v,start in zip(elapsed(0,1,3,256),data["launch"])]
     first=elapsed(128,1,5,1)
     data["first_io"]= [

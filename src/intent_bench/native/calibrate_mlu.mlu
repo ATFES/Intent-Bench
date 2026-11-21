@@ -3,6 +3,30 @@
 __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips){
     __nram__ float local[2048];
     if(mode==0)return;
+    if(mode>=6){
+        __nram__ float tmp[2048];
+        __nram__ half a[2048],b[2048];
+        __memcpy(local,x+taskId*n,n*4,GDRAM2NRAM);
+        for(int k=0;k<trips;k++) {
+            if(mode==6) { __bang_argmax(tmp,local,n); __sync_compute(); }
+            if(mode==7) { __bang_sumpool(tmp,local,32,n/32,1,n/32,1,1,1); __bang_reduce_sum(tmp,tmp,32); __sync_compute(); }
+            if(mode==8) { __bang_abs(tmp,local,n);__bang_argmax(tmp,tmp,n);__sync_compute();__bang_active_exphp(tmp,local,n); }
+            if(mode==9) {
+                __bang_mul_scalar(tmp,local,0.3125f,n);
+                __bang_add_scalar((int*)tmp,(int*)tmp,-4,n);
+                __bang_float2half_rn(a,tmp,n);
+                __bang_add_scalar((int*)tmp,(int*)tmp,8,n);
+                __bang_float2half_rn(b,tmp,n);
+                __bang_bxor((short*)a,(short*)a,(short*)b,n);
+                __bang_int162float(tmp,(short*)a,n,0);
+                volatile unsigned count=__bang_count(tmp,n);
+                (void)count;
+            }
+            asm volatile("" ::: "memory");
+        }
+        __memcpy(y+taskId*n,tmp,n*4,NRAM2GDRAM);
+        return;
+    }
     if(mode==5){
         __memcpy_async(local,x+taskId*n,n*4,GDRAM2NRAM);
         __sync();
