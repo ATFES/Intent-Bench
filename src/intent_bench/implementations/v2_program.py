@@ -33,6 +33,10 @@ def prepare(name, backend, case, values, env):
             result = call.result
             call.result = lambda: result().cpu()
         return call
+    return bind(name, backend, author_arguments(values, device), env, device)
+
+
+def author_arguments(values, device):
     from intent.examples.programs.inputs import Array
     if device == "cpu":
         args = [x.to_numpy() if isinstance(x, Array) else x for x in values["arguments"]]
@@ -46,7 +50,7 @@ def prepare(name, backend, case, values, env):
             torch.frombuffer(x.data, dtype=dtypes[x.dtype]).reshape(x.shape).to(device)
             if isinstance(x, Array) else x for x in values["arguments"]
         ]
-    return bind(name, backend, args, env, device)
+    return args
 
 
 def bind(name, backend, args, env, device):
