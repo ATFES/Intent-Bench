@@ -55,6 +55,8 @@ def catalog():
         if provider == 'mojo' and row['kernel'] in CATALOG:
             row['implementations'].extend(registrations(row['kernel']))
         row['implementations'].extend(sides.get(row['name'], {}).get('alternatives', {}))
+        if sides.get(row["name"],{}).get("v2_symbol"):
+            row["implementations"].extend("intent-v2:"+b for b in ("triton","cutile","mojo","weft","bangc"))
     return rows
 
 

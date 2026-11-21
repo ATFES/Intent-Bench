@@ -22,6 +22,10 @@ def build(name):
                     'dense_gemm':{'rows':4096,'columns':4096,'output_columns':14336}}[kernel]
         return replace(mlu_workload(operation),name=name,cases=[Case(row['case'],parameters)],parameter_keys=())
     if provider == "mojo":
+        from .side_workload import mappings,build as side_workload
+        side = mappings().get(name, {})
+        if "v2_symbol" in side and "inputs" in side:
+            return side_workload(row, side)
         from .cpu_inputs import FACTORIES
         if kernel in FACTORIES:
             from .structured import cpu_workload

@@ -8,7 +8,7 @@ CATALOG = {"rotary_embedding_equivalent_index"}
 
 
 def registrations(name):
-    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope"}:
+    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -55,7 +55,7 @@ def bind(name, backend, args, env, device):
     options = env.options.get("compilerinfra", {})
     kernel = intentdsl.jit(getattr(examples, name), backend=backend,
                            library=options.get("library"), configuration=options.get("configuration"))
-    mutable = {"adamw": (1,2,3), "rope":(0,1)}.get(name, ())
+    mutable = {"adamw": (1,2,3), "rope":(0,1), "batch_norm":(3,4)}.get(name, ())
     original = [(args[i], args[i].copy() if device=="cpu" else args[i].clone()) for i in mutable]
     def reset():
         for dest, value in original:
@@ -63,14 +63,14 @@ def bind(name, backend, args, env, device):
                 dest[...] = value
             else:
                 dest.copy_(value)
-    call = kernel.prepare(*args, artifact_file=options.get("artifact_file"))
+    measured = {"artifact_file": options["artifact_file"]} if options.get("artifact_file") else {}
+    call = kernel.prepare(*args, **measured)
     if "row_id" in options:
         call = call.bind_row(options["row_id"])
     metadata = {"author_program": name}
     def compile():
         call.compile()
-        if backend != "triton":
-            metadata["cold_compile"] = call.compilation_report()
+        metadata["cold_compile"] = call.compilation_report()
 
     prepared = PreparedCall(call.launch, call.result, device=device, compile=compile,
                             tuning_report=call.tuning_report, reset=reset if original else None, metadata=metadata)

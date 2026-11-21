@@ -104,15 +104,29 @@ def build(row,entries):
             prepare(name,provider,case,seed,env,entry))
     def check(actual,expected):
         from .numeric import compare_outputs
-        if provider=='bangc':
-            def cpu(tree):return tuple(cpu(v) for v in tree) if isinstance(tree,tuple) else tree.cpu()
+        if provider=='bangc' or entries.get("v2_symbol"):
+            def cpu(tree):
+                if isinstance(tree,(list,tuple)):return tuple(cpu(v) for v in tree)
+                return tree.cpu() if hasattr(tree,"cpu") else tree
             actual,expected=cpu(actual),cpu(expected)
         compare_outputs(actual,expected,next(iter(tolerances.values())))
+    if entries.get("v2_symbol"):
+        from .implementations.v2_program import bind
+        from .workloads.programs import _device
+        def v2(case, payload, env, backend):
+            device = _device(env, backend)
+            if device.startswith("mlu:"):
+                import torch_mlu
+            args = [v.to(device) if hasattr(v, "to") else v for v in payload.arguments]
+            return bind(entries["v2_symbol"], backend, args, env, device)
+        for backend in ("triton","cutile","mojo","weft","bangc"):
+            name = "intent-v2:"+backend
+            impls[name] = Implementation(name,lambda case,payload,env,b=backend:v2(case,payload,env,b))
     def inputs(case, seed):
         if factory is None:
             return seed
         import torch
-        with torch.random.fork_rng(devices=[]):
+        with torch.random.fork_rng(devices=[torch.cuda.current_device()] if provider in ("triton","cutile") else []):
             torch.manual_seed(seed)
             return load(factory)()
     return Workload(row['name'],[Case(row['case'],{'profile':'original'})],inputs,impls,

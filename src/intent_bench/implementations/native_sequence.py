@@ -37,8 +37,10 @@ class NativeSequence:
         self.arguments = {}
         for binding in bindings:
             if not hasattr(binding, "function"):
-                from intent import NativeMemoryFill
-                if not isinstance(binding, NativeMemoryFill):
+                if not (isinstance(getattr(binding, "address", None), int)
+                        and isinstance(getattr(binding, "count", None), int) and binding.count >= 0
+                        and isinstance(getattr(binding, "value", None), bytes)
+                        and len(binding.value) in (1, 2, 4, 8)):
                     raise TypeError("unknown native sequence entry")
                 fills.append(_Fill(binding.address, binding.count, len(binding.value),
                                    (ct.c_ubyte * 8)(*binding.value)))

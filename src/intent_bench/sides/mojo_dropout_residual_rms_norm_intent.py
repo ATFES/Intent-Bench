@@ -1,28 +1,13 @@
 from __future__ import annotations
 from intent_bench.implementations.prepared import checked_call
-import intent
-import torch
 from intent.examples.kernels.normalization.dropout_residual_rms_norm import dropout_residual_rms_norm_backward_data, dropout_residual_rms_norm_forward
 from intent_bench.implementations.context import Tolerance
 from intent_bench.implementations.prepared import IntentSequence
-FEATURES = 4096
-KEEP_PROBABILITY = 0.9
-RMS_ROWS = 4096
-RMS_SEED = 17
 
 def prepare(context):
-    inverse_features = 1.0 / FEATURES
-    inverse_keep_probability = 1.0 / KEEP_PROBABILITY
-    epsilon = 1e-06
-    weight_offset = 1.0
-    shape = (RMS_ROWS, FEATURES)
-    x = torch.randn(shape, dtype=torch.bfloat16) * 0.5
-    residual = torch.randn_like(x) * 0.5
-    weight = torch.randn((FEATURES,), dtype=torch.bfloat16)
-    dnormalized = torch.randn_like(x) * 0.25
-    dresidual = torch.randn_like(x) * 0.25
-    forward_arguments = (x, residual, weight, RMS_SEED, KEEP_PROBABILITY, inverse_keep_probability, inverse_features, epsilon, weight_offset)
-    backward_arguments = (x, residual, weight, dnormalized, dresidual, RMS_SEED, KEEP_PROBABILITY, inverse_keep_probability, inverse_features, epsilon, weight_offset)
+    x,residual,weight,dnormalized,dresidual,*scalars = context.inputs
+    forward_arguments = (x,residual,weight,*scalars)
+    backward_arguments = context.inputs
     forward = context.compile(dropout_residual_rms_norm_forward)
     backward = context.compile(dropout_residual_rms_norm_backward_data)
     generated_outputs = {}

@@ -140,6 +140,8 @@
     "intent": "intent_bench.sides.triton_swiglu_intent:prepare"
   },
   "corpus/triton/fused_add_rms_norm": {
+    "inputs": "intent_bench.sides.norm_inputs:fused_add",
+    "v2_symbol": "fused_add_rms_norm",
     "source": "intent_bench.sides.triton_fused_add_rms_norm_source:prepare",
     "intent": "intent_bench.sides.triton_fused_add_rms_norm_intent:prepare"
   },
@@ -518,6 +520,8 @@
     "intent": "intent_bench.sides.mojo_sparse_mla_backward_intent:prepare"
   },
   "corpus/mojo/dropout_residual_rms_norm": {
+    "inputs": "intent_bench.sides.norm_inputs:dropout_residual",
+    "v2_symbol": "dropout_residual_rms_norm",
     "source": "intent_bench.sides.mojo_dropout_residual_rms_norm_source:prepare",
     "intent": "intent_bench.sides.mojo_dropout_residual_rms_norm_intent:prepare"
   },

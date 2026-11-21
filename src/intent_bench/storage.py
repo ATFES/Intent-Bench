@@ -8,10 +8,11 @@ import numpy as np
 
 
 def record_types():
+    from .sides.norm_inputs import Arguments
     from .structured import InputBundle, KernelSymbol
     from .implementations.context import Tolerance, IntegerTolerance, SimilarityTolerance
     return {kind.__name__: kind for kind in
-            (InputBundle, KernelSymbol, Tolerance, IntegerTolerance, SimilarityTolerance)}
+            (InputBundle, KernelSymbol, Tolerance, IntegerTolerance, SimilarityTolerance, Arguments)}
 
 
 def numpy_dtype(name):
@@ -92,7 +93,7 @@ def write_tree(value, directory):
     (directory / "tree.json").write_text(json.dumps(encode(value)) + "\n")
 
 
-def read_tree(directory, *, tensor_device="cpu"):
+def read_tree(directory, *, tensor_device="cpu", host_arrays=False):
     directory = Path(directory)
     allocations, objects, tensors = {}, {}, {}
 
@@ -116,7 +117,7 @@ def read_tree(directory, *, tensor_device="cpu"):
             return float.fromhex(item["value"])
         if kind in {"numpy", "torch"}:
             raw = allocation(item["storage"])
-            if kind == "numpy":
+            if kind == "numpy" or host_arrays:
                 result = np.ndarray(tuple(item["shape"]), dtype=numpy_dtype(item["dtype"]),
                                     buffer=raw, offset=item["offset"], strides=tuple(item["strides"]))
             else:
