@@ -19,7 +19,8 @@ BASELINES = {
     "batched_gemm": {"cutile": "NVIDIA TileGym batched GEMM", "torch": "ATen batched GEMM"},
     "histogram": {"cub": "NVIDIA CUB DeviceHistogram, including initialization and merge"},
     "swiglu": {"triton": "Liger fused SwiGLU", "torch": "ATen SiLU and multiply composition"},
-    "rope": {"triton": "Liger RoPE, including layout conversion and InOut writeback",
+    "rope": {"torch": "ATen split-half RoPE including both InOut updates",
+             "triton": "Liger RoPE, including layout conversion and InOut writeback",
              "mojo": "MAX native split-half RoPE for Q/K, including phase interleaving"},
     "jagged_mean": {"triton": "TritonBench jagged mean", "torch": "ATen segment_reduce"},
     "cumsum": {"torch": "ATen cumsum"},
@@ -413,6 +414,13 @@ def _reference(name, values, env, implementation="torch"):
     output = invoke_author(name, values, context)
     if context.invocation is None:
         raise ValueError("author program did not submit its complete call")
+    if device.startswith("mlu:") and implementation == "torch" and not context.invocation.native_measure:
+        from ..implementations.mlu_rows import timer
+        stream = torch.mlu.current_stream(device)
+        call = context.invocation
+        call.synchronize = stream.synchronize
+        call.native_measure = lambda settings: timer(call.launch, stream, settings, call.reset)
+        call.timing = "cnrt_notifier"
     context.invocation.metadata.update(author_program=name, input_profile="installed author program")
     from dataclasses import replace
     def observe(value):
@@ -493,8 +501,10 @@ def build(name):
             actual, expected = canonical(actual), canonical(expected)
         if name == "histogram":
             expected = expected.to(actual.device)
-        if isinstance(actual, torch.Tensor) and actual.device.type == "mlu" and expected.device.type == "cpu":
-            actual = actual.cpu()
+        if any(isinstance(t, torch.Tensor) and t.device.type == "mlu"
+                             for t in (actual if isinstance(actual, tuple) else (actual,))):
+            from ..oracle import _align_actual
+            actual = _align_actual(actual, expected)
         compare_outputs(actual, expected, tolerance)
     return Workload("program/"+name, [Case("author")], lambda case, seed: author_inputs(name, seed),
         implementations, oracle=oracle, check=check,

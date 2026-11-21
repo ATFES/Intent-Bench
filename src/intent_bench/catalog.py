@@ -30,6 +30,7 @@ ATEN_NATIVE_OPERATIONS = {
 
 
 def catalog():
+    from .implementations.v2_program import CATALOG, registrations
     from .side_workload import mappings
     sides = mappings()
     path=Path(__file__).with_name("catalog.json")
@@ -51,6 +52,8 @@ def catalog():
             row['implementations']=[row['source_implementation'],*('intent:'+target for target in targets)]
         if provider=='mojo' and row['kernel'] in ATEN_NATIVE_OPERATIONS:
             row['implementations'].append('aten:cpu')
+        if provider == 'mojo' and row['kernel'] in CATALOG:
+            row['implementations'].extend(registrations(row['kernel']))
         row['implementations'].extend(sides.get(row['name'], {}).get('alternatives', {}))
     return rows
 

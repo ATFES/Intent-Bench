@@ -108,6 +108,9 @@ def cpu_workload(row,factory):
     reference=Implementation('oracle',source) if native_source else oracle
     source_name='mojo' if native_source else 'torch'
     implementations={source_name:Implementation(source_name,source),'intent:mojo':Implementation('intent:mojo',generated)}
+    from .implementations.v2_program import CATALOG, registrations
+    if row['kernel'] in CATALOG:
+        implementations.update(registrations(row['kernel']))
     from .catalog import ATEN_NATIVE_OPERATIONS
     if row['kernel'] in ATEN_NATIVE_OPERATIONS:
         def native_aten(case, data, env):

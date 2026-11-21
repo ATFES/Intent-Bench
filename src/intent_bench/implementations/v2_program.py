@@ -4,8 +4,11 @@ from functools import partial
 from ..model import Implementation, PreparedCall
 
 
+CATALOG = {"rotary_embedding_equivalent_index"}
+
+
 def registrations(name):
-    if name not in {"relu", "transpose", "swiglu", "dropout", "adamw"}:
+    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -16,17 +19,21 @@ def registrations(name):
 
 
 def prepare(name, backend, case, values, env):
-    import intentdsl
-    from intentdsl import examples
     from intent.examples.programs.inputs import Array
     from ..workloads.programs import _device
 
     device = _device(env, backend)
-    options = env.options.get("compilerinfra", {})
-    kernel = intentdsl.jit(
-        getattr(examples, name), backend=backend,
-        library=options.get("library"), configuration=options.get("configuration")
-    )
+    if name in CATALOG:
+        args = values.arguments
+        if device != "cpu":
+            if device.startswith("mlu:"):
+                import torch_mlu
+            args = tuple(v.to(device) for v in args)
+        call = bind(name, backend, args, env, device)
+        if device != "cpu":
+            result = call.result
+            call.result = lambda: result().cpu()
+        return call
     if device == "cpu":
         args = [x.to_numpy() if isinstance(x, Array) else x for x in values["arguments"]]
     else:
@@ -39,6 +46,15 @@ def prepare(name, backend, case, values, env):
             torch.frombuffer(x.data, dtype=dtypes[x.dtype]).reshape(x.shape).to(device)
             if isinstance(x, Array) else x for x in values["arguments"]
         ]
+    return bind(name, backend, args, env, device)
+
+
+def bind(name, backend, args, env, device):
+    import intentdsl
+    from intentdsl import examples
+    options = env.options.get("compilerinfra", {})
+    kernel = intentdsl.jit(getattr(examples, name), backend=backend,
+                           library=options.get("library"), configuration=options.get("configuration"))
     mutable = {"adamw": (1,2,3), "rope":(0,1)}.get(name, ())
     original = [(args[i], args[i].copy() if device=="cpu" else args[i].clone()) for i in mutable]
     def reset():
@@ -71,6 +87,7 @@ def prepare(name, backend, case, values, env):
         prepared.timing = "cpu_native_monotonic"
     elif device.startswith("mlu:"):
         from .mlu_rows import timer
+        import torch
         stream = torch.mlu.current_stream(device)
         prepared.synchronize = stream.synchronize
         prepared.native_measure = lambda settings: timer(call.launch, stream, settings, reset)
