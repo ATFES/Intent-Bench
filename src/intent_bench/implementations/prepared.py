@@ -44,8 +44,16 @@ def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None,
         return intent_sequence(call, lambda: observe(call.result()), reset=reset,
                                host_run=host_run, host_result=lambda: observe(host['output']),
                                metadata=metadata)
+    def compile_native():
+        call.compile()
+        snap = getattr(call, "observation", None)
+        if snap is not None and snap.provider == "cutile":
+            from dataclasses import asdict
+            rows = [asdict(c) for c in snap.candidates]
+            metadata["cold_compile"] = {"candidate_count": len(rows), "rows": rows,
+                "instrumentation": "cuTile bound native compilation observations"}
     return PreparedCall(
-        launch=call.launch, result=lambda: observe(call.result()), compile=call.compile,
+        launch=call.launch, result=lambda: observe(call.result()), compile=compile_native,
         reset=reset, device=device,
         metadata=metadata,
         host_run=host_run, host_result=lambda: observe(host['output']),

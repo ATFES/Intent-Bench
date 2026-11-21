@@ -3,24 +3,28 @@
 from ..model import PreparedCall
 
 
-def prepare(definition, args, env):
+def prepare(definition, args, env, backend="triton"):
     import intentdsl
 
     target = env.options.get("compilerinfra", {})
     kernel = intentdsl.jit(
         definition,
-        backend="triton",
+        backend=backend,
         library=target.get("library"),
         configuration=target.get("configuration"),
     )
     call = kernel.prepare(*args)
+    metadata={"candidate":target.get("candidate"),"operator_entry":"prepared_launch"}
+    def compile():
+        call.compile()
+        if backend=="cutile":metadata["cold_compile"]=call.compilation_report()
+    def result():
+        if backend=="cutile":metadata["cold_compile"].update(call.compilation_report())
+        return call.result()
     return PreparedCall(
         call.launch,
-        call.result,
-        compile=call.compile,
+        result,
+        compile=compile,
         device=env.device,
-        metadata={
-            "candidate": target.get("candidate"),
-            "operator_entry": "prepared_launch",
-        },
+        metadata=metadata,
     )

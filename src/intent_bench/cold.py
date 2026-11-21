@@ -123,6 +123,8 @@ def isolated(request, dispatch):
                     / (str(j) + "-" + component(impl)),
                 )
                 part = dispatch(task)
+                if len(part.results) != 1:
+                    raise RuntimeError(f"{impl} / {case}: worker returned {len(part.results)} rows")
                 group.extend(record(row) for row in part.results)
             ref = {
                 r["case"]: r.get("median_ms")

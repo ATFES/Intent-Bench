@@ -68,7 +68,7 @@ def run_output(environment, workload, explicit=None, *, execution=True):
         variables = {
             "INTENT_BENCH_OUTPUT_ROOT": str(root), "INTENT_BENCH_RUN_DIR": str(directory),
             "INTENT_CACHE_DIR": str(cache/"intent"), "XDG_CACHE_HOME": str(cache/"xdg"),
-            "TRITON_CACHE_DIR": str(cache/"triton"), "CUDA_CACHE_PATH": str(cache/"cuda"),
+            "TRITON_CACHE_DIR": str(cache/"triton"), "CUDA_CACHE_PATH": str(cache/"cuda"), "CUDA_TILE_CACHE_DIR":str(cache/"cutile"),
             "TORCHINDUCTOR_CACHE_DIR": str(cache/"inductor"),
             "TORCH_COMPILE_DEBUG_DIR": str(root/"work"/"inductor-debug"),
             "TMPDIR": str(root/"work"/"tmp"), "PYTHONDONTWRITEBYTECODE": "1",

@@ -47,20 +47,20 @@ def build(name):
                 state["out"] = F.rms_norm(x, (x.size(-1),), w, eps)
 
             return PreparedCall(launch, lambda: state["out"], device=env.device)
-        if impl == "intent:triton":
+        if impl in ("intent:triton","intent:cutile"):
             from intent.examples.kernels.normalization.rms_norm import weighted_rms_norm
 
             return intent_call(
-                make_kernel(weighted_rms_norm, env, "triton"), args, device=env.device
+                make_kernel(weighted_rms_norm, env, impl.partition(":")[2]), args, device=env.device
             )
         from intentdsl.examples import rms_norm
         from ..implementations.intent_v2 import prepare as prepare_v2
 
-        return prepare_v2(rms_norm, args, env)
+        return prepare_v2(rms_norm, args, env, backend=impl.partition(":")[2])
 
     impls = {
         k: Implementation(k, lambda c, d, e, k=k: prepare(k, c, d, e))
-        for k in ("torch", "intent:triton", "intent-v2:triton")
+        for k in ("torch", "intent:triton", "intent-v2:triton", "intent:cutile","intent-v2:cutile")
     }
     from ..implementations.cpu_rows import register
 
