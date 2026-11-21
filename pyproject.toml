@@ -25,7 +25,7 @@ intent-bench-mcp = "intent_bench.mcp_server:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-intent_bench = ["**/*.json", "**/*.mojo", "**/*.cpp", "**/*.c", "**/*.h", "**/*.cu", "**/*.cuh", "**/*.md", "licenses/*.txt", "plugin/.mcp.json", "plugin/.codex-plugin/plugin.json"]
+intent_bench = ["**/*.json", "**/*.mojo", "**/*.cpp", "**/*.c", "**/*.h", "**/*.cu", "**/*.mlu", "**/*.cuh", "**/*.md", "licenses/*.txt", "plugin/.mcp.json", "plugin/.codex-plugin/plugin.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -23,6 +23,8 @@ def measure(candidate):
             "candidate": candidate["candidate"],
         },
     }
+    if "row_id" in selection:
+        options["compilerinfra"]["row_id"] = selection["row_id"]
     env = replace(env, python=candidate["python"], options=options)
     request = RunRequest(
         selection["name"],
@@ -34,4 +36,19 @@ def measure(candidate):
         output=Path(candidate["output_dir"]),
     )
     outcome = run(request)
-    return {"directory": str(outcome.directory), "exit_code": outcome.exit_code}
+    result = {"directory": str(outcome.directory), "exit_code": outcome.exit_code}
+    if prediction := candidate.get("prediction"):
+        from .results import record
+        result["prediction"] = prediction
+        result["measurements"] = []
+        for raw in outcome.results:
+            row = raw if isinstance(raw, dict) else record(raw)
+            if row["implementation"] != "intent-v2:" + prediction["exit"]:
+                continue
+            actual = row["metadata"].get("selection", {})
+            result["measurements"].append(dict(
+                case=row["case"], status=row["status"], compiler_candidate=candidate["candidate"],
+                compilation_id=prediction["compilation_id"], row_id=actual.get("winner_row_id"),
+                artifact_sha256=actual.get("artifact_sha256"), measured_ns=(row["median_ms"] * 1e6
+                if row["median_ms"] is not None else None)))
+    return result

@@ -168,6 +168,8 @@ def prepare(name, impl, case, inputs, env):
                 call.compile()
                 metadata["cold_compile"] = call.compilation_report()
 
+            if "row_id" in spec:
+                call = call.bind_row(spec["row_id"])
             selection = call.tuning_report
             launch, close = call.launch, None
             result = lambda: call.result().detach().cpu().numpy()
