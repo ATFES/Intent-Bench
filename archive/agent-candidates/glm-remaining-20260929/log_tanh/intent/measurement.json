@@ -4,7 +4,7 @@
   "reference_ms": 0.04151199944317341,
   "ratio": 0.17537097989665082,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/log_tanh/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/log_tanh/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",
@@ -15,7 +15,7 @@
   "precompile_seconds": 0.677807223983109,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "log_tanh_elementwise": "/home/kingdom/.cache/intentdsl/compiler/259369077bff4f62a49b74b994be75bc"
+    "log_tanh_elementwise": "${HOME}/.cache/intentdsl/compiler/259369077bff4f62a49b74b994be75bc"
   },
   "precompile_failures": [],
   "tuning": [

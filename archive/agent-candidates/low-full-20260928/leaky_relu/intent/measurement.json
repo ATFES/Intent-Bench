@@ -4,7 +4,7 @@
   "reference_ms": 0.007712000049650669,
   "ratio": 1.0186722204664656,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/leaky_relu/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/leaky_relu/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 1.3589518920052797,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "leaky_relu_pointwise": "/home/kingdom/.cache/intentdsl/compiler/8b797a9c6d974733957fe74a67df2586"
+    "leaky_relu_pointwise": "${HOME}/.cache/intentdsl/compiler/8b797a9c6d974733957fe74a67df2586"
   },
   "precompile_failures": [],
   "tuning": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.01101600006222725,
   "ratio": 0.6986201783174985,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_mv_sigmoid_sub/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_mv_sigmoid_sub/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

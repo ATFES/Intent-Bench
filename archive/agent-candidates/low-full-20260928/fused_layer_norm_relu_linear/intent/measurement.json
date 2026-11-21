@@ -4,7 +4,7 @@
   "reference_ms": 0.08936800062656403,
   "ratio": 0.8949959440656219,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_layer_norm_relu_linear/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_layer_norm_relu_linear/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,9 +15,9 @@
   "precompile_seconds": 28.030229864176363,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "linear_relu": "/home/kingdom/.cache/intentdsl/compiler/0d4a0d43c7e3449b948656a4e89e5266",
-    "linear_relu_no_bias": "/home/kingdom/.cache/intentdsl/compiler/d9010df0c5704fafbdc884c16d6fabbb",
-    "layer_norm": "/home/kingdom/.cache/intentdsl/compiler/c54b31786f414dc68372b1c9b128043d"
+    "linear_relu": "${HOME}/.cache/intentdsl/compiler/0d4a0d43c7e3449b948656a4e89e5266",
+    "linear_relu_no_bias": "${HOME}/.cache/intentdsl/compiler/d9010df0c5704fafbdc884c16d6fabbb",
+    "layer_norm": "${HOME}/.cache/intentdsl/compiler/c54b31786f414dc68372b1c9b128043d"
   },
   "precompile_failures": [],
   "tuning": [

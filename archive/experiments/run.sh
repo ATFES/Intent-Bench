@@ -29,11 +29,11 @@ case "${provider}" in
     ;;
   triton)
     experiment=gpu
-    default_python=/home/kingdom/.venvs/intentdsl-mlir20/bin/python
+    default_python=${HOME}/.venvs/intentdsl-mlir20/bin/python
     ;;
   cutile)
     experiment=gpu
-    default_python=/home/kingdom/.venvs/intentdsl-cutile/bin/python
+    default_python=${HOME}/.venvs/intentdsl-cutile/bin/python
     ;;
   weft)
     experiment=cpu
@@ -58,7 +58,7 @@ if [[ "${target}" == cutile ]]; then
     export CUDA_HOME="${CUDA_HOME:-${INTENT_CUTILE_SITE_PACKAGES}/nvidia/cu13}"
     export PATH="${INTENT_CUTILE_SITE_PACKAGES}/nvidia/cu13/bin:${PATH}"
   else
-    default_python=/home/kingdom/.venvs/intentdsl-cutile/bin/python
+    default_python=${HOME}/.venvs/intentdsl-cutile/bin/python
   fi
 fi
 

@@ -4,7 +4,7 @@
   "reference_ms": 0.008863999973982573,
   "ratio": 0.6787003826313173,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_embedding_add_tanh/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_embedding_add_tanh/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 6.525871439836919,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_embedding_add_tanh_default": "/home/kingdom/.cache/intentdsl/compiler/00c64d94bab849aa8c172a59b26bf6b7",
-    "fused_embedding_add_tanh_padded": "/home/kingdom/.cache/intentdsl/compiler/6aa4b4ded14a436ea3b0b8646abcddd7"
+    "fused_embedding_add_tanh_default": "${HOME}/.cache/intentdsl/compiler/00c64d94bab849aa8c172a59b26bf6b7",
+    "fused_embedding_add_tanh_padded": "${HOME}/.cache/intentdsl/compiler/6aa4b4ded14a436ea3b0b8646abcddd7"
   },
   "precompile_failures": [],
   "tuning": [

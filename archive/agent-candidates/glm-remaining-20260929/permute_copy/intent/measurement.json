@@ -4,7 +4,7 @@
   "reference_ms": 0.007664000149816275,
   "ratio": 0.9999999696202193,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/permute_copy/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/permute_copy/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 5.233137416886166,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "permute_copy_reverse_4d": "/home/kingdom/.cache/intentdsl/compiler/ad92cc6a4a8c4f6ca2b948364d53a497"
+    "permute_copy_reverse_4d": "${HOME}/.cache/intentdsl/compiler/ad92cc6a4a8c4f6ca2b948364d53a497"
   },
   "precompile_failures": [],
   "tuning": [

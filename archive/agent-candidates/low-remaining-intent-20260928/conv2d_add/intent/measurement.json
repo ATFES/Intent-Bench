@@ -4,7 +4,7 @@
   "reference_ms": 0.02542399987578392,
   "ratio": 1.5380742575904036,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-remaining-intent-20260928/conv2d_add/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-remaining-intent-20260928/conv2d_add/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 18.473065657075495,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "conv2d_add_kernel": "/home/kingdom/.cache/intentdsl/compiler/90a05975954143a4b73fc1c767d19381"
+    "conv2d_add_kernel": "${HOME}/.cache/intentdsl/compiler/90a05975954143a4b73fc1c767d19381"
   },
   "precompile_failures": [],
   "tuning": [

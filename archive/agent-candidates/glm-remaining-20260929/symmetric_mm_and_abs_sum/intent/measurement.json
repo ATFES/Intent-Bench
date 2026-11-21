@@ -4,7 +4,7 @@
   "reference_ms": 0.08578399941325188,
   "ratio": 1.0188380684684077,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/symmetric_mm_and_abs_sum/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/symmetric_mm_and_abs_sum/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 23.084590902086347,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "symmetric_mm_and_abs_sum_gemm": "/home/kingdom/.cache/intentdsl/compiler/c71e3c029b8444bd90da1854c4211c2a",
-    "symmetric_mm_and_abs_sum_abs_sum": "/home/kingdom/.cache/intentdsl/compiler/fb5c896412f14715a5924b573a4471aa"
+    "symmetric_mm_and_abs_sum_gemm": "${HOME}/.cache/intentdsl/compiler/c71e3c029b8444bd90da1854c4211c2a",
+    "symmetric_mm_and_abs_sum_abs_sum": "${HOME}/.cache/intentdsl/compiler/fb5c896412f14715a5924b573a4471aa"
   },
   "precompile_failures": [],
   "tuning": [

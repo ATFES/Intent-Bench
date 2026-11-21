@@ -4,7 +4,7 @@
   "reference_ms": 0.01500799972563982,
   "ratio": 1.2643923563783341,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-interface-triton-20260928/log_softmax_linear/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-interface-triton-20260928/log_softmax_linear/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

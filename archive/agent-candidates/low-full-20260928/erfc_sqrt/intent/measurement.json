@@ -4,7 +4,7 @@
   "reference_ms": 0.01476799976080656,
   "ratio": 0.6262188372228097,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/erfc_sqrt/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/erfc_sqrt/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 10.002299170941114,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "erfc_sqrt_pointwise": "/home/kingdom/.cache/intentdsl/compiler/cdebd48427724e09b6db020e01378107"
+    "erfc_sqrt_pointwise": "${HOME}/.cache/intentdsl/compiler/cdebd48427724e09b6db020e01378107"
   },
   "precompile_failures": [],
   "tuning": [

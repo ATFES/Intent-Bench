@@ -4,7 +4,7 @@
   "reference_ms": 0.202224001288414,
   "ratio": 0.07959490231502812,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/determinant_via_qr/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/determinant_via_qr/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",

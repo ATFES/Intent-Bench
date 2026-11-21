@@ -4,7 +4,7 @@
   "reference_ms": 0.022559999488294125,
   "ratio": 0.363829779328973,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_hardsigmoid_batch_norm/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/fused_hardsigmoid_batch_norm/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 9.945136720081791,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_hardsigmoid_batch_norm_inference": "/home/kingdom/.cache/intentdsl/compiler/1f646e8abcb44e65a817fea91f2cf046"
+    "fused_hardsigmoid_batch_norm_inference": "${HOME}/.cache/intentdsl/compiler/1f646e8abcb44e65a817fea91f2cf046"
   },
   "precompile_failures": [],
   "tuning": [

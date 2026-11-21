@@ -4,7 +4,7 @@
   "reference_ms": 0.023111999966204166,
   "ratio": 4.722741295939878,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-profile-functions-20260930/fused_cross_entropy_log_softmax/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-profile-functions-20260930/fused_cross_entropy_log_softmax/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 20.803153726039454,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_cross_entropy_kernel": "/home/kingdom/.cache/intentdsl/compiler/110a56f0dee14af2a07361cc3dcbfb93"
+    "fused_cross_entropy_kernel": "${HOME}/.cache/intentdsl/compiler/110a56f0dee14af2a07361cc3dcbfb93"
   },
   "precompile_failures": [],
   "tuning": [

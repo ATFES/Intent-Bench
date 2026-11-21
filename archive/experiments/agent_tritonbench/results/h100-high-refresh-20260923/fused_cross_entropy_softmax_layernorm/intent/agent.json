@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_cross_entropy_softmax_layernorm-intent-6ebjelnx",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_cross_entropy_softmax_layernorm-intent-6ebjelnx",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

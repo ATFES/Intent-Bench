@@ -12,7 +12,7 @@
 
 调查基线为已提交的 `a11b80a`，工作区为 `comet/compiler-foundations-reassessment`。旧 cuTile change 继续暂停；原工作区未提交的 `StatefulPointwise` 和 metadata `ConstInt → int` 试验未纳入本轮编译器。没有修改生产实现、`doc/` 或 baseline CSV。
 
-本文位置约定：`C:` 表示本仓库；`R_T:` 表示 `/home/kingdom/phdworks/ref/triton`；`R_L:` 表示 `/home/kingdom/phdworks/ref/tilelang`；`R_C:` 表示本机 `/home/kingdom/.venvs/intentdsl-cutile/lib/python3.10/site-packages/cuda/tile`。`source/` 是 kernel corpus，与这些真实 compiler 实现分开使用。此前因仅在项目内寻找 `ref/` 而判断参考源码不存在，是定位错误。
+本文位置约定：`C:` 表示本仓库；`R_T:` 表示 `${HOME}/phdworks/ref/triton`；`R_L:` 表示 `${HOME}/phdworks/ref/tilelang`；`R_C:` 表示本机 `${HOME}/.venvs/intentdsl-cutile/lib/python3.10/site-packages/cuda/tile`。`source/` 是 kernel corpus，与这些真实 compiler 实现分开使用。此前因仅在项目内寻找 `ref/` 而判断参考源码不存在，是定位错误。
 
 动态复现使用独立构建的本基线编译器、RTX 5090D、Torch `2.13.0+cu130`、Triton `3.7.1`、cuda-tile `1.5.0`。这是环境记录，不是引入版本管理。真实 ref checkout 用于设计和实现对照，不假定它与安装包逐行相同；下文明确区分实测结论和静态风险。
 
@@ -429,7 +429,7 @@ config 外置、transformation-group 后置条件、occupancy policy/legality �
 
 ```bash
 PYTHONPATH=$PWD/python:$PWD/examples:$PWD \
-  /home/kingdom/.venvs/intentdsl-cutile/bin/python \
+  ${HOME}/.venvs/intentdsl-cutile/bin/python \
   /tmp/intentdsl-foundations-repro.h6uHVZ/numerics.py triton contract \
   --compiler /tmp/intentdsl-foundations-build.GePTCn/tools/intent-compile/intent-compile
 ```
@@ -540,7 +540,7 @@ def paired_batch(a: I.In[I.bf16, (2, 32, 64)], b: I.In[I.bf16, (2, 64, 32)],
 ```bash
 for form in dot gemv transpose multi batch; do
   PYTHONPATH=$PWD/python:$PWD/examples:$PWD \
-    /home/kingdom/.venvs/intentdsl-cutile/bin/python \
+    ${HOME}/.venvs/intentdsl-cutile/bin/python \
     /tmp/intentdsl-foundations-repro.h6uHVZ/contract_forms.py "$form" \
     --compiler /tmp/intentdsl-foundations-build.GePTCn/tools/intent-compile/intent-compile \
     > /tmp/intentdsl-foundations-repro.h6uHVZ/contract-$form.log 2>&1

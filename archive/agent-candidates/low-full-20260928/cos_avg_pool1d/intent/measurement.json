@@ -4,7 +4,7 @@
   "reference_ms": 0.01550400024279952,
   "ratio": 0.9236326012994245,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/cos_avg_pool1d/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/cos_avg_pool1d/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 17.130242065992206,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "cosine_stage": "/home/kingdom/.cache/intentdsl/compiler/c3e3a1549fbb456a8ff0bc8d4561a781",
-    "pool_stage": "/home/kingdom/.cache/intentdsl/compiler/cf8cf6ce06be40028eca39ed05c24f9a"
+    "cosine_stage": "${HOME}/.cache/intentdsl/compiler/c3e3a1549fbb456a8ff0bc8d4561a781",
+    "pool_stage": "${HOME}/.cache/intentdsl/compiler/cf8cf6ce06be40028eca39ed05c24f9a"
   },
   "precompile_failures": [],
   "tuning": [

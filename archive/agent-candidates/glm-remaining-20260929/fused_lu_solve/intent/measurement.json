@@ -4,7 +4,7 @@
   "reference_ms": null,
   "ratio": null,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_lu_solve/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/fused_lu_solve/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",
@@ -16,9 +16,9 @@
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "failure_stage": "comparison",
   "error": "generated/source floating result 0 differs: max_abs=90.57832336425781, atol=0.0001, rtol=0.0001; first_failure=0; largest tolerance excess has generated=-90.43724822998047, source=0.1410786211490631, abs_error=90.57832336425781, limit=0.00011410786100896075",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=90.57832336425781, atol=0.0001, rtol=0.0001; first_failure=0; largest tolerance excess has generated=-90.43724822998047, source=0.1410786211490631, abs_error=90.57832336425781, limit=0.00011410786100896075\n",
+  "traceback": "Traceback (most recent call last):\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=90.57832336425781, atol=0.0001, rtol=0.0001; first_failure=0; largest tolerance excess has generated=-90.43724822998047, source=0.1410786211490631, abs_error=90.57832336425781, limit=0.00011410786100896075\n",
   "compiler_artifacts": {
-    "fused_lu_solve_fixed_profile": "/home/kingdom/.cache/intentdsl/compiler/d8acebb3263542ed8d9de832d2e31a3c"
+    "fused_lu_solve_fixed_profile": "${HOME}/.cache/intentdsl/compiler/d8acebb3263542ed8d9de832d2e31a3c"
   },
   "precompile_failures": [],
   "tuning": [

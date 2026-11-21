@@ -4,7 +4,7 @@
   "reference_ms": 0.00964799989014864,
   "ratio": 0.8391376732824227,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-public-contract-20260930/exp_sqrt/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-public-contract-20260930/exp_sqrt/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 2.4191494840197265,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "exp_sqrt": "/home/kingdom/.cache/intentdsl/compiler/13647ae6356a460384dec3696f53622c"
+    "exp_sqrt": "${HOME}/.cache/intentdsl/compiler/13647ae6356a460384dec3696f53622c"
   },
   "precompile_failures": [],
   "tuning": [

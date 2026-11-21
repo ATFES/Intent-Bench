@@ -4,7 +4,7 @@
   "reference_ms": 0.014864000026136637,
   "ratio": 0.5909580069321001,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/exp_mean/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/exp_mean/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 1.8276901068165898,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "exp_mean_partials": "/home/kingdom/.cache/intentdsl/compiler/36227f57469c4320b34ccb0b6a26d788",
-    "exp_mean_finalize": "/home/kingdom/.cache/intentdsl/compiler/c5cb22a4f2f3478ea126eaaac0b44738"
+    "exp_mean_partials": "${HOME}/.cache/intentdsl/compiler/36227f57469c4320b34ccb0b6a26d788",
+    "exp_mean_finalize": "${HOME}/.cache/intentdsl/compiler/c5cb22a4f2f3478ea126eaaac0b44738"
   },
   "precompile_failures": [],
   "tuning": [

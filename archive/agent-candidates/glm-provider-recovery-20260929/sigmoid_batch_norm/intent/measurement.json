@@ -4,7 +4,7 @@
   "reference_ms": 0.01716800034046173,
   "ratio": 0.49301022566995767,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/sigmoid_batch_norm/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/sigmoid_batch_norm/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,14 +15,14 @@
   "precompile_seconds": 3.4602437070570886,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "sigmoid_batch_norm_inference_false_false": "/home/kingdom/.cache/intentdsl/compiler/a849c5d71cc946b8a1de455429cb9f25",
-    "sigmoid_batch_norm_inference_false_true": "/home/kingdom/.cache/intentdsl/compiler/4ad04350cd584722904bf61435523da4",
-    "sigmoid_batch_norm_inference_true_false": "/home/kingdom/.cache/intentdsl/compiler/d309bb4cfe3b4d9986fc0d8f858f8e41",
-    "sigmoid_batch_norm_inference_true_true": "/home/kingdom/.cache/intentdsl/compiler/aa514f2086ea4f45b67ac8bbb958d5d0",
-    "sigmoid_batch_norm_training_false_false": "/home/kingdom/.cache/intentdsl/compiler/83e217a99b7c4156808cdd41d1eb7f41",
-    "sigmoid_batch_norm_training_false_true": "/home/kingdom/.cache/intentdsl/compiler/64250ffd9e9c44b5bdd33a15fea37531",
-    "sigmoid_batch_norm_training_true_false": "/home/kingdom/.cache/intentdsl/compiler/99977193ea1248d7b9048991c227e501",
-    "sigmoid_batch_norm_training_true_true": "/home/kingdom/.cache/intentdsl/compiler/e63bfe511d504f1c851561a45aeb4415"
+    "sigmoid_batch_norm_inference_false_false": "${HOME}/.cache/intentdsl/compiler/a849c5d71cc946b8a1de455429cb9f25",
+    "sigmoid_batch_norm_inference_false_true": "${HOME}/.cache/intentdsl/compiler/4ad04350cd584722904bf61435523da4",
+    "sigmoid_batch_norm_inference_true_false": "${HOME}/.cache/intentdsl/compiler/d309bb4cfe3b4d9986fc0d8f858f8e41",
+    "sigmoid_batch_norm_inference_true_true": "${HOME}/.cache/intentdsl/compiler/aa514f2086ea4f45b67ac8bbb958d5d0",
+    "sigmoid_batch_norm_training_false_false": "${HOME}/.cache/intentdsl/compiler/83e217a99b7c4156808cdd41d1eb7f41",
+    "sigmoid_batch_norm_training_false_true": "${HOME}/.cache/intentdsl/compiler/64250ffd9e9c44b5bdd33a15fea37531",
+    "sigmoid_batch_norm_training_true_false": "${HOME}/.cache/intentdsl/compiler/99977193ea1248d7b9048991c227e501",
+    "sigmoid_batch_norm_training_true_true": "${HOME}/.cache/intentdsl/compiler/e63bfe511d504f1c851561a45aeb4415"
   },
   "precompile_failures": [],
   "tuning": [

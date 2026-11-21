@@ -4,7 +4,7 @@
   "reference_ms": 1.1786800026893616,
   "ratio": 30.95085307086954,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cholesky_solve/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cholesky_solve/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",

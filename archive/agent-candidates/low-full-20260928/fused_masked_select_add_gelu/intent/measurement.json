@@ -4,7 +4,7 @@
   "reference_ms": 0.052744001150131226,
   "ratio": 8.811314869801304,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_masked_select_add_gelu/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_masked_select_add_gelu/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",
@@ -15,9 +15,9 @@
   "precompile_seconds": 18.17662915494293,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "masked_positions": "/home/kingdom/.cache/intentdsl/compiler/306a9c0b591e42f5a0c118c91abd07d1",
-    "masked_compact_gelu_exact": "/home/kingdom/.cache/intentdsl/compiler/eb5dae202bc5404bb0e55cab7c2b62d5",
-    "masked_compact_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/8eb1e493da244e6ab638ef18210ff770"
+    "masked_positions": "${HOME}/.cache/intentdsl/compiler/306a9c0b591e42f5a0c118c91abd07d1",
+    "masked_compact_gelu_exact": "${HOME}/.cache/intentdsl/compiler/eb5dae202bc5404bb0e55cab7c2b62d5",
+    "masked_compact_gelu_tanh": "${HOME}/.cache/intentdsl/compiler/8eb1e493da244e6ab638ef18210ff770"
   },
   "precompile_failures": [],
   "tuning": [

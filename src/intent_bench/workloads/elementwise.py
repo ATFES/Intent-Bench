@@ -40,6 +40,10 @@ def _prepare(name, implementation, case, inputs, env):
     if implementation in {"triton", "cutile"}:
         from ..implementations.gpu import prepare
         return prepare(name, implementation, x)
+    if implementation == "intent-v2:triton":
+        from intentdsl.examples import softmax
+        from ..implementations.intent_v2 import prepare
+        return prepare(softmax,(x,),env)
     intent = intent_environment(env)
     if name == "softmax":
         from intent.examples.kernels.normalization.softmax import stable_softmax, stable_softmax_f16
@@ -62,6 +66,8 @@ def build(name="softmax"):
     impls = {}
     for impl in ("numpy", "torch", "triton", "cutile", "intent:triton", "intent:cutile", "intent:mojo"):
         impls[impl] = Implementation(impl, lambda case, args, env, impl=impl: _prepare(name, impl, case, args, env))
+    if name == "softmax":
+        impls["intent-v2:triton"] = Implementation("intent-v2:triton",lambda c,d,e: _prepare(name,"intent-v2:triton",c,d,e))
     return Workload(name, cases, inputs, impls, oracle=lambda case,args: _numpy(name,*args),
                     atol=2e-3, rtol=2e-3, family="reduction" if name=="softmax" else "elementwise",
                     work=lambda case: {"bytes":2*case.parameters["rows"]*case.parameters["columns"]*np.dtype(case.parameters["dtype"]).itemsize})

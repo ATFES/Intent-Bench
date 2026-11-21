@@ -4,7 +4,7 @@
   "reference_ms": 1.1786800026893616,
   "ratio": 26.82613156056022,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cholesky_solve/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cholesky_solve/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",
@@ -15,9 +15,9 @@
   "precompile_seconds": 1.7449246349278837,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_cholesky_cholesky": "/home/kingdom/.cache/intentdsl/compiler/0de73c2629a44ca69517338ba29d71a9",
-    "fused_cholesky_forward": "/home/kingdom/.cache/intentdsl/compiler/464c8b65b185485dbfe89105ef1ed288",
-    "fused_cholesky_backward": "/home/kingdom/.cache/intentdsl/compiler/ee3e089e9ae1469c87fcb48981d4dbf2"
+    "fused_cholesky_cholesky": "${HOME}/.cache/intentdsl/compiler/0de73c2629a44ca69517338ba29d71a9",
+    "fused_cholesky_forward": "${HOME}/.cache/intentdsl/compiler/464c8b65b185485dbfe89105ef1ed288",
+    "fused_cholesky_backward": "${HOME}/.cache/intentdsl/compiler/ee3e089e9ae1469c87fcb48981d4dbf2"
   },
   "precompile_failures": [],
   "tuning": [

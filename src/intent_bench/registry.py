@@ -28,8 +28,10 @@ def workloads():
         values[name] = Registration(metadata, factory, argument)
     for name, family in (("softmax", "reduction"), ("relu", "pointwise")):
         add({"name":name, "family":family,
-             "implementations":["numpy","torch","triton","cutile","intent:triton","intent:cutile","intent:mojo"]},
+             "implementations":["numpy","torch","triton","cutile","intent:triton","intent:cutile","intent:mojo"]+(["intent-v2:triton"] if name=="softmax" else [])},
             "intent_bench.workloads.elementwise:build", name)
+    add({"name":"weighted_rms_norm","family":"normalization","implementations":["torch","intent:triton","intent-v2:triton"]},
+        "intent_bench.workloads.weighted_rms:build", "weighted_rms_norm")
     for row in catalog():
         add(row, "intent_bench.corpus_adapter:build", row["name"])
     from .workloads.programs import BASELINES as PROGRAM_BASELINES, backends as program_backends

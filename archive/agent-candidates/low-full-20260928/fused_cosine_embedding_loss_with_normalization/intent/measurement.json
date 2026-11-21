@@ -4,7 +4,7 @@
   "reference_ms": 0.03872800059616566,
   "ratio": 0.29828548441638697,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cosine_embedding_loss_with_normalization/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cosine_embedding_loss_with_normalization/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,9 +15,9 @@
   "precompile_seconds": 39.35427450109273,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "cosine_row_loss": "/home/kingdom/.cache/intentdsl/compiler/59e2828246f94288b89e5f388d213eda",
-    "cosine_loss_sum": "/home/kingdom/.cache/intentdsl/compiler/98384593455b4c20a33c659ccbd0d4d1",
-    "cosine_loss_mean": "/home/kingdom/.cache/intentdsl/compiler/5ff3cf17649b4babaefb3c226abef7ca"
+    "cosine_row_loss": "${HOME}/.cache/intentdsl/compiler/59e2828246f94288b89e5f388d213eda",
+    "cosine_loss_sum": "${HOME}/.cache/intentdsl/compiler/98384593455b4c20a33c659ccbd0d4d1",
+    "cosine_loss_mean": "${HOME}/.cache/intentdsl/compiler/5ff3cf17649b4babaefb3c226abef7ca"
   },
   "precompile_failures": [],
   "tuning": [

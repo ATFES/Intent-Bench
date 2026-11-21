@@ -48,4 +48,4 @@ python -m experiments.cpu weft \
   --output experiments/cpu/results/weft-rvv.csv
 ```
 
-`i8_gemv_bias` 使用 [ime.json](providers/weft/ime.json) 的 k1/CPU3/VLEN256/`spacemit-ime1` 条件；普通 RVV 项使用 [rvv.json](providers/weft/rvv.json)。`INTENT_WEFT_PROFILE` 可显式选择现有部署配置，不能把另一台机器的工具链路径直接套用。远端需要 SSH、profile 中的 clang 与运行库；本机生成 artifact，远端编译和执行。
+`i8_gemv_bias` 使用 [ime.json](providers/weft/ime.json) 的 IME/CPU3/VLEN256/`spacemit-ime1` 条件；普通 RVV 项使用 [rvv.json](providers/weft/rvv.json)。`INTENT_WEFT_PROFILE` 可显式选择现有部署配置，不能把另一台机器的工具链路径直接套用。远端需要 SSH、profile 中的 clang 与运行库；本机生成 artifact，远端编译和执行。

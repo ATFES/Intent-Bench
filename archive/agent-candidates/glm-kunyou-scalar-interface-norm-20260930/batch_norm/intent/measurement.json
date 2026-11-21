@@ -4,7 +4,7 @@
   "reference_ms": null,
   "ratio": null,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-scalar-interface-norm-20260930/batch_norm/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-scalar-interface-norm-20260930/batch_norm/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -14,11 +14,11 @@
   },
   "failure_stage": "candidate_precompile",
   "error": "GPU computation must use the submitted language, not PyTorch aten.copy_.default",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 151, in run\n    candidate_call.call(function)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-scalar-interface-norm-20260930/batch_norm/intent/candidate.py\", line 130, in batch_norm\n    used_mean.copy_(running_mean)\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 43, in __torch_dispatch__\n    raise ValueError(f\"GPU computation must use the submitted language, not PyTorch {function}\")\nValueError: GPU computation must use the submitted language, not PyTorch aten.copy_.default\n",
+  "traceback": "Traceback (most recent call last):\n  File \"${HOME}/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 151, in run\n    candidate_call.call(function)\n  File \"${HOME}/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/tasks.py\", line 141, in call\n    return function(*self.args, **self.kwargs)\n  File \"${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-scalar-interface-norm-20260930/batch_norm/intent/candidate.py\", line 130, in batch_norm\n    used_mean.copy_(running_mean)\n  File \"${HOME}/.cache/intentdsl/agent-glm-kunyou-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 43, in __torch_dispatch__\n    raise ValueError(f\"GPU computation must use the submitted language, not PyTorch {function}\")\nValueError: GPU computation must use the submitted language, not PyTorch aten.copy_.default\n",
   "compiler_artifacts": {
-    "batch_norm_stats_train": "/home/kingdom/.cache/intentdsl/compiler/43a60d723589428ba8c6099086054646",
-    "batch_norm_stats_infer": "/home/kingdom/.cache/intentdsl/compiler/3cfe584d9a214438b4cd061ac51eea11",
-    "batch_norm_normalize": "/home/kingdom/.cache/intentdsl/compiler/8e0edcf530464e2f99be765ae982df66"
+    "batch_norm_stats_train": "${HOME}/.cache/intentdsl/compiler/43a60d723589428ba8c6099086054646",
+    "batch_norm_stats_infer": "${HOME}/.cache/intentdsl/compiler/3cfe584d9a214438b4cd061ac51eea11",
+    "batch_norm_normalize": "${HOME}/.cache/intentdsl/compiler/8e0edcf530464e2f99be765ae982df66"
   },
   "precompile_failures": [],
   "tuning": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.01256000017747283,
   "ratio": 0.6464967979298835,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/add_gelu/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-provider-recovery-20260929/add_gelu/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,10 +15,10 @@
   "precompile_seconds": 8.528180379187688,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "add_gelu_tensor_none": "/home/kingdom/.cache/intentdsl/compiler/5826677acf9e49ccbf013024b544539f",
-    "add_gelu_tensor_tanh": "/home/kingdom/.cache/intentdsl/compiler/bb502e53bd7b40e4a60b3f3ef642be10",
-    "add_gelu_scalar_none": "/home/kingdom/.cache/intentdsl/compiler/f0f70c6de07e43719c9435b32d82a985",
-    "add_gelu_scalar_tanh": "/home/kingdom/.cache/intentdsl/compiler/cb1c3e63b2e9456fb9d1bd37e5d726a4"
+    "add_gelu_tensor_none": "${HOME}/.cache/intentdsl/compiler/5826677acf9e49ccbf013024b544539f",
+    "add_gelu_tensor_tanh": "${HOME}/.cache/intentdsl/compiler/bb502e53bd7b40e4a60b3f3ef642be10",
+    "add_gelu_scalar_none": "${HOME}/.cache/intentdsl/compiler/f0f70c6de07e43719c9435b32d82a985",
+    "add_gelu_scalar_tanh": "${HOME}/.cache/intentdsl/compiler/cb1c3e63b2e9456fb9d1bd37e5d726a4"
   },
   "precompile_failures": [],
   "tuning": [

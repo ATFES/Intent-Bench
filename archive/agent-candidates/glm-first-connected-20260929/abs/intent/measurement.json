@@ -4,7 +4,7 @@
   "reference_ms": 0.0077599999494850636,
   "ratio": 0.9731958820419944,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-first-connected-20260929/abs/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-first-connected-20260929/abs/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 0.603944094851613,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "abs_elementwise": "/home/kingdom/.cache/intentdsl/compiler/710b1e2ec5ae40df9043492971d9d634"
+    "abs_elementwise": "${HOME}/.cache/intentdsl/compiler/710b1e2ec5ae40df9043492971d9d634"
   },
   "precompile_failures": [],
   "tuning": [

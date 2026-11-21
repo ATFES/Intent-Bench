@@ -4,7 +4,7 @@
   "reference_ms": 0.023111999966204166,
   "ratio": 0.5309795718712698,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cross_entropy_log_softmax/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cross_entropy_log_softmax/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

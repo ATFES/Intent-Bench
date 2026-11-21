@@ -1,17 +1,17 @@
 {
-  "host": "rvv",
+  "host": "your-ssh-alias",
   "march": "rv64gcv_zfh_zvfh",
   "abi": "lp64d",
   "vlen_bits": 128,
   "cpus": [48],
   "matrix_extension": null,
   "required_extensions": [],
-  "cc": ["/opt/tcrv-toolchains/llvm-18.1.8/bin/clang"],
+  "cc": ["/path/to/riscv-toolchains/llvm-18.1.8/bin/clang"],
   "cflags": [
-    "--gcc-toolchain=/opt/tcrv-toolchains/gcc-15.2.0",
-    "-B/opt/tcrv-toolchains/binutils-2.46.1/bin",
+    "--gcc-toolchain=/path/to/riscv-toolchains/gcc-15.2.0",
+    "-B/path/to/riscv-toolchains/binutils-2.46.1/bin",
     "-fno-integrated-as",
-    "-L/opt/tcrv-toolchains/gcc-15.2.0/lib",
-    "-Wl,-rpath,/opt/tcrv-toolchains/gcc-15.2.0/lib"
+    "-L/path/to/riscv-toolchains/gcc-15.2.0/lib",
+    "-Wl,-rpath,/path/to/riscv-toolchains/gcc-15.2.0/lib"
   ]
 }

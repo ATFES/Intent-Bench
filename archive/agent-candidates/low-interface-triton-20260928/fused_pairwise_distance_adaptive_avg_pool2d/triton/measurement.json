@@ -4,7 +4,7 @@
   "reference_ms": 0.0162559999153018,
   "ratio": 12.241141736399847,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-interface-triton-20260928/fused_pairwise_distance_adaptive_avg_pool2d/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-interface-triton-20260928/fused_pairwise_distance_adaptive_avg_pool2d/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

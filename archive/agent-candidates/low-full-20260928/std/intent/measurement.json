@@ -4,7 +4,7 @@
   "reference_ms": 0.014560000039637089,
   "ratio": 0.6324175989007323,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/std/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/std/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 20.617096416885033,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "std_partial_stats": "/home/kingdom/.cache/intentdsl/compiler/1129f070a3e44dd6963f1b558e3cbbc1",
-    "std_finish_stats": "/home/kingdom/.cache/intentdsl/compiler/d700163163a442a793be0cd4d10bdf28"
+    "std_partial_stats": "${HOME}/.cache/intentdsl/compiler/1129f070a3e44dd6963f1b558e3cbbc1",
+    "std_finish_stats": "${HOME}/.cache/intentdsl/compiler/d700163163a442a793be0cd4d10bdf28"
   },
   "precompile_failures": [],
   "tuning": [

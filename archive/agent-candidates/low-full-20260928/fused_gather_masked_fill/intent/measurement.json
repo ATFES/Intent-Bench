@@ -4,7 +4,7 @@
   "reference_ms": 0.022559999488294125,
   "ratio": 0.7368794459456196,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_gather_masked_fill/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_gather_masked_fill/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 3.0633793380111456,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_gather_masked_fill": "/home/kingdom/.cache/intentdsl/compiler/49638b48b679412191089e752a55982f"
+    "fused_gather_masked_fill": "${HOME}/.cache/intentdsl/compiler/49638b48b679412191089e752a55982f"
   },
   "precompile_failures": [],
   "tuning": [

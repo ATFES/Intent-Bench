@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_hardsigmoid_batch_norm-intent-0d850l1n",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_hardsigmoid_batch_norm-intent-0d850l1n",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.010128000285476446,
   "ratio": 0.7622432753716543,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/ifftshift/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/ifftshift/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 1.4438794378656894,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "ifftshift_1d": "/home/kingdom/.cache/intentdsl/compiler/e1e45a997cb046d3ba889b0ecb8515ba"
+    "ifftshift_1d": "${HOME}/.cache/intentdsl/compiler/e1e45a997cb046d3ba889b0ecb8515ba"
   },
   "precompile_failures": [],
   "tuning": [

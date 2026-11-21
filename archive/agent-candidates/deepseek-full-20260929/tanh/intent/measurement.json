@@ -4,7 +4,7 @@
   "reference_ms": 0.007631999906152487,
   "ratio": 1.070230655485996,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/tanh/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/tanh/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 0.618416169192642,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "tanh_kernel": "/home/kingdom/.cache/intentdsl/compiler/a5b6ab4a6476485ca509b59183c6e428"
+    "tanh_kernel": "${HOME}/.cache/intentdsl/compiler/a5b6ab4a6476485ca509b59183c6e428"
   },
   "precompile_failures": [],
   "tuning": [

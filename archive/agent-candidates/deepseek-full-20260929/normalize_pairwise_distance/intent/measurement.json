@@ -4,7 +4,7 @@
   "reference_ms": 0.016896000131964684,
   "ratio": 0.5625000068901114,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/normalize_pairwise_distance/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/normalize_pairwise_distance/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 18.62365532713011,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "normalize_pairwise_distance_pairwise": "/home/kingdom/.cache/intentdsl/compiler/6d894bef74f34518baa94fc247030fc8",
-    "normalize_pairwise_distance_normalize": "/home/kingdom/.cache/intentdsl/compiler/44bcb465a966438b9d1c2418a011d49a"
+    "normalize_pairwise_distance_pairwise": "${HOME}/.cache/intentdsl/compiler/6d894bef74f34518baa94fc247030fc8",
+    "normalize_pairwise_distance_normalize": "${HOME}/.cache/intentdsl/compiler/44bcb465a966438b9d1c2418a011d49a"
   },
   "precompile_failures": [],
   "tuning": [

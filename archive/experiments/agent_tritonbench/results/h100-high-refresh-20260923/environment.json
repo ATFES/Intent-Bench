@@ -2,13 +2,13 @@
   "project_revision": "a3bddc6a91917281dbe963a8f9cad8776302e6bd",
   "reference_revision": "603e28a5050e8c268f6883a69709d477a272d49a",
   "triton_ref_revision": "ef08c7fc412737f1663dbfc38a8bed3e9fbf82da",
-  "compiler": "/home/kingdom/.cache/intentdsl/main-build/tools/intent-compile/intent-compile",
+  "compiler": "${HOME}/.cache/intentdsl/main-build/tools/intent-compile/intent-compile",
   "torch": "2.10.0+cu130",
   "triton": "3.6.0",
   "gpu": null,
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
-  "suite": "/home/kingdom/phdworks/intentdsl/experiments/agent_tritonbench/suite-100.json",
+  "suite": "${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/suite-100.json",
   "tasks": [
     {
       "task": "abs",

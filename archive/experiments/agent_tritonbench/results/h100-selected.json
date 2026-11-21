@@ -20,7 +20,7 @@
   },
   "suite": "experiments/agent_tritonbench/suite-100.json",
   "runner": "experiments/agent_tritonbench/benchmark.py",
-  "source_root": "/home/kingdom/.local/share/intentdsl/agent-evaluation",
+  "source_root": "${HOME}/.local/share/intentdsl/agent-evaluation",
   "source_artifact": "first-stage-performance-h100-current-selected-full-20260922b",
   "result_files": {
     "operator_comparison": "h100-selected.csv",
@@ -3708,7 +3708,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "abs_f32_1d": "/home/kingdom/.cache/intentdsl/compiler/683c4ca5152c41d38e56d154e6751e9f"
+          "abs_f32_1d": "${HOME}/.cache/intentdsl/compiler/683c4ca5152c41d38e56d154e6751e9f"
         },
         "tuning_winners": [
           {
@@ -3733,7 +3733,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "elementwise_add": "/home/kingdom/.cache/intentdsl/compiler/0c58943976334b8a92f193fbc5551ab7"
+          "elementwise_add": "${HOME}/.cache/intentdsl/compiler/0c58943976334b8a92f193fbc5551ab7"
         },
         "tuning_winners": [
           {
@@ -3758,8 +3758,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "add_gelu_none": "/home/kingdom/.cache/intentdsl/compiler/2a56455725c4486dae5e03dd7494c696",
-          "add_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/e855faf664354eea9f881366e56a24c7"
+          "add_gelu_none": "${HOME}/.cache/intentdsl/compiler/2a56455725c4486dae5e03dd7494c696",
+          "add_gelu_tanh": "${HOME}/.cache/intentdsl/compiler/e855faf664354eea9f881366e56a24c7"
         },
         "tuning_winners": [
           {
@@ -3784,8 +3784,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "add_mean_partial_sums": "/home/kingdom/.cache/intentdsl/compiler/b047de40b6a34dcbad3833f800c83c8c",
-          "add_mean_finish": "/home/kingdom/.cache/intentdsl/compiler/5e07ed897d5c495f9f98bd0e9b7d214b"
+          "add_mean_partial_sums": "${HOME}/.cache/intentdsl/compiler/b047de40b6a34dcbad3833f800c83c8c",
+          "add_mean_finish": "${HOME}/.cache/intentdsl/compiler/5e07ed897d5c495f9f98bd0e9b7d214b"
         },
         "tuning_winners": [
           {
@@ -3814,7 +3814,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "addmm_intent_kernel": "/home/kingdom/.cache/intentdsl/compiler/e2f4152ba47440f99d81a260ddc4e277"
+          "addmm_intent_kernel": "${HOME}/.cache/intentdsl/compiler/e2f4152ba47440f99d81a260ddc4e277"
         },
         "tuning_winners": [
           {
@@ -3839,8 +3839,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "argmax_partial": "/home/kingdom/.cache/intentdsl/compiler/7257836008064b4cb4147bbee0ba2c64",
-          "argmax_final": "/home/kingdom/.cache/intentdsl/compiler/60bb42eee30241eaa96d61239ffb5af9"
+          "argmax_partial": "${HOME}/.cache/intentdsl/compiler/7257836008064b4cb4147bbee0ba2c64",
+          "argmax_final": "${HOME}/.cache/intentdsl/compiler/60bb42eee30241eaa96d61239ffb5af9"
         },
         "tuning_winners": [
           {
@@ -3869,7 +3869,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "asin_intent_kernel": "/home/kingdom/.cache/intentdsl/compiler/810cb268adde485186e390fad41a21d6"
+          "asin_intent_kernel": "${HOME}/.cache/intentdsl/compiler/810cb268adde485186e390fad41a21d6"
         },
         "tuning_winners": [
           {
@@ -3894,10 +3894,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "batch_norm_affine": "/home/kingdom/.cache/intentdsl/compiler/2877b1c738d14b63b56aa929747b9d3e",
-          "batch_norm_no_affine": "/home/kingdom/.cache/intentdsl/compiler/1e8743f3e87b44b9be40ea2612155756",
-          "batch_norm_weight_only": "/home/kingdom/.cache/intentdsl/compiler/c3917eb6d86f49b8bde25552a10686fa",
-          "batch_norm_bias_only": "/home/kingdom/.cache/intentdsl/compiler/ad968d5d52024987938057193ab0d916"
+          "batch_norm_affine": "${HOME}/.cache/intentdsl/compiler/2877b1c738d14b63b56aa929747b9d3e",
+          "batch_norm_no_affine": "${HOME}/.cache/intentdsl/compiler/1e8743f3e87b44b9be40ea2612155756",
+          "batch_norm_weight_only": "${HOME}/.cache/intentdsl/compiler/c3917eb6d86f49b8bde25552a10686fa",
+          "batch_norm_bias_only": "${HOME}/.cache/intentdsl/compiler/ad968d5d52024987938057193ab0d916"
         },
         "tuning_winners": [
           {
@@ -3922,7 +3922,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "bitwise_and_int32": "/home/kingdom/.cache/intentdsl/compiler/5a5ebc9fe84b499281bcf3e4819da42a"
+          "bitwise_and_int32": "${HOME}/.cache/intentdsl/compiler/5a5ebc9fe84b499281bcf3e4819da42a"
         },
         "tuning_winners": [
           {
@@ -3947,7 +3947,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "chebyshev_t3": "/home/kingdom/.cache/intentdsl/compiler/927a8b5bb9ed4079b1c29586f0bde1dc"
+          "chebyshev_t3": "${HOME}/.cache/intentdsl/compiler/927a8b5bb9ed4079b1c29586f0bde1dc"
         },
         "tuning_winners": [
           {
@@ -3972,7 +3972,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "combined_activation": "/home/kingdom/.cache/intentdsl/compiler/b8c99eb521a74ccabcdd84c1ef737157"
+          "combined_activation": "${HOME}/.cache/intentdsl/compiler/b8c99eb521a74ccabcdd84c1ef737157"
         },
         "tuning_winners": [
           {
@@ -3997,8 +3997,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "conv2d_with_bias": "/home/kingdom/.cache/intentdsl/compiler/6332c4529ea4486ea63f650f9b9bd3bb",
-          "conv2d_without_bias": "/home/kingdom/.cache/intentdsl/compiler/e8f2db8aaabf43b798dc367cec40151e"
+          "conv2d_with_bias": "${HOME}/.cache/intentdsl/compiler/6332c4529ea4486ea63f650f9b9bd3bb",
+          "conv2d_without_bias": "${HOME}/.cache/intentdsl/compiler/e8f2db8aaabf43b798dc367cec40151e"
         },
         "tuning_winners": [
           {
@@ -4023,7 +4023,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "conv2d_add_fixed": "/home/kingdom/.cache/intentdsl/compiler/b96f0258dc6a4983b2fdc3c44ba0bbbe"
+          "conv2d_add_fixed": "${HOME}/.cache/intentdsl/compiler/b96f0258dc6a4983b2fdc3c44ba0bbbe"
         },
         "tuning_winners": [
           {
@@ -4048,7 +4048,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "cos_kernel": "/home/kingdom/.cache/intentdsl/compiler/30afa585bb1842c29a3cd4bcd20284b7"
+          "cos_kernel": "${HOME}/.cache/intentdsl/compiler/30afa585bb1842c29a3cd4bcd20284b7"
         },
         "tuning_winners": [
           {
@@ -4073,7 +4073,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "cos_avg_pool1d": "/home/kingdom/.cache/intentdsl/compiler/e38c3d784c4e4f5aa3b1eeeefd8529af"
+          "cos_avg_pool1d": "${HOME}/.cache/intentdsl/compiler/e38c3d784c4e4f5aa3b1eeeefd8529af"
         },
         "tuning_winners": [
           {
@@ -4098,8 +4098,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "det_qr_copy": "/home/kingdom/.cache/intentdsl/compiler/d52801de31b840dcb95383d60105d12b",
-          "det_qr_householder": "/home/kingdom/.cache/intentdsl/compiler/2366ce7a8af742f6a6a64494c6ab518a"
+          "det_qr_copy": "${HOME}/.cache/intentdsl/compiler/d52801de31b840dcb95383d60105d12b",
+          "det_qr_householder": "${HOME}/.cache/intentdsl/compiler/2366ce7a8af742f6a6a64494c6ab518a"
         },
         "tuning_winners": [
           {
@@ -4128,7 +4128,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "div_float32": "/home/kingdom/.cache/intentdsl/compiler/b4c92df0bc15471d93e788aeb9223466"
+          "div_float32": "${HOME}/.cache/intentdsl/compiler/b4c92df0bc15471d93e788aeb9223466"
         },
         "tuning_winners": [
           {
@@ -4153,7 +4153,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "erfc_sqrt_elementwise": "/home/kingdom/.cache/intentdsl/compiler/41277ed3aa8e46f585a94333f2b1729c"
+          "erfc_sqrt_elementwise": "${HOME}/.cache/intentdsl/compiler/41277ed3aa8e46f585a94333f2b1729c"
         },
         "tuning_winners": [
           {
@@ -4178,7 +4178,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "exp_float32_1d": "/home/kingdom/.cache/intentdsl/compiler/9abfd8221b334a2ebc8053cf24dda506"
+          "exp_float32_1d": "${HOME}/.cache/intentdsl/compiler/9abfd8221b334a2ebc8053cf24dda506"
         },
         "tuning_winners": [
           {
@@ -4203,8 +4203,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "exp_mean_stage1": "/home/kingdom/.cache/intentdsl/compiler/39f89c0fe0894507a032a5c69f4de077",
-          "exp_mean_stage2": "/home/kingdom/.cache/intentdsl/compiler/c7b20f80d16947df8db86b52676ae30e"
+          "exp_mean_stage1": "${HOME}/.cache/intentdsl/compiler/39f89c0fe0894507a032a5c69f4de077",
+          "exp_mean_stage2": "${HOME}/.cache/intentdsl/compiler/c7b20f80d16947df8db86b52676ae30e"
         },
         "tuning_winners": [
           {
@@ -4233,7 +4233,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "exp_sqrt": "/home/kingdom/.cache/intentdsl/compiler/44b22af9661e404b9f487ed93a6b38f5"
+          "exp_sqrt": "${HOME}/.cache/intentdsl/compiler/44b22af9661e404b9f487ed93a6b38f5"
         },
         "tuning_winners": [
           {
@@ -4258,7 +4258,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "floor_float32": "/home/kingdom/.cache/intentdsl/compiler/ab0e954898d6454eb15d2ffb0a440c96"
+          "floor_float32": "${HOME}/.cache/intentdsl/compiler/ab0e954898d6454eb15d2ffb0a440c96"
         },
         "tuning_winners": [
           {
@@ -4283,7 +4283,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_add_mul_groupnorm": "/home/kingdom/.cache/intentdsl/compiler/98f9c06c9ea54727a3772c600aa47489"
+          "fused_add_mul_groupnorm": "${HOME}/.cache/intentdsl/compiler/98f9c06c9ea54727a3772c600aa47489"
         },
         "tuning_winners": [
           {
@@ -4308,8 +4308,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "cosine_stage": "/home/kingdom/.cache/intentdsl/compiler/780eb30ee5f64f5aaa17b3c262cfdc26",
-          "avg_pool_stage": "/home/kingdom/.cache/intentdsl/compiler/18c2c76c56a64f6f860bba32256e94ac"
+          "cosine_stage": "${HOME}/.cache/intentdsl/compiler/780eb30ee5f64f5aaa17b3c262cfdc26",
+          "avg_pool_stage": "${HOME}/.cache/intentdsl/compiler/18c2c76c56a64f6f860bba32256e94ac"
         },
         "tuning_winners": [
           {
@@ -4338,9 +4338,9 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_cholesky_factor": "/home/kingdom/.cache/intentdsl/compiler/fdb45bc0026c4d36b1988382b3346fa4",
-          "fused_forward_substitution": "/home/kingdom/.cache/intentdsl/compiler/de5850d101c84ba19d6c7b3e54630f58",
-          "fused_backward_substitution": "/home/kingdom/.cache/intentdsl/compiler/03fca4756dc04bdca1aeebbcabc30322"
+          "fused_cholesky_factor": "${HOME}/.cache/intentdsl/compiler/fdb45bc0026c4d36b1988382b3346fa4",
+          "fused_forward_substitution": "${HOME}/.cache/intentdsl/compiler/de5850d101c84ba19d6c7b3e54630f58",
+          "fused_backward_substitution": "${HOME}/.cache/intentdsl/compiler/03fca4756dc04bdca1aeebbcabc30322"
         },
         "tuning_winners": [
           {
@@ -4373,8 +4373,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_cosine_row_loss": "/home/kingdom/.cache/intentdsl/compiler/81e9c75b91d44a7ebb5c35a866ea20e1",
-          "fused_cosine_reduce_loss": "/home/kingdom/.cache/intentdsl/compiler/d96d6c4d94a646c681995ab396fba523"
+          "fused_cosine_row_loss": "${HOME}/.cache/intentdsl/compiler/81e9c75b91d44a7ebb5c35a866ea20e1",
+          "fused_cosine_reduce_loss": "${HOME}/.cache/intentdsl/compiler/d96d6c4d94a646c681995ab396fba523"
         },
         "tuning_winners": [
           {
@@ -4403,8 +4403,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_ce_log_softmax_rows": "/home/kingdom/.cache/intentdsl/compiler/10f1245031864340b6c08cd0d9191242",
-          "fused_ce_log_softmax_mean": "/home/kingdom/.cache/intentdsl/compiler/4f3c3c88a7c84d3d944ed6fdb785d35e"
+          "fused_ce_log_softmax_rows": "${HOME}/.cache/intentdsl/compiler/10f1245031864340b6c08cd0d9191242",
+          "fused_ce_log_softmax_mean": "${HOME}/.cache/intentdsl/compiler/4f3c3c88a7c84d3d944ed6fdb785d35e"
         },
         "tuning_winners": [
           {
@@ -4433,8 +4433,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_cross_entropy_softmax_layernorm_rows": "/home/kingdom/.cache/intentdsl/compiler/87489f5bed2f4323b31d506df2a2137a",
-          "fused_cross_entropy_softmax_layernorm_mean": "/home/kingdom/.cache/intentdsl/compiler/8f1e74f39edc40c3902a5f73463a74eb"
+          "fused_cross_entropy_softmax_layernorm_rows": "${HOME}/.cache/intentdsl/compiler/87489f5bed2f4323b31d506df2a2137a",
+          "fused_cross_entropy_softmax_layernorm_mean": "${HOME}/.cache/intentdsl/compiler/8f1e74f39edc40c3902a5f73463a74eb"
         },
         "tuning_winners": [
           {
@@ -4463,7 +4463,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_embedding_add_tanh": "/home/kingdom/.cache/intentdsl/compiler/327dbaf9a785479984527830a309fce8"
+          "fused_embedding_add_tanh": "${HOME}/.cache/intentdsl/compiler/327dbaf9a785479984527830a309fce8"
         },
         "tuning_winners": [
           {
@@ -4488,7 +4488,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_gather_masked_fill": "/home/kingdom/.cache/intentdsl/compiler/8813dabc69934c849c70911dc7003739"
+          "fused_gather_masked_fill": "${HOME}/.cache/intentdsl/compiler/8813dabc69934c849c70911dc7003739"
         },
         "tuning_winners": [
           {
@@ -4513,10 +4513,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_hardsigmoid_batch_norm_wb": "/home/kingdom/.cache/intentdsl/compiler/78de560900e041b88d25eb0b92fcfab7",
-          "fused_hardsigmoid_batch_norm_w": "/home/kingdom/.cache/intentdsl/compiler/df81f91798404d32a59e73b2266ded55",
-          "fused_hardsigmoid_batch_norm_b": "/home/kingdom/.cache/intentdsl/compiler/6f3fe3b591e74fbfbb4d4f6627849217",
-          "fused_hardsigmoid_batch_norm_none": "/home/kingdom/.cache/intentdsl/compiler/982710d52a734b73b413594ce8440c66"
+          "fused_hardsigmoid_batch_norm_wb": "${HOME}/.cache/intentdsl/compiler/78de560900e041b88d25eb0b92fcfab7",
+          "fused_hardsigmoid_batch_norm_w": "${HOME}/.cache/intentdsl/compiler/df81f91798404d32a59e73b2266ded55",
+          "fused_hardsigmoid_batch_norm_b": "${HOME}/.cache/intentdsl/compiler/6f3fe3b591e74fbfbb4d4f6627849217",
+          "fused_hardsigmoid_batch_norm_none": "${HOME}/.cache/intentdsl/compiler/982710d52a734b73b413594ce8440c66"
         },
         "tuning_winners": [
           {
@@ -4541,7 +4541,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_index_select_eq": "/home/kingdom/.cache/intentdsl/compiler/6b1a09c3237f472a89ea5df02ffadd85"
+          "fused_index_select_eq": "${HOME}/.cache/intentdsl/compiler/6b1a09c3237f472a89ea5df02ffadd85"
         },
         "tuning_winners": [
           {
@@ -4566,9 +4566,9 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_conv_selu": "/home/kingdom/.cache/intentdsl/compiler/833717a2aece4fb9a1ca87325f5b4f3c",
-          "fused_conv_selu_no_bias": "/home/kingdom/.cache/intentdsl/compiler/4f94e98fb62c4c33b6669fd0c2b73b1c",
-          "fused_instance_norm": "/home/kingdom/.cache/intentdsl/compiler/0081fa86995941aa85970a0fa1ad75d0"
+          "fused_conv_selu": "${HOME}/.cache/intentdsl/compiler/833717a2aece4fb9a1ca87325f5b4f3c",
+          "fused_conv_selu_no_bias": "${HOME}/.cache/intentdsl/compiler/4f94e98fb62c4c33b6669fd0c2b73b1c",
+          "fused_instance_norm": "${HOME}/.cache/intentdsl/compiler/0081fa86995941aa85970a0fa1ad75d0"
         },
         "tuning_winners": [
           {
@@ -4597,9 +4597,9 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_linear_relu_bias": "/home/kingdom/.cache/intentdsl/compiler/8e4a89a568ff41fbad2c108854aba1a9",
-          "fused_linear_relu_no_bias": "/home/kingdom/.cache/intentdsl/compiler/da4ed372f88443b6abc60075b5088062",
-          "fused_layer_norm": "/home/kingdom/.cache/intentdsl/compiler/ecc7aef94fd64c4789482a6a7faa889b"
+          "fused_linear_relu_bias": "${HOME}/.cache/intentdsl/compiler/8e4a89a568ff41fbad2c108854aba1a9",
+          "fused_linear_relu_no_bias": "${HOME}/.cache/intentdsl/compiler/da4ed372f88443b6abc60075b5088062",
+          "fused_layer_norm": "${HOME}/.cache/intentdsl/compiler/ecc7aef94fd64c4789482a6a7faa889b"
         },
         "tuning_winners": [
           {
@@ -4628,8 +4628,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "lu_factor": "/home/kingdom/.cache/intentdsl/compiler/e361f4e6f19c4d29b652602ae595814b",
-          "lu_solve": "/home/kingdom/.cache/intentdsl/compiler/1ecbb4cef132468293c5414c954083ad"
+          "lu_factor": "${HOME}/.cache/intentdsl/compiler/e361f4e6f19c4d29b652602ae595814b",
+          "lu_solve": "${HOME}/.cache/intentdsl/compiler/1ecbb4cef132468293c5414c954083ad"
         },
         "tuning_winners": [
           {
@@ -4658,10 +4658,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "masked_select_gelu_prefix": "/home/kingdom/.cache/intentdsl/compiler/c27a5eec52b84e128f95a6aa36ff498f",
-          "masked_select_add_gelu_exact": "/home/kingdom/.cache/intentdsl/compiler/1166badab5d542c5aba32d0dd9c4a87f",
-          "masked_select_add_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/bc825c70857041e4b9267f3c41c02c0e",
-          "masked_select_gelu_copy": "/home/kingdom/.cache/intentdsl/compiler/8def202427294999b8b4b28979a4852d"
+          "masked_select_gelu_prefix": "${HOME}/.cache/intentdsl/compiler/c27a5eec52b84e128f95a6aa36ff498f",
+          "masked_select_add_gelu_exact": "${HOME}/.cache/intentdsl/compiler/1166badab5d542c5aba32d0dd9c4a87f",
+          "masked_select_add_gelu_tanh": "${HOME}/.cache/intentdsl/compiler/bc825c70857041e4b9267f3c41c02c0e",
+          "masked_select_gelu_copy": "${HOME}/.cache/intentdsl/compiler/8def202427294999b8b4b28979a4852d"
         },
         "tuning_winners": [
           {
@@ -4690,7 +4690,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_mv_sigmoid_sub_scalar": "/home/kingdom/.cache/intentdsl/compiler/4964b82c4f334345b55f39f39527c007"
+          "fused_mv_sigmoid_sub_scalar": "${HOME}/.cache/intentdsl/compiler/4964b82c4f334345b55f39f39527c007"
         },
         "tuning_winners": [
           {
@@ -4715,7 +4715,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_pairwise_distance": "/home/kingdom/.cache/intentdsl/compiler/8bf20e6ce87f4901877222be5ca1423c"
+          "fused_pairwise_distance": "${HOME}/.cache/intentdsl/compiler/8bf20e6ce87f4901877222be5ca1423c"
         },
         "tuning_winners": [
           {
@@ -4740,7 +4740,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_qr_solve": "/home/kingdom/.cache/intentdsl/compiler/9881ead5bfd143ef93a97991ab6a503a"
+          "fused_qr_solve": "${HOME}/.cache/intentdsl/compiler/9881ead5bfd143ef93a97991ab6a503a"
         },
         "tuning_winners": [
           {
@@ -4765,9 +4765,9 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_conv_bias": "/home/kingdom/.cache/intentdsl/compiler/77e50e89eb3347b791595e7f81b8e4a3",
-          "fused_conv_no_bias": "/home/kingdom/.cache/intentdsl/compiler/d3e12efe6a864294b256c982d8f4f96c",
-          "fused_layer_norm_silu": "/home/kingdom/.cache/intentdsl/compiler/ec9ca3fb2ef64e2292d4f983a032ee34"
+          "fused_conv_bias": "${HOME}/.cache/intentdsl/compiler/77e50e89eb3347b791595e7f81b8e4a3",
+          "fused_conv_no_bias": "${HOME}/.cache/intentdsl/compiler/d3e12efe6a864294b256c982d8f4f96c",
+          "fused_layer_norm_silu": "${HOME}/.cache/intentdsl/compiler/ec9ca3fb2ef64e2292d4f983a032ee34"
         },
         "tuning_winners": [
           {
@@ -4796,7 +4796,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_svd_reconstruct_identity": "/home/kingdom/.cache/intentdsl/compiler/f0f73e8e713b41fd8680057c1d05162e"
+          "fused_svd_reconstruct_identity": "${HOME}/.cache/intentdsl/compiler/f0f73e8e713b41fd8680057c1d05162e"
         },
         "tuning_winners": [
           {
@@ -4821,7 +4821,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_tile_exp": "/home/kingdom/.cache/intentdsl/compiler/26da523afe964a9094382aac2975c565"
+          "fused_tile_exp": "${HOME}/.cache/intentdsl/compiler/26da523afe964a9094382aac2975c565"
         },
         "tuning_winners": [
           {
@@ -4846,7 +4846,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "gammaln_elementwise": "/home/kingdom/.cache/intentdsl/compiler/3fc9a2a61d9149348e00732f727fdfd1"
+          "gammaln_elementwise": "${HOME}/.cache/intentdsl/compiler/3fc9a2a61d9149348e00732f727fdfd1"
         },
         "tuning_winners": [
           {
@@ -4871,8 +4871,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "gelu_none": "/home/kingdom/.cache/intentdsl/compiler/6b8adc0ebf174750a777fa613b4d4bfc",
-          "gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/92414cf8afee49b0af47fb7f8a708c0a"
+          "gelu_none": "${HOME}/.cache/intentdsl/compiler/6b8adc0ebf174750a777fa613b4d4bfc",
+          "gelu_tanh": "${HOME}/.cache/intentdsl/compiler/92414cf8afee49b0af47fb7f8a708c0a"
         },
         "tuning_winners": [
           {
@@ -4897,10 +4897,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "gelu_conv2d_no_bias_none": "/home/kingdom/.cache/intentdsl/compiler/5e42b4fba2b04129982650bc356be7bf",
-          "gelu_conv2d_no_bias_tanh": "/home/kingdom/.cache/intentdsl/compiler/59d96f19e31f4ffaa363edeb6934600c",
-          "gelu_conv2d_bias_none": "/home/kingdom/.cache/intentdsl/compiler/956855fa2d3d45c8ad0c8e638fc37b0d",
-          "gelu_conv2d_bias_tanh": "/home/kingdom/.cache/intentdsl/compiler/239503bc82c742e99a7b96c6d7d37421"
+          "gelu_conv2d_no_bias_none": "${HOME}/.cache/intentdsl/compiler/5e42b4fba2b04129982650bc356be7bf",
+          "gelu_conv2d_no_bias_tanh": "${HOME}/.cache/intentdsl/compiler/59d96f19e31f4ffaa363edeb6934600c",
+          "gelu_conv2d_bias_none": "${HOME}/.cache/intentdsl/compiler/956855fa2d3d45c8ad0c8e638fc37b0d",
+          "gelu_conv2d_bias_tanh": "${HOME}/.cache/intentdsl/compiler/239503bc82c742e99a7b96c6d7d37421"
         },
         "tuning_winners": [
           {
@@ -4925,7 +4925,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "grid_sample_bilinear_zeros": "/home/kingdom/.cache/intentdsl/compiler/18e7ee92112247539702a6d25c296ee4"
+          "grid_sample_bilinear_zeros": "${HOME}/.cache/intentdsl/compiler/18e7ee92112247539702a6d25c296ee4"
         },
         "tuning_winners": [
           {
@@ -4950,7 +4950,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "i0_kernel": "/home/kingdom/.cache/intentdsl/compiler/0eca2a3d7d0a42e8bf3c4967f7a8cef8"
+          "i0_kernel": "${HOME}/.cache/intentdsl/compiler/0eca2a3d7d0a42e8bf3c4967f7a8cef8"
         },
         "tuning_winners": [
           {
@@ -4975,7 +4975,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "ifftshift_1d": "/home/kingdom/.cache/intentdsl/compiler/e8215e288ab2494c86213bbdd093bba8"
+          "ifftshift_1d": "${HOME}/.cache/intentdsl/compiler/e8215e288ab2494c86213bbdd093bba8"
         },
         "tuning_winners": [
           {
@@ -5000,8 +5000,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "leaky_relu_out": "/home/kingdom/.cache/intentdsl/compiler/bfa62ddfb0bd4dd691421223f602dafe",
-          "leaky_relu_inplace": "/home/kingdom/.cache/intentdsl/compiler/7e83e6a151824e52a7d1e53d21f9f43b"
+          "leaky_relu_out": "${HOME}/.cache/intentdsl/compiler/bfa62ddfb0bd4dd691421223f602dafe",
+          "leaky_relu_inplace": "${HOME}/.cache/intentdsl/compiler/7e83e6a151824e52a7d1e53d21f9f43b"
         },
         "tuning_winners": [
           {
@@ -5026,8 +5026,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "leaky_relu_conv2d": "/home/kingdom/.cache/intentdsl/compiler/f49eb135771244c3b3167da00d687c22",
-          "leaky_relu_conv2d_no_bias": "/home/kingdom/.cache/intentdsl/compiler/a3841e4fc26b4516ac82691dacc834e6"
+          "leaky_relu_conv2d": "${HOME}/.cache/intentdsl/compiler/f49eb135771244c3b3167da00d687c22",
+          "leaky_relu_conv2d_no_bias": "${HOME}/.cache/intentdsl/compiler/a3841e4fc26b4516ac82691dacc834e6"
         },
         "tuning_winners": [
           {
@@ -5052,8 +5052,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "least_squares_qr_factor": "/home/kingdom/.cache/intentdsl/compiler/177b8845466b413496de530fca3b4558",
-          "least_squares_qr_solve": "/home/kingdom/.cache/intentdsl/compiler/070c73c690f3408f8324c5bfe89e3a45"
+          "least_squares_qr_factor": "${HOME}/.cache/intentdsl/compiler/177b8845466b413496de530fca3b4558",
+          "least_squares_qr_solve": "${HOME}/.cache/intentdsl/compiler/070c73c690f3408f8324c5bfe89e3a45"
         },
         "tuning_winners": [
           {
@@ -5082,7 +5082,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "log_elementwise": "/home/kingdom/.cache/intentdsl/compiler/88afd13a4724494499f4c24abaa6115d"
+          "log_elementwise": "${HOME}/.cache/intentdsl/compiler/88afd13a4724494499f4c24abaa6115d"
         },
         "tuning_winners": [
           {
@@ -5107,7 +5107,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "log1p": "/home/kingdom/.cache/intentdsl/compiler/2f4659d1c33c4986a47867c7c44e4ce9"
+          "log1p": "${HOME}/.cache/intentdsl/compiler/2f4659d1c33c4986a47867c7c44e4ce9"
         },
         "tuning_winners": [
           {
@@ -5132,8 +5132,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "linear_log_softmax": "/home/kingdom/.cache/intentdsl/compiler/ddd980288dc24c0c810a7134bf0f0bac",
-          "linear_log_softmax_no_bias": "/home/kingdom/.cache/intentdsl/compiler/fa3a109076874c3ebc2febc68da7515d"
+          "linear_log_softmax": "${HOME}/.cache/intentdsl/compiler/ddd980288dc24c0c810a7134bf0f0bac",
+          "linear_log_softmax_no_bias": "${HOME}/.cache/intentdsl/compiler/fa3a109076874c3ebc2febc68da7515d"
         },
         "tuning_winners": [
           {
@@ -5158,7 +5158,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "log_tanh": "/home/kingdom/.cache/intentdsl/compiler/411f2262f03441c8b5c3cc1343529616"
+          "log_tanh": "${HOME}/.cache/intentdsl/compiler/411f2262f03441c8b5c3cc1343529616"
         },
         "tuning_winners": [
           {
@@ -5183,8 +5183,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "logit_none": "/home/kingdom/.cache/intentdsl/compiler/2c65354471c647f6967a7cb9f9fc9770",
-          "logit_eps": "/home/kingdom/.cache/intentdsl/compiler/a4d3c0a27dbb4d71b228fc0f6459f659"
+          "logit_none": "${HOME}/.cache/intentdsl/compiler/2c65354471c647f6967a7cb9f9fc9770",
+          "logit_eps": "${HOME}/.cache/intentdsl/compiler/a4d3c0a27dbb4d71b228fc0f6459f659"
         },
         "tuning_winners": [
           {
@@ -5209,8 +5209,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "logsumexp_partial": "/home/kingdom/.cache/intentdsl/compiler/4e076851252a47569b2d4dba93e77dca",
-          "logsumexp_finalize": "/home/kingdom/.cache/intentdsl/compiler/93f30a1727dd4a918269c53f44857d2c"
+          "logsumexp_partial": "${HOME}/.cache/intentdsl/compiler/4e076851252a47569b2d4dba93e77dca",
+          "logsumexp_finalize": "${HOME}/.cache/intentdsl/compiler/93f30a1727dd4a918269c53f44857d2c"
         },
         "tuning_winners": [
           {
@@ -5239,7 +5239,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "matmul_fp16": "/home/kingdom/.cache/intentdsl/compiler/b19e27a890f74218bed10b9dd2a5a29d"
+          "matmul_fp16": "${HOME}/.cache/intentdsl/compiler/b19e27a890f74218bed10b9dd2a5a29d"
         },
         "tuning_winners": [
           {
@@ -5266,8 +5266,8 @@
         "error": "generated/source floating result 0 differs: max_abs=0.0421295166015625, atol=0.0001, rtol=0.0001; first_failure=0; largest tolerance excess has generated=161.161865234375, source=161.20399475097656, abs_error=0.0421295166015625, limit=0.016220398247241974",
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "matrix_power_eig_symmetrize": "/home/kingdom/.cache/intentdsl/compiler/6f3f8703c0a0496db327a662108dd992",
-          "matrix_power_eig_power_two": "/home/kingdom/.cache/intentdsl/compiler/0aea1ca5022f4599b25d48f37bb82331"
+          "matrix_power_eig_symmetrize": "${HOME}/.cache/intentdsl/compiler/6f3f8703c0a0496db327a662108dd992",
+          "matrix_power_eig_power_two": "${HOME}/.cache/intentdsl/compiler/0aea1ca5022f4599b25d48f37bb82331"
         },
         "tuning_winners": [
           {
@@ -5296,8 +5296,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "chunk_argmax": "/home/kingdom/.cache/intentdsl/compiler/f68cd76ef67f48efb579a05a9c1a9b71",
-          "final_argmax": "/home/kingdom/.cache/intentdsl/compiler/c7347969c511409eafe8b93ec1a3346b"
+          "chunk_argmax": "${HOME}/.cache/intentdsl/compiler/f68cd76ef67f48efb579a05a9c1a9b71",
+          "final_argmax": "${HOME}/.cache/intentdsl/compiler/c7347969c511409eafe8b93ec1a3346b"
         },
         "tuning_winners": [
           {
@@ -5326,8 +5326,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "mean_partial_1024": "/home/kingdom/.cache/intentdsl/compiler/b5620756b9de4ab79d7802343e7ca4b5",
-          "mean_finalize_1024": "/home/kingdom/.cache/intentdsl/compiler/c84ba93c054044958907a7c6e364e46a"
+          "mean_partial_1024": "${HOME}/.cache/intentdsl/compiler/b5620756b9de4ab79d7802343e7ca4b5",
+          "mean_finalize_1024": "${HOME}/.cache/intentdsl/compiler/c84ba93c054044958907a7c6e364e46a"
         },
         "tuning_winners": [
           {
@@ -5356,7 +5356,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "min_dim0_float32": "/home/kingdom/.cache/intentdsl/compiler/7fb3993f442e499d94c62538ab057f77"
+          "min_dim0_float32": "${HOME}/.cache/intentdsl/compiler/7fb3993f442e499d94c62538ab057f77"
         },
         "tuning_winners": [
           {
@@ -5381,7 +5381,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "mul_f16_1048576": "/home/kingdom/.cache/intentdsl/compiler/2e26763a551f4be28f58d3ed5a5f2917"
+          "mul_f16_1048576": "${HOME}/.cache/intentdsl/compiler/2e26763a551f4be28f58d3ed5a5f2917"
         },
         "tuning_winners": [
           {
@@ -5406,8 +5406,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "mul_relu_tensor": "/home/kingdom/.cache/intentdsl/compiler/aefbe613e19b4dfabcfbcd9c41cbbbb6",
-          "mul_relu_scalar": "/home/kingdom/.cache/intentdsl/compiler/ec7e5adbd0e94717990ab19fb0720269"
+          "mul_relu_tensor": "${HOME}/.cache/intentdsl/compiler/aefbe613e19b4dfabcfbcd9c41cbbbb6",
+          "mul_relu_scalar": "${HOME}/.cache/intentdsl/compiler/ec7e5adbd0e94717990ab19fb0720269"
         },
         "tuning_winners": [
           {
@@ -5432,7 +5432,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "mul_sub_f32_1d": "/home/kingdom/.cache/intentdsl/compiler/4c76594740bf405b89eaec9269fe8fe4"
+          "mul_sub_f32_1d": "${HOME}/.cache/intentdsl/compiler/4c76594740bf405b89eaec9269fe8fe4"
         },
         "tuning_winners": [
           {
@@ -5457,8 +5457,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "normalize_pairwise_distance_distance": "/home/kingdom/.cache/intentdsl/compiler/294c42909b6c4f36a9ece8b80ef50e3a",
-          "normalize_pairwise_distance_normalize": "/home/kingdom/.cache/intentdsl/compiler/c5f8449e87814dd39bcd020feb17eeb0"
+          "normalize_pairwise_distance_distance": "${HOME}/.cache/intentdsl/compiler/294c42909b6c4f36a9ece8b80ef50e3a",
+          "normalize_pairwise_distance_normalize": "${HOME}/.cache/intentdsl/compiler/c5f8449e87814dd39bcd020feb17eeb0"
         },
         "tuning_winners": [
           {
@@ -5487,7 +5487,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "normalized_cosine_similarity_main": "/home/kingdom/.cache/intentdsl/compiler/d0f6b2d21e4d47879d9c34248c9b99ca"
+          "normalized_cosine_similarity_main": "${HOME}/.cache/intentdsl/compiler/d0f6b2d21e4d47879d9c34248c9b99ca"
         },
         "tuning_winners": [
           {
@@ -5512,7 +5512,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "permute_copy_reverse": "/home/kingdom/.cache/intentdsl/compiler/828d689173624b1a83af382c69af7095"
+          "permute_copy_reverse": "${HOME}/.cache/intentdsl/compiler/828d689173624b1a83af382c69af7095"
         },
         "tuning_winners": [
           {
@@ -5537,8 +5537,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "relu_out_of_place": "/home/kingdom/.cache/intentdsl/compiler/c761fb8bcc5b49c38c7e95071ba43612",
-          "relu_in_place": "/home/kingdom/.cache/intentdsl/compiler/562ab69ba7ae42cf89c0dfbb6066c4e2"
+          "relu_out_of_place": "${HOME}/.cache/intentdsl/compiler/c761fb8bcc5b49c38c7e95071ba43612",
+          "relu_in_place": "${HOME}/.cache/intentdsl/compiler/562ab69ba7ae42cf89c0dfbb6066c4e2"
         },
         "tuning_winners": [
           {
@@ -5563,7 +5563,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "fused_conv_bn_relu": "/home/kingdom/.cache/intentdsl/compiler/0a2333be1e9e4cad8da72665e1160fdf"
+          "fused_conv_bn_relu": "${HOME}/.cache/intentdsl/compiler/0a2333be1e9e4cad8da72665e1160fdf"
         },
         "tuning_winners": [
           {
@@ -5588,7 +5588,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "relu_conv2d_fixed": "/home/kingdom/.cache/intentdsl/compiler/09ba76c89f194d06bad16f37355dc19b"
+          "relu_conv2d_fixed": "${HOME}/.cache/intentdsl/compiler/09ba76c89f194d06bad16f37355dc19b"
         },
         "tuning_winners": [
           {
@@ -5613,7 +5613,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "relu_sqrt_kernel": "/home/kingdom/.cache/intentdsl/compiler/ca5f913f1657480e9cd031e035713737"
+          "relu_sqrt_kernel": "${HOME}/.cache/intentdsl/compiler/ca5f913f1657480e9cd031e035713737"
         },
         "tuning_winners": [
           {
@@ -5638,7 +5638,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "rsqrt_kernel": "/home/kingdom/.cache/intentdsl/compiler/05c61db6f8664249824789df11e18990"
+          "rsqrt_kernel": "${HOME}/.cache/intentdsl/compiler/05c61db6f8664249824789df11e18990"
         },
         "tuning_winners": [
           {
@@ -5663,7 +5663,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "selu": "/home/kingdom/.cache/intentdsl/compiler/7642459166664e2cb8612d9a10aba21a"
+          "selu": "${HOME}/.cache/intentdsl/compiler/7642459166664e2cb8612d9a10aba21a"
         },
         "tuning_winners": [
           {
@@ -5688,7 +5688,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sigmoid_elementwise": "/home/kingdom/.cache/intentdsl/compiler/79dd40f2be2b4839aea9648f8e2cec7d"
+          "sigmoid_elementwise": "${HOME}/.cache/intentdsl/compiler/79dd40f2be2b4839aea9648f8e2cec7d"
         },
         "tuning_winners": [
           {
@@ -5713,7 +5713,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sigmoid_adaptive_avg_pool2d": "/home/kingdom/.cache/intentdsl/compiler/3f9e01653c6046bbaf62e3be81fd6fc1"
+          "sigmoid_adaptive_avg_pool2d": "${HOME}/.cache/intentdsl/compiler/3f9e01653c6046bbaf62e3be81fd6fc1"
         },
         "tuning_winners": [
           {
@@ -5738,7 +5738,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sigmoid_argmax": "/home/kingdom/.cache/intentdsl/compiler/f0618a1fbb1c43909aa18c63d2767682"
+          "sigmoid_argmax": "${HOME}/.cache/intentdsl/compiler/f0618a1fbb1c43909aa18c63d2767682"
         },
         "tuning_winners": [
           {
@@ -5763,10 +5763,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sigmoid_batch_norm_fused": "/home/kingdom/.cache/intentdsl/compiler/11809b3ee30441d8a37e9bae770dfc5a",
-          "sigmoid_batch_norm_no_weight": "/home/kingdom/.cache/intentdsl/compiler/fa6ec84f40aa4a6cbbc0fcd4a3bad943",
-          "sigmoid_batch_norm_no_bias": "/home/kingdom/.cache/intentdsl/compiler/217661d9fc074d2ca7e8496b9dade39d",
-          "sigmoid_batch_norm_no_affine": "/home/kingdom/.cache/intentdsl/compiler/6cedab903c8944c280f3593a00f69c12"
+          "sigmoid_batch_norm_fused": "${HOME}/.cache/intentdsl/compiler/11809b3ee30441d8a37e9bae770dfc5a",
+          "sigmoid_batch_norm_no_weight": "${HOME}/.cache/intentdsl/compiler/fa6ec84f40aa4a6cbbc0fcd4a3bad943",
+          "sigmoid_batch_norm_no_bias": "${HOME}/.cache/intentdsl/compiler/217661d9fc074d2ca7e8496b9dade39d",
+          "sigmoid_batch_norm_no_affine": "${HOME}/.cache/intentdsl/compiler/6cedab903c8944c280f3593a00f69c12"
         },
         "tuning_winners": [
           {
@@ -5791,8 +5791,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sigmoid_conv2d_bias": "/home/kingdom/.cache/intentdsl/compiler/fdb4a2750e1444f88d8511dba75ebed5",
-          "sigmoid_conv2d_no_bias": "/home/kingdom/.cache/intentdsl/compiler/8666c71a5233404785fa21c8aab83684"
+          "sigmoid_conv2d_bias": "${HOME}/.cache/intentdsl/compiler/fdb4a2750e1444f88d8511dba75ebed5",
+          "sigmoid_conv2d_no_bias": "${HOME}/.cache/intentdsl/compiler/8666c71a5233404785fa21c8aab83684"
         },
         "tuning_winners": [
           {
@@ -5817,10 +5817,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "silu_batch_norm_affine": "/home/kingdom/.cache/intentdsl/compiler/1638ba9746ad40f890b85f29073f1ead",
-          "silu_batch_norm_weight_only": "/home/kingdom/.cache/intentdsl/compiler/a91cd5a1d4c64056a3e50ce6e066939a",
-          "silu_batch_norm_bias_only": "/home/kingdom/.cache/intentdsl/compiler/7d11e816ec4b46268f28349e6adfa7c4",
-          "silu_batch_norm_no_affine": "/home/kingdom/.cache/intentdsl/compiler/de6b100246e14caabb8fd4bc5b3ce7b0"
+          "silu_batch_norm_affine": "${HOME}/.cache/intentdsl/compiler/1638ba9746ad40f890b85f29073f1ead",
+          "silu_batch_norm_weight_only": "${HOME}/.cache/intentdsl/compiler/a91cd5a1d4c64056a3e50ce6e066939a",
+          "silu_batch_norm_bias_only": "${HOME}/.cache/intentdsl/compiler/7d11e816ec4b46268f28349e6adfa7c4",
+          "silu_batch_norm_no_affine": "${HOME}/.cache/intentdsl/compiler/de6b100246e14caabb8fd4bc5b3ce7b0"
         },
         "tuning_winners": [
           {
@@ -5845,7 +5845,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "softmax_rows": "/home/kingdom/.cache/intentdsl/compiler/2d4f87a3c26645cebd8ee503889f70ef"
+          "softmax_rows": "${HOME}/.cache/intentdsl/compiler/2d4f87a3c26645cebd8ee503889f70ef"
         },
         "tuning_winners": [
           {
@@ -5870,7 +5870,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "softmax_log_last_1024": "/home/kingdom/.cache/intentdsl/compiler/7f2fa54803fe477a8d24a91ea638e02a"
+          "softmax_log_last_1024": "${HOME}/.cache/intentdsl/compiler/7f2fa54803fe477a8d24a91ea638e02a"
         },
         "tuning_winners": [
           {
@@ -5895,8 +5895,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "softplus_linear_with_bias": "/home/kingdom/.cache/intentdsl/compiler/cc752eb0598847a1b57f8137e78d642c",
-          "softplus_linear_without_bias": "/home/kingdom/.cache/intentdsl/compiler/49e7973dd3fd47579e5c859f048f679d"
+          "softplus_linear_with_bias": "${HOME}/.cache/intentdsl/compiler/cc752eb0598847a1b57f8137e78d642c",
+          "softplus_linear_without_bias": "${HOME}/.cache/intentdsl/compiler/49e7973dd3fd47579e5c859f048f679d"
         },
         "tuning_winners": [
           {
@@ -5921,8 +5921,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "lu_factor": "/home/kingdom/.cache/intentdsl/compiler/6a22d503e74b448380e70d2ae58b1510",
-          "lu_backsolve": "/home/kingdom/.cache/intentdsl/compiler/2008380620cd4c7da4c82ed065292f6e"
+          "lu_factor": "${HOME}/.cache/intentdsl/compiler/6a22d503e74b448380e70d2ae58b1510",
+          "lu_backsolve": "${HOME}/.cache/intentdsl/compiler/2008380620cd4c7da4c82ed065292f6e"
         },
         "tuning_winners": [
           {
@@ -5951,10 +5951,10 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "solve_multiple_lu_factor_no_pivot": "/home/kingdom/.cache/intentdsl/compiler/2490e06b490d47078fe0a249ce54c665",
-          "solve_multiple_lu_factor_pivot": "/home/kingdom/.cache/intentdsl/compiler/f30a2dbc4b87429e8baa40f0600205c2",
-          "solve_multiple_lu_solve_no_pivot": "/home/kingdom/.cache/intentdsl/compiler/9ec0ab3b61d54163b39d07746fb3dafe",
-          "solve_multiple_lu_solve_pivot": "/home/kingdom/.cache/intentdsl/compiler/78333cc1e60a42f49b6292500d665bcf"
+          "solve_multiple_lu_factor_no_pivot": "${HOME}/.cache/intentdsl/compiler/2490e06b490d47078fe0a249ce54c665",
+          "solve_multiple_lu_factor_pivot": "${HOME}/.cache/intentdsl/compiler/f30a2dbc4b87429e8baa40f0600205c2",
+          "solve_multiple_lu_solve_no_pivot": "${HOME}/.cache/intentdsl/compiler/9ec0ab3b61d54163b39d07746fb3dafe",
+          "solve_multiple_lu_solve_pivot": "${HOME}/.cache/intentdsl/compiler/78333cc1e60a42f49b6292500d665bcf"
         },
         "tuning_winners": [
           {
@@ -5985,8 +5985,8 @@
         "error": "generated/source floating result 0 differs: max_abs=214781.03125, atol=0.0001, rtol=0.0001; first_failure=0; largest tolerance excess has generated=-243803.90625, source=-29022.873046875, abs_error=214781.03125, limit=2.9023871421813965",
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "symmetric_ldl_factor": "/home/kingdom/.cache/intentdsl/compiler/67c1d958ebec4f95b49799a59fd430c8",
-          "symmetric_ldl_reconstruct_solve": "/home/kingdom/.cache/intentdsl/compiler/4f4b222ce9e2422b8f0117e7fdafc98d"
+          "symmetric_ldl_factor": "${HOME}/.cache/intentdsl/compiler/67c1d958ebec4f95b49799a59fd430c8",
+          "symmetric_ldl_reconstruct_solve": "${HOME}/.cache/intentdsl/compiler/4f4b222ce9e2422b8f0117e7fdafc98d"
         },
         "tuning_winners": [
           {
@@ -6015,7 +6015,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sqrt_elementwise": "/home/kingdom/.cache/intentdsl/compiler/cb0f40266b034ac4b130d83208ede6a2"
+          "sqrt_elementwise": "${HOME}/.cache/intentdsl/compiler/cb0f40266b034ac4b130d83208ede6a2"
         },
         "tuning_winners": [
           {
@@ -6040,7 +6040,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sqrt_exp_pointwise": "/home/kingdom/.cache/intentdsl/compiler/ae9fea99dd1d449d9142970c2e41f260"
+          "sqrt_exp_pointwise": "${HOME}/.cache/intentdsl/compiler/ae9fea99dd1d449d9142970c2e41f260"
         },
         "tuning_winners": [
           {
@@ -6065,7 +6065,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sqrt_tanh_elementwise": "/home/kingdom/.cache/intentdsl/compiler/76ff06ded3e648c68ce29ae5efed1526"
+          "sqrt_tanh_elementwise": "${HOME}/.cache/intentdsl/compiler/76ff06ded3e648c68ce29ae5efed1526"
         },
         "tuning_winners": [
           {
@@ -6090,8 +6090,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "std_partial": "/home/kingdom/.cache/intentdsl/compiler/8ac69c2fbf8d49649fbbb212aa494928",
-          "std_finish": "/home/kingdom/.cache/intentdsl/compiler/f96c69d32d134f1aa066be6850b46fae"
+          "std_partial": "${HOME}/.cache/intentdsl/compiler/8ac69c2fbf8d49649fbbb212aa494928",
+          "std_finish": "${HOME}/.cache/intentdsl/compiler/f96c69d32d134f1aa066be6850b46fae"
         },
         "tuning_winners": [
           {
@@ -6120,7 +6120,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sub_float32_1d": "/home/kingdom/.cache/intentdsl/compiler/8c94e29f0d0e44cb8e203a7f9775b81a"
+          "sub_float32_1d": "${HOME}/.cache/intentdsl/compiler/8c94e29f0d0e44cb8e203a7f9775b81a"
         },
         "tuning_winners": [
           {
@@ -6145,8 +6145,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sub_gelu_exact": "/home/kingdom/.cache/intentdsl/compiler/567535216e3b4530b883369d5276710a",
-          "sub_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/9ecc354c3c8f48fb806aa3e41954cf5f"
+          "sub_gelu_exact": "${HOME}/.cache/intentdsl/compiler/567535216e3b4530b883369d5276710a",
+          "sub_gelu_tanh": "${HOME}/.cache/intentdsl/compiler/9ecc354c3c8f48fb806aa3e41954cf5f"
         },
         "tuning_winners": [
           {
@@ -6171,8 +6171,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sum_partial": "/home/kingdom/.cache/intentdsl/compiler/1b40d8fb7b984ba8b515cf75eb7732dd",
-          "sum_final": "/home/kingdom/.cache/intentdsl/compiler/50d64971762d40ceabefc5dbc35b00ec"
+          "sum_partial": "${HOME}/.cache/intentdsl/compiler/1b40d8fb7b984ba8b515cf75eb7732dd",
+          "sum_final": "${HOME}/.cache/intentdsl/compiler/50d64971762d40ceabefc5dbc35b00ec"
         },
         "tuning_winners": [
           {
@@ -6201,7 +6201,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "sum_std_sum_all": "/home/kingdom/.cache/intentdsl/compiler/6b82aba0d7f041bfb768a2e30ef5666c"
+          "sum_std_sum_all": "${HOME}/.cache/intentdsl/compiler/6b82aba0d7f041bfb768a2e30ef5666c"
         },
         "tuning_winners": []
       },
@@ -6221,8 +6221,8 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "symmetric_mm_form_result": "/home/kingdom/.cache/intentdsl/compiler/16d639f0a6194de78b294a7741b772f9",
-          "symmetric_mm_abs_sum": "/home/kingdom/.cache/intentdsl/compiler/6f9ab95573764a0a8c5241b3434b8683"
+          "symmetric_mm_form_result": "${HOME}/.cache/intentdsl/compiler/16d639f0a6194de78b294a7741b772f9",
+          "symmetric_mm_abs_sum": "${HOME}/.cache/intentdsl/compiler/6f9ab95573764a0a8c5241b3434b8683"
         },
         "tuning_winners": [
           {
@@ -6251,7 +6251,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "tanh_f32_1d": "/home/kingdom/.cache/intentdsl/compiler/ecfd2a3b1d654220a0be70c4f7fa3bd3"
+          "tanh_f32_1d": "${HOME}/.cache/intentdsl/compiler/ecfd2a3b1d654220a0be70c4f7fa3bd3"
         },
         "tuning_winners": [
           {
@@ -6276,7 +6276,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "tensordot_1024x8x8": "/home/kingdom/.cache/intentdsl/compiler/971e382619134f1fb649a956c8bed13b"
+          "tensordot_1024x8x8": "${HOME}/.cache/intentdsl/compiler/971e382619134f1fb649a956c8bed13b"
         },
         "tuning_winners": [
           {
@@ -6301,7 +6301,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "tensordot_rsqrt_kernel": "/home/kingdom/.cache/intentdsl/compiler/1df4d0805f214a288b331f6a90c6af0f"
+          "tensordot_rsqrt_kernel": "${HOME}/.cache/intentdsl/compiler/1df4d0805f214a288b331f6a90c6af0f"
         },
         "tuning_winners": [
           {
@@ -6326,7 +6326,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "trunc_f32": "/home/kingdom/.cache/intentdsl/compiler/b88d2934d3944490a2442180129400fd"
+          "trunc_f32": "${HOME}/.cache/intentdsl/compiler/b88d2934d3944490a2442180129400fd"
         },
         "tuning_winners": [
           {
@@ -6351,7 +6351,7 @@
         },
         "reference_timing_note": null,
         "compiler_artifacts": {
-          "hurwitz_zeta_f32": "/home/kingdom/.cache/intentdsl/compiler/33541aef9ab5414d85c97d44e641901b"
+          "hurwitz_zeta_f32": "${HOME}/.cache/intentdsl/compiler/33541aef9ab5414d85c97d44e641901b"
         },
         "tuning_winners": [
           {

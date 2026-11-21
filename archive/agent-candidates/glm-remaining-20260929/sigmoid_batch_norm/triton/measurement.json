@@ -4,7 +4,7 @@
   "reference_ms": 0.01716800034046173,
   "ratio": 0.5274929749376153,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/sigmoid_batch_norm/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/sigmoid_batch_norm/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

@@ -1,4 +1,4 @@
 {
   "status": "agent_timeout",
-  "error": "2026-09-29T06:58:48.887967Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in /home/kingdom/.local/share/intentdsl/agent-evaluation-glm-20260929/candidates/solve_symmetric_ldl-triton-69518k2b/candidate.py:\n        )\n        return out\n\n\ndef torch_empty(shape, device):\n    import torch\n\n    return torch.empty(shape, device=device, dtype=torch.float32)\n"
+  "error": "2026-09-29T06:58:48.887967Z ERROR codex_core::tools::router: error=apply_patch verification failed: Failed to find expected lines in ${HOME}/.local/share/intentdsl/agent-evaluation-glm-20260929/candidates/solve_symmetric_ldl-triton-69518k2b/candidate.py:\n        )\n        return out\n\n\ndef torch_empty(shape, device):\n    import torch\n\n    return torch.empty(shape, device=device, dtype=torch.float32)\n"
 }

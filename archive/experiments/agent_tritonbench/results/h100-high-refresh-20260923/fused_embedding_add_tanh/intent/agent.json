@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_embedding_add_tanh-intent-mgvvcsd1",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_embedding_add_tanh-intent-mgvvcsd1",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

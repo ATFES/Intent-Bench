@@ -4,7 +4,7 @@
   "reference_ms": 0.5236239731311798,
   "ratio": 8.868363943914323,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-contract-intent-20260928/solve/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-contract-intent-20260928/solve/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",
@@ -15,7 +15,7 @@
   "precompile_seconds": 8.948807879118249,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "solve_gauss_jordan": "/home/kingdom/.cache/intentdsl/compiler/2ddea7d5ad3e48e2ad33025e85b8668e"
+    "solve_gauss_jordan": "${HOME}/.cache/intentdsl/compiler/2ddea7d5ad3e48e2ad33025e85b8668e"
   },
   "precompile_failures": [],
   "tuning": [

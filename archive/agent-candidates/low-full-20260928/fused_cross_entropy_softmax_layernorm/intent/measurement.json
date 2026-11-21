@@ -4,7 +4,7 @@
   "reference_ms": 0.02160000056028366,
   "ratio": 0.4499999870649646,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cross_entropy_softmax_layernorm/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_cross_entropy_softmax_layernorm/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 14.849379802122712,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "fused_ce_rows": "/home/kingdom/.cache/intentdsl/compiler/2e6757d88c344a26840f4b18d71d7f58",
-    "fused_ce_mean": "/home/kingdom/.cache/intentdsl/compiler/7e81ce7603c347afbcac28c132f4b7cf"
+    "fused_ce_rows": "${HOME}/.cache/intentdsl/compiler/2e6757d88c344a26840f4b18d71d7f58",
+    "fused_ce_mean": "${HOME}/.cache/intentdsl/compiler/7e81ce7603c347afbcac28c132f4b7cf"
   },
   "precompile_failures": [],
   "tuning": [

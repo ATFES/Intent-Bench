@@ -4,7 +4,7 @@
   "reference_ms": 0.02269599959254265,
   "ratio": 0.43073669849260005,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-annotation-rag-20260930/sub_gelu/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-annotation-rag-20260930/sub_gelu/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 3.829965256853029,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "sub_gelu_erf": "/home/kingdom/.cache/intentdsl/compiler/7340ce94e35943bda045b523e4035598",
-    "sub_gelu_tanh": "/home/kingdom/.cache/intentdsl/compiler/5a3c9dfd9d8c416b89ddba08db5400eb"
+    "sub_gelu_erf": "${HOME}/.cache/intentdsl/compiler/7340ce94e35943bda045b523e4035598",
+    "sub_gelu_tanh": "${HOME}/.cache/intentdsl/compiler/5a3c9dfd9d8c416b89ddba08db5400eb"
   },
   "precompile_failures": [],
   "tuning": [

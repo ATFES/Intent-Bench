@@ -4,7 +4,7 @@
   "reference_ms": 0.02783999964594841,
   "ratio": 2.7344827406254555,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-kunyou-literal-convnorm-20260930/relu_conv2d/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-kunyou-literal-convnorm-20260930/relu_conv2d/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 17.226521745091304,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "relu_conv2d": "/home/kingdom/.cache/intentdsl/compiler/3cdc1226bb55430486375fdc92ee9a6b"
+    "relu_conv2d": "${HOME}/.cache/intentdsl/compiler/3cdc1226bb55430486375fdc92ee9a6b"
   },
   "precompile_failures": [],
   "tuning": [

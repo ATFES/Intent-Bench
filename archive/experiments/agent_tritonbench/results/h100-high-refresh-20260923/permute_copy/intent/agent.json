@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/permute_copy-intent-y3iep799",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/permute_copy-intent-y3iep799",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

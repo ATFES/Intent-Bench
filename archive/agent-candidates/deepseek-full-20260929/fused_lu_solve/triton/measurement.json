@@ -4,7 +4,7 @@
   "reference_ms": 1.001423954963684,
   "ratio": 2.051319002451386,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/fused_lu_solve/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/fused_lu_solve/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_event",

@@ -4,7 +4,7 @@
   "reference_ms": 0.007519999984651804,
   "ratio": 0.8042553144058945,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/fused_index_select_eq/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/fused_index_select_eq/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

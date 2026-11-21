@@ -4,7 +4,7 @@
   "reference_ms": 0.04673600010573864,
   "ratio": 0.1787059179595204,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/normalized_cosine_similarity/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/normalized_cosine_similarity/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 38.301932226866484,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "normalized_cosine_similarity_norms": "/home/kingdom/.cache/intentdsl/compiler/1637881a2d5c4062bfff64ea609aadbf",
-    "normalized_cosine_similarity_similarity": "/home/kingdom/.cache/intentdsl/compiler/36956fe44fd542d0b71dde10c16cee5c"
+    "normalized_cosine_similarity_norms": "${HOME}/.cache/intentdsl/compiler/1637881a2d5c4062bfff64ea609aadbf",
+    "normalized_cosine_similarity_similarity": "${HOME}/.cache/intentdsl/compiler/36956fe44fd542d0b71dde10c16cee5c"
   },
   "precompile_failures": [],
   "tuning": [

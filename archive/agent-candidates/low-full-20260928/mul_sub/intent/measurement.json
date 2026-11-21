@@ -4,7 +4,7 @@
   "reference_ms": 0.017032000236213207,
   "ratio": 0.6697980054758398,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/mul_sub/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/mul_sub/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,10 +15,10 @@
   "precompile_seconds": 1.812132366001606,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "mul_sub_tt": "/home/kingdom/.cache/intentdsl/compiler/9deb648239c440e8bc5085767e64d8e0",
-    "mul_sub_st": "/home/kingdom/.cache/intentdsl/compiler/21c94c9354f341b5b3684a5ae6cfcbc6",
-    "mul_sub_ts": "/home/kingdom/.cache/intentdsl/compiler/a2633f70f25b4e0d9aa5fd9e32b026c8",
-    "mul_sub_ss": "/home/kingdom/.cache/intentdsl/compiler/5947380aa8814c328fd875d2992b8dc6"
+    "mul_sub_tt": "${HOME}/.cache/intentdsl/compiler/9deb648239c440e8bc5085767e64d8e0",
+    "mul_sub_st": "${HOME}/.cache/intentdsl/compiler/21c94c9354f341b5b3684a5ae6cfcbc6",
+    "mul_sub_ts": "${HOME}/.cache/intentdsl/compiler/a2633f70f25b4e0d9aa5fd9e32b026c8",
+    "mul_sub_ss": "${HOME}/.cache/intentdsl/compiler/5947380aa8814c328fd875d2992b8dc6"
   },
   "precompile_failures": [],
   "tuning": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.08578399941325188,
   "ratio": 1.0324535911830859,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-effect-intent-20260928/symmetric_mm_and_abs_sum/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-effect-intent-20260928/symmetric_mm_and_abs_sum/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 17.104710606159642,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "symmetric_form_d": "/home/kingdom/.cache/intentdsl/compiler/402b580e640e4372b534a9dcbb94403a",
-    "symmetric_abs_sum": "/home/kingdom/.cache/intentdsl/compiler/d7d7a60ba78a44cca4aca482af2d3180"
+    "symmetric_form_d": "${HOME}/.cache/intentdsl/compiler/402b580e640e4372b534a9dcbb94403a",
+    "symmetric_abs_sum": "${HOME}/.cache/intentdsl/compiler/d7d7a60ba78a44cca4aca482af2d3180"
   },
   "precompile_failures": [],
   "tuning": [

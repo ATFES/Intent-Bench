@@ -6,7 +6,7 @@
 
 **核心判断：现在同时存在编译器实现缺陷、运行准备不完整、作者程序错误，以及尚未归因的数值差异。不能把它们统称为“JIT 没写好”。统一的 Intent JIT 用户入口确实还没有完成，但显式编译入口和若干后端自身的 JIT 已经存在。**
 
-**我们要完成的结果仍然是第一阶段：新生成的 Intent 程序在多轮中达到约 95% 正确率，再使完整算子性能达到或超过 agent Triton 和原 ref。** 目前最近三轮首次成绩为 89/88/89；最新一批旧程序开发复测为 93/100，不能算成新生成已经稳定达到 95%。93 个正确程序中 57 个快于 ref，但 Intent/ref 耗时比的几何平均仍为 1.43，整体性能尚未达标。[最新完整复测](/home/kingdom/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r26-recheck/workspace-and-public-math-closure.csv)
+**我们要完成的结果仍然是第一阶段：新生成的 Intent 程序在多轮中达到约 95% 正确率，再使完整算子性能达到或超过 agent Triton 和原 ref。** 目前最近三轮首次成绩为 89/88/89；最新一批旧程序开发复测为 93/100，不能算成新生成已经稳定达到 95%。93 个正确程序中 57 个快于 ref，但 Intent/ref 耗时比的几何平均仍为 1.43，整体性能尚未达标。[最新完整复测](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r26-recheck/workspace-and-public-math-closure.csv)
 
 **先区分四层职责，避免把修复放错位置。** 下图以 Triton 路径为例：
 
@@ -36,7 +36,7 @@ flowchart LR
 - 展开产生 `256 × 64 × 256 = 4194304` 个元素，超过 Triton 的 `1048576` 元素上限，编译失败。
 - 同一份原程序此前在 `BK=16` 下能编译并运行到数值比较。因此这是我们选择了非法物理配置/实现，不能据此说作者的整个矩阵乘法不受支持。
 
-这里的 `131072` 是输入块大小估算，不是 Triton 最终共享内存分配结果。“原生实现可能放不下”也不证明“展开实现一定合法”。应修目标 pass 的合法性判断，优先保留已知合法配置，不为每个坏配置增加替代算法。[实现选择](/home/kingdom/phdworks/intentdsl/lib/Target/Triton/Transforms/Legalize.cpp:2113)、[展开的 FMA](/home/kingdom/phdworks/intentdsl/python/intent/runtime/triton_math.py:39)
+这里的 `131072` 是输入块大小估算，不是 Triton 最终共享内存分配结果。“原生实现可能放不下”也不证明“展开实现一定合法”。应修目标 pass 的合法性判断，优先保留已知合法配置，不为每个坏配置增加替代算法。[实现选择](${HOME}/phdworks/intentdsl/lib/Target/Triton/Transforms/Legalize.cpp:2113)、[展开的 FMA](${HOME}/phdworks/intentdsl/python/intent/runtime/triton_math.py:39)
 
 第二，运行准备缺少编译后的资源可运行性检查。当前实验的预编译主要调用 Triton `warmup`，得到编译产物后就返回；实际 shared 检查在 Triton 准备启动 kernel 时才发生。这解释了之前 QR 的“预编译无失败，最终启动却 shared 超限”。
 
@@ -52,7 +52,7 @@ QR 曾报 `Required: 524288, Hardware limit: 101376`。这里的 524288 来自 T
 
 Autotune 负责比较配置速度，不负责修复程序或重新设计内存分配。当前 Triton 会把资源失败的配置记为无穷大耗时；全都失败时仍可能选出一个，最终启动再报错。另一方面，张量 shape 非法产生的普通 `CompilationError` 不属于这类可跳过的资源失败，会直接中断准备。不能通过捕获所有异常来掩盖 compiler bug。
 
-依据：[设备查询](/home/kingdom/phdworks/intentdsl/python/intent/targets/gpu/device.py:34)、[现有预编译](/home/kingdom/phdworks/intentdsl/experiments/agent_tritonbench/program.py:106)、[Triton 实际 shared 检查](/home/kingdom/.local/lib/python3.10/site-packages/triton/compiler/compiler.py:436)、[QR 资源失败记录](/home/kingdom/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r25-recheck/fused_qr_solve/intent/fixed-collective-warp-distribution/measurement.json:12)。Triton 官方已有 `warmup → _init_handles → metadata.shared/n_regs` 的用法，可直接参考其职责边界。[官方示例](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html)
+依据：[设备查询](${HOME}/phdworks/intentdsl/python/intent/targets/gpu/device.py:34)、[现有预编译](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/program.py:106)、[Triton 实际 shared 检查](${HOME}/.local/lib/python3.10/site-packages/triton/compiler/compiler.py:436)、[QR 资源失败记录](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r25-recheck/fused_qr_solve/intent/fixed-collective-warp-distribution/measurement.json:12)。Triton 官方已有 `warmup → _init_handles → metadata.shared/n_regs` 的用法，可直接参考其职责边界。[官方示例](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html)
 
 **为什么反复生成，还有问题：既有覆盖缺口，也有回归和工作重点扩大。**
 
@@ -72,9 +72,9 @@ Autotune 负责比较配置速度，不负责修复程序或重新设计内存�
 | 卷积＋BN 数值失败 | 数学公式和坐标基本一致，浮点实现差异尚未唯一归因 | 区分卷积累加与 BN 舍入，不能只说“浮点误差”就结束 |
 | 矩阵乘法后端编译失败 | 本次资源策略引入的回归 | 修配置/展开合法性，恢复原程序可运行 |
 
-LDL 的原 ref 把 `ldl_factor` 返回的 pivot 信息当作对角数值使用，不是通常的 LDL 求解；继续遵守用户已确认的“原 ref 实际行为为准”，但不要求 compiler 猜测并替换作者算法。[原 ref](/home/kingdom/phdworks/ref/tritonbench/data/TritonBench_T_v1/solve_symmetric_ldl.py:9)
+LDL 的原 ref 把 `ldl_factor` 返回的 pivot 信息当作对角数值使用，不是通常的 LDL 求解；继续遵守用户已确认的“原 ref 实际行为为准”，但不要求 compiler 猜测并替换作者算法。[原 ref](${HOME}/phdworks/ref/tritonbench/data/TritonBench_T_v1/solve_symmetric_ldl.py:9)
 
-卷积＋BN 这题使用固定 running mean/variance，不涉及训练时方差计算；TF32 已关闭。当前最大误差约 0.000696，仍超出既定容差。旧 agent Triton 也有类似误差，只能作为调查线索，不能证明我们的编译器无错。[当前测量](/home/kingdom/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r26-recheck/relu_batch_norm_conv2d/intent/workspace-and-public-math-closure/measurement.json:15)
+卷积＋BN 这题使用固定 running mean/variance，不涉及训练时方差计算；TF32 已关闭。当前最大误差约 0.000696，仍超出既定容差。旧 agent Triton 也有类似误差，只能作为调查线索，不能证明我们的编译器无错。[当前测量](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-high-100-intent-stability-r26-recheck/relu_batch_norm_conv2d/intent/workspace-and-public-math-closure/measurement.json:15)
 
 **统一 JIT：用户提出的方向需要做，但不能说现有基础完全没有。**
 
@@ -89,18 +89,18 @@ artifact = intent.compile(
 artifact(...)
 ```
 
-`intent.compile` 当场完成 Intent lowering 和源码生成；随后各 provider 在自己的阶段编译机器代码。`@intent.kernel` 定义本身不能直接运行，没有首次调用自动完成 Intent 编译的公共 JIT 包装。`target` 当前必须是具有 `.resolve()` 的对象，`target="triton"` 尚不能直接使用。[公共编译入口](/home/kingdom/phdworks/intentdsl/python/intent/compiler/pipeline.py:16)、[kernel 直接调用的拒绝](/home/kingdom/phdworks/intentdsl/python/intent/api/definitions.py:53)
+`intent.compile` 当场完成 Intent lowering 和源码生成；随后各 provider 在自己的阶段编译机器代码。`@intent.kernel` 定义本身不能直接运行，没有首次调用自动完成 Intent 编译的公共 JIT 包装。`target` 当前必须是具有 `.resolve()` 的对象，`target="triton"` 尚不能直接使用。[公共编译入口](${HOME}/phdworks/intentdsl/python/intent/compiler/pipeline.py:16)、[kernel 直接调用的拒绝](${HOME}/phdworks/intentdsl/python/intent/api/definitions.py:53)
 
 | 用户关心的后端 | 当前接入情况 | 统一 JIT 尚需补齐的部分 |
 |---|---|---|
-| Triton | [TritonTarget()](/home/kingdom/phdworks/intentdsl/python/intent/targets/triton.py:38)；显式 Intent compile 后，生成程序使用 Triton JIT/autotune | 统一首次调用入口、编译结果缓存和准备期资源检查 |
-| cuTile | [CuTileTarget()](/home/kingdom/phdworks/intentdsl/python/intent/targets/cutile.py:38)；已有源码生成和运行 materializer | 接到同一 host JIT 生命周期，验证实际可运行范围 |
-| Mojo | [MojoTarget(...)](/home/kingdom/phdworks/intentdsl/python/intent/targets/mojo.py:45)；materialization 时编译 native library | 将现有编译/加载接入统一入口，保持 CPU 配置和 ABI |
-| Weft | [WeftTarget(...)](/home/kingdom/phdworks/intentdsl/python/intent/targets/weft.py:25) 当前是 source target；可 `intent.generate`，另有 AOT 导出路径 | 公共 `intent.compile` 尚不能返回 Weft runnable artifact，需接通 native materialization/加载 |
+| Triton | [TritonTarget()](${HOME}/phdworks/intentdsl/python/intent/targets/triton.py:38)；显式 Intent compile 后，生成程序使用 Triton JIT/autotune | 统一首次调用入口、编译结果缓存和准备期资源检查 |
+| cuTile | [CuTileTarget()](${HOME}/phdworks/intentdsl/python/intent/targets/cutile.py:38)；已有源码生成和运行 materializer | 接到同一 host JIT 生命周期，验证实际可运行范围 |
+| Mojo | [MojoTarget(...)](${HOME}/phdworks/intentdsl/python/intent/targets/mojo.py:45)；materialization 时编译 native library | 将现有编译/加载接入统一入口，保持 CPU 配置和 ABI |
+| Weft | [WeftTarget(...)](${HOME}/phdworks/intentdsl/python/intent/targets/weft.py:25) 当前是 source target；可 `intent.generate`，另有 AOT 导出路径 | 公共 `intent.compile` 尚不能返回 Weft runnable artifact，需接通 native materialization/加载 |
 
 这张表是当前代码接入情况，不是本轮对四后端的运行认证，更不表示这 100 题在四个后端都已通过。Mojo/Weft 的 CPU 参数与工具链要求也不能被字符串名称隐藏。
 
-当前 Mojo native 路径面向 Linux x86-64；Weft 的现有生产路径使用显式 RISC-V Linux profile 和独立 AOT/部署流程。它们需要在相应执行环境中接通，不能默认在当前 GPU 主机上互换运行。[Weft AOT 导出](/home/kingdom/phdworks/intentdsl/python/intent/runtime/weft/compilation.py:70)
+当前 Mojo native 路径面向 Linux x86-64；Weft 的现有生产路径使用显式 RISC-V Linux profile 和独立 AOT/部署流程。它们需要在相应执行环境中接通，不能默认在当前 GPU 主机上互换运行。[Weft AOT 导出](${HOME}/phdworks/intentdsl/python/intent/runtime/weft/compilation.py:70)
 
 已有缓存也是分散的：Triton 等 provider 有自己的 JIT/cache，Mojo 有进程内 native library cache；当前 Intent 公共入口没有统一的首次调用 specialization 与持久 artifact cache。动态 shape 已可作为运行时元数据传给后端，不应为了新增 JIT 一律按完整 shape 重编译；外部 dtype 仍受 kernel 声明约束，不能静默改类型。
 
@@ -113,7 +113,7 @@ entry(...)
 
 该入口应复用现有 Target 对象、compiler pipeline 和各后端 materializer。首次需要时完成编译和可运行性准备，随后复用结果；specialization/cache 必须区分必要的 constexpr、ABI、provider、硬件和编译选项。补 Intent 层的复用，并继续使用已有 provider 缓存，不另造一套底层缓存。保留高级 target 配置方式。target 仍在 host 选择，不进入 kernel 的算法分支；不会自动换算法或增加隐式 kernel。
 
-这四个名称选择的是 provider，GPU device、CPU 架构与工具链配置仍需单独表达。成熟参考也在 host 侧处理这些区别：Triton 从 active driver/device 建立 target，TileLang 分开 target、target_host 与 execution_backend；不应把这些选择塞进 DSL 运算或另一个 compiler IR。[Triton 入口](/home/kingdom/phdworks/ref/triton/python/triton/runtime/jit.py:686)、[TileLang 入口](/home/kingdom/phdworks/ref/tilelang/tilelang/jit/kernel.py:65)
+这四个名称选择的是 provider，GPU device、CPU 架构与工具链配置仍需单独表达。成熟参考也在 host 侧处理这些区别：Triton 从 active driver/device 建立 target，TileLang 分开 target、target_host 与 execution_backend；不应把这些选择塞进 DSL 运算或另一个 compiler IR。[Triton 入口](${HOME}/phdworks/ref/triton/python/triton/runtime/jit.py:686)、[TileLang 入口](${HOME}/phdworks/ref/tilelang/tilelang/jit/kernel.py:65)
 
 Weft 接通 runnable artifact 是实际缺口，不能仅增加字符串别名就宣布四后端 JIT 完成。统一入口也不会自行修好错误的分块、QR 公式或数值差异。
 

@@ -42,13 +42,13 @@ Intent source → canonical KIR
              → 当前只生成，不接设备执行
 ```
 
-直接入口是 [intent-compile.cpp](/home/kingdom/phdworks/intentdsl/tools/intent-compile/intent-compile.cpp:154)。Mojo 才调用 [materializeCPUProgram](/home/kingdom/phdworks/intentdsl/lib/Target/Mojo/Transforms/Legalize.cpp:67)；Weft 直接消费未走这一步的 CPU task，把 contraction 转为 Weft `OuterContractOp`，而不是先强制转换成 Mojo 式 SIMD。[Weft 转换](/home/kingdom/phdworks/intentdsl/lib/Target/Weft/Transforms/Legalize.cpp:354)
+直接入口是 [intent-compile.cpp](${HOME}/phdworks/intentdsl/tools/intent-compile/intent-compile.cpp:154)。Mojo 才调用 [materializeCPUProgram](${HOME}/phdworks/intentdsl/lib/Target/Mojo/Transforms/Legalize.cpp:67)；Weft 直接消费未走这一步的 CPU task，把 contraction 转为 Weft `OuterContractOp`，而不是先强制转换成 Mojo 式 SIMD。[Weft 转换](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Legalize.cpp:354)
 
 因此，“现在 CPU 没有 IR”“Weft 已被迫消费完全标量化程序”“所有优化都写在 serializer”都不是当前事实。
 
 ### 2.2 当前表示和已有能力
 
-CPU dialect 使用自有 ABI、capability、configuration、reduction-order、microtile attributes，以及 `TasksOp`、`ReduceOp`；其余复用 `func/linalg/scf/memref/vector/arith/math`。没有独立 CPU value type 不等于没有 CPU IR，也不构成必须另造一套 type 的理由。[属性定义](/home/kingdom/phdworks/intentdsl/include/Intent/Dialect/CPU/IR/CPUAttrs.td:13)、[operation 定义](/home/kingdom/phdworks/intentdsl/include/Intent/Dialect/CPU/IR/CPUOps.td:11)
+CPU dialect 使用自有 ABI、capability、configuration、reduction-order、microtile attributes，以及 `TasksOp`、`ReduceOp`；其余复用 `func/linalg/scf/memref/vector/arith/math`。没有独立 CPU value type 不等于没有 CPU IR，也不构成必须另造一套 type 的理由。[属性定义](${HOME}/phdworks/intentdsl/include/Intent/Dialect/CPU/IR/CPUAttrs.td:13)、[operation 定义](${HOME}/phdworks/intentdsl/include/Intent/Dialect/CPU/IR/CPUOps.td:11)
 
 | 当前能力 | 真实作用 | 应如何看待 |
 |---|---|---|
@@ -59,19 +59,19 @@ CPU dialect 使用自有 ABI、capability、configuration、reduction-order、mi
 | register contraction materialization | 形成 f32 vector loads、广播、FMA、循环、prefetch | 已有一种真实微核实现，不是只有空接口 |
 | finite tuning | 编译多个 config，实测并缓存 winner | 有效，但还不是专业实现族之间的选择 |
 
-一维 task coordinate 也不等于不能表达二维 GEMM ownership。当前 partition 已把多维矩形 workset 线性化，再用除余恢复各坐标；真正限制是零起点、unit step、矩形域，以及尚未实现的嵌套调度/任务归约。不能仅为“看起来像多维 IR”新增另一套 task 模型。[PartitionTasks.cpp](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/PartitionTasks.cpp:34)
+一维 task coordinate 也不等于不能表达二维 GEMM ownership。当前 partition 已把多维矩形 workset 线性化，再用除余恢复各坐标；真正限制是零起点、unit step、矩形域，以及尚未实现的嵌套调度/任务归约。不能仅为“看起来像多维 IR”新增另一套 task 模型。[PartitionTasks.cpp](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/PartitionTasks.cpp:34)
 
 ### 2.3 真正需要调整的地方
 
-**第一，共同分块提前绑定了当前 f32 向量微核的偏好。** `BlockContractions` 不只创建外层 cache blocks：它按 `vectorWidth × microN` 决定 B micro-panel，按固定行/列序列拆尾部，分配 f32 partial，并把对齐设为 `width × 4`。这些选择同时进入发给 Weft 的 shared 程序。[BlockContractions.cpp](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/BlockContractions.cpp:69)
+**第一，共同分块提前绑定了当前 f32 向量微核的偏好。** `BlockContractions` 不只创建外层 cache blocks：它按 `vectorWidth × microN` 决定 B micro-panel，按固定行/列序列拆尾部，分配 f32 partial，并把对齐设为 `width × 4`。这些选择同时进入发给 Weft 的 shared 程序。[BlockContractions.cpp](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/BlockContractions.cpp:69)
 
 这不证明已有 f32 程序错误；它意味着下一种实现尚未提出要求，共同层就已替它决定了一部分内部结构。对更不同的量化、RVV 或 matrix implementation，这可能限制选择空间。
 
-**第二，配置与能力混合了共同职责和局部职责。** 同一 `ConfigurationAttr` 包含 task grain、cache tiles、vector width、microtiles、register/reduction replicas；shared legality 使用 `vectorBits / 32`、每元素 4 bytes 和固定微核范围。[Passes.cpp](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/Passes.cpp:78) 这些是当前实现条件，不能成为整个 CPU family 的长期定义。
+**第二，配置与能力混合了共同职责和局部职责。** 同一 `ConfigurationAttr` 包含 task grain、cache tiles、vector width、microtiles、register/reduction replicas；shared legality 使用 `vectorBits / 32`、每元素 4 bytes 和固定微核范围。[Passes.cpp](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/Passes.cpp:78) 这些是当前实现条件，不能成为整个 CPU family 的长期定义。
 
-**第三，数值覆盖仍很窄。** KIRToCPU 拒绝非 f32 view；矩阵识别依赖二维 indexing maps 和单个 FMA body；Weft external capture 固定为 `dense.f32`。只增加一个“量化实现名称”无法让数据和语义穿过这些入口。[KIRToCPU.cpp](/home/kingdom/phdworks/intentdsl/lib/Conversion/KIRToCPU/KIRToCPU.cpp:39)、[contraction 识别](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Analysis/PhysicalProgram.cpp:15)、[Weft encoding](/home/kingdom/phdworks/intentdsl/lib/Target/Weft/Transforms/Legalize.cpp:112)
+**第三，数值覆盖仍很窄。** KIRToCPU 拒绝非 f32 view；矩阵识别依赖二维 indexing maps 和单个 FMA body；Weft external capture 固定为 `dense.f32`。只增加一个“量化实现名称”无法让数据和语义穿过这些入口。[KIRToCPU.cpp](${HOME}/phdworks/intentdsl/lib/Conversion/KIRToCPU/KIRToCPU.cpp:39)、[contraction 识别](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Analysis/PhysicalProgram.cpp:15)、[Weft encoding](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Legalize.cpp:112)
 
-**第四，专业实现的编译接口尚不存在。** 当前选择基本是 `vector/contraction` 两类数值配置；Mojo 有一份 f32 register-contraction builder，而没有各实现分别提供 applicability、接口需求和 expansion 的机制。当前 tuner 测的是已生成 config functions，不能凭 tuning 补出另一套数值微程序。[微核实现](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/MaterializeRegisterContractions.cpp:51)、[winner 选择](/home/kingdom/phdworks/intentdsl/python/intent/runtime/mojo/program.py:33)
+**第四，专业实现的编译接口尚不存在。** 当前选择基本是 `vector/contraction` 两类数值配置；Mojo 有一份 f32 register-contraction builder，而没有各实现分别提供 applicability、接口需求和 expansion 的机制。当前 tuner 测的是已生成 config functions，不能凭 tuning 补出另一套数值微程序。[微核实现](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/MaterializeRegisterContractions.cpp:51)、[winner 选择](${HOME}/phdworks/intentdsl/python/intent/runtime/mojo/program.py:33)
 
 这些是结构与覆盖限制，不是已经证实的性能归因。本文不把静态审查升级成“某性能差距已经解释”。
 
@@ -90,15 +90,15 @@ Gemm node：regions、dtype、M/N/K、accumulator、storage 等
     → 插回当前 TIR，继续访问/布局/资源/codegen 处理
 ```
 
-- [实现注册](/home/kingdom/phdworks/ref/tilelang/tilelang/cuda/op/gemm/__init__.py:45)分别登记 MMA、WGMMA、TCGEN05、block-scaled 等类；[Gemm.lower](/home/kingdom/phdworks/ref/tilelang/tilelang/tileop/gemm/__init__.py:127)选择实现并调用其 lowering。
-- [GemmMMA.lower](/home/kingdom/phdworks/ref/tilelang/tilelang/cuda/op/gemm/gemm_mma.py:109)用 `T.prim_func` 写出 local buffers、K-loop、fragment loads 和 MMA；并不是从通用乘加 IR 自动搜索出这些组织。
-- [GemmNode::Lower](/home/kingdom/phdworks/ref/tilelang/src/op/gemm.cc:198)取回 PrimFunc body，带 lexical allocation scope 插入 TIR；[LowerTileOp](/home/kingdom/phdworks/ref/tilelang/src/transform/lower_tile_op.cc:1134)提供 buffer/layout/workspace 等上下文，并继续处理展开的子树。
+- [实现注册](${HOME}/phdworks/ref/tilelang/tilelang/cuda/op/gemm/__init__.py:45)分别登记 MMA、WGMMA、TCGEN05、block-scaled 等类；[Gemm.lower](${HOME}/phdworks/ref/tilelang/tilelang/tileop/gemm/__init__.py:127)选择实现并调用其 lowering。
+- [GemmMMA.lower](${HOME}/phdworks/ref/tilelang/tilelang/cuda/op/gemm/gemm_mma.py:109)用 `T.prim_func` 写出 local buffers、K-loop、fragment loads 和 MMA；并不是从通用乘加 IR 自动搜索出这些组织。
+- [GemmNode::Lower](${HOME}/phdworks/ref/tilelang/src/op/gemm.cc:198)取回 PrimFunc body，带 lexical allocation scope 插入 TIR；[LowerTileOp](${HOME}/phdworks/ref/tilelang/src/transform/lower_tile_op.cc:1134)提供 buffer/layout/workspace 等上下文，并继续处理展开的子树。
 
 因此，专家编写复杂实现并不违背 compiler lowering。实现产出真实 IR，才是判据；类名叫 `Emitter` 并不能说明它是错误的终端发射器。官方 [GemmBase 接口](https://tilelang.com/autoapi/tilelang/tileop/gemm/gemm_base/index.html)也把 `infer_layout` 和 `lower` 分别列为实现接口。
 
 ### 3.2 专业实现还需要与外围协调
 
-TileLang 的实现会提出布局要求，外围处理已经存在的共享布局与新要求的关系；某些 instruction 的严格布局不能被忽略。[GemmNode::InferLayout](/home/kingdom/phdworks/ref/tilelang/src/op/gemm.cc:243)
+TileLang 的实现会提出布局要求，外围处理已经存在的共享布局与新要求的关系；某些 instruction 的严格布局不能被忽略。[GemmNode::InferLayout](${HOME}/phdworks/ref/tilelang/src/op/gemm.cc:243)
 
 给 CPU 的启示是：不能先把全部 blocking/packing 固定，再在最后选一个微核。实现需求至少要在相关结构冻结前参与选择。
 
@@ -106,11 +106,11 @@ TileLang 的实现会提出布局要求，外围处理已经存在的共享布�
 
 ### 3.3 专门量化实现的证据与边界
 
-SM120 block-scaled GEMM 有独立实现，内部可以组织 fragments、scale loads、unroll 和 ping-pong；它的 applicability 同时约束 scale operands、target、storage 与格式。[选择条件](/home/kingdom/phdworks/ref/tilelang/src/cuda/op/gemm.cc:363)、[专门微程序](/home/kingdom/phdworks/ref/tilelang/tilelang/cuda/op/gemm/gemm_mma_sm120.py:130)
+SM120 block-scaled GEMM 有独立实现，内部可以组织 fragments、scale loads、unroll 和 ping-pong；它的 applicability 同时约束 scale operands、target、storage 与格式。[选择条件](${HOME}/phdworks/ref/tilelang/src/cuda/op/gemm.cc:363)、[专门微程序](${HOME}/phdworks/ref/tilelang/tilelang/cuda/op/gemm/gemm_mma_sm120.py:130)
 
 这支持“难以通用推导的实现由专家编写”的机制，但不证明它能处理任意 Q4_K/Q8_K 或所有量化 GEMM。专门实现仍需要明确的适用语义。
 
-CUTLASS/CuTe 在当前 ref 中确实参与部分局部指令与类型封装，例如 [mma.h](/home/kingdom/phdworks/ref/tilelang/src/tl_templates/cuda/instruction/mma.h:4)；不能把这种组件复用笼统说成每个 `T.gemm` 都调用完整 CUTLASS GEMM。
+CUTLASS/CuTe 在当前 ref 中确实参与部分局部指令与类型封装，例如 [mma.h](${HOME}/phdworks/ref/tilelang/src/tl_templates/cuda/instruction/mma.h:4)；不能把这种组件复用笼统说成每个 `T.gemm` 都调用完整 CUTLASS GEMM。
 
 ### 3.4 与当前 Intent CPU 的具体差异和后果
 
@@ -247,7 +247,7 @@ Weft 是面向更具体数值 realization 的语言。把它用作专业实现�
 
 ### 7.2 当前规格有一个必须正面处理的边界
 
-当前 [DSL core](/home/kingdom/phdworks/intentdsl/doc/dsl/core.md:322)的 scaled contract 是特定 microscaling schema；普通 packed INT4/INT2 则要求作者显式 decode 后调用 ordinary contract。不能把 Q4_K 的 scale/min/bsum 程序直接冒充为现有 FP4 scaled contract。
+当前 [DSL core](${HOME}/phdworks/intentdsl/doc/dsl/core.md:322)的 scaled contract 是特定 microscaling schema；普通 packed INT4/INT2 则要求作者显式 decode 后调用 ordinary contract。不能把 Q4_K 的 scale/min/bsum 程序直接冒充为现有 FP4 scaled contract。
 
 建议采用两种明确处理，而不把所有量化都推回作者的逐位代码：
 
@@ -258,7 +258,7 @@ Weft 是面向更具体数值 realization 的语言。把它用作专业实现�
 
 ### 7.3 一个必须保留的实际边界：量化准备不能被重复藏入微核
 
-外部 Weft 的 [Q4_K mul_mat 示例](/home/kingdom/phdworks/TianchenRV/examples/kernels/mul_mat/q4_k.py:10)先将 f32 activation 量化到 Q8_K，再遍历输出调用量化点积 helper；[点积 helper](/home/kingdom/phdworks/TianchenRV/examples/kernels/vec_dot/q4_k_q8_k.py:8)内部包含 block/subtile、整数统计和 scale/min correction。
+外部 Weft 的 [Q4_K mul_mat 示例](${HOME}/phdworks/TianchenRV/examples/kernels/mul_mat/q4_k.py:10)先将 f32 activation 量化到 Q8_K，再遍历输出调用量化点积 helper；[点积 helper](${HOME}/phdworks/TianchenRV/examples/kernels/vec_dot/q4_k_q8_k.py:8)内部包含 block/subtile、整数统计和 scale/min correction。
 
 这说明可以复用专家程序，但不能把完整示例 kernel 原封不动塞进每个 output microtile：那会重复量化 activation、改变 scratch lifetime 或数据复用。应承接明确的计算块，并让一次性的准备、跨块共享与输出接口在外围可见。
 
@@ -270,13 +270,13 @@ Weft 是面向更具体数值 realization 的语言。把它用作专业实现�
 
 Mojo 是完整系统语言，SIMD 只是其低层值与计算工具，不是 CPU IR 必须采用的统一抽象。
 
-当前 f32 microkernel 已由 [MaterializeRegisterContractions](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/MaterializeRegisterContractions.cpp:51)形成；固定 f32 vector、prefetch 和四步 unroll 是这一实现的具体策略。建议把这份策略及其参数、合法性归到 Mojo 对应的 vector realization，而不是删除后重写已有性能结构。
+当前 f32 microkernel 已由 [MaterializeRegisterContractions](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/MaterializeRegisterContractions.cpp:51)形成；固定 f32 vector、prefetch 和四步 unroll 是这一实现的具体策略。建议把这份策略及其参数、合法性归到 Mojo 对应的 vector realization，而不是删除后重写已有性能结构。
 
-通用的逐点/归约 loop materialization 可以继续复用；但它应是所选 realization 的步骤，不是所有 provider 无条件经过的最低公共层。普通算术语义仍由 Intent 保持，显式 FMA 与普通 add/mul 分开；当前 `--fp-mode=contract=off` 不应因为加入实现选择就被去掉。[native 编译选项](/home/kingdom/phdworks/intentdsl/python/intent/targets/mojo.py:30)
+通用的逐点/归约 loop materialization 可以继续复用；但它应是所选 realization 的步骤，不是所有 provider 无条件经过的最低公共层。普通算术语义仍由 Intent 保持，显式 FMA 与普通 add/mul 分开；当前 `--fp-mode=contract=off` 不应因为加入实现选择就被去掉。[native 编译选项](${HOME}/phdworks/intentdsl/python/intent/targets/mojo.py:30)
 
 ### 8.2 Weft：复用专家 source 编程，但必须补结构化实例化接口
 
-Weft 普通 helper 当前可以真实 inline：frontend 绑定 typed values 与静态参数，在宿主上下文中编译 helper body。[现有 inline 实现](/home/kingdom/phdworks/TianchenRV/python/weft/frontend/compiler.py:2963)
+Weft 普通 helper 当前可以真实 inline：frontend 绑定 typed values 与静态参数，在宿主上下文中编译 helper body。[现有 inline 实现](${HOME}/phdworks/TianchenRV/python/weft/frontend/compiler.py:2963)
 
 然而，这不等于 Intent 已能调用这个入口。当前 Intent 链接的是外部 Canonical dialect，用 C++ 构造新的 Weft task module；没有已提供的 helper importer 或 microprogram splice API。
 
@@ -290,7 +290,7 @@ Weft 普通 helper 当前可以真实 inline：frontend 绑定 typed values 与�
 - 局部资源、输出写入与外围 lifetime/effect；
 - 专业程序本身的数值义务及允许的参数域。
 
-不能简单拼接两个完整 kernel body。现有 Weft `KernelOp` 是 isolated single-block，root domain、entry arguments 和 terminal return 都有约束；kernel return 当前不能携带 SSA results。[KernelOp](/home/kingdom/phdworks/TianchenRV/include/Weft/Dialect/Kernel/IR/KernelOps.td:134)、[Return verifier](/home/kingdom/phdworks/TianchenRV/lib/Dialect/Kernel/IR/KernelDialect.cpp:954)
+不能简单拼接两个完整 kernel body。现有 Weft `KernelOp` 是 isolated single-block，root domain、entry arguments 和 terminal return 都有约束；kernel return 当前不能携带 SSA results。[KernelOp](${HOME}/phdworks/TianchenRV/include/Weft/Dialect/Kernel/IR/KernelOps.td:134)、[Return verifier](${HOME}/phdworks/TianchenRV/lib/Dialect/Kernel/IR/KernelDialect.cpp:954)
 
 第一版应明确一种足够支撑实际微程序的输入/输出形式，不能承诺任意 standalone module 都可自动内联。源级 fragment export 与 canonical adapter 的具体实现需要结合现有 frontend 落地；本文确认了必要边界和现有缺口，不宣称这套接口已经存在。
 
@@ -317,7 +317,7 @@ Weft 的 RVV/IME physical layout、machine resources 和 intrinsic lowering 继�
 
 ### 9.1 配置必须从“所有 CPU 一张向量表”改为分层所有权
 
-当前可编辑配置在 [CPU TuningProfiles.json](/home/kingdom/phdworks/intentdsl/lib/Dialect/CPU/Transforms/TuningProfiles.json:1)。它不是无效 tuning，但不同职责现在被放进同一表和同一 Configuration。
+当前可编辑配置在 [CPU TuningProfiles.json](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/TuningProfiles.json:1)。它不是无效 tuning，但不同职责现在被放进同一表和同一 Configuration。
 
 建议区分：
 
@@ -325,7 +325,7 @@ Weft 的 RVV/IME physical layout、machine resources 和 intrinsic lowering 继�
 - implementation：该微程序真正消费的局部 block、vector/replica、unroll 等；
 - external compiler：外部 provider 自己负责并公开的机器参数。
 
-若某参数影响 shared block 与 implementation 两边，必须有一个 binding owner 和显式约束关系，不各自选择两个值。目前 `WeftTarget` 把 `cpu-vector-bits` 明确作为 construction budget；它会影响 shared 微块，但并不证明或直接指定 Weft 的实际 RVV 宽度/LMUL。应拆开这个 f32 导向的构造预算、实现需求和外部 compiler 的机器参数，避免把三者当成同一件事。[WeftTarget](/home/kingdom/phdworks/intentdsl/python/intent/targets/weft.py:21)
+若某参数影响 shared block 与 implementation 两边，必须有一个 binding owner 和显式约束关系，不各自选择两个值。目前 `WeftTarget` 把 `cpu-vector-bits` 明确作为 construction budget；它会影响 shared 微块，但并不证明或直接指定 Weft 的实际 RVV 宽度/LMUL。应拆开这个 f32 导向的构造预算、实现需求和外部 compiler 的机器参数，避免把三者当成同一件事。[WeftTarget](${HOME}/phdworks/intentdsl/python/intent/targets/weft.py:21)
 
 ### 9.2 修改重点不是批量搬文件
 

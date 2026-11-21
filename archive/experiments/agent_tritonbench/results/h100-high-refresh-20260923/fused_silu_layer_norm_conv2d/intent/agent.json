@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_silu_layer_norm_conv2d-intent-f8n23q0n",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/fused_silu_layer_norm_conv2d-intent-f8n23q0n",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

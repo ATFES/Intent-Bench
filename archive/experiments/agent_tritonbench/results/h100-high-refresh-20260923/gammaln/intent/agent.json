@@ -1,5 +1,5 @@
 {
-  "task_directory": "/home/kingdom/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/gammaln-intent-per0ce2w",
+  "task_directory": "${HOME}/.local/share/intentdsl/agent-evaluation-high-20260923/candidates/gammaln-intent-per0ce2w",
   "model": "gpt-5.6-luna",
   "reasoning_effort": "high",
   "threads": [

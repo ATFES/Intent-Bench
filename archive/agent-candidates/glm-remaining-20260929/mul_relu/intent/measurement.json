@@ -4,7 +4,7 @@
   "reference_ms": 0.011744000017642975,
   "ratio": 0.8051770956185333,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/mul_relu/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/mul_relu/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,8 +15,8 @@
   "precompile_seconds": 1.5423283050768077,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "mul_relu_tensor": "/home/kingdom/.cache/intentdsl/compiler/d481320d204a42ffb7d28ff6e1edd8c3",
-    "mul_relu_scalar": "/home/kingdom/.cache/intentdsl/compiler/dcd56dba503f4b16876cc118772f2186"
+    "mul_relu_tensor": "${HOME}/.cache/intentdsl/compiler/d481320d204a42ffb7d28ff6e1edd8c3",
+    "mul_relu_scalar": "${HOME}/.cache/intentdsl/compiler/dcd56dba503f4b16876cc118772f2186"
   },
   "precompile_failures": [],
   "tuning": [

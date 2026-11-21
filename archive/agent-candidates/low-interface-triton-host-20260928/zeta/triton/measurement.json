@@ -4,7 +4,7 @@
   "reference_ms": 0.009711999911814928,
   "ratio": 4.9851730126842355,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-interface-triton-host-20260928/zeta/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-interface-triton-host-20260928/zeta/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

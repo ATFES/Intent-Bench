@@ -1,5 +1,5 @@
 {
-  "host": "k1",
+  "host": "your-ssh-alias",
   "march": "rv64gcv_zfh_zvfh",
   "abi": "lp64d",
   "vlen_bits": 256,

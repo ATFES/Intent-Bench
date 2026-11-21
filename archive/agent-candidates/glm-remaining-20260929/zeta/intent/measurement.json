@@ -4,7 +4,7 @@
   "reference_ms": null,
   "ratio": null,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/zeta/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-remaining-20260929/zeta/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -16,10 +16,10 @@
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "failure_stage": "comparison",
   "error": "generated/source floating result 1 differs: max_abs=0.9999974966049194, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=0.0, source=0.9999974966049194, abs_error=0.9999974966049194, limit=0.00010999997175531462",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 1 differs: max_abs=0.9999974966049194, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=0.0, source=0.9999974966049194, abs_error=0.9999974966049194, limit=0.00010999997175531462\n",
+  "traceback": "Traceback (most recent call last):\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"${HOME}/.cache/intentdsl/agent-glm-20260929/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 1 differs: max_abs=0.9999974966049194, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=0.0, source=0.9999974966049194, abs_error=0.9999974966049194, limit=0.00010999997175531462\n",
   "compiler_artifacts": {
-    "hurwitz_zeta_shift": "/home/kingdom/.cache/intentdsl/compiler/2b306f25e83c467a8d16b28aa8a98c96",
-    "hurwitz_zeta_finish": "/home/kingdom/.cache/intentdsl/compiler/6e3db09edfa6414c8b9cc7f261119287"
+    "hurwitz_zeta_shift": "${HOME}/.cache/intentdsl/compiler/2b306f25e83c467a8d16b28aa8a98c96",
+    "hurwitz_zeta_finish": "${HOME}/.cache/intentdsl/compiler/6e3db09edfa6414c8b9cc7f261119287"
   },
   "precompile_failures": [],
   "tuning": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.00967200007289648,
   "ratio": 0.8354011576632239,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/glm-full-20260929/i0/triton/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/glm-full-20260929/i0/triton/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",

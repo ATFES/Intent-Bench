@@ -4,7 +4,7 @@
   "reference_ms": 0.014543999917805195,
   "ratio": 0.5363036508626357,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/sigmoid_argmax/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/deepseek-full-20260929/sigmoid_argmax/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 11.67381231696345,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "sigmoid_argmax_lastdim": "/home/kingdom/.cache/intentdsl/compiler/6c56d2fa9cf64179958c58b6f55e8750"
+    "sigmoid_argmax_lastdim": "${HOME}/.cache/intentdsl/compiler/6c56d2fa9cf64179958c58b6f55e8750"
   },
   "precompile_failures": [],
   "tuning": [

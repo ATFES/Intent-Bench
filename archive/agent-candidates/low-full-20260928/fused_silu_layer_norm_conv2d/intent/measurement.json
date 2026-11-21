@@ -4,7 +4,7 @@
   "reference_ms": null,
   "ratio": null,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_silu_layer_norm_conv2d/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/fused_silu_layer_norm_conv2d/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -16,10 +16,10 @@
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "failure_stage": "comparison",
   "error": "generated/source floating result 0 differs: max_abs=0.07797670364379883, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=4.770771026611328, source=4.692794322967529, abs_error=0.07797670364379883, limit=0.00014692793774884194",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"/home/kingdom/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.07797670364379883, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=4.770771026611328, source=4.692794322967529, abs_error=0.07797670364379883, limit=0.00014692793774884194\n",
+  "traceback": "Traceback (most recent call last):\n  File \"${HOME}/.cache/intentdsl/agent-low-20260928/repo/experiments/agent_tritonbench/benchmark.py\", line 157, in run\n    measured, anchor = evaluate(PreparedComparison(candidate, source, tolerance(task, suite), cuda_graph=cuda_graph),\n  File \"${HOME}/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 517, in evaluate\n    validate_outputs()\n  File \"${HOME}/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 510, in validate_outputs\n    compare_outputs(\n  File \"${HOME}/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 331, in compare_outputs\n    _compare_float_chunk(\n  File \"${HOME}/.cache/intentdsl/agent-low-20260928/repo/experiments/_common/measurement.py\", line 386, in _compare_float_chunk\n    raise NumericalComparisonError(\nexperiments._common.measurement.NumericalComparisonError: generated/source floating result 0 differs: max_abs=0.07797670364379883, atol=0.0001, rtol=1e-05; first_failure=0; largest tolerance excess has generated=4.770771026611328, source=4.692794322967529, abs_error=0.07797670364379883, limit=0.00014692793774884194\n",
   "compiler_artifacts": {
-    "fused_conv2d": "/home/kingdom/.cache/intentdsl/compiler/f0dcbdcddf4a4621a20d7c9420059ea0",
-    "fused_layernorm_silu": "/home/kingdom/.cache/intentdsl/compiler/8c51d1df3c4d49159fe3033b7187a0c9"
+    "fused_conv2d": "${HOME}/.cache/intentdsl/compiler/f0dcbdcddf4a4621a20d7c9420059ea0",
+    "fused_layernorm_silu": "${HOME}/.cache/intentdsl/compiler/8c51d1df3c4d49159fe3033b7187a0c9"
   },
   "precompile_failures": [],
   "tuning": [

@@ -4,7 +4,7 @@
   "reference_ms": 0.042023999616503716,
   "ratio": 0.40928992503721945,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/silu_batch_norm/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/silu_batch_norm/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,10 +15,10 @@
   "precompile_seconds": 11.333586181048304,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "silu_batch_norm_eval_00": "/home/kingdom/.cache/intentdsl/compiler/c2fb5ddbd1f04ddd83834a3a76275d8a",
-    "silu_batch_norm_eval_01": "/home/kingdom/.cache/intentdsl/compiler/f4be23c1d6754bf393696a4d457bbc48",
-    "silu_batch_norm_eval_10": "/home/kingdom/.cache/intentdsl/compiler/a138fbeb9c7048f19376ae9b64ae9eb5",
-    "silu_batch_norm_eval_11": "/home/kingdom/.cache/intentdsl/compiler/229ce45c5f47434d8c8ef68e6d52d268"
+    "silu_batch_norm_eval_00": "${HOME}/.cache/intentdsl/compiler/c2fb5ddbd1f04ddd83834a3a76275d8a",
+    "silu_batch_norm_eval_01": "${HOME}/.cache/intentdsl/compiler/f4be23c1d6754bf393696a4d457bbc48",
+    "silu_batch_norm_eval_10": "${HOME}/.cache/intentdsl/compiler/a138fbeb9c7048f19376ae9b64ae9eb5",
+    "silu_batch_norm_eval_11": "${HOME}/.cache/intentdsl/compiler/229ce45c5f47434d8c8ef68e6d52d268"
   },
   "precompile_failures": [],
   "tuning": [

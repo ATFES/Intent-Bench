@@ -4,7 +4,7 @@
   "reference_ms": 0.009519999846816063,
   "ratio": 1.0218487105584395,
   "target": "triton",
-  "program": "/home/kingdom/.local/share/intentdsl/agent-evaluation/low-full-20260928/matmul/intent/candidate.py",
+  "program": "${HOME}/.local/share/intentdsl/agent-evaluation/low-full-20260928/matmul/intent/candidate.py",
   "reference_time_reused": true,
   "reference_timing_note": null,
   "timing": "cuda_graph",
@@ -15,7 +15,7 @@
   "precompile_seconds": 11.826705622021109,
   "preparation_policy": "compile_only_before_gpu_timing_lock",
   "compiler_artifacts": {
-    "matmul_fp16": "/home/kingdom/.cache/intentdsl/compiler/5c5eb4d5cad2409a838fdf4819cac3c3"
+    "matmul_fp16": "${HOME}/.cache/intentdsl/compiler/5c5eb4d5cad2409a838fdf4819cac3c3"
   },
   "precompile_failures": [],
   "tuning": [
