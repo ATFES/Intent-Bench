@@ -26,5 +26,6 @@ def prepare(definition, args, env, backend="triton"):
         result,
         compile=compile,
         device=env.device,
+        tuning_report=call.tuning_report,
         metadata=metadata,
     )

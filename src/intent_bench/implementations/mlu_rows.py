@@ -58,6 +58,7 @@ def prepare(name, impl, case, inputs, env):
 
     stream = torch.mlu.current_stream(env.device)
     metadata = {}
+    selection = None
     if impl == "intent:bangc":
         import intent
         from .intent import make_kernel
@@ -113,6 +114,9 @@ def prepare(name, impl, case, inputs, env):
         def result():
             return native_result(call.result())
 
+        from .prepared import native_selection
+        selection = lambda: native_selection(call, kernel)
+
         def close():
             kernel.close()
             buffers.close()
@@ -162,6 +166,7 @@ def prepare(name, impl, case, inputs, env):
                 call.compile()
                 metadata["cold_compile"] = call.compilation_report()
 
+            selection = call.tuning_report
             launch, close = call.launch, None
             result = lambda: call.result().detach().cpu().numpy()
     return PreparedCall(
@@ -171,6 +176,7 @@ def prepare(name, impl, case, inputs, env):
         close=close,
         synchronize=stream.synchronize,
         native_measure=lambda s: timer(launch, stream, s),
+        tuning_report=selection,
         timing="cnrt_notifier",
         device=env.device,
         metadata=metadata,

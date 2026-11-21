@@ -27,8 +27,11 @@ def prepare(reference, args, env):
         call = kernel.prepare(*arguments)
         metadata = {"execution": "local_jit",
                     "compiler_artifacts": [str(artifact.cache_directory) for artifact in kernel.artifacts]}
-        return intent_sequence(call, lambda: decode(call.result()), reset=buffers.reset,
+        prepared = intent_sequence(call, lambda: decode(call.result()), reset=buffers.reset,
                                metadata=metadata, release=owners.close)
+        from .prepared import native_selection
+        prepared.tuning_report=lambda: native_selection(call,kernel)
+        return prepared
     except BaseException:
         owners.close()
         raise

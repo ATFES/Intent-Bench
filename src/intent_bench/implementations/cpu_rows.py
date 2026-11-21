@@ -66,6 +66,7 @@ def prepare(name, impl, case, args, env):
             device="cpu",
             native_measure=measure,
             timing="cpu_native_monotonic",
+            tuning_report=call.tuning_report,
             metadata=metadata,
             close=lambda: timer and timer.close(),
         )

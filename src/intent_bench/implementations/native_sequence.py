@@ -34,6 +34,7 @@ class NativeSequence:
         fills = []
         signatures, entries, owners = [], [], []
         self.bindings = bindings
+        self.arguments = {}
         for binding in bindings:
             if not hasattr(binding, "function"):
                 from intent import NativeMemoryFill
@@ -50,6 +51,7 @@ class NativeSequence:
             if signature not in signatures:
                 signatures.append(signature)
             values = binding.arguments
+            self.arguments[len(entries)] = values
             pointers = (ct.c_void_p * len(values))(*(ct.addressof(v) for v in values))
             owners.append((binding, values, pointers))
             entries.append(_Call(ct.cast(function, ct.c_void_p), pointers, signatures.index(signature), 0))
@@ -115,7 +117,7 @@ extern "C" double measure(Call* calls, size_t count, Fill* fills, int32_t* statu
         status, failed = ct.c_int32(), ct.c_size_t()
         elapsed = self.measure(self.calls, len(self.calls), self.fills, ct.byref(status), ct.byref(failed))
         if status.value:
-            self.bindings[failed.value].check_status(status.value)
+            self.bindings[failed.value].check_status(status.value, self.arguments[failed.value])
         for binding in self.bindings:
             binding.complete()
         return elapsed

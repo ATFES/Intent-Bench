@@ -160,6 +160,8 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                             row.error = str(error)
                     row.status = {"passed": "passed", "failed": "numerical_failed",
                                   "unchecked": "unchecked", "reference_failed": "reference_failed"}[row.correctness]
+                    if call.tuning_report is not None:
+                        row.metadata["selection"] = call.tuning_report()
                     if call.compiler_observations is not None:
                         row.stage = "observation"
                         row.metadata["compiler_observations"] = [

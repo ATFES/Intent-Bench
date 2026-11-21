@@ -97,6 +97,7 @@ class PreparedCall:
     host_result: Callable[[], Any] | None = None
     tolerance: Any = None
     owners: Any = None
+    tuning_report: Callable[[], dict] | None = None
     compiler_observations: Callable[[], Sequence[Any]] | None = None
 
     def __post_init__(self):

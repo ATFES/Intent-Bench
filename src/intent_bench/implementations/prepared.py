@@ -25,6 +25,22 @@ def native_samples(measure):
     return sample
 
 
+def native_selection(call, kernel):
+    """Expose V1 public observations, retaining missing provider timings as null."""
+    import hashlib
+    from pathlib import Path
+    observed = getattr(call, "observation", None)
+    sources = [Path(a.cache_directory) / "kernel.source" for a in kernel.artifacts]
+    return dict(
+        winner_configuration=dict(observed.configuration) if observed and observed.configuration else None,
+        artifact_format="emitted-source",
+        source_sha256=[hashlib.sha256(p.read_bytes()).hexdigest() for p in sources if p.is_file()],
+        trials_us=[dict(configuration=dict(c.configuration or ()), status=c.status,
+                        us=None if c.elapsed_ms is None else 1000*c.elapsed_ms)
+                   for c in observed.candidates] if observed else [],
+    )
+
+
 def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None,
                 host_factory=None, bindings=None):
     bindings = {} if bindings is None else bindings
@@ -41,9 +57,11 @@ def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None,
                 'operator_entry': 'prepared_launch',
                 'host_entry': 'torch_compile_custom_op' if host_factory else 'artifact.run'}
     if device == 'cpu':
-        return intent_sequence(call, lambda: observe(call.result()), reset=reset,
+        prepared = intent_sequence(call, lambda: observe(call.result()), reset=reset,
                                host_run=host_run, host_result=lambda: observe(host['output']),
                                metadata=metadata)
+        prepared.tuning_report=lambda: native_selection(call, artifact)
+        return prepared
     def compile_native():
         call.compile()
         snap = getattr(call, "observation", None)
@@ -57,6 +75,7 @@ def intent_call(artifact, arguments, *, device='cpu', reset=None, observe=None,
         reset=reset, device=device,
         metadata=metadata,
         host_run=host_run, host_result=lambda: observe(host['output']),
+        tuning_report=lambda: native_selection(call,artifact),
     )
 
 
