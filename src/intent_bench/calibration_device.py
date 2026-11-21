@@ -5,6 +5,7 @@ import statistics
 import os
 import time
 import subprocess
+import json
 
 def probe(backend,root):
     if backend=="cuda":
@@ -17,6 +18,7 @@ def cuda(root):
     from .calibration_tiles import traffic, empty
     d=torch.device("cuda",torch.cuda.current_device())
     p=torch.cuda.get_device_properties(d)
+    (root/"cache.json").write_text(json.dumps({"bytes":p.L2_cache_size, "source":"CUDA L2 device property"}))
     x=torch.ones(1<<28,device=d)
     sinks=torch.empty(1<<16,device=d)
     def elapsed(fn):
@@ -55,6 +57,11 @@ def mlu(root):
     mod=ctypes.CDLL(str(lib));call=mod.enqueue
     call.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*4),ctypes.c_void_p]
     x=torch.ones(1<<26,device="mlu");sink=torch.empty_like(x);stream=torch.mlu.current_stream()
+    size=ctypes.c_int()
+    cnrt=ctypes.CDLL(os.path.join(os.environ["NEUWARE_HOME"],"lib64","libcnrt.so"))
+    status=cnrt.cnrtDeviceGetAttribute(ctypes.byref(size),0x301,torch.mlu.current_device())
+    (root/"cache.json").write_text(json.dumps({"bytes":size.value if status==0 else None,
+        "source":"cnrtAttrMaxL2CacheSize", "status":status}))
     settings=Measurement(samples=9,warmup=3)
     def elapsed(words,step,mode,trips):
         def run():
@@ -73,6 +80,8 @@ def mlu(root):
         sizes=(64,128,256,512,1024,2048)
         samples=[elapsed(size,1,mode,256) for size in sizes]
         xs=[4*size for size in sizes]
+        (root/f"dma-{label}.json").write_text(json.dumps({"bytes_per_transfer":xs,
+            "transfers":256,"launch_ns":data["launch"],"elapsed_ns":samples},indent=2))
         xm=statistics.mean(xs)
         rates=[];latencies=[];errors=[]
         for start,*times in zip(data["launch"],*samples):

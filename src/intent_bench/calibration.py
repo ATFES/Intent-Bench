@@ -13,6 +13,22 @@ def summary(samples):
     return statistics.median(measured),f"range [{min(measured):.6g}, {max(measured):.6g}], n={len(measured)}"
 
 def cpu(root, args):
+    caches = []
+    for core in sorted(os.sched_getaffinity(0)):
+        entries = []
+        for directory in Path(f"/sys/devices/system/cpu/cpu{core}/cache").glob("index*"):
+            if (directory/"type").read_text().strip() not in ("Unified","Data"):
+                continue
+            size=(directory/"size").read_text().strip()
+            unit=size[-1]
+            capacity=int(size[:-1])*{"K":1024,"M":1<<20}[unit] if unit in ("K","M") else int(size)
+            entries.append((int((directory/"level").read_text()),capacity,
+                            (directory/"shared_cpu_list").read_text().strip()))
+        if entries:
+            level,size,shared=max(entries)
+            cache=dict(level=level,bytes=size,shared_cpu_list=shared)
+            if cache not in caches:caches.append(cache)
+    (root/"cache.json").write_text(json.dumps({"source":"Linux cpu cacheinfo", "last_level":caches}))
     src=Path(__file__).with_name("native")/"calibrate_cpu.c"
     binary=root/"calibrate_cpu"
     cmd=[args.cc,"-O3","-fopenmp",*args.cflag,str(src),"-o",str(binary)]

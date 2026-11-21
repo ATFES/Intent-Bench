@@ -9,27 +9,53 @@
 #include <immintrin.h>
 #endif
 
-static void load_only(float *p, size_t n, size_t step) {
+static void transfer(float *p, size_t n, size_t step, int write) {
 #if defined(__AVX512F__)
     size_t i=0;
+    const __m512 ones=_mm512_set1_ps(1.f);
     if(step==1) {
         for(; i+16<=n; i+=16) {
-            __m512 x=_mm512_loadu_ps(p+i);
-            __asm__ volatile("" :: "v"(x));
+            if (write) _mm512_storeu_ps(p+i, ones);
+            else {
+                __m512 x=_mm512_loadu_ps(p+i);
+                __asm__ volatile("" :: "v"(x));
+            }
+        }
+    } else {
+        const __m512i offsets=_mm512_mullo_epi32(_mm512_setr_epi32(
+            0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15), _mm512_set1_epi32(step));
+        for(; n-i>=16*step; i+=16*step) {
+            if (write) _mm512_i32scatter_ps(p+i,offsets,ones,4);
+            else {
+                __m512 x=_mm512_i32gather_ps(offsets,p+i,4);
+                __asm__ volatile("" :: "v"(x));
+            }
         }
     }
-    for(;i<n;i+=step) __asm__ volatile("" :: "x"(p[i]));
+    for(;i<n;i+=step) {
+        if(write) p[i]=1.f;
+        else __asm__ volatile("" :: "x"(p[i]));
+    }
 #elif defined(__riscv_vector)
-    while(n) {
+    size_t remaining=n/step;
+    while(remaining) {
         size_t vl;
-        __asm__ volatile("vsetvli %0,%1,e32,m4,ta,ma" : "=r"(vl) : "r"(n/step));
-        if(step==1) __asm__ volatile("vle32.v v8,(%0)" :: "r"(p) : "memory");
+        __asm__ volatile("vsetvli %0,%1,e32,m4,ta,ma" : "=r"(vl) : "r"(remaining));
+        if(write){
+            if(step==1) __asm__ volatile("vfmv.v.f v8,%1\n\tvse32.v v8,(%0)" :: "r"(p),"f"(1.f) : "memory");
+            else __asm__ volatile("vfmv.v.f v8,%1\n\tvsse32.v v8,(%0),%2" :: "r"(p),"f"(1.f),"r"(4*step) : "memory");
+        }
+        else if(step==1) __asm__ volatile("vle32.v v8,(%0)" :: "r"(p) : "memory");
         else __asm__ volatile("vlse32.v v8,(%0),%1" :: "r"(p),"r"(4*step) : "memory");
-        p+=vl*step; n-=vl*step;
+        remaining-=vl; if(remaining) p+=vl*step;
     }
 #else
-    for(size_t i=0;i<n;i+=step) (void)((volatile float *)p)[i];
+    for(size_t i=0;i<n;i+=step) {
+        if(write)((volatile float *)p)[i]=1.f;
+        else (void)((volatile float *)p)[i];
+    }
 #endif
+    __asm__ volatile("" ::: "memory");
 }
 
 static void bandwidth(float *x, size_t bytes, const char *tier, int trial) {
@@ -43,12 +69,7 @@ static void bandwidth(float *x, size_t bytes, const char *tier, int trial) {
             size_t t=omp_get_thread_num(), nt=omp_get_num_threads();
             size_t first=(n/stride*t/nt)*stride, stop=(n/stride*(t+1)/nt)*stride;
             for(int r=0;r<trips;r++){
-                if(!write)load_only(x+first,stop-first,stride);
-                else {
-                    #pragma omp simd
-                    for(size_t i=first;i<stop;i+=stride) x[i]=1.0f;
-                    __asm__ volatile("" ::: "memory");
-                }
+                transfer(x+first,stop-first,stride,write);
             }
         }
         printf("%s_%d_%s_bw %.9g\n",write?"write":"read",stride,tier,
