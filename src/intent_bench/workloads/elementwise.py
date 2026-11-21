@@ -69,6 +69,8 @@ def build(name="softmax"):
     if name == "softmax":
         from ..implementations.cpu_rows import register
         impls.update(register(name))
+        from ..implementations.mlu_rows import register as mlu_rows
+        impls.update(mlu_rows(name))
         for key in ("intent-v2:triton","intent-v2:cutile"):
             impls[key] = Implementation(key,lambda c,d,e,k=key: _prepare(name,k,c,d,e))
     return Workload(name, cases, inputs, impls, oracle=lambda case,args: _numpy(name,*args),

@@ -65,6 +65,8 @@ def build(name):
     from ..implementations.cpu_rows import register
 
     impls.update(register(name))
+    from ..implementations.mlu_rows import register as mlu_rows
+    impls.update(mlu_rows(name))
     return Workload(
         name,
         [

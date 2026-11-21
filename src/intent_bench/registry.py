@@ -19,6 +19,7 @@ class Registration:
 def workloads():
     from .implementations.mojo import NAMES as CPU_NAMES
     from .workloads.mlu import NAMES as MLU_NAMES
+    from .implementations.mlu_rows import NAMES as MLU_ROWS
     from .workloads.rvv import NAMES as RVV_NAMES
     values = {}
     def add(metadata, factory, argument):
@@ -28,9 +29,9 @@ def workloads():
         values[name] = Registration(metadata, factory, argument)
     for name, family in (("softmax", "reduction"), ("relu", "pointwise")):
         add({"name":name, "family":family,
-             "implementations":["numpy","torch","triton","cutile","intent:triton","intent:cutile","intent:mojo"]+(["intent-v2:triton","intent-v2:cutile","intent-v2:weft","intent-v2:mojo","intent:weft","ggml"] if name=="softmax" else [])},
+             "implementations":["numpy","torch","triton","cutile","intent:triton","intent:cutile","intent:mojo"]+(["intent-v2:triton","intent-v2:cutile","intent-v2:weft","intent-v2:mojo","intent:weft","ggml",*MLU_ROWS] if name=="softmax" else [])},
             "intent_bench.workloads.elementwise:build", name)
-    add({"name":"weighted_rms_norm","family":"normalization","implementations":["torch","intent:triton","intent-v2:triton","intent:cutile","intent-v2:cutile","ggml","intent:weft","intent:mojo","intent-v2:weft","intent-v2:mojo"]},
+    add({"name":"weighted_rms_norm","family":"normalization","implementations":["torch","intent:triton","intent-v2:triton","intent:cutile","intent-v2:cutile","ggml","intent:weft","intent:mojo","intent-v2:weft","intent-v2:mojo",*MLU_ROWS]},
         "intent_bench.workloads.weighted_rms:build", "weighted_rms_norm")
     for row in catalog():
         add(row, "intent_bench.corpus_adapter:build", row["name"])
