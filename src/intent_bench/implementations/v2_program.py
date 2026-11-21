@@ -19,7 +19,6 @@ def registrations(name):
 
 
 def prepare(name, backend, case, values, env):
-    from intent.examples.programs.inputs import Array
     from ..workloads.programs import _device
 
     device = _device(env, backend)
@@ -30,10 +29,11 @@ def prepare(name, backend, case, values, env):
                 import torch_mlu
             args = tuple(v.to(device) for v in args)
         call = bind(name, backend, args, env, device)
-        if device != "cpu":
+        if device.startswith("cuda:"):
             result = call.result
             call.result = lambda: result().cpu()
         return call
+    from intent.examples.programs.inputs import Array
     if device == "cpu":
         args = [x.to_numpy() if isinstance(x, Array) else x for x in values["arguments"]]
     else:
