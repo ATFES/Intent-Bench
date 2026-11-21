@@ -82,6 +82,8 @@ def run_output(environment, workload, explicit=None, *, execution=True):
             if option in environment.options:
                 for name in names:
                     variables[name] = str(environment.options[option])
+        if environment.device=="cpu":
+            variables["INTENT_CPU_THREADS"]=str(environment.threads)
         previous = {key: os.environ.get(key) for key in variables}
         os.environ.update(variables)
         import tempfile

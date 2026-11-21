@@ -29,14 +29,16 @@ class _Fill(ct.Structure):
 
 class NativeSequence:
     def __init__(self, calls):
-        from intent import PreparedSequence, NativeMemoryFill
         bindings = tuple(binding for call in calls for binding in
-                         (call.native_calls() if isinstance(call, PreparedSequence) else (call.native_call(),)))
+                         (call.native_calls() if hasattr(call, "native_calls") else (call.native_call(),)))
         fills = []
         signatures, entries, owners = [], [], []
         self.bindings = bindings
         for binding in bindings:
-            if isinstance(binding, NativeMemoryFill):
+            if not hasattr(binding, "function"):
+                from intent import NativeMemoryFill
+                if not isinstance(binding, NativeMemoryFill):
+                    raise TypeError("unknown native sequence entry")
                 fills.append(_Fill(binding.address, binding.count, len(binding.value),
                                    (ct.c_ubyte * 8)(*binding.value)))
                 entries.append(_Call(None, None, 0, len(fills)))

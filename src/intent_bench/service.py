@@ -81,7 +81,7 @@ def execute_local(request):
                              oracle_output=directory / "artifacts" / "oracle" if request.oracle_environment is not None else None)
             if profile is not None:
                 for row in rows:
-                    row.metadata["cold_compile"]=profile
+                    row.metadata.setdefault("cold_compile",profile)
         except Exception as error:
             status = "environment_missing" if isinstance(error, ImportError) else getattr(error, "status", "preparation_failed")
             rows = [Result(request.workload, "requested", case, {}, name, status=status,

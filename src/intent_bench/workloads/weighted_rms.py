@@ -1,4 +1,4 @@
-"""GPU comparison with the established weighted RMSNorm author shape and scalar ABI."""
+"""Weighted row normalization with an explicit inverse width and epsilon."""
 
 import numpy as np
 from ..model import Case, Implementation, Workload, PreparedCall
@@ -26,10 +26,8 @@ def tensors(data, device):
 
 
 def reference(case, data):
-    import torch
-
-    x, w, inv, eps = tensors(data, "cpu")
-    return ((x * torch.rsqrt((x * x).sum(-1, keepdim=True) * inv + eps)) * w).numpy()
+    x, w, inv, eps = data
+    return (x * np.reciprocal(np.sqrt((x * x).sum(-1, keepdims=True) * inv + eps))) * w
 
 
 def build(name):
@@ -64,9 +62,15 @@ def build(name):
         k: Implementation(k, lambda c, d, e, k=k: prepare(k, c, d, e))
         for k in ("torch", "intent:triton", "intent-v2:triton")
     }
+    from ..implementations.cpu_rows import register
+
+    impls.update(register(name))
     return Workload(
         name,
-        [Case("8192x4096-f32", dict(rows=8192, columns=4096))],
+        [
+            Case("8192x4096-f32", dict(rows=8192, columns=4096)),
+            Case("32x1024-f32", dict(rows=32, columns=1024)),
+        ],
         inputs,
         impls,
         oracle=reference,

@@ -67,6 +67,8 @@ def build(name="softmax"):
     for impl in ("numpy", "torch", "triton", "cutile", "intent:triton", "intent:cutile", "intent:mojo"):
         impls[impl] = Implementation(impl, lambda case, args, env, impl=impl: _prepare(name, impl, case, args, env))
     if name == "softmax":
+        from ..implementations.cpu_rows import register
+        impls.update(register(name))
         impls["intent-v2:triton"] = Implementation("intent-v2:triton",lambda c,d,e: _prepare(name,"intent-v2:triton",c,d,e))
     return Workload(name, cases, inputs, impls, oracle=lambda case,args: _numpy(name,*args),
                     atol=2e-3, rtol=2e-3, family="reduction" if name=="softmax" else "elementwise",

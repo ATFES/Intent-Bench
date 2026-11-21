@@ -29,6 +29,20 @@ class Worker:
         self.lib.bench_gated_delta_create.argtypes=[C.POINTER(C.c_void_p)]+[C.c_int]*6
         self.lib.bench_gated_delta_create.restype=C.c_void_p
         self.lib.bench_state_output.argtypes=[C.c_void_p,C.c_void_p];self.lib.bench_state_output.restype=None
+        if request["operation"] in ("softmax", "weighted_rms_norm"):
+            x=np.load(root/"input0.npy")
+            if x.dtype not in (np.float32,np.float16) or x.ndim!=2:raise ValueError("expected FP16 or FP32 row input")
+            weighted=request["operation"]=="weighted_rms_norm"
+            w=np.load(root/"input1.npy") if weighted else None
+            if weighted and (x.dtype!=np.float32 or w.dtype!=x.dtype or w.shape!=(x.shape[1],)):raise ValueError("gain signature mismatch")
+            entry=self.lib.bench_row_create
+            entry.argtypes=[C.c_bool,C.c_bool,C.c_void_p,C.c_void_p,C.c_int,C.c_int,C.c_float,C.c_int]
+            entry.restype=C.c_void_p
+            self.context=entry(weighted,x.dtype==np.float16,x.ctypes.data,w.ctypes.data if weighted else None,*x.shape, request.get("epsilon",0),request["threads"])
+            if not self.context:raise RuntimeError(self.lib.bench_error().decode())
+            self.kind=9 if weighted else 8
+            self.output=np.empty_like(x);self.reference=False
+            return
         if request["operation"] == "gated_delta":
             self.kind=6
             if request.get("reference",False):

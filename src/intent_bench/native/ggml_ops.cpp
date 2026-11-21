@@ -129,6 +129,32 @@ extern "C" void *bench_create(int kind, const void *weight_data, const void *act
   } catch(const std::exception &e){last_error=e.what();return nullptr;}
 }
 
+extern "C" void *bench_row_create(bool weighted, bool half_storage, const void *x, const float *gain, int rows, int cols, float eps, int threads) {
+  try {
+    auto op=std::make_unique<Operation>();
+    op->kind=weighted?9:8;
+    op->backend=ggml_backend_cpu_init();
+    ggml_backend_cpu_set_n_threads(op->backend,threads);
+    op->context=ggml_init({16*ggml_tensor_overhead()+ggml_graph_overhead_custom(16,false),nullptr,true});
+    op->input=ggml_new_tensor_2d(op->context,half_storage?GGML_TYPE_F16:GGML_TYPE_F32,cols,rows);
+    if(weighted){
+      op->weight=ggml_new_tensor_1d(op->context,GGML_TYPE_F32,cols);
+      op->output=ggml_mul(op->context,ggml_rms_norm(op->context,op->input,eps),op->weight);
+    } else {
+      auto *values=half_storage?ggml_cast(op->context,op->input,GGML_TYPE_F32):op->input;
+      auto *probabilities=ggml_soft_max(op->context,values);
+      op->output=half_storage?ggml_cast(op->context,probabilities,GGML_TYPE_F16):probabilities;
+    }
+    op->graph=ggml_new_graph_custom(op->context,16,false);
+    ggml_build_forward_expand(op->graph,op->output);
+    op->buffer=ggml_backend_alloc_ctx_tensors(op->context,op->backend);
+    if(!op->buffer)throw std::runtime_error("row graph allocation failed");
+    ggml_backend_tensor_set(op->input,x,0,ggml_nbytes(op->input));
+    if(weighted)ggml_backend_tensor_set(op->weight,gain,0,ggml_nbytes(op->weight));
+    op->prepare(threads);return op.release();
+  } catch(const std::exception &e){last_error=e.what();return nullptr;}
+}
+
 extern "C" void *bench_gated_delta_create(const void *const *data, int batch, int tokens,
                                           int key_heads, int value_heads, int dimension, int threads) {
   try {
@@ -193,7 +219,7 @@ extern "C" int bench_run(void *ptr) {
 }
 extern "C" void bench_output(void *ptr, void *out, int reference) {
   auto &op=*static_cast<Operation*>(ptr);
-  if(op.kind==6)ggml_backend_tensor_get(op.output,out,0,ggml_nbytes(op.output));
+  if(op.kind==6 || op.kind>=8)ggml_backend_tensor_get(op.output,out,0,ggml_nbytes(op.output));
   else if(op.kind==4)std::memcpy(out,op.packed_input.data(),op.packed_input.size());
   else if(reference)std::memcpy(out,op.reference.data(),op.reference.size()*sizeof(float));
   else if(op.kind==3)std::memcpy(out,op.result.data(),op.result.size()*sizeof(float));
