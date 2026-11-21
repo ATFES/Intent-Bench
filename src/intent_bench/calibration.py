@@ -36,15 +36,22 @@ def run():
         info = {key.strip(): value.strip() for key,value in info.items()}
         device=info.get("model name") or (info.get("mvendorid","")+"/"+info.get("marchid",""))
         isa=platform.machine()+" "+flags
-        conditions=f"affinity={sorted(os.sched_getaffinity(0))}, threads={a.threads}, 64 MiB working set, FP32 strides 1 and 16, unmanaged clocks"
+        dram_mib=1024 if platform.machine()=="x86_64" else 256
+        conditions=(f"affinity={sorted(os.sched_getaffinity(0))}, threads={a.threads}, FP32; "
+                    f"private {16*a.threads} KiB, mid {512*a.threads} KiB, shared 16 MiB, DRAM {dram_mib} MiB; "
+                    "paired copy uses binary16 32 MiB sparse footprint; unmanaged clocks")
     else:
         from . import calibration_device
         data,tool,device,isa,conditions=calibration_device.probe(a.backend,root)
+    for op in ("read","write"):
+        for step in (1,16):
+            key=f"{op}_{step}"
+            data[key]=data[key+"_dram_bw"]
     facts={}
     for k,samples in data.items():
         val,error=summary(samples)
         unit="B/ns" if k.startswith(("read_","write_")) or k.endswith("_bw") else "lane/ns" if k=="compute" else "FLOP/ns" if k=="vector" else "ns"
         facts[k]=dict(value=val,unit=unit,source=dict(device=device,isa=isa,toolchain=tool,conditions=conditions,benchmark="intent_bench.calibration/"+k,error=error))
     (root/"samples.json").write_text(json.dumps(data,indent=2))
-    (root/(a.profile+".calibration.json")).write_text(json.dumps(dict(version="1",facts=facts),indent=2)+"\n")
+    (root/(a.profile+".calibration.json")).write_text(json.dumps(dict(version="3",facts=facts),indent=2)+"\n")
 if __name__=="__main__":run()
