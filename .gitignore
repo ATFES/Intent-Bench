@@ -6,6 +6,6 @@ build/
 dist/
 .venv/
 runs/
-output/
+/output
 *.so
 __mojocache__/
