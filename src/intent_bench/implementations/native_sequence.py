@@ -45,7 +45,8 @@ class NativeSequence:
                 continue
             function = binding.function
             types = binding.argument_types
-            signature = tuple(_type(t) for t in types)
+            result = getattr(binding, 'return_type', None)
+            signature = (_type(result) if result else 'void', tuple(_type(t) for t in types))
             if signature not in signatures:
                 signatures.append(signature)
             values = binding.arguments
@@ -56,9 +57,11 @@ class NativeSequence:
         self.calls = (_Call * len(entries))(*entries)
         self.fills = (_Fill * len(fills))(*fills)
         cases = []
-        for index, types in enumerate(signatures):
+        for index, (result, types) in enumerate(signatures):
             arguments = ', '.join(f'*static_cast<{t}*>(call.arguments[{i}])' for i, t in enumerate(types))
-            cases.append(f'case {index}: reinterpret_cast<void (*)({", ".join(types)})>(call.function)({arguments}); break;')
+            invoke = f'reinterpret_cast<{result} (*)({", ".join(types)})>(call.function)({arguments})'
+            statement = invoke + ';' if result == 'void' else f'if ((*status = {invoke})) {{ *failed = i; return 0; }}'
+            cases.append(f'case {index}: {statement} break;')
         source = '''#include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -70,7 +73,7 @@ template<size_t Width> void initialize(const Fill& fill) {
     for (size_t i = 0; i < fill.count; ++i)
         std::memcpy(data + i * Width, fill.value, Width);
 }
-extern "C" double measure(Call* calls, size_t count, Fill* fills) {
+extern "C" double measure(Call* calls, size_t count, Fill* fills, int32_t* status, size_t* failed) {
     auto begin = std::chrono::steady_clock::now();
     for (size_t i = 0; i < count; ++i) {
         const auto& call = calls[i];
@@ -103,13 +106,16 @@ extern "C" double measure(Call* calls, size_t count, Fill* fills) {
             raise RuntimeError(f'native sequence timer compilation failed; see {path}: ' + result.stderr)
         self.library = ct.CDLL(str(path / 'timer.so'))
         self.measure = self.library.measure
-        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t, ct.POINTER(_Fill)]
+        self.measure.argtypes = [ct.POINTER(_Call), ct.c_size_t, ct.POINTER(_Fill), ct.POINTER(ct.c_int32), ct.POINTER(ct.c_size_t)]
         self.measure.restype = ct.c_double
 
     def run(self):
         for binding in self.bindings:
             binding.validate()
-        elapsed = self.measure(self.calls, len(self.calls), self.fills)
+        status, failed = ct.c_int32(), ct.c_size_t()
+        elapsed = self.measure(self.calls, len(self.calls), self.fills, ct.byref(status), ct.byref(failed))
+        if status.value:
+            self.bindings[failed.value].check_status(status.value)
         for binding in self.bindings:
             binding.complete()
         return elapsed
