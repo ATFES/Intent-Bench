@@ -41,9 +41,9 @@ def _prepare(name, implementation, case, inputs, env):
         from ..implementations.gpu import prepare
         return prepare(name, implementation, x)
     if implementation == "intent-v2:triton":
-        from intentdsl.examples import softmax
+        from intentdsl.examples import softmax, softmax_f32
         from ..implementations.intent_v2 import prepare
-        return prepare(softmax,(x,),env)
+        return prepare(softmax_f32 if x.dtype == torch.float32 else softmax, (x,), env)
     intent = intent_environment(env)
     if name == "softmax":
         from intent.examples.kernels.normalization.softmax import stable_softmax, stable_softmax_f16
