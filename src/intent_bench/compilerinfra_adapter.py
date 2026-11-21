@@ -47,6 +47,7 @@ def measure(candidate):
                 continue
             actual = row["metadata"].get("selection", {})
             result["measurements"].append(dict(
+                measurement_receipt=row["metadata"].get("measurement_receipt"),
                 case=row["case"], status=row["status"], runtime_identity=actual.get("runtime_identity"),
                 row_id=actual.get("winner_row_id"),
                 artifact_sha256=actual.get("artifact_sha256"), measured_ns=(row["median_ms"] * 1e6

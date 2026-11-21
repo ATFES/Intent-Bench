@@ -161,7 +161,15 @@ def benchmark(workload: Workload, implementations: Sequence[str | Implementation
                     row.status = {"passed": "passed", "failed": "numerical_failed",
                                   "unchecked": "unchecked", "reference_failed": "reference_failed"}[row.correctness]
                     if call.tuning_report is not None:
-                        row.metadata["selection"] = call.tuning_report()
+                        selection = call.tuning_report()
+                        row.metadata["selection"] = selection
+                        if (row.status == "passed" or row.metadata.get("oracle_capture")) and row.samples_ms:
+                            if selection.get("runtime_identity", {}).get("row_selection"):
+                                from uuid import uuid4
+                                from compilerinfra.performance import timed_receipt
+                                row.metadata["measurement_receipt"] = timed_receipt(
+                                    uuid4().hex, selection, row.samples_ms
+                                )
                     if call.compiler_observations is not None:
                         row.stage = "observation"
                         row.metadata["compiler_observations"] = [
