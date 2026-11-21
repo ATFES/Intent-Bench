@@ -59,6 +59,7 @@ class Measurement:
     warmup_ms: float = 25
     rep_ms: float = 100
     throughput: str | None = None
+    fresh_compile_cache: bool = False
 
     def __post_init__(self):
         if self.scope == "prepared_call":

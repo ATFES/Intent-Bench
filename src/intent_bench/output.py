@@ -61,6 +61,10 @@ def run_output(environment, workload, explicit=None, *, execution=True):
             yield directory
             return
         cache = root/"cache"/component(environment.name)
+        if environment.options.get("fresh_compile_cache"):
+            import tempfile
+            cache.mkdir(parents=True, exist_ok=True)
+            cache = Path(tempfile.mkdtemp(dir=cache, prefix="cold-"))
         variables = {
             "INTENT_BENCH_OUTPUT_ROOT": str(root), "INTENT_BENCH_RUN_DIR": str(directory),
             "INTENT_CACHE_DIR": str(cache/"intent"), "XDG_CACHE_HOME": str(cache/"xdg"),

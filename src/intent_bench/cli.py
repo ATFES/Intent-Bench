@@ -52,6 +52,7 @@ def main(argv=None):
     run.add_argument("--jobs",type=int,default=1)
     run.add_argument("--samples",type=int)
     run.add_argument("--warmup",type=int)
+    run.add_argument("--fresh-compile-cache",action="store_true", help="isolate each case and implementation in a new worker and compiler cache")
     run.add_argument("--cache",choices=("flush","warm"),default="flush")
     run.add_argument("--throughput",choices=("tflops","gbps"))
     run.add_argument("--timing",choices=("auto","host","cuda_event","cuda_graph","native"),default="auto")
@@ -140,7 +141,7 @@ def main(argv=None):
         return code
     selected = tuple(name for group in args.impl or () for name in group.split(","))
     settings = Measurement(method=args.timing,samples=args.samples,warmup=args.warmup,scope=args.scope,
-                           enabled=not args.check_only,cache=args.cache,throughput=args.throughput)
+                           enabled=not args.check_only,cache=args.cache,fresh_compile_cache=args.fresh_compile_cache,throughput=args.throughput)
     oracle_env = load_environment(args.oracle_env) if args.oracle_env else None
     if args.suite:
         if args.workload:
