@@ -9,9 +9,9 @@ from .author_inputs import Definition as _Definition, inputs as author_inputs, i
 
 
 BASELINES = {
-    "relu": {"cutile": "NVIDIA TileGym ReLU", "torch": "ATen ReLU", "cnnl": "CNNL ReLU"},
+    "relu": {"cutile": "NVIDIA TileGym ReLU", "torch": "ATen ReLU", "ggml": "GGML ReLU with native FP16 input and output conversions", "cnnl": "CNNL ReLU"},
     "softmax": {"triton": "Triton fused-softmax tutorial", "torch": "ATen softmax", "cnnl": "CNNL softmax"},
-    "transpose": {"torch": "ATen transpose materialization"},
+    "transpose": {"torch": "ATen transpose materialization", "ggml": "GGML materialized transposed view"},
     "embedding": {"triton": "Liger embedding lookup", "torch": "ATen embedding lookup"},
     "layer_norm": {"triton": "Triton layer-norm tutorial", "torch": "ATen LayerNorm",
                    "mojo": "MAX rowwise LayerNorm moments"},
@@ -153,11 +153,16 @@ def _intent(name, backend, values, env):
         metadata = {"author_program": name, "input_profile": "installed author program",
                     "compiler_artifacts": [str(a.cache_directory) for a in context.artifacts]}
         reset = lambda: [function() for function in restore]
+        def selection():
+            from ..implementations.prepared import native_selection
+            selections = [native_selection(call, k) for k in context.kernels]
+            return selections[0] if len(selections) == 1 else {"members": selections}
         if backend == "bangc":
             from ..implementations.bangc import prepare_sequence
             prepared = prepare_sequence(call, output, environment=env, reset=reset,
                                         close=context.close, owners=context)
             prepared.metadata.update(metadata)
+            prepared.tuning_report = selection
             return prepared
         native_measure = None
         if device == "cpu":
@@ -172,11 +177,11 @@ def _intent(name, backend, values, env):
                 finally:
                     context.close()
             from dataclasses import replace
-            return replace(native, close=close, owners=context,
+            return replace(native, close=close, owners=context, tuning_report=selection,
                 compiler_observations=lambda: [a.observation for k in context.kernels for a in k.artifacts
                                                 if a.observation is not None])
         return PreparedCall(call.launch, lambda: output, compile=call.compile,
-            reset=reset, close=context.close, native_measure=native_measure,
+            reset=reset, close=context.close, native_measure=native_measure, tuning_report=selection,
             timing="cpu_native_monotonic" if native_measure else None,
             device=context.device, owners=context,
             metadata=metadata,
@@ -216,6 +221,9 @@ def _q4_reference(values, env, implementation):
 
 
 def _reference(name, values, env, implementation="torch"):
+    if implementation == "ggml" and name in ("relu", "transpose"):
+        from ..implementations.native_libraries import ggml
+        return ggml(name, None, tuple(arg.to_numpy() for arg in values["arguments"]), env)
     if name == "q4_projection":
         return _q4_reference(values, env, implementation)
     import torch
@@ -391,6 +399,13 @@ def _reference(name, values, env, implementation="torch"):
             call = functional_launch(function)
             call.device = device
             call.owners = arguments
+            if device.startswith("mlu:"):
+                from ..implementations.mlu_rows import timer
+                import torch_mlu
+                stream = torch.mlu.current_stream(device)
+                call.native_measure = lambda settings: timer(call.launch, stream, settings)
+                call.synchronize = stream.synchronize
+                call.timing = "cnrt_notifier"
             call.metadata["library"] = source
             return self.bind(call, arguments, mutable)
 
@@ -433,6 +448,8 @@ def build(name):
     for backend in backends():
         implementations["intent:"+backend] = Implementation("intent:"+backend,
             lambda case, values, env, backend=backend: _intent(name, backend, values, env))
+    from ..implementations.v2_program import registrations
+    implementations.update(registrations(name))
     # Histogram's independent CPU oracle also checks excluded bins in the author
     # input; its output is integer, so no tolerance is applied to counts.
     def histogram_oracle(case, values):
@@ -456,7 +473,12 @@ def build(name):
             return
         import torch
         from ..numeric import compare_outputs
-        tensor = lambda value: torch.from_numpy(value) if isinstance(value, np.ndarray) else value
+        def tensor(value):
+            if not isinstance(value, np.ndarray):
+                return value
+            if value.dtype.name == "bfloat16":
+                return torch.from_numpy(value.view(np.uint16)).view(torch.bfloat16)
+            return torch.from_numpy(value)
         actual, expected = _tree(actual, tensor), _tree(expected, tensor)
         if name == "nonzero":
             actual = actual["indices"], actual["counts"]
@@ -471,6 +493,8 @@ def build(name):
             actual, expected = canonical(actual), canonical(expected)
         if name == "histogram":
             expected = expected.to(actual.device)
+        if isinstance(actual, torch.Tensor) and actual.device.type == "mlu" and expected.device.type == "cpu":
+            actual = actual.cpu()
         compare_outputs(actual, expected, tolerance)
     return Workload("program/"+name, [Case("author")], lambda case, seed: author_inputs(name, seed),
         implementations, oracle=oracle, check=check,

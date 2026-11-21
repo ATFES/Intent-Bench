@@ -129,9 +129,10 @@ extern "C" void *bench_create(int kind, const void *weight_data, const void *act
   } catch(const std::exception &e){last_error=e.what();return nullptr;}
 }
 
-extern "C" void *bench_row_create(bool weighted, bool half_storage, const void *x, const float *gain, int rows, int cols, float eps, int threads) {
+extern "C" void *bench_row_create(int operation, bool half_storage, const void *x, const float *gain, int rows, int cols, float eps, int threads) {
   try {
     auto op=std::make_unique<Operation>();
+    const bool weighted = operation == 1;
     op->kind=weighted?9:8;
     op->backend=ggml_backend_cpu_init();
     ggml_backend_cpu_set_n_threads(op->backend,threads);
@@ -140,9 +141,11 @@ extern "C" void *bench_row_create(bool weighted, bool half_storage, const void *
     if(weighted){
       op->weight=ggml_new_tensor_1d(op->context,GGML_TYPE_F32,cols);
       op->output=ggml_mul(op->context,ggml_rms_norm(op->context,op->input,eps),op->weight);
+    } else if (operation == 3) {
+      op->output=ggml_cont(op->context,ggml_transpose(op->context,op->input));
     } else {
       auto *values=half_storage?ggml_cast(op->context,op->input,GGML_TYPE_F32):op->input;
-      auto *probabilities=ggml_soft_max(op->context,values);
+      auto *probabilities=operation==2 ? ggml_relu(op->context,values) : ggml_soft_max(op->context,values);
       op->output=half_storage?ggml_cast(op->context,probabilities,GGML_TYPE_F16):probabilities;
     }
     op->graph=ggml_new_graph_custom(op->context,16,false);

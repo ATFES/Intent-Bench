@@ -19,7 +19,7 @@ def register(name):
     return {k: Implementation(k, partial(prepare, name, k)) for k in NAMES}
 
 
-def timer(launch, stream, settings):
+def timer(launch, stream, settings, reset=None):
     lib = C.CDLL("libcnrt.so")
 
     def invoke(name, *args):
@@ -34,9 +34,11 @@ def timer(launch, stream, settings):
             invoke("cnrtNotifierCreate", C.byref(ev))
             marks.append(ev)
         for _ in range(settings.warmup):
+            if reset: reset()
             launch()
         samples = []
         for _ in range(settings.samples):
+            if reset: reset()
             invoke("cnrtPlaceNotifier", marks[0], C.c_void_p(stream.mlu_stream))
             launch()
             invoke("cnrtPlaceNotifier", marks[1], C.c_void_p(stream.mlu_stream))

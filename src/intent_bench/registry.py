@@ -37,11 +37,12 @@ def workloads():
         add(row, "intent_bench.corpus_adapter:build", row["name"])
     from .workloads.programs import BASELINES as PROGRAM_BASELINES, backends as program_backends
     providers = tuple("intent:" + backend for backend in program_backends())
+    from .implementations.v2_program import registrations
     for name,baselines in PROGRAM_BASELINES.items():
         add({"name":"program/"+name, "family":"program", "case":"author",
              "description":"Installed author program with its original inputs and complete call",
              "implementation_descriptions":dict(baselines),
-             "implementations":[*baselines,*providers]},
+             "implementations":[*baselines,*providers,*registrations(name)]},
             "intent_bench.workloads.programs:build", name)
     for group, names, implementations in (
         ("advanced", ADVANCED_OPERATIONS, ["torch","mojo","intent:mojo"]),
