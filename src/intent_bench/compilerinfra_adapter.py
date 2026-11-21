@@ -21,6 +21,7 @@ def measure(candidate):
             "library": candidate["library"],
             "configuration": candidate["configuration"],
             "candidate": candidate["candidate"],
+            "artifact_file": candidate.get("artifact_file"),
         },
     }
     if "row_id" in selection:
@@ -37,18 +38,17 @@ def measure(candidate):
     )
     outcome = run(request)
     result = {"directory": str(outcome.directory), "exit_code": outcome.exit_code}
-    if prediction := candidate.get("prediction"):
+    if candidate.get("artifact_file"):
         from .results import record
-        result["prediction"] = prediction
         result["measurements"] = []
         for raw in outcome.results:
             row = raw if isinstance(raw, dict) else record(raw)
-            if row["implementation"] != "intent-v2:" + prediction["exit"]:
+            if not row["implementation"].startswith("intent-v2:"):
                 continue
             actual = row["metadata"].get("selection", {})
             result["measurements"].append(dict(
-                case=row["case"], status=row["status"], compiler_candidate=candidate["candidate"],
-                compilation_id=prediction["compilation_id"], row_id=actual.get("winner_row_id"),
+                case=row["case"], status=row["status"], runtime_identity=actual.get("runtime_identity"),
+                row_id=actual.get("winner_row_id"),
                 artifact_sha256=actual.get("artifact_sha256"), measured_ns=(row["median_ms"] * 1e6
                 if row["median_ms"] is not None else None)))
     return result

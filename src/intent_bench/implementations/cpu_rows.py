@@ -42,7 +42,7 @@ def prepare(name, impl, case, args, env):
             library=target.get("library"),
             configuration=target.get("configuration"),
         )
-        call = kernel.prepare(*args)
+        call = kernel.prepare(*args, artifact_file=target.get("artifact_file"))
         metadata = {
             "candidate": target.get("candidate"),
             "operator_entry": "prepared_native_sequence",

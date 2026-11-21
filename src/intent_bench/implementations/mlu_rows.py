@@ -162,7 +162,7 @@ def prepare(name, impl, case, inputs, env):
             kernel = intentdsl.jit(
                 fn, backend="bangc", library=spec.get("library"), configuration=cfg
             )
-            call = kernel.prepare(*args)
+            call = kernel.prepare(*args, artifact_file=spec.get("artifact_file"))
 
             def compile():
                 call.compile()

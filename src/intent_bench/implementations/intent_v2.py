@@ -13,7 +13,7 @@ def prepare(definition, args, env, backend="triton"):
         library=target.get("library"),
         configuration=target.get("configuration"),
     )
-    call = kernel.prepare(*args)
+    call = kernel.prepare(*args, artifact_file=target.get("artifact_file"))
     metadata={"candidate":target.get("candidate"),"operator_entry":"prepared_launch"}
     def compile():
         call.compile()

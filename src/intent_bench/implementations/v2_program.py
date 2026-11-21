@@ -63,7 +63,7 @@ def bind(name, backend, args, env, device):
                 dest[...] = value
             else:
                 dest.copy_(value)
-    call = kernel.prepare(*args)
+    call = kernel.prepare(*args, artifact_file=options.get("artifact_file"))
     if "row_id" in options:
         call = call.bind_row(options["row_id"])
     metadata = {"author_program": name}
