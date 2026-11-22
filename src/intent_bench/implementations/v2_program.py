@@ -4,11 +4,12 @@ from functools import partial
 from ..model import Implementation, PreparedCall
 
 
-CATALOG = {"rotary_embedding_equivalent_index"}
+CATALOG = {"rotary_embedding_equivalent_index","qkv_projection"}
+CONTRACTIONS = {"gemm","batched_gemm","ragged_gemm","int8_gemm","fp8_gemm","q4_projection"}
 
 
 def registrations(name):
-    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean","histogram","nonzero","moe_alignment"}:
+    if name not in CONTRACTIONS and name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean","histogram","nonzero","moe_alignment"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -68,11 +69,20 @@ def author_arguments(values, device):
         if device.startswith("mlu:"):
             import torch_mlu
         dtypes = {"f16": torch.float16, "bf16": torch.bfloat16,
-                  "f32": torch.float32, "i32": torch.int32,"i64":torch.int64}
-        args = [
-            torch.frombuffer(x.data, dtype=dtypes[x.dtype]).reshape(x.shape).to(device)
-            if isinstance(x, Array) else x for x in values["arguments"]
-        ]
+                  "f32": torch.float32, "i32": torch.int32,"i64":torch.int64,
+                  "i8":torch.int8,"u8":torch.uint8}
+        if any(isinstance(x,Array) and x.dtype=="f8e4m3fn" for x in values["arguments"]):
+            dtypes["f8e4m3fn"]=torch.float8_e4m3fn
+        def transfer(x):
+            if not isinstance(x, Array):
+                return x
+            if device.startswith("mlu") and x.dtype=="f8e4m3fn":
+                # CNRT accepts the storage; this avoids requesting a CNNL FP8
+                # conversion while preserving the logical dtype for the JIT.
+                raw=torch.frombuffer(x.data,dtype=torch.uint8).reshape(x.shape).to(device)
+                return raw.view(dtypes[x.dtype])
+            return torch.frombuffer(x.data,dtype=dtypes[x.dtype]).reshape(x.shape).to(device)
+        args = [transfer(x) for x in values["arguments"]]
     return args
 
 

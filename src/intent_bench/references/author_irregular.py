@@ -61,6 +61,9 @@ def prepare(name, implementation, arguments, environment):
         owners = arguments, matrix, output
         library = "ATen/cuSPARSE CSR matrix-vector product"
     elif name == "int8_gemm" and implementation == "torch":
+        if device.startswith("mlu") and not torch._C._dispatch_has_kernel_for_dispatch_key("aten::_int_mm.out","PrivateUse1"):
+            from ..model import EnvironmentUnavailable
+            raise EnvironmentUnavailable("torch_mlu _int_mm falls back to CPU on the registered MLU370")
         a, b, bias = arguments
         output = torch.empty((a.shape[0], b.shape[1]), dtype=torch.int32, device=device)
         def run():

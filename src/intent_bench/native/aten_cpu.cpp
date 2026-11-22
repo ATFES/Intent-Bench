@@ -235,6 +235,15 @@ void initialize(Call &call) {
        at::empty(a[1].sizes(),fp32),at::empty(a[0].sizes(),fp32)};
     break;
   }
+  case 34: {
+    TORCH_CHECK(a.size()==2 && a[0].dim()==2 && a[1].dim()==3 &&
+                a[0].size(1)==a[1].size(1), "expected X[M,K] and weights[P,K,N]");
+    o.push_back(at::empty({a[1].size(0),a[0].size(0),a[1].size(2)},a[0].options()));
+    auto fp32=a[0].options().dtype(at::kFloat);
+    w={at::empty(a[0].sizes(),fp32),at::empty({a[1].size(1),a[1].size(2)},fp32),
+       at::empty({a[0].size(0),a[1].size(2)},fp32)};
+    break;
+  }
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -443,6 +452,14 @@ void execute(Call &call) {
     o = {dq, reduceHeads(dk), reduceHeads(dv)};
     break;
   }
+  case 34:
+    w[0].copy_(a[0]);
+    for (int64_t i=0;i<a[1].size(0);++i) {
+      w[1].copy_(a[1].select(0,i));
+      at::mm_out(w[2],w[0],w[1]);
+      o[0].select(0,i).copy_(w[2]);
+    }
+    break;
   case 33:
     w[2].copy_(a[2]);
     w[4].copy_(a[0]);

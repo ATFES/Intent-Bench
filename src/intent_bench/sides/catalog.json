@@ -198,6 +198,8 @@
     "intent": "intent_bench.sides.triton_jagged_mean_intent:prepare"
   },
   "corpus/triton/moe_expert_projection": {
+    "inputs": "intent_bench.sides.triton_moe_expert_projection_source:inputs",
+    "v2_symbol": "expert_projection",
     "source": "intent_bench.sides.triton_moe_expert_projection_source:prepare",
     "intent": "intent_bench.sides.triton_moe_expert_projection_intent:prepare"
   },

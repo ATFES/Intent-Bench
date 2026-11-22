@@ -20,6 +20,7 @@ ATEN_NATIVE_OPERATIONS = {
         'cumsum': ('flaggems_cumsum',),
         'gemm': ('dense_gemm', 'tilegym_dense_gemm', 'gemm_loop_interchange'),
         'batched_gemm': ('batched_gemm',),
+        'qkv_projection': ('qkv_projection',),
         'batched_gemm_tn': ('batched_gemm_tn',),
         'batched_gemm_nt': ('batched_gemm_nt',),
         'batched_gemm_tt': ('batched_gemm_tt',),
@@ -43,6 +44,8 @@ def catalog():
             if row['kernel'] in ADVANCED_OPERATIONS and 'mojo' not in row['implementations']:row['implementations'].append('mojo')
         elif provider=='weft':
             row['implementations']=['weft','intent:weft']
+            if row["kernel"]=="q4_k_projection":
+                row["implementations"].extend("intent-v2:"+b for b in ("triton","cutile","mojo","weft","bangc"))
             row['source_runtime']='implementations/triton_weft_source.py'
         elif provider=='bangc':
             source='cnnl' if row['kernel'] in {'relu','fused_softmax','dense_gemm'} else 'reference:mojo' if row['kernel'] in {'causal_attention_f32','causal_linear_attention_f32'} else 'reference:cuda'

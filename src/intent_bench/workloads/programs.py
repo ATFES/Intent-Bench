@@ -347,7 +347,7 @@ def _reference(name, values, env, implementation="torch"):
                         "group_norm_backward", "adamw", "cholesky", "dropout"}:
                 return self.bind(prepare_additional(name, implementation, arguments, env), arguments, mutable)
             x = arguments[0]
-            source = "PyTorch ATen "+("CUDA" if device.startswith("cuda:") else "CPU")
+            source = "PyTorch ATen "+device.split(":")[0].upper()
             if implementation == "triton":
                 from ..corpus import PROJECT_ROOT
                 from ..corpus._common.loading import load_module

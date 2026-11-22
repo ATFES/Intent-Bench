@@ -5,11 +5,26 @@ from intent_bench.corpus._common.loading import load_module
 from intent_bench.model import PreparedCall
 from intent_bench.implementations.context import Tolerance
 
-def prepare(context):
+def inputs():
+    from .norm_inputs import Arguments
     (tokens, hidden, output, experts, topk) = (2048, 4096, 14336, 8, 2)
     x = torch.randn((tokens, hidden), device='cuda', dtype=torch.bfloat16)
     weight = torch.randn((experts, output, hidden), device='cuda', dtype=torch.bfloat16)
     ids = torch.stack((torch.arange(tokens, device='cuda') % experts, (torch.arange(tokens, device='cuda') + 1) % experts), dim=1).to(torch.int32)
+    flat=ids.flatten()
+    routes=torch.argsort(flat,stable=True).to(torch.int32)
+    offsets=torch.cat((flat.new_zeros(1),torch.bincount(flat,minlength=experts).cumsum(0))).int()
+    return Arguments((x,offsets,routes,weight))
+
+def prepare(context):
+    x,offsets,routes,weight=context.inputs
+    tokens,hidden=x.shape
+    experts,output,_=weight.shape
+    topk=routes.numel()//tokens
+    counts=(offsets[1:]-offsets[:-1]).long()
+    flat=torch.empty_like(routes)
+    flat[routes.long()]=torch.repeat_interleave(torch.arange(experts,device=x.device,dtype=torch.int32),counts)
+    ids=flat.reshape(tokens,topk)
     projection_runtime = load_module(context.project_root / 'corpus/gpu/baselines/triton/meta-applied-ai/moe/support/projection_runtime.py', 'intent_v2_triton_moe_projection_runtime')
     runtime = projection_runtime._runtime_module()
     if 'grouped' == 'grouped':
