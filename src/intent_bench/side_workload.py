@@ -122,6 +122,11 @@ def build(row,entries):
         for backend in ("triton","cutile","mojo","weft","bangc"):
             name = "intent-v2:"+backend
             impls[name] = Implementation(name,lambda case,payload,env,b=backend:v2(case,payload,env,b))
+            legacy="intent:"+backend
+            if legacy not in impls:
+                from .implementations.legacy_norms import prepare as legacy_call
+                from functools import partial
+                impls[legacy]=Implementation(legacy,partial(legacy_call,entries["v2_symbol"],backend))
     def inputs(case, seed):
         if factory is None:
             return seed
