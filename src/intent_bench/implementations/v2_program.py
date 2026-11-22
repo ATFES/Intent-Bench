@@ -4,12 +4,13 @@ from functools import partial
 from ..model import Implementation, PreparedCall
 
 
-CATALOG = {"rotary_embedding_equivalent_index","qkv_projection"}
-CONTRACTIONS = {"gemm","batched_gemm","ragged_gemm","int8_gemm","fp8_gemm","q4_projection"}
+CATALOG = {"rotary_embedding_equivalent_index","qkv_projection","selective_state_scan"}
+CONTRACTIONS = {"gemm","batched_gemm","ragged_gemm","int8_gemm","fp8_gemm","q4_projection","mamba_chunk_state"}
+RECURRENCES = {"cholesky", "causal_convolution", "gated_delta", "causal_linear_attention"}
 
 
 def registrations(name):
-    if name not in CONTRACTIONS and name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean","histogram","nonzero","moe_alignment"}:
+    if name not in CONTRACTIONS and name not in CATALOG and name not in RECURRENCES and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean","histogram","nonzero","moe_alignment"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -92,8 +93,8 @@ def bind(name, backend, args, env, device):
     options = env.options.get("compilerinfra", {})
     kernel = intentdsl.jit(getattr(examples, name), backend=backend,
                            library=options.get("library"), configuration=options.get("configuration"))
-    mutable = {"adamw": (1,2,3), "rope":(0,1), "batch_norm":(3,4)}.get(name, ())
-    original = [(args[i], args[i].copy() if device=="cpu" else args[i].clone()) for i in mutable]
+    mutable = {"adamw": (1,2,3), "rope":(0,1), "batch_norm":(3,4),"cholesky":(0,)}.get(name, ())
+    original = [(args[i], args[i].clone() if hasattr(args[i],"clone") else args[i].copy()) for i in mutable]
     def reset():
         for dest, value in original:
             if device=="cpu":
