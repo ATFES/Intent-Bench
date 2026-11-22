@@ -57,7 +57,7 @@ def prepare(symbol, backend, case, payload, env):
         else:
             raise ValueError(f"unknown legacy normalization program {symbol}")
         sequence=intent.PreparedSequence(steps,outputs=outputs,owners=(buffers,))
-        lifetime=owners.pop_all()
+        lifetime=ExitStack()
         if backend=="bangc":
             from .bangc import prepare_sequence
             call=prepare_sequence(sequence,outputs,environment=env,close=lifetime.close,owners=lifetime)
@@ -67,4 +67,5 @@ def prepare(symbol, backend, case, payload, env):
             call=PreparedCall(sequence.launch,lambda:native_result(outputs),device=device,
                               compile=sequence.compile,close=lifetime.close)
         call.tuning_report=lambda:{"members":[native_selection(step,kernel) for kernel,step in members]}
+        lifetime.enter_context(owners.pop_all())
         return call
