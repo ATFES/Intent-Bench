@@ -8,7 +8,7 @@ CATALOG = {"rotary_embedding_equivalent_index"}
 
 
 def registrations(name):
-    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean"}:
+    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding","csr_spmv","jagged_mean","histogram","nonzero","moe_alignment"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -33,7 +33,30 @@ def prepare(name, backend, case, values, env):
             result = call.result
             call.result = lambda: result().cpu()
         return call
-    return bind(name, backend, author_arguments(values, device), env, device)
+    args=author_arguments(values,device)
+    if name=="moe_alignment":
+        from intent.examples.kernels.routing.moe_align import EXPERT_BLOCKS, BLOCK_SIZE
+        # This public entry accepts the expert-block destination. Seed its
+        # inactive tail before measurement, just like a caller reusing a buffer.
+        if device=="cpu":
+            import numpy as np
+            blocks=np.full(EXPERT_BLOCKS,-1,dtype=np.int32)
+        else:
+            import torch
+            blocks=torch.full((EXPERT_BLOCKS,),-1,device=device,dtype=torch.int32)
+        call=bind("moe_alignment_into",backend,(*args,blocks),env,device)
+        result=call.result
+        def output():
+            routes,experts,total=result()
+            return {"route_ids":routes,"expert_blocks":experts,"total_padded":total,"block_size":BLOCK_SIZE}
+        call.result=output
+        call.metadata["caller_output"]="expert_blocks"
+        return call
+    call=bind(name, backend, args, env, device)
+    if name=="nonzero":
+        result=call.result
+        call.result=lambda:dict(zip(("indices","counts"),result(),strict=True))
+    return call
 
 
 def author_arguments(values, device):

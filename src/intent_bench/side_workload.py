@@ -124,7 +124,7 @@ def build(row,entries):
             name = "intent-v2:"+backend
             impls[name] = Implementation(name,lambda case,payload,env,b=backend:v2(case,payload,env,b))
             legacy="intent:"+backend
-            if legacy not in impls:
+            if legacy not in impls and entries["v2_symbol"] in {"fused_add_rms_norm","dropout_residual_rms_norm","layer_norm_backward"}:
                 from .implementations.legacy_norms import prepare as legacy_call
                 from functools import partial
                 impls[legacy]=Implementation(legacy,partial(legacy_call,entries["v2_symbol"],backend))

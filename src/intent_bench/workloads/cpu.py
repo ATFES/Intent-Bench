@@ -49,7 +49,24 @@ def build(name):
     def mojo_prepare(case,x,env):
         from ..implementations.mojo import prepare
         return prepare(name,case,x,env)
+    implementations={"numpy":Implementation("numpy",numpy_prepare),"mojo":Implementation("mojo",mojo_prepare)}
+    if name=="histogram":
+        from .programs import _device
+        from ..implementations.v2_program import bind
+        def prepare_bins(backend,case,x,env):
+            device=_device(env,backend); indices=x["indices"]
+            if device!="cpu":
+                import torch
+                if device.startswith("mlu"):import torch_mlu
+                indices=torch.from_numpy(indices).to(device)
+            result=bind("histogram_from_indices",backend,(indices,case.parameters["columns"]),env,device)
+            if device.startswith("cuda"):
+                get=result.result;result.result=lambda:get().cpu().numpy()
+            return result
+        from functools import partial
+        for backend in ("weft","mojo","triton","cutile","bangc"):
+            key="intent-v2:"+backend;implementations[key]=Implementation(key,partial(prepare_bins,backend))
     return Workload("cpu/"+name,[Case("small",{"rows":16,"columns":32}),Case("large",{"rows":512,"columns":1024})],
                     lambda case,seed:inputs(name,case,seed),
-                    {"numpy":Implementation("numpy",numpy_prepare),"mojo":Implementation("mojo",mojo_prepare)},
+                    implementations,
                     oracle=lambda case,x:reference(name,case,x),atol=1e-4,rtol=1e-4,family="cpu/"+name)

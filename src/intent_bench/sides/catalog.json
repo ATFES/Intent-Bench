@@ -210,6 +210,8 @@
     "intent": "intent_bench.sides.triton_flaggems_cumsum_intent:prepare"
   },
   "corpus/triton/flaggems_histogram": {
+    "inputs": "intent_bench.sides.histogram_inputs:samples",
+    "v2_symbol": "histogram",
     "source": "intent_bench.sides.triton_flaggems_histogram_source:prepare",
     "intent": "intent_bench.sides.triton_flaggems_histogram_intent:prepare",
     "alternatives": {
