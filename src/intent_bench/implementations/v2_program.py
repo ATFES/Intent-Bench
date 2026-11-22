@@ -8,7 +8,7 @@ CATALOG = {"rotary_embedding_equivalent_index"}
 
 
 def registrations(name):
-    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward"}:
+    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward","cumsum","embedding"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
@@ -45,7 +45,7 @@ def author_arguments(values, device):
         if device.startswith("mlu:"):
             import torch_mlu
         dtypes = {"f16": torch.float16, "bf16": torch.bfloat16,
-                  "f32": torch.float32, "i32": torch.int32}
+                  "f32": torch.float32, "i32": torch.int32,"i64":torch.int64}
         args = [
             torch.frombuffer(x.data, dtype=dtypes[x.dtype]).reshape(x.shape).to(device)
             if isinstance(x, Array) else x for x in values["arguments"]
