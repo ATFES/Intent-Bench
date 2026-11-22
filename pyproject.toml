@@ -13,7 +13,7 @@ requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
-compilerinfra = ["compilerinfra==0.3.3"]
+compilerinfra = ["compilerinfra==0.3.4"]
 test = ["pytest>=7"]
 torch = ["torch"]
 mcp = ["mcp>=1.28,<2"]
