@@ -29,10 +29,9 @@ class InputBundle:
 
 
 def cpu_workload(row,factory):
-    import torch
-    from .corpus.cpu.baselines.pytorch import cpu_runtime
     last={}
     def inputs(case,seed):
+        import torch
         with torch.random.fork_rng(devices=[]):
             torch.manual_seed(seed)
             data=factory()
@@ -40,6 +39,7 @@ def cpu_workload(row,factory):
         last['prequantized']=None
         return data
     def oracle(case,data):
+        from .corpus.cpu.baselines.pytorch import cpu_runtime
         last['tolerance'] = data.tolerance
         last['prequantized'] = None
         if data.prequantized_reference is not None:
@@ -51,6 +51,7 @@ def cpu_workload(row,factory):
     def observed(output, data):
         return (output, tuple(data.arguments[i] for i in data.mutable_positions)) if data.mutable_positions else output
     def source(case,data,env):
+        import torch
         torch.set_num_threads(env.threads)
         if data.reference.endswith('.py'):
             from .corpus import PROJECT_ROOT
@@ -61,6 +62,7 @@ def cpu_workload(row,factory):
             return PreparedCall(call.launch,call.result,
                 native_measure=lambda settings:sample_timer(call,settings,lambda:None,metadata=metadata),
                 timing='cpu_native_monotonic',metadata=metadata)
+        from .corpus.cpu.baselines.pytorch import cpu_runtime
         state={};initial=clone(data.arguments)
         def run():state['output']=observed(getattr(cpu_runtime,data.reference)(*data.arguments),data)
         return PreparedCall(run,lambda:state['output'],reset=lambda:restore(data.arguments,initial),

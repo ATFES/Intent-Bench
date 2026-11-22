@@ -26,6 +26,13 @@ def build(name):
         side = mappings().get(name, {})
         if "v2_symbol" in side and "inputs" in side:
             return side_workload(row, side)
+        from .implementations.v2_program import CATALOG
+        if kernel in CATALOG:
+            from .structured import cpu_workload
+            def original_inputs():
+                from .cpu_inputs import FACTORIES
+                return FACTORIES[kernel]()
+            return cpu_workload(row, original_inputs)
         from .cpu_inputs import FACTORIES
         if kernel in FACTORIES:
             from .structured import cpu_workload
