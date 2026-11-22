@@ -21,7 +21,11 @@ def prepare(symbol, backend, case, payload, env):
     with ExitStack() as owners:
         buffers = intent.HostBuffers(backend,device,backend_options(env,backend))
         owners.callback(buffers.close)
-        args = tuple(buffers.input(v) if hasattr(v,"shape") else v for v in payload.arguments)
+        arguments = payload.arguments
+        if device.startswith("cuda:"):
+            from ..trees import to_device
+            arguments = to_device(arguments,device)
+        args = tuple(buffers.input(v) if hasattr(v,"shape") else v for v in arguments)
         steps, members = [], []
 
         def bind(definition, values):
