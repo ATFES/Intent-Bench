@@ -503,6 +503,8 @@
     "intent": "intent_bench.sides.mojo_group_norm_silu_backward_intent:prepare"
   },
   "corpus/mojo/layer_norm_backward": {
+    "inputs": "intent_bench.sides.norm_inputs:layer_backward",
+    "v2_symbol": "layer_norm_backward",
     "source": "intent_bench.sides.mojo_layer_norm_backward_source:prepare",
     "intent": "intent_bench.sides.mojo_layer_norm_backward_intent:prepare"
   },

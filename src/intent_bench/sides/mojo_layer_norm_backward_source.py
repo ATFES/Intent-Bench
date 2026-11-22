@@ -1,22 +1,11 @@
 from __future__ import annotations
 from intent_bench.implementations.prepared import checked_call
-import torch
 from intent_bench.corpus._common.loading import load_module
 from intent_bench.implementations.context import Tolerance
 from intent_bench.model import PreparedCall
-LAYER_NORM_FEATURES = 4096
-LAYER_NORM_ROWS = 4096
 
 def prepare(context):
-    epsilon = 1e-05
-    shape = (LAYER_NORM_ROWS, LAYER_NORM_FEATURES)
-    x = torch.randn(shape, dtype=torch.bfloat16) * 0.5
-    dy = torch.randn(shape, dtype=torch.bfloat16) * 0.05
-    weight = torch.randn((LAYER_NORM_FEATURES,), dtype=torch.bfloat16)
-    x_f32 = x.float()
-    mean = x_f32.mean(dim=1)
-    centered = x_f32 - mean[:, None]
-    rstd = torch.rsqrt(centered.square().mean(dim=1) + epsilon)
+    x,dy,weight,mean,rstd,_ = context.inputs
     runtime = load_module(context.project_root / 'corpus/cpu/baselines/pytorch/cpu_runtime.py', 'intent_cpu_reference_layer_norm_backward')
     source_state = {}
 

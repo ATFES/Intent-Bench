@@ -1,24 +1,13 @@
 from __future__ import annotations
 from intent_bench.implementations.prepared import checked_call, IntentSequence
-import intent
 import torch
 from intent.examples.kernels.backward.layer_norm import layer_norm_backward_reduce, layer_norm_backward_rows
 from intent_bench.implementations.context import Tolerance
 LAYER_NORM_FEATURES = 4096
 LAYER_NORM_PARTIAL_GROUPS = 128
-LAYER_NORM_ROWS = 4096
 
 def prepare(context):
-    epsilon = 1e-05
-    inverse_features = 1.0 / LAYER_NORM_FEATURES
-    shape = (LAYER_NORM_ROWS, LAYER_NORM_FEATURES)
-    x = torch.randn(shape, dtype=torch.bfloat16) * 0.5
-    dy = torch.randn(shape, dtype=torch.bfloat16) * 0.05
-    weight = torch.randn((LAYER_NORM_FEATURES,), dtype=torch.bfloat16)
-    x_f32 = x.float()
-    mean = x_f32.mean(dim=1)
-    centered = x_f32 - mean[:, None]
-    rstd = torch.rsqrt(centered.square().mean(dim=1) + epsilon)
+    x,dy,weight,mean,rstd,inverse_features = context.inputs
     rows_artifact = context.compile(layer_norm_backward_rows)
     reduce_artifact = context.compile(layer_norm_backward_reduce)
     dx = torch.empty_like(x)
