@@ -75,7 +75,8 @@ def build(row,entries):
                     compile_call()
             prepared.compile = compile_calls
         artifacts = list(context.artifacts)
-        for owner in (prepared.owners or {}).values():
+        owners=prepared.owners
+        for owner in (owners.values() if isinstance(owners,dict) else (owners,)):
             directory = getattr(owner, 'cache_directory', None)
             if directory is not None and str(directory) not in artifacts:
                 artifacts.append(str(directory))

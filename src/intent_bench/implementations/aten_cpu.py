@@ -16,7 +16,7 @@ OPERATIONS = {name: index for index, name in enumerate((
     "csr_spmv", "ragged_gemm", "int8_gemm", "attention", "histogram", "jagged_mean",
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
     "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention", "aoti", "vllm_moe_alignment",
-    "attention_backward", "varlen_causal_conv1d", "varlen_unfold"))}
+    "attention_backward", "varlen_causal_conv1d", "varlen_unfold", "layer_norm_backward"))}
 
 
 @cache

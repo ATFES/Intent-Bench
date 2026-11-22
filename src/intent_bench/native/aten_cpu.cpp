@@ -223,6 +223,18 @@ void initialize(Call &call) {
                 "segmented convolution requires X[T,D], offsets[B+1], W[D,K], bias[D]");
     o = {at::empty_like(a[0]), at::empty({a[1].numel()-1, a[2].size(1), a[0].size(1)}, a[0].options())};
     break;
+  case 33: {
+    TORCH_CHECK(a.size()==5 && a[0].dim()==2 && a[0].sizes()==a[1].sizes() &&
+                a[2].numel()==a[0].size(1) && a[3].numel()==a[0].size(0) &&
+                a[4].sizes()==a[3].sizes() && call.scalars.size()==1 &&
+                call.scalars[0]==1.0/a[0].size(1), "expected the saved LayerNorm mean and rstd");
+    auto fp32=a[0].options().dtype(at::kFloat);
+    o={at::empty_like(a[0]),at::empty(a[2].sizes(),fp32),at::empty(a[2].sizes(),fp32)};
+    w={a[3].view({-1,1}),a[4].view({-1,1}),at::empty(a[2].sizes(),fp32),
+       at::zeros(a[2].sizes(),fp32),at::empty(a[0].sizes(),fp32),
+       at::empty(a[1].sizes(),fp32),at::empty(a[0].sizes(),fp32)};
+    break;
+  }
   default: TORCH_CHECK(false, "unsupported ATen CPU operation");
   }
   if (call.operation == 4) {
@@ -431,6 +443,14 @@ void execute(Call &call) {
     o = {dq, reduceHeads(dk), reduceHeads(dv)};
     break;
   }
+  case 33:
+    w[2].copy_(a[2]);
+    w[4].copy_(a[0]);
+    w[5].copy_(a[1]);
+    at::native_layer_norm_backward_out(w[6],o[1],o[2],w[5],w[4],{a[0].size(1)},
+        w[0],w[1],w[2],w[3],{true,true,true});
+    o[0].copy_(w[6]);
+    break;
   case 31: case 32: {
     int64_t width = a[2].size(1), segments = a[1].numel()-1;
     std::vector<at::Tensor> pieces, histories;
