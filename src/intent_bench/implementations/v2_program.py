@@ -8,7 +8,7 @@ CATALOG = {"rotary_embedding_equivalent_index"}
 
 
 def registrations(name):
-    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm"}:
+    if name not in CATALOG and name not in {"relu", "transpose", "swiglu", "dropout", "adamw", "rope", "softmax", "layer_norm", "batch_norm","group_norm_backward"}:
         return {}
     return {
         "intent-v2:" + backend: Implementation(
