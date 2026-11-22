@@ -129,10 +129,12 @@ extern "C" void *bench_create(int kind, const void *weight_data, const void *act
   } catch(const std::exception &e){last_error=e.what();return nullptr;}
 }
 
-extern "C" void *bench_row_create(int operation, bool half_storage, const void *x, const float *gain, int rows, int cols, float eps, int threads) {
+extern "C" void *bench_row_create(int operation, bool half_storage, const void *x, const float *gain, const float *bias, int rows, int cols, float eps, int threads) {
   try {
     auto op=std::make_unique<Operation>();
-    const bool weighted = operation == 1;
+    const bool affine = operation == 4;
+    const bool weighted = operation == 1 || affine;
+    ggml_tensor *offset = nullptr;
     op->kind=weighted?9:8;
     op->backend=ggml_backend_cpu_init();
     ggml_backend_cpu_set_n_threads(op->backend,threads);
@@ -140,7 +142,12 @@ extern "C" void *bench_row_create(int operation, bool half_storage, const void *
     op->input=ggml_new_tensor_2d(op->context,half_storage?GGML_TYPE_F16:GGML_TYPE_F32,cols,rows);
     if(weighted){
       op->weight=ggml_new_tensor_1d(op->context,GGML_TYPE_F32,cols);
-      op->output=ggml_mul(op->context,ggml_rms_norm(op->context,op->input,eps),op->weight);
+      auto *normalized = affine ? ggml_norm(op->context,op->input,eps) : ggml_rms_norm(op->context,op->input,eps);
+      op->output=ggml_mul(op->context,normalized,op->weight);
+      if(affine){
+        offset=ggml_new_tensor_1d(op->context,GGML_TYPE_F32,cols);
+        op->output=ggml_add(op->context,op->output,offset);
+      }
     } else if (operation == 3) {
       op->output=ggml_cont(op->context,ggml_transpose(op->context,op->input));
     } else {
@@ -154,6 +161,7 @@ extern "C" void *bench_row_create(int operation, bool half_storage, const void *
     if(!op->buffer)throw std::runtime_error("row graph allocation failed");
     ggml_backend_tensor_set(op->input,x,0,ggml_nbytes(op->input));
     if(weighted)ggml_backend_tensor_set(op->weight,gain,0,ggml_nbytes(op->weight));
+    if(offset)ggml_backend_tensor_set(offset,bias,0,ggml_nbytes(offset));
     op->prepare(threads);return op.release();
   } catch(const std::exception &e){last_error=e.what();return nullptr;}
 }

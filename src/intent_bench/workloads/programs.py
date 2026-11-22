@@ -10,11 +10,12 @@ from .author_inputs import Definition as _Definition, inputs as author_inputs, i
 
 BASELINES = {
     "relu": {"cutile": "NVIDIA TileGym ReLU", "torch": "ATen ReLU", "ggml": "GGML ReLU with native FP16 input and output conversions", "cnnl": "CNNL ReLU"},
-    "softmax": {"triton": "Triton fused-softmax tutorial", "torch": "ATen softmax", "cnnl": "CNNL softmax"},
+    "softmax": {"triton": "Triton fused-softmax tutorial", "torch": "ATen softmax", "cnnl": "CNNL softmax",
+                "ggml": "GGML native softmax with FP16 input and output conversion"},
     "transpose": {"torch": "ATen transpose materialization", "ggml": "GGML materialized transposed view"},
     "embedding": {"triton": "Liger embedding lookup", "torch": "ATen embedding lookup"},
     "layer_norm": {"triton": "Triton layer-norm tutorial", "torch": "ATen LayerNorm",
-                   "mojo": "MAX rowwise LayerNorm moments"},
+                   "mojo": "MAX rowwise LayerNorm moments", "ggml": "GGML norm with FP32 gain and bias"},
     "gemm": {"triton": "Triton matrix-multiplication tutorial", "torch": "ATen GEMM", "cnnl": "CNNL matmul"},
     "batched_gemm": {"cutile": "NVIDIA TileGym batched GEMM", "torch": "ATen batched GEMM"},
     "histogram": {"cub": "NVIDIA CUB DeviceHistogram, including initialization and merge"},
@@ -222,9 +223,10 @@ def _q4_reference(values, env, implementation):
 
 
 def _reference(name, values, env, implementation="torch"):
-    if implementation == "ggml" and name in ("relu", "transpose"):
+    if implementation == "ggml" and name in ("relu", "transpose", "layer_norm", "softmax"):
         from ..implementations.native_libraries import ggml
-        return ggml(name, None, tuple(arg.to_numpy() for arg in values["arguments"]), env)
+        args = tuple(arg.to_numpy() if hasattr(arg, "to_numpy") else arg for arg in values["arguments"])
+        return ggml(name, None, args, env)
     if name == "q4_projection":
         return _q4_reference(values, env, implementation)
     import torch

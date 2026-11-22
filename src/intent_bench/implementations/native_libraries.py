@@ -37,11 +37,11 @@ def ggml(name,case,inputs,env,*,reference=False):
     root=Path(__file__).parents[1]/"native"
     request={"operation":name,"source":env.options["ggml_source"],"libraries":env.options["ggml_libraries"],
              "threads":env.threads,"reference":reference,"cxx":env.options.get("cxx","c++")}
-    if name=="weighted_rms_norm":
-        x,w,inv,eps=inputs
-        if inv!=1/x.shape[-1]:raise ValueError("GGML RMSNorm requires inverse feature count")
+    if name in ("weighted_rms_norm","layer_norm"):
+        x,*affine,inv,eps=inputs
+        if inv!=1/x.shape[-1]:raise ValueError("GGML normalization requires inverse feature count")
         request["epsilon"]=eps
-        inputs=(x,w)
+        inputs=(x,*affine)
     session=WorkerSession(env,"ggml_worker.py",[root/"cnnl_worker.py",root/"ggml_worker.py",root/"ggml_ops.cpp"],request,inputs)
     metadata={**session.metadata(),
               "execution":"prepared native graph plan and persistent threadpool" if name not in {"q4_dot_packed","q8_quantize"}
