@@ -119,6 +119,8 @@ def build(row,entries):
             if device.startswith("mlu:"):
                 import torch_mlu
             args = [v.to(device) if hasattr(v, "to") else v for v in payload.arguments]
+            if adapter := entries.get("v2_arguments"):
+                args = load(adapter)(*args)
             return bind(entries["v2_symbol"], backend, args, env, device)
         for backend in ("triton","cutile","mojo","weft","bangc"):
             name = "intent-v2:"+backend

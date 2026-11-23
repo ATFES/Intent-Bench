@@ -13,18 +13,8 @@ from intent_bench.model import PreparedCall
 from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
-    (batch, heads, sequence, dimension) = (2, 16, 2048, 128)
-    shape = (batch, heads, sequence, dimension)
-    q = torch.randn(shape, device='cuda', dtype=torch.float16) * 0.5
-    k = torch.randn_like(q) * 0.5
-    v = torch.randn_like(q) * 0.5
-    output = torch.empty_like(q)
-    lse = torch.empty((batch, heads, sequence), device='cuda', dtype=torch.float32)
-    runtime_helper = load_module(context.project_root / 'corpus/gpu/baselines/triton/meta-applied-ai/support/runtime.py', 'intent_v2_triton_flash_backward_runtime')
-    source_module = runtime_helper.load_source(context.project_root / 'corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward.py', 'intent_v2_triton_flash_backward_source')
-    _prepare_source_launch(lambda : source_module.flash(q, k, v, output, lse))
-    grad_output = torch.randn_like(output) * 0.05
-    scale = dimension ** (-0.5)
+    from .attention_inputs import backward
+    q,k,v,output,grad_output,lse,scale = context.inputs if context.inputs is not None else backward().arguments
     (_, delta) = compile_single(context, attention_backward_delta, (output, grad_output))
     delta_value = delta.result()
     generated_lse = lse / math.log2(math.e)

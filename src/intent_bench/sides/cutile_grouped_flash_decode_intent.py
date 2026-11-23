@@ -9,12 +9,11 @@ from intent_bench.model import PreparedCall
 from intent_bench.implementations.context import Tolerance
 
 def prepare(context):
-    (batch, query_heads, key_heads, sequence, dimension, split_size) = (8, 32, 8, 8192, 128, 256)
+    from .attention_inputs import grouped
+    q,k,v,scale = context.inputs if context.inputs is not None else grouped().arguments
+    split_size = 256
+    query_heads, key_heads, sequence = q.shape[1], k.shape[1], k.shape[2]
     splits = (sequence + split_size - 1) // split_size
-    q = torch.randn((batch, query_heads, 1, dimension), device='cuda', dtype=torch.bfloat16)
-    k = torch.randn((batch, key_heads, sequence, dimension), device='cuda', dtype=torch.bfloat16)
-    v = torch.randn_like(k)
-    scale = 1.0 / math.sqrt(dimension)
     (_, partials) = compile_single(context, grouped_flash_decode_partials, (q, k, v, scale), constexprs={'HEAD_GROUP': query_heads // key_heads, 'P': splits, 'SPLIT_SIZE': split_size})
     (partial_lse, partial_output) = partials.result()
     (_, reduction) = compile_single(context, splitk_attention_reduce, (partial_output, partial_lse))

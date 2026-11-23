@@ -8,14 +8,10 @@ from intent_bench.implementations.context import Tolerance
 from intent_bench.implementations.prepared import IntentSequence
 
 def prepare(context):
-    query = torch.randn((8, 128, 512), dtype=torch.float16)
-    query_rope = torch.randn((8, 128, 64), dtype=torch.float16)
-    cache = torch.randn((4096, 16, 1, 512), dtype=torch.float16)
-    cache_rope = torch.randn((4096, 16, 1, 64), dtype=torch.float16)
-    offsets = torch.arange(0, 4097, 512, dtype=torch.int32)
-    indices = torch.arange(4096, dtype=torch.int32)
-    lengths = torch.full((8,), 8192, dtype=torch.int32)
-    flat_arguments = (query, query_rope, cache.reshape(65536, 1, 512), cache_rope.reshape(65536, 1, 64), offsets, indices, lengths, 576 ** (-0.5))
+    from .attention_inputs import latent
+    arguments = context.inputs if context.inputs is not None else latent().arguments
+    query,query_rope,cache,cache_rope,offsets,indices,lengths,scale = arguments
+    flat_arguments = (query,query_rope,cache.flatten(0,1),cache_rope.flatten(0,1),offsets,indices,lengths,scale)
     partials = context.compile(paged_mla_decode_partials, constexprs={'PAGE_SIZE': 16, 'HEAD_GROUP': 128, 'SPLITS': 8})
     reduction = context.compile(splitk_attention_f32_to_f16_reduce)
     (generated, source) = ({}, {})
