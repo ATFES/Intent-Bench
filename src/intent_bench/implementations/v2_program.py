@@ -55,7 +55,10 @@ def prepare(name, backend, case, values, env):
         call.result=output
         call.metadata["caller_output"]="expert_blocks"
         return call
-    call=bind(name, backend, args, env, device)
+    symbol = ("batched_gemm_subnormal_ftz"
+              if name == "batched_gemm" and case.parameters.get("allow_subnormal_ftz")
+              else name)
+    call=bind(symbol, backend, args, env, device)
     if name=="nonzero":
         result=call.result
         call.result=lambda:dict(zip(("indices","counts"),result(),strict=True))

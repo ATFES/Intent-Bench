@@ -222,7 +222,7 @@ def _q4_reference(values, env, implementation):
     return context.invocation
 
 
-def _reference(name, values, env, implementation="torch"):
+def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz=False):
     if implementation == "ggml" and name in ("relu", "transpose", "layer_norm", "softmax"):
         from ..implementations.native_libraries import ggml
         args = tuple(arg.to_numpy() if hasattr(arg, "to_numpy") else arg for arg in values["arguments"])
@@ -293,7 +293,9 @@ def _reference(name, values, env, implementation="torch"):
             mutable = _mutable_arguments(program)
             if implementation == "aten:cpu":
                 from ..implementations.aten_cpu import prepare
-                return self.bind(prepare(name, arguments, env), arguments, mutable)
+                op_name = ("batched_gemm_subnormal_ftz"
+                           if name == "batched_gemm" and allow_subnormal_ftz else name)
+                return self.bind(prepare(op_name, arguments, env), arguments, mutable)
             if implementation == "inductor:cpu":
                 from ..implementations.aoti_cpu import prepare
                 return self.bind(prepare(name, arguments, env), arguments, mutable)
@@ -396,7 +398,10 @@ def _reference(name, values, env, implementation="torch"):
             elif name == "gemm":
                 function = lambda: torch.mm(x, arguments[1])
             elif name == "batched_gemm":
-                function = lambda: torch.bmm(x, arguments[1])
+                if device == "cpu" and not allow_subnormal_ftz:
+                    function = lambda: torch.bmm(x.float(), arguments[1].float()).to(torch.bfloat16)
+                else:
+                    function = lambda: torch.bmm(x, arguments[1])
             else:
                 raise NotImplementedError(name)
             call = functional_launch(function)
@@ -453,7 +458,10 @@ def build(name):
                   "batch_norm": (Tolerance(.02, .01), *((Tolerance(.0001, .0001),)*4))}
     tolerance = tolerances.get(name, Tolerance(0))
     implementations = {baseline: Implementation(baseline,
-        lambda case, values, env, baseline=baseline: _reference(name, values, env, baseline), description)
+        lambda case, values, env, baseline=baseline: _reference(
+            name, values, env, baseline,
+            allow_subnormal_ftz=bool(case.parameters.get("allow_subnormal_ftz"))),
+        description)
         for baseline, description in BASELINES[name].items()}
     for backend in backends():
         implementations["intent:"+backend] = Implementation("intent:"+backend,
@@ -473,7 +481,9 @@ def build(name):
                 return torch.from_numpy(counts)
         return invoke_author(name, values, Context())
     oracle = histogram_oracle if name == "histogram" else Implementation(
-        "oracle", lambda case, values, env: _reference(name, values, env, "oracle"))
+        "oracle", lambda case, values, env: _reference(
+            name, values, env, "oracle",
+            allow_subnormal_ftz=bool(case.parameters.get("allow_subnormal_ftz"))))
     def check(actual, expected):
         import numpy as np
         if name == "q4_projection":
@@ -508,6 +518,8 @@ def build(name):
             from ..oracle import _align_actual
             actual = _align_actual(actual, expected)
         compare_outputs(actual, expected, tolerance)
-    return Workload("program/"+name, [Case("author")], lambda case, seed: author_inputs(name, seed),
+    cases = ([Case("author"), Case("subnormal_ftz", {"allow_subnormal_ftz": True})]
+             if name == "batched_gemm" else [Case("author")])
+    return Workload("program/"+name, cases, lambda case, seed: author_inputs(name, seed),
         implementations, oracle=oracle, check=check,
         family="program", parameter_keys=())

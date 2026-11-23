@@ -17,7 +17,7 @@ OPERATIONS = {name: index for index, name in enumerate((
     "batched_gemm_tn", "batched_gemm_nt", "batched_gemm_tt", "causal_convolution", "nonzero",
     "fp8_gemm", "paged_decode", "mamba_chunk_state", "causal_linear_attention", "aoti", "vllm_moe_alignment",
     "attention_backward", "varlen_causal_conv1d", "varlen_unfold", "layer_norm_backward",
-    "qkv_projection"))}
+    "qkv_projection", "batched_gemm_subnormal_ftz"))}
 
 
 @cache
@@ -210,7 +210,17 @@ def prepare(name, arguments, environment, *, package=None):
     if name == "jagged_mean":
         metadata["library"] = "ATen CPU segment_reduce(mean)"
         metadata["scope_note"] += " Segment offsets are read by the native library inside every interval."
-    if name.startswith("batched_gemm"):
+    if name == "batched_gemm":
+        metadata["library"] = "ATen CPU batched GEMM (FP32-widened strict subnormals)"
+        metadata["numerical_contract"] = "strict_ieee_subnormals"
+        metadata["scope_note"] = ("BF16 inputs widened to FP32 to preserve subnormal inputs, intermediates and cancellation; "
+                                  "widening, FP32 batched GEMM and BF16 output rounding are all timed. "
+                                  "ATen's native BF16 AMX flushes subnormals and is compared only under case subnormal_ftz.")
+    elif name == "batched_gemm_subnormal_ftz":
+        metadata["library"] = "ATen CPU batched GEMM (native BF16 AMX, subnormal FTZ)"
+        metadata["numerical_contract"] = "allow_subnormal_ftz"
+        metadata["scope_note"] += " Native BF16 batched GEMM (AMX FTZ) timed under explicit allow_subnormal_ftz contract."
+    elif name.startswith("batched_gemm"):
         metadata["library"] = "ATen CPU batched GEMM"
         metadata["scope_note"] += " Transposed views and any library packing are inside the native interval; input dtype is unchanged."
     if name == "causal_convolution":

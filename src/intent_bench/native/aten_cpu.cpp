@@ -60,7 +60,14 @@ void initialize(Call &call) {
   case 2: o.push_back(at::empty({a[0].size(1), a[0].size(0)}, a[0].options())); break;
   case 3: o.push_back(at::empty({a[1].numel(), a[0].size(1)}, a[0].options())); break;
   case 5: o.push_back(at::empty({a[0].size(0), a[1].size(1)}, a[0].options())); break;
-  case 6: case 19: case 20: case 21: {
+  case 6: {
+    o.push_back(at::empty({a[0].size(0), a[0].size(1), a[1].size(2)}, a[0].options()));
+    auto fp32 = a[0].options().dtype(at::kFloat);
+    w = {at::empty_like(a[0], fp32), at::empty_like(a[1], fp32),
+         at::empty({a[0].size(0), a[0].size(1), a[1].size(2)}, fp32)};
+    break;
+  }
+  case 19: case 20: case 21: case 35: {
     bool leftTranspose = call.operation == 19 || call.operation == 21;
     bool rightTranspose = call.operation == 20 || call.operation == 21;
     o.push_back(at::empty({a[0].size(0), a[0].size(leftTranspose ? 2 : 1),
@@ -272,7 +279,13 @@ void execute(Call &call) {
   case 3: at::index_select_out(o[0], a[0], 0, a[1]); break;
   case 4: at::native_layer_norm_out(o[0], w[0], w[1], a[0], {a[0].size(-1)}, a[1], a[2], s[1]); break;
   case 5: at::mm_out(o[0], a[0], a[1]); break;
-  case 6: case 19: case 20: case 21: {
+  case 6:
+    w[0].copy_(a[0]);
+    w[1].copy_(a[1]);
+    at::bmm_out(w[2], w[0], w[1]);
+    o[0].copy_(w[2]);
+    break;
+  case 19: case 20: case 21: case 35: {
     auto left = call.operation == 19 || call.operation == 21 ? a[0].transpose(-1, -2) : a[0];
     auto right = call.operation == 20 || call.operation == 21 ? a[1].transpose(-1, -2) : a[1];
     at::bmm_out(o[0], left, right);
