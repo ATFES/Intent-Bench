@@ -111,7 +111,9 @@ def bind(name, backend, args, env, device):
         call.compile()
         metadata["cold_compile"] = call.compilation_report()
 
-    prepared = PreparedCall(call.launch, call.result, device=device, compile=compile,
+    # Bench already owns the terminal timing event or native host interval.
+    execute = getattr(call, "execute", call.launch)
+    prepared = PreparedCall(execute, call.result, device=device, compile=compile,
                             tuning_report=call.tuning_report, reset=reset if original else None, metadata=metadata)
     if device == "cpu":
         from .native_sequence import NativeSequence
@@ -131,7 +133,7 @@ def bind(name, backend, args, env, device):
         import torch
         stream = torch.mlu.current_stream(device)
         prepared.synchronize = stream.synchronize
-        prepared.native_measure = lambda settings: timer(call.launch, stream, settings, reset)
+        prepared.native_measure = lambda settings: timer(execute, stream, settings, reset)
         prepared.timing = "cnrt_notifier"
         from ..workloads.programs import _tree
         prepared.result = lambda: _tree(call.result(), lambda v:v.cpu())

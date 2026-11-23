@@ -22,7 +22,7 @@ def prepare(definition, args, env, backend="triton"):
         if backend=="cutile":metadata["cold_compile"].update(call.compilation_report())
         return call.result()
     return PreparedCall(
-        call.launch,
+        getattr(call, "execute", call.launch),
         result,
         compile=compile,
         device=env.device,
