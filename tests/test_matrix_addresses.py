@@ -8,12 +8,12 @@ import pytest
 
 @pytest.mark.parametrize("exit_name", ["bangc", "triton"])
 def test_wide_record_and_scale_offsets(exit_name):
-    from compilerinfra import Compiler
-    from intentdsl import examples
-
     library = os.environ.get("INTENTDSL_LIBRARY")
     if not library:
         pytest.skip("requires an installed IntentDSL compiler")
+    from compilerinfra import Compiler
+    from intentdsl import examples
+
     stride = 1 << 30
     if exit_name == "bangc":
         kernel = examples.q4_projection
