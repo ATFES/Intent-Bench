@@ -1473,6 +1473,9 @@ def paged_mla_decode(q_latent, q_rope, latent_cache, rope_cache,
     groups = latent_cache.shape[2]
     heads_per_group = q_latent.shape[1] // groups
     for batch in range(q_latent.shape[0]):
+        if lengths[batch] == 0:
+            outputs.append(torch.full_like(q_latent[batch], float("nan")))
+            continue
         pages = page_indices[page_offsets[batch]:page_offsets[batch + 1]].long()
         latent = latent_cache[pages].reshape(-1, groups, latent_cache.shape[-1])[:lengths[batch]].float()
         rope = rope_cache[pages].reshape(-1, groups, rope_cache.shape[-1])[:lengths[batch]].float()
