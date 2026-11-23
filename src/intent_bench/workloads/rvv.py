@@ -5,15 +5,8 @@ NAMES=("gemm","q4_projection","rms_norm","q4_dot","q8_quantize")
 
 
 def q8_reference(case,inputs):
-    from ..references.quantization import q8_fields
-    scale, codes = q8_fields(inputs[1])
-    count = len(scale)
-    records = np.empty((count, 292), dtype=np.uint8)
-    records[:, :4] = scale.astype("<f4").view(np.uint8).reshape(count, 4)
-    records[:, 4:260] = codes.view(np.uint8)
-    sums = codes.reshape(count, 16, 16).sum(axis=2, dtype=np.int16)
-    records[:, 260:] = sums.astype("<i2").view(np.uint8)
-    return records.ravel()
+    from ..references.quantization import q8_records
+    return q8_records(inputs[1]).ravel()
 
 
 def build(name):
@@ -54,5 +47,6 @@ def build(name):
         return pack_q4(data,env,packed_activation=name=="q4_dot")
     return Workload("rvv/"+name,cases,inputs,{"ggml":Implementation("ggml",prepare),
                     "intent:weft":Implementation("intent:weft",generated)},oracle=oracle,
-                    atol=2e-3,rtol=2e-3,family="rvv/"+name,
+                    atol=0 if name=="q8_quantize" else 2e-3,
+                    rtol=0 if name=="q8_quantize" else 2e-3,family="rvv/"+name,
                     prepare_inputs=encode if name in {"q4_dot","q4_projection"} else None)
