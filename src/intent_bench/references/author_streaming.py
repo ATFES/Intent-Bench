@@ -16,7 +16,10 @@ def prepare(name, implementation, arguments, environment):
         elif name == "mamba_chunk_state":
             run = lambda: cpu_runtime.mamba_chunk_state_bf16_fwd(*arguments)
         elif name == "paged_decode":
-            run = lambda: cpu_runtime._paged_gqa_decode(*arguments[:6], arguments[-1]).half()
+            def run():
+                output = cpu_runtime._paged_gqa_decode(*arguments[:6], arguments[-1]).half()
+                # The author publishes NaN when no split contributes any token.
+                return output.masked_fill(arguments[5][:, None, None] == 0, float("nan"))
         elif name == "gated_delta":
             q, k, v, gate, beta, scale = arguments
             group = v.shape[2] // q.shape[2]
