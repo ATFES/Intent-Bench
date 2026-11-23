@@ -53,10 +53,12 @@ def build(row,entries):
             now=time.perf_counter();phases[stage]=phases.get(stage,0)+now-started
             stage,started=next_stage,now
         with ExitStack() as stack:
-            if provider in ('triton','cutile'):
+            use_cuda = provider in ('triton', 'cutile') and (
+                side != 'oracle' or factory is None or env.device.startswith('cuda'))
+            if use_cuda:
                 stack.enter_context(device_window(f'cuda:{index}'))
                 stack.enter_context(torch.cuda.device(index))
-            stack.enter_context(torch.random.fork_rng(devices=[index] if provider in ('triton','cutile') else []))
+            stack.enter_context(torch.random.fork_rng(devices=[index] if use_cuda else []))
             stack.enter_context(observe_stages(observe))
             if factory is None:
                 torch.manual_seed(payload)

@@ -32,6 +32,7 @@
     "intent": "intent_bench.sides.triton_block_sparse_gqa_decode_intent:prepare"
   },
   "corpus/triton/flash_attention_backward": {
+    "oracle": "intent_bench.sides.attention_oracles:backward",
     "inputs": "intent_bench.sides.attention_inputs:backward",
     "v2_symbol": "flash_attention_backward",
     "v2_arguments": "intent_bench.sides.attention_inputs:natural_lse",
@@ -256,6 +257,7 @@
     "intent": "intent_bench.sides.cutile_dense_attention_forward_intent:prepare"
   },
   "corpus/cutile/grouped_flash_decode": {
+    "oracle": "intent_bench.sides.attention_oracles:grouped",
     "inputs": "intent_bench.sides.attention_inputs:grouped",
     "v2_symbol": "grouped_flash_decode",
     "source": "intent_bench.sides.cutile_grouped_flash_decode_source:prepare",

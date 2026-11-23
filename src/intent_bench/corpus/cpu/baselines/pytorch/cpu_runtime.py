@@ -1020,14 +1020,19 @@ def unique_consecutive(values, run_lengths):
     return output, groups, counts
 
 
-def prepare_attention_backward(query, key, value, grad_output, scale):
-    q, k, v = (tensor.float().requires_grad_(True) for tensor in (query, key, value))
-    group = query.shape[1] // key.shape[1]
+def causal_attention_with_log2_lse(q, k, v, scale):
+    group = q.shape[1] // k.shape[1]
     scores = (q @ k.repeat_interleave(group, dim=1).transpose(-2, -1)) * scale
-    causal = torch.ones(scores.shape[-2:], dtype=torch.bool).tril()
+    causal = torch.ones(scores.shape[-2:], dtype=torch.bool, device=q.device).tril()
     scores = scores.masked_fill(~causal, -float("inf"))
     output = torch.softmax(scores, dim=-1) @ v.repeat_interleave(group, dim=1)
     lse = torch.logsumexp(scores.detach(), dim=-1) * np.log2(np.e)
+    return output, lse
+
+
+def prepare_attention_backward(query, key, value, grad_output, scale):
+    q, k, v = (tensor.detach().float().requires_grad_(True) for tensor in (query, key, value))
+    output, lse = causal_attention_with_log2_lse(q, k, v, scale)
 
     def launch():
         gradients = torch.autograd.grad(output, (q, k, v), grad_output.float(), retain_graph=True)

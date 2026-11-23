@@ -22,21 +22,11 @@ def latent():
     lengths=torch.full((8,),8192,dtype=torch.int32)
     return Arguments((q,qr,k,kr,offsets,pages,lengths,576**-0.5))
 
-def backward_source(root):
-    from ..corpus._common.loading import load_module
-    runtime=load_module(root/"corpus/gpu/baselines/triton/meta-applied-ai/support/runtime.py",
-                        "intent_v2_triton_flash_backward_runtime")
-    return runtime.load_source(root/"corpus/gpu/baselines/triton/meta-applied-ai/attention/flash_backward/flash_backward.py",
-                               "intent_v2_triton_flash_backward_source")
-
 def backward():
     import torch
-    from ..corpus import PROJECT_ROOT
-    from .triton_flash_attention_backward_source import _prepare_source_launch
+    from ..corpus.cpu.baselines.pytorch.cpu_runtime import causal_attention_with_log2_lse
     q=torch.randn((2,16,2048,128),device="cuda",dtype=torch.float16)*0.5
     k,v=torch.randn_like(q)*0.5,torch.randn_like(q)*0.5
-    output=torch.empty_like(q)
-    logs=torch.empty(q.shape[:-1],device=q.device,dtype=torch.float32)
-    source=backward_source(PROJECT_ROOT)
-    _prepare_source_launch(lambda:source.flash(q,k,v,output,logs))
-    return Arguments((q,k,v,output,torch.randn_like(q)*0.05,logs,128**-0.5))
+    scale = q.shape[-1] ** -0.5
+    output, logs = causal_attention_with_log2_lse(q.float(), k.float(), v.float(), scale)
+    return Arguments((q,k,v,output.to(q.dtype),torch.randn_like(q)*0.05,logs,scale))
