@@ -403,3 +403,50 @@ def test_cpu_v053_address_op_interface_rejects_stride_product_overflow():
                         break
                 assert found, f"{ex_name}: expected un-narrowed 64-bit address on 65537x65536 overflow"
 
+
+def test_cpu_owner_space_extent_100_vs_128_tail_proof():
+    """0.5.3 IndexedRegionOpInterface + TiledAccessOpInterface on cpu.owner_space (extent=100 vs 128)."""
+    library, Compiler = _require_compiler()
+    from intentdsl import examples
+
+    def attn_opts(hq: int, out_hq: int | None = None) -> dict:
+        hk = max(1, (hq + 3) // 4)
+        ohq = hq if out_hq is None else out_hq
+        return {
+            "vector_bits": 512,
+            "vector_registers": 32,
+            "workers": 1,
+            "calibration": "x86-1c",
+            "arguments": [
+                {"shape": [1, hq, 1, 64], "strides": [hq * 64, 64, 64, 1]},
+                {"shape": [1, hk, 512, 64], "strides": [hk * 32768, 32768, 64, 1]},
+                {"shape": [1, hk, 512, 64], "strides": [hk * 32768, 32768, 64, 1]},
+                {"shape": [1, ohq, 1, 64], "strides": [ohq * 64, 64, 64, 1]},
+                None,
+            ],
+        }
+
+    with Compiler(library) as base:
+        root = base.root_ir(examples.attention.source)
+        # HQ=128 is divisible by packed cpu.owner_batch=4 -> passes proveTailAccess.
+        with base.derive({"exits": {"mojo": {"options": attn_opts(128)}}}) as cc128:
+            tasked_128 = cc128.compile(root, exit="mojo", through="cpu@tasked", text=True).decode()
+            assert "cpu.owner_batch = 4 : i64" in tasked_128
+            cc128.compile(tasked_128.encode(), exit="mojo", after="cpu@tasked", through="mojo@callable", text=True)
+
+        # HQ=102 (not divisible by 4) rejects batch=4 and falls back to batch<=2.
+        with base.derive({"exits": {"mojo": {"options": attn_opts(102)}}}) as cc102:
+            tasked_102 = cc102.compile(root, exit="mojo", through="cpu@tasked", text=True).decode()
+            assert "cpu.owner_batch = 4 : i64" not in tasked_102
+
+        # Forging output view (%arg3) HQ extent to 100 while keeping packed cpu.owner_batch=4
+        # MUST be rejected by cpu.owner_space IndexedRegionOpInterface + proveTailAccess(cpu.slice_write)!
+        with base.derive({"exits": {"mojo": {"options": attn_opts(128, out_hq=100)}}}) as cc_forged:
+            forged = tasked_128.replace(
+                "%arg3: memref<?x?x?x?xbf16, strided<[?, ?, ?, ?], offset: ?>> {cpu.shape = array<i64: 1, 128, 1, 64>, cpu.strides = array<i64: 8192, 64, 64, 1>}",
+                "%arg3: memref<?x?x?x?xbf16, strided<[?, ?, ?, ?], offset: ?>> {cpu.shape = array<i64: 1, 100, 1, 64>, cpu.strides = array<i64: 6400, 64, 64, 1>}",
+            )
+            with pytest.raises(Exception, match="packed cpu.owner_batch tile exceeds proven owner-axis extent"):
+                cc_forged.compile(forged.encode(), exit="mojo", after="cpu@tasked", through="mojo@callable", text=True)
+
+
