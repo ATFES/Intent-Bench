@@ -32,11 +32,13 @@ def test_owner_rectangle_mismatched_domain_and_view_tail(exit_name):
     ):
         for b in I.parallel(y.dim(0)):
             for m in I.parallel(y.dim(1)):
-                q_row = I.cast(q[b, m, :], I.f32)
+                q_row = q[b, m, :]
                 acc = I.zeros(y.dim(2), I.f32)
                 for t in I.fold(k.dim(1)):
-                    kv = I.cast(k[b, t, :], I.f32)
-                    acc = acc + kv * I.sum(q_row * kv)
+                    kv = k[b, t, :]
+                    score = I.sum(I.cast(q_row, I.f32) * I.cast(kv, I.f32))
+                    p = I.cast(score, I.bf16)
+                    acc = acc + I.cast(kv, I.f32) * I.cast(p, I.f32)
                 y[b, m, :] = acc
 
     device = torch.device("cuda", torch.cuda.current_device())
@@ -62,16 +64,56 @@ def test_owner_rectangle_mismatched_domain_and_view_tail(exit_name):
     expected = torch.einsum("bmn,bnd->bmd", torch.einsum("bmd,bnd->bmn", qf, kf), kf)
     torch.testing.assert_close(y, expected, rtol=1e-2, atol=1e-2)
 
-    # Case 2: y has M=192 (multiple of 64) while q only has M_PAD=128 (< 192).
-    # Actual last tile start on q is 192 - tile >= 128, so q's slice_read must not get owner_rectangle.
-    q_short = torch.zeros((1, 128, 64), device=device, dtype=torch.bfloat16)
-    k_one = torch.zeros((1, 64, 64), device=device, dtype=torch.bfloat16)
-    y_long = torch.empty((1, 192, 64), device=device, dtype=torch.float32)
+    # Case 2: y has M=192 (multiple of 64 -> pair_axis selected) while q only has M_PAD=128 (< 192).
+    # Actual last tile start on q is 192 - tile >= 128, so q's slice_read must not get owner_rectangle,
+    # whereas y's slice_write (extent 192) does get owner_rectangle.
+    q_short = torch.zeros((16, 128, 64), device=device, dtype=torch.bfloat16)
+    k_one = torch.zeros((16, 64, 64), device=device, dtype=torch.bfloat16)
+    y_long = torch.empty((16, 192, 64), device=device, dtype=torch.float32)
     with fn.compilation_target(q_short, k_one, outputs=(y_long,)) as target:
         legal_ir_oob = target.compile(root, exit=exit_name, through=f"{exit_name}@legal", text=True).decode()
+    assert "block.pair_axis" in legal_ir_oob
     for line in legal_ir_oob.splitlines():
-        if "slice_read" in line:
+        if "slice_read" in line and "%arg0" in line:
             assert "owner_rectangle" not in line
+    assert any("slice_write" in line and "owner_rectangle" in line for line in legal_ir_oob.splitlines())
+
+    # Case 3 (V05Tests 2B scenario: extent=100 vs extent=128):
+    # extent=100 must never get owner_rectangle, while aligned extent=128 does.
+    q_100 = (torch.randn((16, 100, 64), generator=gen, device=device) * 0.25).to(torch.bfloat16)
+    y_100 = torch.empty((16, 100, 64), device=device, dtype=torch.float32)
+    with fn.compilation_target(q_100, k_one, outputs=(y_100,)) as target:
+        legal_ir_100 = target.compile(root, exit=exit_name, through=f"{exit_name}@legal", text=True).decode()
+    assert "owner_rectangle" not in legal_ir_100
+    fn(q_100, k_one, y_100)
+    torch.cuda.synchronize(device)
+    assert torch.all(y_100 == 0)
+
+    # Case 4 (V05Tests 2A scenario: K=4097 vs K=4096 fold panels, plus extent=128 owner_rectangle):
+    # K=4097 has a partial tail panel [4096, 4097) and must not be marked block.full_panels,
+    # whereas K=4096 is exact and gets block.full_panels; aligned M=128 gets owner_rectangle.
+    q_aligned = (torch.randn((16, 128, 64), generator=gen, device=device) * 0.25).to(torch.bfloat16)
+    y_aligned = torch.empty((16, 128, 64), device=device, dtype=torch.float32)
+    k_4097 = (torch.randn((16, 4097, 64), generator=gen, device=device) * 0.05).to(torch.bfloat16)
+    k_4096 = k_4097[:, :4096, :].contiguous()
+    with fn.compilation_target(q_aligned, k_4097, outputs=(y_aligned,)) as target:
+        realized_4097 = target.compile(root, exit=exit_name, through="block@realized", text=True).decode()
+        legal_4097 = target.compile(root, exit=exit_name, through=f"{exit_name}@legal", text=True).decode()
+    assert "block.pair_axis" in realized_4097
+    assert "block.full_panels" not in realized_4097
+    assert "owner_rectangle" in legal_4097
+    with fn.compilation_target(q_aligned, k_4096, outputs=(y_aligned,)) as target:
+        realized_4096 = target.compile(root, exit=exit_name, through="block@realized", text=True).decode()
+    assert "block.pair_axis" in realized_4096
+    assert "block.full_panels" in realized_4096
+    fn(q_aligned, k_4097, y_aligned)
+    torch.cuda.synchronize(device)
+    expected_4097 = torch.einsum(
+        "bmn,bnd->bmd",
+        torch.einsum("bmd,bnd->bmn", q_aligned.float(), k_4097.float()),
+        k_4097.float(),
+    )
+    torch.testing.assert_close(y_aligned, expected_4097, rtol=2e-2, atol=2e-2)
 
 
 def test_cutile_nsz_preserves_subnormals_under_ieee_denormal_mode():
