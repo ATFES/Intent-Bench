@@ -55,4 +55,7 @@ def workloads():
         for name in names:
             add({"name":group+"/"+name, "family":group, "implementations":implementations},
                 f"intent_bench.workloads.{group}:build", name)
+    from .workloads.group7_gpu import registrations as group7_gpu_registrations
+    for arg, meta in group7_gpu_registrations().items():
+        add(meta, "intent_bench.workloads.group7_gpu:build", arg)
     return values
