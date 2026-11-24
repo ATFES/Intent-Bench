@@ -171,7 +171,7 @@ def prepare(name, impl, case, inputs, env):
             if "row_id" in spec:
                 call = call.bind_row(spec["row_id"])
             selection = call.tuning_report
-            launch, close = call.launch, None
+            launch, close = getattr(call, "execute", call.launch), None
             result = lambda: call.result().detach().cpu().numpy()
     return PreparedCall(
         launch,

@@ -60,7 +60,7 @@ def prepare(name, impl, case, args, env):
             return sample_timer(timer, settings, lambda: None, metadata=metadata)
 
         return PreparedCall(
-            call.launch,
+            getattr(call, "execute", call.launch),
             call.result,
             compile=compile,
             device="cpu",
