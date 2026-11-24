@@ -125,12 +125,13 @@ def _prepare_v2(name, backend, args, env, device):
         from ..implementations.native_sequence import NativeSequence
 
         timer = None
+        noop = lambda: None
 
         def measure(settings):
             nonlocal timer
             if timer is None:
                 timer = NativeSequence((call,))
-            return sample_timer(timer, settings, None, metadata=metadata)
+            return sample_timer(timer, settings, noop, metadata=metadata)
 
         prepared.native_measure = measure
         prepared.close = lambda: timer and timer.close()
@@ -595,7 +596,12 @@ def build(name):
         if impl.startswith("intent-v2:"):
             backend = impl.partition(":")[2]
             return _prepare_v2(name, backend, _transfer(data, device), env, device)
-        return _prepare_baseline(name, impl, case, data, env, device)
+        prepared = _prepare_baseline(name, impl, case, data, env, device)
+        if device == "cpu" and prepared.native_measure is None:
+            from .group7_cpu import _attach_cpu_timer
+
+            return _attach_cpu_timer(prepared)
+        return prepared
 
     impls = {
         impl: Implementation(impl, partial(prepare, impl))

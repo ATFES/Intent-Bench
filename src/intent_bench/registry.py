@@ -58,4 +58,7 @@ def workloads():
     from .workloads.group7_gpu import registrations as group7_gpu_registrations
     for arg, meta in group7_gpu_registrations().items():
         add(meta, "intent_bench.workloads.group7_gpu:build", arg)
+    from .workloads.group7_cpu import registrations as group7_cpu_registrations
+    for arg, meta in group7_cpu_registrations().items():
+        add(meta, "intent_bench.workloads.group7_cpu:build", arg)
     return values
