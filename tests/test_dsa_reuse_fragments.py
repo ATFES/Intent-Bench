@@ -89,3 +89,62 @@ def test_reuse_fragments_replays_proven_read_without_writes():
         [([4, 64], [64, 1]), ([64], [1]), ([4, 64], [64, 1])],
     )
     assert ir_safe.count('"block.load"(%arg0') == 1
+
+
+def test_mlu370_supply_cost_prefers_single_step_batch_over_multi_step_double_buffer():
+    """Minimal reproducer for MLU370 supply cost misranking on small resident norms:
+    Before calibration/model fix, rank-1 scalar ops were counted as N-lane vector
+    ops, persistent prologue loads and tail-synced writeback were added to the
+    double-buffer overlap pool, and per-step DMA round-trip latency was omitted,
+    causing layer_norm (64x1024) to pick double-buffer-shared-16 over the faster
+    single-step direct-shared-16-b4 while still preferring double-buffer-shared-16-b4
+    at large M (4096x1024).
+    """
+    library = os.environ.get("INTENTDSL_LIBRARY")
+    if not library:
+        pytest.skip("requires an installed IntentDSL compiler")
+    from compilerinfra import Compiler
+    from intentdsl import examples as E
+
+    def _selected_supply(rows: int) -> tuple[str, list[str], dict]:
+        opts = dict(
+            calibration="mlu370",
+            clusters=4,
+            cores=4,
+            isa=372,
+            nram_bytes=786432,
+            sram_bytes=4194304,
+            wram_bytes=1048576,
+            fast_math=False,
+            fpmath_mode="strict",
+            arguments=[
+                dict(alias_group=0, shape=[rows, 1024], strides=[1024, 1]),
+                dict(alias_group=1, shape=[1024], strides=[1]),
+                dict(alias_group=2, shape=[1024], strides=[1]),
+                dict(alias_group=3, shape=[rows, 1024], strides=[1024, 1]),
+                None,
+                None,
+            ],
+        )
+        with Compiler(library) as base, base.derive({"exits": {"bangc": {"options": opts}}}) as comp:
+            _, report = comp.compile_measured(base.root_ir(E.layer_norm.source), exit="bangc")
+        chosen = [
+            ev["details"]
+            for ev in report["events"]
+            if ev.get("action") == "candidate"
+            and ev.get("family") == "levels/storage/dsa::supply"
+            and ev["details"].get("selected")
+            and not ev["details"].get("eliminated")
+        ]
+        assert len(chosen) == 1
+        row0 = next(iter(chosen[0]["rows"].values()))
+        return chosen[0]["candidate"], chosen[0].get("missing", []), row0["terms"]
+
+    small_cand, small_missing, small_terms = _selected_supply(64)
+    assert small_missing == []
+    assert small_cand == "direct-shared-16-b4"
+    assert small_terms["shared_prologue"]["value"] > 0.0
+
+    large_cand, large_missing, _ = _selected_supply(4096)
+    assert large_missing == []
+    assert large_cand == "double-buffer-shared-16-b4"

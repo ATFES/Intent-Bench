@@ -54,8 +54,9 @@ def mlu(root):
     cc=os.path.join(os.environ["NEUWARE_HOME"],"bin","cncc")
     lib=root/"traffic.so"
     subprocess.run([cc,"--bang-mlu-arch=mtp_372","-O2","-shared","-fPIC",str(src),"-o",str(lib),"-lcnrt"],check=True)
-    mod=ctypes.CDLL(str(lib));call=mod.enqueue
+    mod=ctypes.CDLL(str(lib));call=mod.enqueue;call_tasks=mod.enqueue_tasks
     call.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*4),ctypes.c_void_p]
+    call_tasks.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*5),ctypes.c_void_p]
     x=torch.ones(1<<26,device="mlu");sink=torch.empty_like(x);stream=torch.mlu.current_stream()
     size=ctypes.c_int()
     cnrt=ctypes.CDLL(os.path.join(os.environ["NEUWARE_HOME"],"lib64","libcnrt.so"))
@@ -63,9 +64,9 @@ def mlu(root):
     (root/"cache.json").write_text(json.dumps({"bytes":size.value if status==0 else None,
         "source":"cnrtAttrMaxL2CacheSize", "status":status}))
     settings=Measurement(samples=9,warmup=3)
-    def elapsed(words,step,mode,trips):
+    def elapsed(words,step,mode,trips,tasks=16):
         def run():
-            code=call(x.data_ptr(),sink.data_ptr(),words,step,mode,trips,stream.mlu_stream)
+            code=call_tasks(x.data_ptr(),sink.data_ptr(),words,step,mode,trips,tasks,stream.mlu_stream)
             if code:raise RuntimeError(f"CNRT {code}")
         return [v*1e6 for v in timer(run,stream,settings)]
     data={"launch":elapsed(0,1,0,0)}
@@ -110,4 +111,26 @@ def mlu(root):
             first,data["launch"],data["sync"],data["dma_in_latency"],
             data["dma_out_latency"],data["dma_in_bw"],data["dma_out_bw"])
     ]
-    return data,subprocess.check_output([cc,"--version"],text=True).strip().splitlines()[0],torch.mlu.get_device_name(0),"mtp_372","16 block tasks; CNRT notifier; 64 KiB, 1 MiB, 8 MiB and 256 MiB footprints; six-size DMA fit at 256..8192 bytes, 256 copies; sync_io barrier; unmanaged clocks"
+    # Synchronous DMA-compute round-trip latency (16 tasks) and single-task streaming DMA bandwidth.
+    rt_sizes=(64,256,1024,2048)
+    rt_xs=[4*s for s in rt_sizes]
+    rt_xm=statistics.mean(rt_xs)
+    def diff_step(words,mode,tasks):
+        short=elapsed(words,1,mode,16,tasks)
+        long=elapsed(words,1,mode,128,tasks)
+        return [(b-a)/112 for a,b in zip(short,long)]
+    for tasks,want_lat,want_bw in ((16,True,False),(1,False,True)):
+        base_c=[diff_step(s,12,tasks) for s in rt_sizes]
+        for mode,label in ((10,"in"),(11,"out")):
+            raw=[diff_step(s,mode,tasks) for s in rt_sizes]
+            net=[[max(0.0,v-c) for v,c in zip(rs,cs)] for rs,cs in zip(raw,base_c)]
+            rates=[];latencies=[]
+            for ys in zip(*net):
+                ym=statistics.mean(ys)
+                slope=sum((xv-rt_xm)*(yv-ym) for xv,yv in zip(rt_xs,ys))/sum((xv-rt_xm)**2 for xv in rt_xs)
+                if slope<=0:raise ValueError(f"sync DMA {label} slope unresolved at tasks={tasks}")
+                rates.append(1/slope)
+                latencies.append(max(0.0,ym-slope*rt_xm))
+            if want_lat: data[f"dma_{label}_sync_latency"]=latencies
+            if want_bw: data[f"dma_{label}_single_bw"]=rates
+    return data,subprocess.check_output([cc,"--version"],text=True).strip().splitlines()[0],torch.mlu.get_device_name(0),"mtp_372","16 block tasks; CNRT notifier; 64 KiB, 1 MiB, 8 MiB and 256 MiB footprints; six-size DMA fit at 256..8192 bytes, 256 copies; sync_io barrier; differential 128-16 sync DMA-compute round-trip fit at 256..8192 bytes (16 tasks and 1 task); unmanaged clocks"

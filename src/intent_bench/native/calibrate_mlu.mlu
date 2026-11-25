@@ -3,6 +3,25 @@
 __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips){
     __nram__ float local[2048];
     if(mode==0)return;
+    if(mode>=10){
+        __nram__ float tmp[2048];
+        if(mode==11||mode==12) __memcpy(local,x+taskId*n,n*4,GDRAM2NRAM);
+        for(int k=0;k<trips;k++){
+            long offset=((long)k*taskDim+taskId)*n;
+            if(mode==10){
+                __memcpy(local,x+offset,n*4,GDRAM2NRAM);
+                __bang_mul_scalar(tmp,local,1.00001f,n);
+            }else if(mode==11){
+                __bang_mul_scalar(tmp,local,1.00001f,n);
+                __memcpy(y+offset,tmp,n*4,NRAM2GDRAM);
+            }else{
+                __bang_mul_scalar(tmp,local,1.00001f,n);
+            }
+            asm volatile("" ::: "memory");
+        }
+        if(mode==10||mode==12) __memcpy(y+taskId*n,tmp,n*4,NRAM2GDRAM);
+        return;
+    }
     if(mode>=6){
         __nram__ float tmp[2048];
         __nram__ half a[2048],b[2048];
@@ -52,8 +71,11 @@ __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips)
         }
     }
 }
-extern "C" int enqueue(float*x,float*y,int n,int step,int mode,int trips,void*queue){
-    cnrtDim3_t dim={16,1,1};
+extern "C" int enqueue_tasks(float*x,float*y,int n,int step,int mode,int trips,int tasks,void*queue){
+    cnrtDim3_t dim={(unsigned)tasks,1,1};
     traffic<<<dim,cnrtFuncTypeBlock,(cnrtQueue_t)queue>>>(x,y,n,step,mode,trips);
     return cnrtGetLastError();
+}
+extern "C" int enqueue(float*x,float*y,int n,int step,int mode,int trips,void*queue){
+    return enqueue_tasks(x,y,n,step,mode,trips,16,queue);
 }
