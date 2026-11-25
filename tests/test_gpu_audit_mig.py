@@ -190,6 +190,65 @@ def test_cutile_nsz_preserves_subnormals_under_ieee_denormal_mode():
         assert (out_ftz == 0).all()
 
 
+def test_author_flush_to_zero_propagates_denormal_mode():
+    """Explicit op-level flush_to_zero=True must set function denormal-fp-math='preserve-sign'."""
+    library = _require_library()
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("cuda.tile")
+    if not torch.cuda.is_available():
+        pytest.skip("requires CUDA device")
+    import intentdsl as I
+
+    @I.kernel
+    def fdiv_ftz(x: I.In[I.f32, ("M", "N")], y: I.In[I.f32, ("M", "N")], out: I.Out[I.f32, ("M", "N")]):
+        for m in I.parallel(x.dim(0)):
+            out[m, :] = I.fdiv(x[m, :], y[m, :], approximate=True, flush_to_zero=True)
+
+    @I.kernel
+    def fdiv_ieee(x: I.In[I.f32, ("M", "N")], y: I.In[I.f32, ("M", "N")], out: I.Out[I.f32, ("M", "N")]):
+        for m in I.parallel(x.dim(0)):
+            out[m, :] = I.fdiv(x[m, :], y[m, :], approximate=True)
+
+    @I.kernel
+    def ordered_exp2_ftz(x: I.In[I.f32, ("M", "N")], out: I.Out[I.f32, ("M", "N")]):
+        for m in I.parallel(x.dim(0)):
+            acc = I.zeros(x.dim(1), I.f32)
+            for _ in I.ordered(1):
+                acc = acc + x[m, :] * I.exp2(I.sum(x[m, :]), approximate=True, flush_to_zero=True)
+            out[m, :] = acc
+
+    @I.kernel
+    def ordered_exp2_ieee(x: I.In[I.f32, ("M", "N")], out: I.Out[I.f32, ("M", "N")]):
+        for m in I.parallel(x.dim(0)):
+            acc = I.zeros(x.dim(1), I.f32)
+            for _ in I.ordered(1):
+                acc = acc + x[m, :] * I.exp2(I.sum(x[m, :]), approximate=True)
+            out[m, :] = acc
+
+    device = torch.device("cuda", torch.cuda.current_device())
+    x = torch.full((4, 32), 1.4e-40, device=device, dtype=torch.float32)
+    y = torch.full((4, 32), 2.0, device=device, dtype=torch.float32)
+    out = torch.empty_like(x)
+
+    for k_ftz, k_ieee, ins in (
+        (fdiv_ftz, fdiv_ieee, (x, y)),
+        (ordered_exp2_ftz, ordered_exp2_ieee, (x,)),
+    ):
+        fn_ftz = I.jit(k_ftz, backend="cutile", library=library)
+        root_ftz = fn_ftz.compiler.root_ir(k_ftz.source)
+        assert '"preserve-sign"' in root_ftz.decode()
+        with fn_ftz.compilation_target(*ins, outputs=(out,)) as target:
+            emitted_ftz, _ = target.compile_runtime(root_ftz, exit="cutile")
+        assert "flush_to_zero=True" in json.loads(emitted_ftz)["source"]
+
+        fn_ieee = I.jit(k_ieee, backend="cutile", library=library)
+        root_ieee = fn_ieee.compiler.root_ir(k_ieee.source)
+        assert '"preserve-sign"' not in root_ieee.decode()
+        with fn_ieee.compilation_target(*ins, outputs=(out,)) as target:
+            emitted_ieee, _ = target.compile_runtime(root_ieee, exit="cutile")
+        assert "flush_to_zero=True" not in json.loads(emitted_ieee)["source"]
+
+
 def test_cutile_scf_for_loop_kind_decided_in_legalize():
     """cuTile scf.for range vs while lowering choice must be materialized and verified in IR."""
     library = _require_library()
