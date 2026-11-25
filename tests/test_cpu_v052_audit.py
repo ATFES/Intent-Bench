@@ -450,3 +450,124 @@ def test_cpu_owner_space_extent_100_vs_128_tail_proof():
                 cc_forged.compile(forged.encode(), exit="mojo", after="cpu@tasked", through="mojo@callable", text=True)
 
 
+def test_csr_spmv_reassoc_vs_strict_ordered_sum():
+    """Reassociable segment_sum vector-accumulates while strict ordered_sum preserves left-to-right order."""
+    library, Compiler = _require_compiler()
+    from intentdsl import examples
+
+    strict_source = examples.csr_spmv.source.replace(b"I.segment_sum(", b"I.ordered_sum(")
+    assert strict_source != examples.csr_spmv.source
+
+    csr_args = [
+        {"shape": [32769], "strides": [1]},
+        {"shape": [1048576], "strides": [1]},
+        {"shape": [1048576], "strides": [1]},
+        {"shape": [32768], "strides": [1]},
+        {"shape": [32768], "strides": [1]},
+    ]
+    base_opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "calibration": "x86",
+        "arguments": csr_args,
+    }
+    with Compiler(library) as base:
+        reassoc_root = base.root_ir(examples.csr_spmv.source)
+        strict_root = base.root_ir(strict_source)
+
+        with base.derive({"exits": {"mojo": {"options": base_opts}}}) as cc_m:
+            m_reassoc = cc_m.compile(reassoc_root, exit="mojo", through="mojo@realized", text=True).decode()
+            m_strict = cc_m.compile(strict_root, exit="mojo", through="mojo@realized", text=True).decode()
+            assert "mojo_row.gather_slice" in m_reassoc and "mojo_row.lane_sum" in m_reassoc
+            assert "mojo_row.lane_sum" not in m_strict
+
+        with base.derive({"exits": {"weft": {"options": base_opts}}}) as cc_w:
+            w_reassoc = cc_w.compile(reassoc_root, exit="weft", through="weft@realized", text=True).decode()
+            w_strict = cc_w.compile(strict_root, exit="weft", through="weft@realized", text=True).decode()
+            assert "weft_host.task_reduce" in w_reassoc
+            assert "!weft_kernel.value<f32,[16],[2]>" in w_reassoc
+            assert "weft_host.task_reduce" not in w_strict
+
+
+def test_weft_attention_uses_runtime_dv_loop():
+    """Weft causal GQA attention uses a runtime dv0 task_for loop instead of 4x unrolled Pass 2b."""
+    library, Compiler = _require_compiler()
+    from intentdsl import examples
+
+    opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "calibration": "x86",
+        "arguments": [
+            {"shape": [2, 8, 256, 64], "strides": [131072, 16384, 64, 1]},
+            {"shape": [2, 2, 256, 64], "strides": [32768, 16384, 64, 1]},
+            {"shape": [2, 2, 256, 64], "strides": [32768, 16384, 64, 1]},
+            {"shape": [2, 8, 256, 64], "strides": [131072, 16384, 64, 1]},
+            None,
+        ],
+    }
+    with Compiler(library) as base, base.derive({"exits": {"weft": {"options": opts}}}) as cc:
+        ir = cc.compile(base.root_ir(examples.attention.source), exit="weft", through="weft@realized", text=True).decode()
+    assert "weft_host.task_for" in ir
+    # Single runtime dv0 loop produces 1 PV outer_contract per pass rather than 4 unrolled copies.
+    assert ir.count("weft_host.task_outer_contract") <= 4
+
+
+def test_gemm_nt_tls_panel_streaming_and_weft_assume_bounds():
+    """gemm_nt 2048x2048x2048 f16 selects 12x64 TLS panel streaming and emits positive+upper tile assumes on Weft."""
+    library, Compiler = _require_compiler()
+    from intentdsl import group7_dsa
+
+    args = [
+        {"shape": [2048, 2048], "strides": [2048, 1]},
+        {"shape": [2048, 2048], "strides": [2048, 1]},
+        {"shape": [2048, 2048], "strides": [2048, 1]},
+    ]
+    opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "onednn_runtime": True,
+        "weft_version": "0.2.0",
+        "weft_brgemm_available": True,
+        "weft_brgemm_runtime": "SEQ",
+        "weft_brgemm_f32": True,
+        "calibration": "x86",
+        "arguments": args,
+    }
+    with Compiler(library) as base:
+        root = base.root_ir(group7_dsa.gemm_nt.source)
+        with base.derive({"exits": {"mojo": {"options": opts}}}) as cc_m:
+            m_ir = cc_m.compile(root, exit="mojo", through="mojo@realized", text=True).decode()
+            assert 'placement = "tls"' in m_ir
+            assert 'name = "b_grp"' in m_ir and 'name = "a_tile"' in m_ir
+            assert 'name = "left"' not in m_ir and 'name = "rhs"' not in m_ir
+            assert "tile = array<i64: 12, 64," in m_ir
+
+        with base.derive({"exits": {"weft": {"options": opts}}}) as cc_w:
+            w_ir = cc_w.compile(root, exit="weft", through="weft@realized", text=True).decode()
+            assert 'placement = "tls"' in w_ir
+            assert 'name = "b_grp"' in w_ir and 'name = "a_tile"' in w_ir
+            assert 'name = "left"' not in w_ir and 'name = "rhs"' not in w_ir
+            assert w_ir.count("weft_host.task_assume") >= 4
+            assert 'predicate = "gt"' in w_ir and 'predicate = "le"' in w_ir
+
+        # Quantized decoded-f32-panels (awq_int4_gemm, K=4096) allocates M*K left buffer
+        # and must emit row_stride=4096 on widen-lhs-f32 (never padded 4112).
+        awq_opts = dict(opts)
+        awq_opts["arguments"] = [
+            {"shape": [256, 4096], "strides": [4096, 1]},
+            {"shape": [4096, 512], "strides": [512, 1]},
+            {"shape": [32, 4096], "strides": [4096, 1]},
+            {"shape": [32, 512], "strides": [512, 1]},
+            {"shape": [256, 4096], "strides": [4096, 1]},
+        ]
+        awq_root = base.root_ir(group7_dsa.awq_int4_gemm.source)
+        with base.derive({"exits": {"mojo": {"options": awq_opts}}}) as cc_awq:
+            awq_ir = cc_awq.compile(awq_root, exit="mojo", through="mojo@realized", text=True).decode()
+            assert "row*4096LL" in awq_ir and "row*4112LL" not in awq_ir
+
+
+
