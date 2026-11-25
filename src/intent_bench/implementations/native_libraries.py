@@ -46,9 +46,10 @@ def ggml(name,case,inputs,env,*,reference=False):
     metadata={**session.metadata(),
               "execution":"prepared native graph plan and persistent threadpool" if name not in {"q4_dot_packed","q8_quantize"}
                           else "native quantization/dot primitive",
-              "weights":"preencoded Q4_K input bytes" if name in {"q4_projection_packed","q4_dot_packed"} else
+              "weights":"preencoded Q6_K input bytes" if name=="q6_projection_packed" else
+                        "preencoded Q4_K input bytes" if name in {"q4_projection_packed","q4_dot_packed"} else
                         "Q4_K weights encoded once outside timing" if name.startswith("q4") else "f32",
-              "activation_quantization":"inside graph call" if name in {"q4_projection","q4_projection_packed"}
+              "activation_quantization":"inside graph call" if name in {"q4_projection","q4_projection_packed","q6_projection_packed"}
                                         else "preencoded" if name=="q4_dot_packed" else "not applicable"}
     if name=="gated_delta":
         metadata.update(library="GGML CPU ggml_gated_delta_net", weights="not applicable",

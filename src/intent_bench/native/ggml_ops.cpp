@@ -58,12 +58,14 @@ extern "C" const char *bench_error() { return last_error.c_str(); }
 extern "C" void *bench_create(int kind, const void *weight_data, const void *activation_data, int m, int n, int k, int threads) {
   try {
     const bool packed_dot = kind == 7;
-    const bool packed_weight = kind == 5 || packed_dot;
+    const bool is_q6 = kind == 8;
+    const bool packed_weight = kind == 5 || packed_dot || is_q6;
     if (packed_dot) kind = 3;
+    if (is_q6) kind = 5;
     if (m<=0 || n<=0 || k<=0 || threads<=0 || kind<0 || kind>5 || (kind==3 && m!=1))
       throw std::runtime_error("invalid GGML workload geometry");
     if ((kind==1 || kind==3 || kind==4 || kind==5) && k%256)
-      throw std::runtime_error("Q4_K/Q8_K require K divisible by 256");
+      throw std::runtime_error("Q4_K/Q6_K/Q8_K require K divisible by 256");
     auto op=std::make_unique<Operation>();op->kind=kind;op->m=m;op->n=n;op->k=k;
     const auto *a = static_cast<const float *>(weight_data);
     const auto *b = static_cast<const float *>(activation_data);
@@ -73,7 +75,8 @@ extern "C" void *bench_create(int kind, const void *weight_data, const void *act
     if (!packed_dot) std::copy(b,b+m*k,op->b.begin());
     op->result.resize(m*n);op->reference.resize(m*n);
     ggml_cpu_init();
-    ggml_type type=kind==1 || kind==3 || kind==5 ? GGML_TYPE_Q4_K : GGML_TYPE_F32;
+    ggml_type type = is_q6 ? GGML_TYPE_Q6_K
+                           : (kind==1 || kind==3 || kind==5 ? GGML_TYPE_Q4_K : GGML_TYPE_F32);
     if (kind==1 || kind==3 || kind==5) {
       op->packed_weight.resize(ggml_row_size(type,k)*n);
       if (packed_weight) std::memcpy(op->packed_weight.data(),weight_data,op->packed_weight.size());

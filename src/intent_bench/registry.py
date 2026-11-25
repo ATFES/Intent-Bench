@@ -61,4 +61,7 @@ def workloads():
     from .workloads.group7_cpu import registrations as group7_cpu_registrations
     for arg, meta in group7_cpu_registrations().items():
         add(meta, "intent_bench.workloads.group7_cpu:build", arg)
+    from .workloads.group7_dsa import registrations as group7_dsa_registrations
+    for arg, meta in group7_dsa_registrations().items():
+        add(meta, "intent_bench.workloads.group7_dsa:build", arg)
     return values

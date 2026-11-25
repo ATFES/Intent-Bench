@@ -72,10 +72,11 @@ class Worker:
             return
         self.a=np.load(root/"input0.npy");self.b=np.load(root/"input1.npy")
         self.kind={"gemm":0,"q4_projection":1,"rms_norm":2,"q4_dot":3,"q8_quantize":4,
-                   "q4_projection_packed":5,"q4_dot_packed":7}[request["operation"]]
-        if self.kind in (5,7):
-            if self.a.dtype!=np.uint8 or self.a.ndim!=3 or self.a.shape[-1]!=144 or not self.a.flags.c_contiguous:
-                raise ValueError('packed Q4_K weights require contiguous [N,G,144] bytes')
+                   "q4_projection_packed":5,"q4_dot_packed":7,"q6_projection_packed":8}[request["operation"]]
+        if self.kind in (5,7,8):
+            expected_bytes = 210 if self.kind == 8 else 144
+            if self.a.dtype!=np.uint8 or self.a.ndim!=3 or self.a.shape[-1]!=expected_bytes or not self.a.flags.c_contiguous:
+                raise ValueError(f'packed K-quant weights require contiguous [N,G,{expected_bytes}] bytes')
             n,groups,_=self.a.shape
             k=groups*256
             if not self.b.flags.c_contiguous:
