@@ -592,4 +592,38 @@ def test_gemm_nt_tls_panel_streaming_and_weft_assume_bounds():
             assert "row*4096LL" in awq_ir and "row*4112LL" not in awq_ir
 
 
+def test_global_numerical_options_merge_in_kir_canonical():
+    """CompilerInfra configuration.numerical merges into kir@canonical like fpmath_mode=fast."""
+    library, Compiler = _require_compiler()
+    from intentdsl import examples
+
+    base_opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "calibration": "x86-1c",
+        "onednn_runtime": True,
+        "arguments": [
+            {"shape": [4, 256, 256], "strides": [65536, 256, 1]},
+            {"shape": [4, 256, 256], "strides": [65536, 256, 1]},
+            {"shape": [4, 256, 256], "strides": [65536, 256, 1]},
+        ],
+    }
+    with Compiler(library) as base:
+        root_bg = base.root_ir(examples.batched_gemm.source)
+        with base.derive({"exits": {"mojo": {"options": base_opts}}}) as cc_strict:
+            ir_strict = cc_strict.compile(root_bg, exit="mojo", through="kir@canonical", text=True).decode()
+            assert '"denormal-fp-math" = "ieee"' in ir_strict
+        with base.derive({
+            "numerical": {"fastmath": "fast", "denormal_mode": "preserve-sign"},
+            "exits": {"mojo": {"options": base_opts}},
+        }) as cc_num:
+            ir_num = cc_num.compile(root_bg, exit="mojo", through="kir@canonical", text=True).decode()
+            assert '"denormal-fp-math" = "preserve-sign"' in ir_num
+        with base.derive({"exits": {"mojo": {"options": {**base_opts, "fpmath_mode": "fast"}}}}) as cc_fp:
+            ir_fp = cc_fp.compile(root_bg, exit="mojo", through="kir@canonical", text=True).decode()
+            assert ir_num == ir_fp
+
+
+
 

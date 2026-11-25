@@ -7,11 +7,13 @@ def prepare(definition, args, env, backend="triton"):
     import intentdsl
 
     target = env.options.get("compilerinfra", {})
+    math_kwargs = {k: target[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in target}
     kernel = intentdsl.jit(
         definition,
         backend=backend,
         library=target.get("library"),
         configuration=target.get("configuration"),
+        **math_kwargs,
     )
     call = kernel.prepare(*args, artifact_file=target.get("artifact_file"))
     metadata={"candidate":target.get("candidate"),"operator_entry":"prepared_launch"}

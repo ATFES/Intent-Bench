@@ -95,8 +95,10 @@ def bind(name, backend, args, env, device):
     import intentdsl
     from intentdsl import examples
     options = env.options.get("compilerinfra", {})
+    math_kwargs = {k: options[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in options}
     kernel = intentdsl.jit(getattr(examples, name), backend=backend,
-                           library=options.get("library"), configuration=options.get("configuration"))
+                           library=options.get("library"), configuration=options.get("configuration"),
+                           **math_kwargs)
     mutable = {"adamw": (1,2,3), "rope":(0,1), "batch_norm":(3,4),"cholesky":(0,)}.get(name, ())
     original = [(args[i], args[i].clone() if hasattr(args[i],"clone") else args[i].copy()) for i in mutable]
     def reset():
