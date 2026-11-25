@@ -483,11 +483,33 @@ def test_csr_spmv_reassoc_vs_strict_ordered_sum():
             assert "mojo_row.lane_sum" not in m_strict
 
         with base.derive({"exits": {"weft": {"options": base_opts}}}) as cc_w:
+            w_tasked = cc_w.compile(reassoc_root, exit="weft", through="cpu@tasked", text=True).decode()
             w_reassoc = cc_w.compile(reassoc_root, exit="weft", through="weft@realized", text=True).decode()
             w_strict = cc_w.compile(strict_root, exit="weft", through="weft@realized", text=True).decode()
+            assert "cpu.segment_width = 16 : i64" in w_tasked
             assert "weft_host.task_reduce" in w_reassoc
             assert "!weft_kernel.value<f32,[16],[2]>" in w_reassoc
             assert "weft_host.task_reduce" not in w_strict
+            # Checkpoint round-trip rejects invalid segment_width on cpu@tasked.
+            forged = w_tasked.replace("cpu.segment_width = 16 : i64", "cpu.segment_width = 32 : i64")
+            with pytest.raises(Exception):
+                cc_w.compile(forged.encode(), exit="weft", after="cpu@tasked", through="weft@realized", text=True)
+
+        # Short average segment length (nnz=8) selects segment_width=8 via CPU partition cost model.
+        short_opts = dict(base_opts)
+        short_opts["arguments"] = [
+            {"shape": [32769], "strides": [1]},
+            {"shape": [262144], "strides": [1]},
+            {"shape": [262144], "strides": [1]},
+            {"shape": [32768], "strides": [1]},
+            {"shape": [32768], "strides": [1]},
+        ]
+        with base.derive({"exits": {"weft": {"options": short_opts}}}) as cc_ws:
+            ws_tasked = cc_ws.compile(reassoc_root, exit="weft", through="cpu@tasked", text=True).decode()
+            ws_realized = cc_ws.compile(reassoc_root, exit="weft", through="weft@realized", text=True).decode()
+            assert "cpu.segment_width = 8 : i64" in ws_tasked
+            assert "weft_host.task_reduce" in ws_realized
+            assert "!weft_kernel.value<f32,[8],[2]>" in ws_realized
 
 
 def test_weft_attention_uses_runtime_dv_loop():
