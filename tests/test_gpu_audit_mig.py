@@ -600,8 +600,9 @@ def test_radix_pow2_l1scatter_qknr_index_add_and_awq_loops(exit_name):
     ref_ia = torch.zeros((64, 128), device=device, dtype=torch.float32).index_add_(0, idx.long(), src_ia)
     torch.testing.assert_close(dst_ia, ref_ia, rtol=1e-4, atol=1e-4)
 
-    # 4. awq_int4_gemm: Triton promotes stepped TMA K-loop; SM90 cuTile rewrites aligned 1-row qz/sc to ct.load
-    M, N, K, G = 128, 128, 256, 2
+    # 4. awq_int4_gemm: fused TMA path (M=32, K=1024, N=128 -> mBlocks=1, kPanels>=8):
+    # Triton promotes stepped TMA K-loop; SM90 cuTile rewrites aligned 1-row qz/sc to ct.load
+    M, N, K, G = 32, 128, 1024, 8
     x_awq = (torch.randn((M, K), generator=gen, device=device) * 0.25).to(torch.float16)
     shifts = [0, 16, 4, 20, 8, 24, 12, 28]
     w_codes = torch.randint(0, 16, (K, N), generator=gen, device=device, dtype=torch.int32)
@@ -616,7 +617,7 @@ def test_radix_pow2_l1scatter_qknr_index_add_and_awq_loops(exit_name):
     call_awq = fn_awq.prepare(x_awq, qw, sc, qz)
     src_awq = json.loads(call_awq.artifact.emitted.decode())["source"]
     if exit_name == "triton":
-        assert "range(0,256," in src_awq
+        assert "range(0,1024," in src_awq
     elif sm == 90:
         assert "ct.gather(" not in src_awq and "allow_tma=False" in src_awq
     call_awq.launch()
@@ -624,3 +625,98 @@ def test_radix_pow2_l1scatter_qknr_index_add_and_awq_loops(exit_name):
     w_ref = ((w_codes - z_codes.repeat_interleave(128, dim=0)).to(torch.float16) * sc.repeat_interleave(128, dim=0)).to(torch.float32)
     expected_awq = (x_awq.to(torch.float32) @ w_ref).to(torch.float16)
     torch.testing.assert_close(call_awq.result(), expected_awq, rtol=2e-2, atol=2e-2)
+
+
+@pytest.mark.parametrize("exit_name", ["triton", "cutile"])
+def test_split_quant_contraction_cost_model_and_triton_tuner(exit_name):
+    """Regression: cost-model split-vs-fused grouped-RHS contraction (vendor + library + L2/tail boundaries + CUDAGraph) and Triton median CUDA-event tuner."""
+    library = _require_library()
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("requires CUDA device")
+    if exit_name == "cutile":
+        pytest.importorskip("cuda.tile")
+    from statistics import median
+    import intentdsl as I
+    from intentdsl import examples, group7_dsa
+
+    device = torch.device("cuda", torch.cuda.current_device())
+    major, minor = torch.cuda.get_device_capability(device)
+    sm = major * 10 + minor
+    gen = torch.Generator(device=device).manual_seed(73)
+    shifts = [0, 16, 4, 20, 8, 24, 12, 28]
+
+    def make_awq(M, K, N):
+        G = K // 128
+        x = (torch.randn((M, K), generator=gen, device=device) * 0.125).to(torch.float16)
+        w_codes = torch.randint(0, 16, (K, N), generator=gen, device=device, dtype=torch.int32)
+        z_codes = torch.randint(0, 16, (G, N), generator=gen, device=device, dtype=torch.int32)
+        qw = torch.zeros((K, N // 8), device=device, dtype=torch.int32)
+        qz = torch.zeros((G, N // 8), device=device, dtype=torch.int32)
+        for j, sh in enumerate(shifts):
+            qw |= (w_codes[:, j::8] & 0xF) << sh
+            qz |= (z_codes[:, j::8] & 0xF) << sh
+        sc = (torch.rand((G, N), generator=gen, device=device) * 0.25 + 0.05).to(torch.float16)
+        w_ref = ((w_codes - z_codes.repeat_interleave(128, dim=0)).to(torch.float16) * sc.repeat_interleave(128, dim=0)).to(torch.float32)
+        ref = (x.to(torch.float32) @ w_ref).to(torch.float16)
+        return x, qw, sc, qz, ref
+
+    # 1. Production shape 256x4096x4096-g128: verify split-vs-fused cost selection under vendor & library + CUDAGraph safety
+    x, qw, sc, qz, ref = make_awq(256, 4096, 4096)
+    for reuse in ("vendor", "library"):
+        fn = I.jit(group7_dsa.awq_int4_gemm, backend=exit_name, library=library, configuration={"reuse": reuse})
+        call = fn.prepare(x, qw, sc, qz)
+        art = json.loads(call.artifact.emitted.decode())
+        if exit_name == "triton" or sm == 90:
+            assert art.get("pre_stage") is not None, f"expected split on {exit_name} sm{sm} reuse={reuse}"
+            assert bool(art.get("library_gemm")) == (reuse == "library")
+        else:
+            # SM120 cuTile dequant store overhead favors fused at M=256
+            assert art.get("pre_stage") is None
+        call.launch()
+        torch.cuda.synchronize(device)
+        torch.testing.assert_close(call.result(), ref, rtol=2e-2, atol=2e-2)
+        # Verify CUDA Graph capture + replay stability (pre-allocated workspace, zero capture-time allocs)
+        g = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(g):
+            call.enqueue()
+        g.replay()
+        torch.cuda.synchronize(device)
+        torch.testing.assert_close(call.result(), ref, rtol=2e-2, atol=2e-2)
+        del g
+
+    # 2. Boundary cases: L2-overflow (M=16, K=8192, N=8192) and non-divisible (M=17, K=128, N=200) must fall back to fused
+    x_ov = torch.zeros((16, 8192), device=device, dtype=torch.float16)
+    qw_ov = torch.zeros((8192, 1024), device=device, dtype=torch.int32)
+    sc_ov = torch.ones((64, 8192), device=device, dtype=torch.float16)
+    qz_ov = torch.zeros((64, 1024), device=device, dtype=torch.int32)
+    fn_lib = I.jit(group7_dsa.awq_int4_gemm, backend=exit_name, library=library, configuration={"reuse": "library"})
+    art_ov = json.loads(fn_lib.prepare(x_ov, qw_ov, sc_ov, qz_ov).artifact.emitted.decode())
+    assert art_ov.get("pre_stage") is None
+
+    x_nd, qw_nd, sc_nd, qz_nd, ref_nd = make_awq(17, 128, 200)
+    call_nd = fn_lib.prepare(x_nd, qw_nd, sc_nd, qz_nd)
+    assert json.loads(call_nd.artifact.emitted.decode()).get("pre_stage") is None
+    call_nd.launch()
+    torch.cuda.synchronize(device)
+    torch.testing.assert_close(call_nd.result(), ref_nd, rtol=2e-2, atol=2e-2)
+
+    # 3. Triton runtime median CUDA-event tuner: multi-row kernels gather 9 samples/candidate and select min median
+    if exit_name == "triton":
+        xg = torch.randn((32, 256, 1024), generator=gen, device=device, dtype=torch.float16)
+        dyg = torch.randn((32, 256, 1024), generator=gen, device=device, dtype=torch.float16)
+        mg = torch.randn((32, 32), generator=gen, device=device, dtype=torch.float16)
+        ig = torch.randn((32, 32), generator=gen, device=device, dtype=torch.float16)
+        dwg = torch.empty((256,), device=device, dtype=torch.float16)
+        dbg = torch.empty((256,), device=device, dtype=torch.float16)
+        fn_aff = I.jit(examples.group_affine_gradient, backend="triton", library=library)
+        call_aff = fn_aff.prepare(xg, dyg, mg, ig, outputs=(dwg, dbg))
+        call_aff.launch()
+        torch.cuda.synchronize(device)
+        rep = call_aff.tuning_report()
+        trials = rep["trials_us"]
+        assert len(trials) >= 2
+        for entry in trials:
+            assert len(entry["samples"]) == 9
+        expected_winner = min(trials, key=lambda e: median(e["samples"]))["row_id"]
+        assert rep["winner_row_id"] == expected_winner
