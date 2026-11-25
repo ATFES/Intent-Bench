@@ -507,3 +507,120 @@ def test_full_panels_min_clamp_trans_mma_grouped_panel_and_remat(exit_name):
     proj = (nf * uf).sum(dim=(2, 3), keepdim=True) / (8 * S_g)
     dx_ref = (invg.float()[:, :, None, None] * (uf - tot - nf * proj)).reshape(B_g, C_g, S_g).to(torch.float16)
     torch.testing.assert_close(dxg, dx_ref, rtol=2e-2, atol=2e-2)
+
+
+@pytest.mark.parametrize("exit_name", ["triton", "cutile"])
+def test_radix_pow2_l1scatter_qknr_index_add_and_awq_loops(exit_name):
+    """Regression: pow2 floordivsi shift fast path + zero-atomic L1 scatter, narrow-row non-remat/occ4, index_add occ, AWQ stepped K-loop & SM90 row rect_read."""
+    library = _require_library()
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("requires CUDA device")
+    if exit_name == "cutile":
+        pytest.importorskip("cuda.tile")
+    import numpy as np
+    import intentdsl as I
+    from intentdsl import group7, group7_cpu, group7_dsa
+
+    device = torch.device("cuda", torch.cuda.current_device())
+    major, minor = torch.cuda.get_device_capability(device)
+    sm = major * 10 + minor
+    gen = torch.Generator(device=device).manual_seed(41)
+
+    # 1. radix_pass_rows: dense duplicate bins + non-divisible N=100 for pow2 (1, 256) and non-pow2 (3) divisors
+    keys_dup = torch.randint(0, 100000, (10, 100), generator=gen, device=device, dtype=torch.int32)
+    keys_dup[:, :20] = 768
+    keys_dup[:, 20:35] = 769
+    vals = torch.arange(100, device=device, dtype=torch.int32).unsqueeze(0).expand(10, 100).contiguous()
+    fn_rad = I.jit(group7_cpu.radix_pass_rows, backend=exit_name, library=library)
+    for divisor in (1, 256, 3):
+        hist = torch.zeros((10, 256), device=device, dtype=torch.int32)
+        cur = torch.zeros((10, 256), device=device, dtype=torch.int32)
+        call_rad = fn_rad.prepare(keys_dup, vals, hist, cur, divisor)
+        art_rad = json.loads(call_rad.artifact.emitted.decode())
+        src_rad = art_rad["source"]
+        assert ">>" in src_rad and "//" in src_rad
+        if exit_name == "cutile":
+            # Zero-atomic L1 scatter: only histogram relaxed add + final acq_rel flush remain (no cursor atomics)
+            assert src_rad.count("ct.atomic_add(") == 2
+        else:
+            warps = {r["native"]["num_warps"] for r in art_rad["rows"]}
+            assert {2, 4, 8}.issubset(warps)
+        call_rad.launch()
+        torch.cuda.synchronize(device)
+        _, _, offsets, out_keys, out_vals = call_rad.result()
+        k_np = keys_dup.cpu().numpy()
+        v_np = vals.cpu().numpy()
+        digits = (k_np // divisor) % 256
+        order = np.argsort(digits, axis=-1, kind="stable")
+        assert torch.equal(out_keys.cpu(), torch.from_numpy(np.take_along_axis(k_np, order, axis=-1)))
+        assert torch.equal(out_vals.cpu(), torch.from_numpy(np.take_along_axis(v_np, order, axis=-1)))
+        for r in range(10):
+            exp_off = np.zeros(257, dtype=np.int32)
+            np.cumsum(np.bincount(digits[r], minlength=256), out=exp_off[1:])
+            assert torch.equal(offsets[r].cpu(), torch.from_numpy(exp_off))
+
+    # 2. qk_norm_rope: narrow width=64 must not double-load inputs via rematWrites; cuTile offers occupancy=4
+    B, S = 2, 128
+    q = torch.randn((B, 32, S, 128), generator=gen, device=device, dtype=torch.bfloat16)
+    k = torch.randn((B, 8, S, 128), generator=gen, device=device, dtype=torch.bfloat16)
+    wq = torch.ones((128,), device=device, dtype=torch.bfloat16)
+    wk = torch.ones((128,), device=device, dtype=torch.bfloat16)
+    cos = torch.ones((S, 64), device=device, dtype=torch.bfloat16)
+    sin = torch.zeros((S, 64), device=device, dtype=torch.bfloat16)
+    qo = torch.empty_like(q)
+    ko = torch.empty_like(k)
+    fn_qknr = I.jit(group7.qk_norm_rope, backend=exit_name, library=library)
+    call_qknr = fn_qknr.prepare(q, k, wq, wk, cos, sin, 1.0 / 128.0, 1e-6, outputs=(qo, ko))
+    art_qknr = json.loads(call_qknr.artifact.emitted.decode())
+    src_qknr = art_qknr["source"]
+    if exit_name == "triton":
+        assert src_qknr.count("tl.load(") == 16
+    else:
+        assert src_qknr.count("ct.load(") == 16
+        occs = {r["native"]["occupancy"] for r in art_qknr["rows"]}
+        assert 4 in occs
+    call_qknr.launch()
+    torch.cuda.synchronize(device)
+    qf = q.float()
+    q_ref = (qf * torch.rsqrt(qf.pow(2).mean(dim=-1, keepdim=True) + 1e-6)).to(torch.bfloat16)
+    torch.testing.assert_close(qo, q_ref, rtol=2e-2, atol=2e-2)
+
+    # 3. index_add_accumulate: cuTile emits explicit occupancy/opt_level hints for tile_atomic_add
+    idx = torch.randint(0, 64, (256,), generator=gen, device=device, dtype=torch.int32)
+    src_ia = torch.randn((256, 128), generator=gen, device=device, dtype=torch.float32)
+    dst_ia = torch.zeros((64, 128), device=device, dtype=torch.float32)
+    fn_ia = I.jit(group7_cpu.index_add_accumulate, backend=exit_name, library=library)
+    call_ia = fn_ia.prepare(idx, src_ia, dst_ia)
+    art_ia = json.loads(call_ia.artifact.emitted.decode())
+    if exit_name == "cutile":
+        assert any(r["native"].get("occupancy") == 4 and r["native"].get("opt_level") == 3 for r in art_ia["rows"])
+    call_ia.launch()
+    torch.cuda.synchronize(device)
+    ref_ia = torch.zeros((64, 128), device=device, dtype=torch.float32).index_add_(0, idx.long(), src_ia)
+    torch.testing.assert_close(dst_ia, ref_ia, rtol=1e-4, atol=1e-4)
+
+    # 4. awq_int4_gemm: Triton promotes stepped TMA K-loop; SM90 cuTile rewrites aligned 1-row qz/sc to ct.load
+    M, N, K, G = 128, 128, 256, 2
+    x_awq = (torch.randn((M, K), generator=gen, device=device) * 0.25).to(torch.float16)
+    shifts = [0, 16, 4, 20, 8, 24, 12, 28]
+    w_codes = torch.randint(0, 16, (K, N), generator=gen, device=device, dtype=torch.int32)
+    z_codes = torch.randint(0, 16, (G, N), generator=gen, device=device, dtype=torch.int32)
+    qw = torch.zeros((K, N // 8), device=device, dtype=torch.int32)
+    qz = torch.zeros((G, N // 8), device=device, dtype=torch.int32)
+    for j, sh in enumerate(shifts):
+        qw |= (w_codes[:, j::8] & 0xF) << sh
+        qz |= (z_codes[:, j::8] & 0xF) << sh
+    sc = (torch.rand((G, N), generator=gen, device=device) * 0.5 + 0.1).to(torch.float16)
+    fn_awq = I.jit(group7_dsa.awq_int4_gemm, backend=exit_name, library=library)
+    call_awq = fn_awq.prepare(x_awq, qw, sc, qz)
+    src_awq = json.loads(call_awq.artifact.emitted.decode())["source"]
+    if exit_name == "triton":
+        assert "range(0,256," in src_awq
+    elif sm == 90:
+        assert "ct.gather(" not in src_awq and "allow_tma=False" in src_awq
+    call_awq.launch()
+    torch.cuda.synchronize(device)
+    w_ref = ((w_codes - z_codes.repeat_interleave(128, dim=0)).to(torch.float16) * sc.repeat_interleave(128, dim=0)).to(torch.float32)
+    expected_awq = (x_awq.to(torch.float32) @ w_ref).to(torch.float16)
+    torch.testing.assert_close(call_awq.result(), expected_awq, rtol=2e-2, atol=2e-2)
