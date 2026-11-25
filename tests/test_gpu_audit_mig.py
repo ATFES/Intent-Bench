@@ -390,3 +390,120 @@ def test_non_divisible_radix_and_exact_half_bias_awq(exit_name):
     w_ref = ((w_codes - z_codes).to(torch.float16) * sc).to(torch.float32)
     expected_awq = (x_awq.to(torch.float32) @ w_ref).to(torch.float16)
     torch.testing.assert_close(call_awq.result(), expected_awq, rtol=1e-2, atol=2e-2)
+
+
+@pytest.mark.parametrize("exit_name", ["triton", "cutile"])
+def test_full_panels_min_clamp_trans_mma_grouped_panel_and_remat(exit_name):
+    """Regression: min-clamp full_panels & SM90 transMma, groupedPanel coalescing, and resident remat."""
+    library = _require_library()
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("requires CUDA device")
+    if exit_name == "cutile":
+        pytest.importorskip("cuda.tile")
+    import intentdsl as I
+    from intentdsl.decode import grouped_partials
+    from intentdsl import examples, group7_cpu
+
+    device = torch.device("cuda", torch.cuda.current_device())
+    major, minor = torch.cuda.get_device_capability(device)
+    sm = major * 10 + minor
+    gen = torch.Generator(device=device).manual_seed(29)
+
+    # 1. Min-clamp full_panels proof on divisible T=1024 vs non-divisible T=1000
+    B, H, KV, D = 8, 32, 8, 128
+    scale = D ** -0.5
+    for T, expect_full in [(1024, True), (1000, False)]:
+        S = (T + 255) // 256
+        q = torch.randn((B, H, 1, D), generator=gen, device=device, dtype=torch.bfloat16)
+        k = torch.randn((B, KV, T, D), generator=gen, device=device, dtype=torch.bfloat16)
+        v = torch.randn((B, KV, T, D), generator=gen, device=device, dtype=torch.bfloat16)
+        logs = torch.empty((B, H, S), device=device, dtype=torch.float32)
+        partial = torch.empty((B, H, S, D), device=device, dtype=torch.bfloat16)
+        fn_gp = I.jit(grouped_partials, backend=exit_name, library=library)
+        with fn_gp.compilation_target(q, k, v, scale, outputs=(logs, partial)) as target:
+            ir_gp = target.compile(
+                fn_gp.compiler.root_ir(grouped_partials.source),
+                exit=exit_name,
+                through="block@realized",
+                text=True,
+            ).decode()
+        assert ("block.full_panels" in ir_gp) == expect_full
+        call_gp = fn_gp.prepare(q, k, v, scale, outputs=(logs, partial))
+        art_gp = json.loads(call_gp.artifact.emitted.decode())
+        src_gp = art_gp["source"]
+        if expect_full and exit_name == "cutile" and sm == 90:
+            # SM90 narrow-M transposed WGMMA emits (span, 16) score accumulator
+            assert (
+                "ct.full((64,16),0,ct.float32)" in src_gp
+                or "ct.full((128,16),0,ct.float32)" in src_gp
+            )
+        call_gp.launch()
+        torch.cuda.synchronize(device)
+        # Spot-check batch 0 on first and last split against FP32/BF16 reference
+        qf = q[:1].float()
+        kf = k[:1].float().repeat_interleave(H // KV, dim=1)
+        vf = v[:1].float().repeat_interleave(H // KV, dim=1)
+        for s_idx in {0, S - 1}:
+            lo, hi = s_idx * 256, min((s_idx + 1) * 256, T)
+            sc = torch.einsum("bhqd,bhkd->bhk", qf, kf[:, :, lo:hi, :]) * scale
+            p_ref = torch.softmax(sc, dim=-1).to(torch.bfloat16).float()
+            out_ref = torch.einsum("bhk,bhkd->bhd", p_ref, vf[:, :, lo:hi, :]).to(torch.bfloat16)
+            torch.testing.assert_close(partial[:1, :, s_idx, :], out_ref, rtol=2e-2, atol=2e-2)
+
+    # 2. Grouped panel coalescing on rows=1 (CLA) and rows>1 (retention_recurrence)
+    if exit_name == "cutile":
+        qc = torch.randn((2, 64, 32), generator=gen, device=device, dtype=torch.float32)
+        kc = torch.randn((2, 64, 32), generator=gen, device=device, dtype=torch.float32)
+        vc = torch.randn((2, 64, 64), generator=gen, device=device, dtype=torch.float32)
+        oc = torch.empty_like(vc)
+        fc = torch.empty((2, 32, 64), device=device, dtype=torch.float32)
+        fn_cla = I.jit(examples.causal_linear_attention, backend="cutile", library=library)
+        call_cla = fn_cla.prepare(qc, kc, vc, outputs=(oc, fc))
+        src_cla = json.loads(call_cla.artifact.emitted.decode())["source"]
+        assert "ct.extract(" in src_cla
+        call_cla.launch()
+        torch.cuda.synchronize(device)
+        # Verify final state exactness: sum_t k[b,t,d] * v[b,t,dv]
+        fc_ref = torch.einsum("btd,btv->bdv", kc, vc)
+        torch.testing.assert_close(fc, fc_ref, rtol=1e-3, atol=1e-3)
+
+        qr = torch.randn((2, 64, 8, 64), generator=gen, device=device, dtype=torch.bfloat16)
+        kr = torch.randn((2, 64, 8, 64), generator=gen, device=device, dtype=torch.bfloat16)
+        vr = torch.randn((2, 64, 8, 64), generator=gen, device=device, dtype=torch.bfloat16)
+        gam = torch.full((8,), 0.95, device=device, dtype=torch.float32)
+        outr = torch.empty_like(vr)
+        finr = torch.empty((2, 8, 64, 64), device=device, dtype=torch.float32)
+        fn_ret = I.jit(group7_cpu.retention_recurrence, backend="cutile", library=library)
+        call_ret = fn_ret.prepare(qr, kr, vr, gam, 0.125, outputs=(outr, finr))
+        src_ret = json.loads(call_ret.artifact.emitted.decode())["source"]
+        assert "ct.extract(" in src_ret and "ct.broadcast_to(ct.reshape(ct.extract(" in src_ret
+        call_ret.launch()
+        torch.cuda.synchronize(device)
+        # Reference check on final state with constant decay 0.95
+        decays = (0.95 ** torch.arange(63, -1, -1, device=device, dtype=torch.float32))[None, :, None, None]
+        finr_ref = torch.einsum("bthk,bthv->bhkv", kr.float() * decays, vr.float())
+        torch.testing.assert_close(finr, finr_ref, rtol=2e-2, atol=2e-2)
+
+    # 3. Resident multi-reduction rematerialization & immediate disjoint stores (group_input_gradient)
+    B_g, C_g, S_g, G_g = 4, 32, 256, 4
+    xg = torch.randn((B_g, C_g, S_g), generator=gen, device=device, dtype=torch.float16)
+    dyg = torch.randn((B_g, C_g, S_g), generator=gen, device=device, dtype=torch.float16)
+    gaing = torch.randn((C_g,), generator=gen, device=device, dtype=torch.float16)
+    meang = torch.randn((B_g, G_g), generator=gen, device=device, dtype=torch.float16)
+    invg = torch.randn((B_g, G_g), generator=gen, device=device, dtype=torch.float16)
+    dxg = torch.empty_like(xg)
+    k_dx = examples.group_norm_backward.steps[3][1]
+    fn_dx = I.jit(k_dx, backend=exit_name, library=library)
+    call_dx = fn_dx.prepare(xg, dyg, gaing, meang, invg, 1.0 / (8 * S_g), outputs=(dxg,))
+    call_dx.launch()
+    torch.cuda.synchronize(device)
+    xf = xg.float().reshape(B_g, G_g, 8, S_g)
+    dyf = dyg.float().reshape(B_g, G_g, 8, S_g)
+    gf = gaing.float().reshape(1, G_g, 8, 1)
+    nf = (xf - meang.float()[:, :, None, None]) * invg.float()[:, :, None, None]
+    uf = dyf * gf
+    tot = uf.sum(dim=(2, 3), keepdim=True) / (8 * S_g)
+    proj = (nf * uf).sum(dim=(2, 3), keepdim=True) / (8 * S_g)
+    dx_ref = (invg.float()[:, :, None, None] * (uf - tot - nf * proj)).reshape(B_g, C_g, S_g).to(torch.float16)
+    torch.testing.assert_close(dxg, dx_ref, rtol=2e-2, atol=2e-2)
