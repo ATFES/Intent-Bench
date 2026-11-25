@@ -16,6 +16,7 @@ from intent.runtime.native import NativeABI
 from kernels.quantization.quantized_projection import quantized_projection
 
 from intent_bench.corpus._common.loading import load_module
+from intent_bench.environments import legacy_weft_profile_path
 from intent_bench.corpus._common.measurement import NumericalComparisonError, PipelineStageError, report_stage
 from intent_bench.corpus._common.model import NativeComparisonResult, PreparedComparison, Tolerance
 
@@ -58,7 +59,7 @@ def _source_artifact(context, directory: Path, profile: TargetProfile, compiler:
 
 
 def projection(context, deployment_name="rvv.json"):
-    deployment_path = Path(os.environ.get("INTENT_WEFT_PROFILE", Path(__file__).with_name(deployment_name)))
+    deployment_path = legacy_weft_profile_path(deployment_name)
     deployment = json.loads(deployment_path.read_text())
     profile = TargetProfile.from_deployment(deployment)
     compiler = os.environ["INTENT_WEFT_COMPILER"]

@@ -18,6 +18,7 @@ from intent.runtime.native import NativeABI
 from kernels.streaming.attention_f32 import causal_attention_f32, causal_linear_attention_f32
 
 from intent_bench.corpus._common.loading import load_module
+from intent_bench.environments import legacy_weft_profile_path
 from intent_bench.corpus._common.measurement import PipelineStageError, report_stage
 from intent_bench.corpus._common.model import NativeComparisonResult, PreparedComparison, Tolerance
 
@@ -63,7 +64,7 @@ def source_artifact(directory, profile, metadata, linear, canonical, artifact):
 
 
 def prepare(context, linear):
-    deployment_path = Path(os.environ.get("INTENT_WEFT_PROFILE", Path(__file__).with_name("rvv.json")))
+    deployment_path = legacy_weft_profile_path("rvv.json")
     deployment = json.loads(deployment_path.read_text())
     deployment["kernel"] = "causal_linear_attention_f32" if linear else "causal_attention_f32"
     profile = TargetProfile.from_deployment(deployment)

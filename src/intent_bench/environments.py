@@ -14,6 +14,15 @@ def environment_directory():
     return Path(os.environ.get("XDG_CONFIG_HOME", Path.home()/".config"))/"intent-bench/environments"
 
 
+def legacy_weft_profile_path(name):
+    """Locate the deployment used by the archived Weft experiments."""
+    configured = os.environ.get("INTENT_WEFT_PROFILE")
+    if configured:
+        return Path(configured).expanduser()
+    config = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return config / "intent-bench" / "legacy-weft" / Path(name).name
+
+
 def environment_path(name):
     path = Path(name).expanduser()
     if path.is_file():

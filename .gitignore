@@ -7,5 +7,7 @@ dist/
 .venv/
 runs/
 /output
+*.local.json
+/local-config/
 *.so
 __mojocache__/

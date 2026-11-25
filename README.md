@@ -39,6 +39,8 @@ FlagGems baseline。使用 describe 查询当前可选实现。
 ## 执行环境
 
 环境位于 `~/.config/intent-bench/environments/NAME.json`，也可直接传配置路径。
+可复制 `examples/environments/remote-gpu.json` 或 `mlu.json` 填写自己的 SSH 别名与工具链路径。仓内私有配置可放在 `local-config/`，用 `--env local-config/NAME.json` 读取。
+复现归档 Weft 实验时，将 `archive/legacy-tools/cpu/providers/weft/{ime,rvv}.json` 模板复制到 `~/.config/intent-bench/legacy-weft/` 并填写目标配置，也可用 `INTENT_WEFT_PROFILE` 指定文件。
 同一份 RunRequest 被 CLI、Python API、MCP 和 suite 使用：
 
 ```json

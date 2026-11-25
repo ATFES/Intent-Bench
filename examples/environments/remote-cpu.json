@@ -1,0 +1,9 @@
+{
+  "description": "Copy to your private environment directory and set the execution host and paths",
+  "transport": "ssh",
+  "host": "your-ssh-alias",
+  "python": "/path/to/native-venv/bin/python",
+  "remote_output_root": "/path/to/intentdsl_bench/output",
+  "device": "cpu",
+  "threads": 1
+}

@@ -17,6 +17,7 @@ from intent.runtime.native import NativeABI
 from kernels.contraction.gemm import gemm_i8
 
 from intent_bench.corpus._common.loading import load_module
+from intent_bench.environments import legacy_weft_profile_path
 from intent_bench.corpus._common.measurement import PipelineStageError, report_stage
 from intent_bench.corpus._common.model import NativeComparisonResult, PreparedComparison, Tolerance
 
@@ -58,7 +59,7 @@ def source_artifact(directory, profile, metadata, canonical, artifact):
 
 
 def prepare(context, rows):
-    deployment_path = Path(os.environ.get("INTENT_WEFT_PROFILE", Path(__file__).with_name("ime.json")))
+    deployment_path = legacy_weft_profile_path("ime.json")
     deployment = json.loads(deployment_path.read_text())
     profile = TargetProfile.from_deployment(deployment)
     compiler = os.environ["INTENT_WEFT_COMPILER"]

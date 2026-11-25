@@ -31,6 +31,9 @@ or Agent protocol. compare/report read existing results.
 
 ## Execution and output
 
+Copy a template from `examples/environments/` to the configuration directory or to the ignored `local-config/` directory and pass its path to `--env`.
+For archived Weft runs, copy the profiles in `archive/legacy-tools/cpu/providers/weft/` to `~/.config/intent-bench/legacy-weft/` and set the SSH destination and toolchain, or set `INTENT_WEFT_PROFILE` to your deployment file.
+
 Profiles in ~/.config/intent-bench/environments select transport, host, python, device,
 threads and toolchain paths. SSH profiles also require remote_output_root. The selected
 Python must already contain Bench, Intent when selected, and provider dependencies.
