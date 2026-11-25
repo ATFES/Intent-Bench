@@ -625,5 +625,124 @@ def test_global_numerical_options_merge_in_kir_canonical():
             assert ir_num == ir_fp
 
 
+def test_weft_ordered_vectorizes_contiguous_inner_loops():
+    """Weft Ordered vectorizes contiguous stride-1 reassociable reductions, independent writes, and pure scf.if."""
+    library, Compiler = _require_compiler()
+    from intentdsl import group7, group7_cpu
+
+    base_opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "calibration": "x86",
+    }
+    with Compiler(library) as base:
+        kl_opts = {
+            **base_opts,
+            "arguments": [
+                {"shape": [64, 128], "strides": [128, 1]},
+                {"shape": [64, 128], "strides": [128, 1]},
+                {"shape": [64, 128], "strides": [128, 1]},
+                {"shape": [64], "strides": [1]},
+            ],
+        }
+        with base.derive({"exits": {"weft": {"options": kl_opts}}}) as cc_kl:
+            kl_ir = cc_kl.compile(
+                base.root_ir(group7_cpu.log_softmax_kl.source),
+                exit="weft", through="weft@realized", text=True,
+            ).decode()
+        assert kl_ir.count("weft_host.task_subview") >= 4
+        assert kl_ir.count("weft_host.task_reduce") >= 3
+        assert kl_ir.count("weft_host.task_commit") >= 2
+        assert "weft_host.task_if" not in kl_ir
+        assert "weft_host.task_select" in kl_ir
+
+        ce_opts = {
+            **base_opts,
+            "arguments": [
+                {"shape": [64, 256], "strides": [256, 1]},
+                {"shape": [64], "strides": [1]},
+                {"shape": [64], "strides": [1]},
+                {"shape": [64], "strides": [1]},
+                {"shape": [64, 256], "strides": [256, 1]},
+            ],
+        }
+        with base.derive({"exits": {"weft": {"options": ce_opts}}}) as cc_ce:
+            ce_ir = cc_ce.compile(
+                base.root_ir(group7.cross_entropy.source),
+                exit="weft", through="weft@realized", text=True,
+            ).decode()
+        assert ce_ir.count("weft_host.task_subview") >= 4
+        assert ce_ir.count("weft_host.task_reduce") >= 2
+        assert ce_ir.count("weft_host.task_commit") >= 2
+        assert "weft_host.task_if" not in ce_ir
+
+
+def test_weft_ordered_tiled_contraction_extensions():
+    """Weft Ordered 2D outer_contract handles scf.if causal, post-sub scale, affine bias+FTZ clamp, and stack-budgeted subDV strips."""
+    library, Compiler = _require_compiler()
+    from intentdsl import group7
+
+    base_opts = {
+        "vector_bits": 512,
+        "vector_registers": 32,
+        "workers": 8,
+        "calibration": "x86",
+    }
+    attn_args = [
+        {"shape": [2, 32, 2048, 128], "strides": [8388608, 262144, 128, 1]},
+        {"shape": [2, 8, 2048, 128], "strides": [2097152, 262144, 128, 1]},
+        {"shape": [2, 8, 2048, 128], "strides": [2097152, 262144, 128, 1]},
+        {"shape": [2, 32, 2048, 128], "strides": [8388608, 262144, 128, 1]},
+        None,
+    ]
+    alibi_args = [
+        attn_args[0],
+        attn_args[1],
+        attn_args[2],
+        {"shape": [32], "strides": [1]},
+        attn_args[3],
+        None,
+    ]
+    swa_args = [
+        {"shape": [2, 32, 4096, 128], "strides": [16777216, 524288, 128, 1]},
+        {"shape": [2, 8, 4096, 128], "strides": [4194304, 524288, 128, 1]},
+        {"shape": [2, 8, 4096, 128], "strides": [4194304, 524288, 128, 1]},
+        {"shape": [2, 32, 4096, 128], "strides": [16777216, 524288, 128, 1]},
+        None,
+        None,
+    ]
+    with Compiler(library) as base:
+        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": attn_args}}}}) as cc:
+            unscaled_ir = cc.compile(
+                base.root_ir(group7.attention_unscaled_max.source),
+                exit="weft", through="weft@realized", text=True,
+            ).decode()
+        assert unscaled_ir.count("weft_host.task_contract") >= 4
+        assert 'engine = "auto"' in unscaled_ir
+        assert "!weft_kernel.value<bf16,[16,128],[3,4]>" in unscaled_ir
+        assert "elements = 2048 : i64" in unscaled_ir  # stack-budgeted scoreBuf (128*16) + tiledOutBuf (16*128)
+
+        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": alibi_args}}}}) as cc:
+            alibi_ir = cc.compile(
+                base.root_ir(group7.alibi_attention.source),
+                exit="weft", through="weft@realized", text=True,
+            ).decode()
+        assert alibi_ir.count("weft_host.task_contract") >= 4
+        assert 'lit = "-126.0"' in alibi_ir  # FTZ exp2 subnormal guard
+        assert 'kind = "exp2"' in alibi_ir
+
+        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": swa_args}}}}) as cc:
+            swa_ir = cc.compile(
+                base.root_ir(group7.sliding_window_attention.source),
+                exit="weft", through="weft@realized", text=True,
+            ).decode()
+        assert swa_ir.count("weft_host.task_contract") >= 4
+        assert "!weft_kernel.value<f16,[4,128],[2,4]>" in swa_ir
+        assert "!weft_kernel.value<f32,[4,32],[2,7]>" in swa_ir  # subDV=32 tiledOutBuf strips
+        assert "elements = 4608 : i64" in swa_ir  # 1152*4 <= 18 KiB scoreBuf leaving >44 KiB stack headroom
+
+
+
 
 
