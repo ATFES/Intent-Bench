@@ -311,3 +311,82 @@ def test_cutile_scf_for_loop_kind_decided_in_legalize():
         tampered = ir_dyn.replace('ct_src.loop_kind = "while"', 'ct_src.loop_kind = "range_const"')
         with pytest.raises(Exception, match="scf.for lowering decision"):
             target.compile(tampered.encode(), exit="cutile", after="cutile@callable")
+
+
+@pytest.mark.parametrize("exit_name", ["triton", "cutile"])
+def test_non_divisible_radix_and_exact_half_bias_awq(exit_name):
+    """Regression: non-divisible tail masks in radix_pass/depthwise and FP16 0x6400 AWQ decode."""
+    library = _require_library()
+    torch = pytest.importorskip("torch")
+    if not torch.cuda.is_available():
+        pytest.skip("requires CUDA device")
+    if exit_name == "cutile":
+        pytest.importorskip("cuda.tile")
+    import numpy as np
+    import intentdsl as I
+    from intentdsl.group7_cpu import radix_pass_rows
+    from intentdsl.group7_dsa import awq_int4_gemm, depthwise_conv2d
+
+    device = torch.device("cuda", torch.cuda.current_device())
+    gen = torch.Generator(device=device).manual_seed(17)
+
+    # 1. Non-divisible radix_pass_rows (B=10, N=100: neither divides P=256/512/64/32)
+    keys = torch.randint(0, 100000, (10, 100), generator=gen, device=device, dtype=torch.int32)
+    vals = torch.arange(100, device=device, dtype=torch.int32).unsqueeze(0).expand(10, 100).contiguous()
+    hist = torch.zeros((10, 256), device=device, dtype=torch.int32)
+    cur = torch.zeros((10, 256), device=device, dtype=torch.int32)
+    fn_rad = I.jit(radix_pass_rows, backend=exit_name, library=library)
+    call_rad = fn_rad.prepare(keys, vals, hist, cur, 256)
+    src_rad = json.loads(call_rad.artifact.emitted.decode())["source"]
+    assert "mask=" in src_rad
+    if exit_name == "triton":
+        assert "tl.histogram(" in src_rad and "tl.gather(" in src_rad
+    else:
+        assert "ct.atomic_xchg(" in src_rad and "ct.atomic_add(" in src_rad
+    call_rad.launch()
+    torch.cuda.synchronize(device)
+    _, _, offsets, out_keys, out_vals = call_rad.result()
+    k_np = keys.cpu().numpy()
+    v_np = vals.cpu().numpy()
+    digits = (k_np // 256) % 256
+    order = np.argsort(digits, axis=-1, kind="stable")
+    assert torch.equal(out_keys.cpu(), torch.from_numpy(np.take_along_axis(k_np, order, axis=-1)))
+    assert torch.equal(out_vals.cpu(), torch.from_numpy(np.take_along_axis(v_np, order, axis=-1)))
+    for r in range(10):
+        exp_off = np.zeros(257, dtype=np.int32)
+        np.cumsum(np.bincount(digits[r], minlength=256), out=exp_off[1:])
+        assert torch.equal(offsets[r].cpu(), torch.from_numpy(exp_off))
+
+    # 2. Non-divisible depthwise_conv2d (1*3*7*7=147 owners, not divisible by tile)
+    x_dw = torch.randn((1, 3, 7, 7), generator=gen, device=device, dtype=torch.float32)
+    w_dw = torch.randn((3, 3, 3), generator=gen, device=device, dtype=torch.float32)
+    b_dw = torch.randn((3,), generator=gen, device=device, dtype=torch.float32)
+    fn_dw = I.jit(depthwise_conv2d, backend=exit_name, library=library)
+    call_dw = fn_dw.prepare(x_dw, w_dw, b_dw)
+    assert "mask=" in json.loads(call_dw.artifact.emitted.decode())["source"]
+    call_dw.launch()
+    torch.cuda.synchronize(device)
+    ref_dw = torch.nn.functional.conv2d(x_dw, w_dw.unsqueeze(1), b_dw, padding=1, groups=3)
+    torch.testing.assert_close(call_dw.result(), ref_dw, rtol=1e-4, atol=1e-4)
+
+    # 3. Exact FP16 magic-bias (0x6400) decode across all 4-bit codes 0..15
+    M, N, K, G = 128, 128, 128, 1
+    x_awq = (torch.randn((M, K), generator=gen, device=device) * 0.25).to(torch.float16)
+    shifts = [0, 16, 4, 20, 8, 24, 12, 28]
+    w_codes = torch.arange(K * N, device=device, dtype=torch.int32).reshape(K, N) % 16
+    z_codes = (torch.arange(N, device=device, dtype=torch.int32).reshape(G, N) * 3) % 16
+    qw = torch.zeros((K, N // 8), device=device, dtype=torch.int32)
+    qz = torch.zeros((G, N // 8), device=device, dtype=torch.int32)
+    for j, sh in enumerate(shifts):
+        qw |= (w_codes[:, j::8] & 0xF) << sh
+        qz |= (z_codes[:, j::8] & 0xF) << sh
+    sc = (torch.rand((G, N), generator=gen, device=device) * 0.5 + 0.1).to(torch.float16)
+    fn_awq = I.jit(awq_int4_gemm, backend=exit_name, library=library)
+    call_awq = fn_awq.prepare(x_awq, qw, sc, qz)
+    src_awq = json.loads(call_awq.artifact.emitted.decode())["source"]
+    assert "25600" in src_awq
+    call_awq.launch()
+    torch.cuda.synchronize(device)
+    w_ref = ((w_codes - z_codes).to(torch.float16) * sc).to(torch.float32)
+    expected_awq = (x_awq.to(torch.float32) @ w_ref).to(torch.float16)
+    torch.testing.assert_close(call_awq.result(), expected_awq, rtol=1e-2, atol=2e-2)
