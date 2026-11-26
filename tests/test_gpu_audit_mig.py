@@ -190,8 +190,8 @@ def test_cutile_nsz_preserves_subnormals_under_ieee_denormal_mode():
         assert (out_ftz == 0).all()
 
 
-def test_author_flush_to_zero_propagates_denormal_mode():
-    """Explicit op-level flush_to_zero=True must set function denormal-fp-math='preserve-sign'."""
+def test_author_flush_to_zero_is_local_to_the_operation():
+    """A local FTZ grant travels with the operation through cuTile lowering."""
     library = _require_library()
     torch = pytest.importorskip("torch")
     pytest.importorskip("cuda.tile")
@@ -236,7 +236,10 @@ def test_author_flush_to_zero_propagates_denormal_mode():
     ):
         fn_ftz = I.jit(k_ftz, backend="cutile", library=library)
         root_ftz = fn_ftz.compiler.root_ir(k_ftz.source)
-        assert '"preserve-sign"' in root_ftz.decode()
+        lines = root_ftz.decode().splitlines()
+        assert not any('"preserve-sign"' in line for line in lines if 'func.func @' in line)
+        assert any('"preserve-sign"' in line for line in lines
+                   if any(op in line for op in ('"kir.div"', 'math.exp2', '"kir.exp2"')))
         with fn_ftz.compilation_target(*ins, outputs=(out,)) as target:
             emitted_ftz, _ = target.compile_runtime(root_ftz, exit="cutile")
         assert "flush_to_zero=True" in json.loads(emitted_ftz)["source"]
