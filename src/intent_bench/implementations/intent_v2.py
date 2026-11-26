@@ -7,7 +7,7 @@ def prepare(definition, args, env, backend="triton"):
     import intentdsl
 
     target = env.options.get("compilerinfra", {})
-    math_kwargs = {k: target[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in target}
+    math_kwargs = {k: target[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math", "numerics") if k in target}
     kernel = intentdsl.jit(
         definition,
         backend=backend,

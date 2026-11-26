@@ -159,7 +159,7 @@ def prepare(name, impl, case, inputs, env):
                     "strategies": ["levels/storage/dsa::" + mode],
                     "realizer": "levels/storage/dsa::stage-transfers",
                 }
-            math_kwargs = {k: spec[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in spec}
+            math_kwargs = {k: spec[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math", "numerics") if k in spec}
             kernel = intentdsl.jit(
                 fn, backend="bangc", library=spec.get("library"), configuration=cfg, **math_kwargs
             )

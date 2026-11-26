@@ -95,7 +95,7 @@ def bind(name, backend, args, env, device):
     import intentdsl
     from intentdsl import examples
     options = env.options.get("compilerinfra", {})
-    math_kwargs = {k: options[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in options}
+    math_kwargs = {k: options[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math", "numerics") if k in options}
     kernel = intentdsl.jit(getattr(examples, name), backend=backend,
                            library=options.get("library"), configuration=options.get("configuration"),
                            **math_kwargs)

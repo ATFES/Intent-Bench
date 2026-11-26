@@ -98,7 +98,7 @@ def _prepare_v2(name, backend, args, env, device):
     from intentdsl import examples
 
     target = env.options.get("compilerinfra", {})
-    math_kwargs = {k: target[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math") if k in target}
+    math_kwargs = {k: target[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math", "numerics") if k in target}
     kernel = intentdsl.jit(
         getattr(examples, name),
         backend=backend,
