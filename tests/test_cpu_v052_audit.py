@@ -707,7 +707,7 @@ def test_weft_ordered_vectorizes_contiguous_inner_loops():
 
 
 def test_weft_ordered_tiled_contraction_extensions():
-    """Weft Ordered 2D outer_contract handles scf.if causal, post-sub scale, affine bias+FTZ clamp, and stack-budgeted subDV strips."""
+    """Weft Ordered 2D outer_contract handles scf.if causal, post-sub scale, affine bias and output FTZ, and stack-budgeted subDV strips."""
     library, Compiler = _require_compiler()
     from intentdsl import group7
 
@@ -783,7 +783,9 @@ def test_weft_ordered_tiled_contraction_extensions():
         alibi_ir, batch, panel = compile_tiles(base, group7.alibi_attention, alibi_args)
         assert panel["score_slots"] == alibi_args[1]["shape"][2]
         check_retained_scores(alibi_ir, tokens=panel["score_slots"], batch=batch)
-        assert 'lit = "-126.0"' in alibi_ir  # FTZ exp2 subnormal guard
+        # ALiBi's local exp2 enables flushing subnormal *outputs*.
+        assert 'lit = "-126.0"' in alibi_ir
+        assert 'lit = "-87.33654022216796875"' not in unscaled_ir
         assert 'kind = "exp2"' in alibi_ir
 
         swa_ir, batch, panel = compile_tiles(base, group7.sliding_window_attention, swa_args)
@@ -793,6 +795,41 @@ def test_weft_ordered_tiled_contraction_extensions():
         assert f"!weft_kernel.value<f32,[{batch},{panel['value_width']}],[2,7]>" in swa_ir
         assert panel["token_tile"] <= panel["score_slots"] < swa_args[1]["shape"][2]
         assert f"elements = {batch * panel['score_slots']} : i64" in swa_ir
+
+
+def test_weft_exp_ftz_preserves_small_normal_weights():
+    library, _ = _require_compiler()
+    pytest.importorskip("weft_core")
+    torch = pytest.importorskip("torch")
+    import intentdsl as I
+    from intentdsl import examples
+
+    q = torch.zeros((1, 4, 512, 128), dtype=torch.bfloat16)
+    q[..., 0] = 1
+    k = torch.zeros((1, 1, 512, 128), dtype=q.dtype)
+    k[:, :, 1:, 0] = -1
+    v = torch.zeros_like(k)
+    v[:, :, 1:, :] = 2.0**120
+    # exp(-87.332) is normal in binary32. The large value makes a wrongly
+    # flushed weight visible in the final BF16 result.
+    scale = 87.332
+    kernel = I.jit(examples.attention_unscaled_max, library=library, backend="weft",
+                   denormal_fp_math="preserve-sign", numerics="relaxed_normalization")
+    from types import SimpleNamespace
+    source = examples.attention_unscaled_max.source.replace(
+        b"@I.kernel(", b'@I.kernel(denormal_fp_math="preserve-sign", ', 1)
+    author = I.jit(SimpleNamespace(source=source), library=library, backend="weft")
+
+    def panel_modes(program):
+        with program.compilation_target(q, k, v, scale) as cc:
+            task = cc.compile(cc.root_ir(program.source), exit="weft", through="cpu@tasked", text=True)
+        return tuple(mark in task for mark in (b"cpu.panel_engine", b"cpu.pv_engine", b"cpu.worker_output_ftz"))
+
+    assert panel_modes(author) == panel_modes(kernel)
+    actual = author.run(q, k, v, scale)
+    weight = torch.exp(torch.tensor(-scale)).bfloat16().float()
+    expected = (torch.arange(512).float() * weight * 2.0**120).bfloat16()
+    torch.testing.assert_close(actual[0, 0, :, 0], expected, atol=0, rtol=0)
 
 
 
