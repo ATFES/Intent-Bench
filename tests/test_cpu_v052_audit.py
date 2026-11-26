@@ -537,6 +537,33 @@ def test_weft_attention_uses_runtime_dv_loop():
     # Single runtime dv0 loop produces 1 PV outer_contract per pass rather than 4 unrolled copies.
     assert ir.count("weft_host.task_outer_contract") <= 4
 
+    # Alternating generated kernels with different AMX tile configurations
+    # must clear each worker's cached configuration before returning.
+    family = "levels/execution/cpu::ordered-owners"
+    brgemm = dict(opts, arch="x86_64", weft_version="0.2.0", amx_bf16=True,
+                  private_stack_bytes=65536, l2_cache_bytes=2097152,
+                  weft_brgemm_available=True, weft_brgemm_bf16=True,
+                  weft_brgemm_runtime="SEQ", denormal_fp_math="preserve-sign")
+    brgemm["arguments"] = [dict(arg, alias_group=i) if arg else None
+                           for i, arg in enumerate(opts["arguments"])]
+    with Compiler(library) as base:
+        root = base.root_ir(examples.attention.source)
+        decision = base.describe()["configuration"]["nodes"]["cpu"]["decisions"][family]
+        forced = dict(decision, candidate="shared-256x64-scores-brgemm-64-pv")
+        with base.derive({"exits": {"weft": {"options": brgemm}},
+                          "nodes": {"cpu": {"decisions": {family: forced}}}}) as cc:
+            managed = cc.compile(root, exit="weft", through="weft@realized", text=True).decode()
+        assert 'engine = "onednn-brgemm-bf16"' in managed
+        team = managed.index('"weft_host.host_omp_parallel"')
+        assert "release_hw_ctx = true" in managed[team:].splitlines()[0]
+        assert managed.index('"weft_host.host_collect_task_status"') > team
+
+        rvv = dict(opts, arch="riscv64", core="sg2044", calibration="sg2044", vector_bits=128)
+        with base.derive({"exits": {"weft": {"options": rvv}}}) as cc:
+            vector = json.loads(cc.compile(root, exit="weft"))
+        assert "weft_kernel_release_hw_context" not in vector["host"]
+        assert "weft_kernel_take_status" not in vector["host"]
+
 
 def test_gemm_nt_tls_panel_streaming_and_weft_assume_bounds():
     """gemm_nt 2048x2048x2048 f16 selects 12x64 TLS panel streaming and emits positive+upper tile assumes on Weft."""
