@@ -2,7 +2,7 @@
 
 本组包含 Mojo CPU 与 Weft/RVV/IME。CPU 分支的 lowering、输入复用、布局、私有存储和输出转发实现已合入 main。
 
-- [registry.py](registry.py)：Mojo 199 项、Weft 6 项。
+- [registry.py](../../../src/intent_bench/corpus/cpu/registry.py)：Mojo 199 项、Weft 6 项。
 - `providers/{mojo,weft}/`：运行适配、输入、参考与部署 profile。
 - `baselines/{mojo,pytorch,weft}/`：原 source/runtime，未改算法、输入或容差。
 - [mojo-x86.csv](results/mojo-x86.csv)：原 199 行观察表，187 pass、11 run_only、1 numerical_failed。
@@ -48,4 +48,4 @@ python -m experiments.cpu weft \
   --output experiments/cpu/results/weft-rvv.csv
 ```
 
-`i8_gemv_bias` 使用 [ime.json](providers/weft/ime.json) 的 IME/CPU3/VLEN256/`spacemit-ime1` 条件；普通 RVV 项使用 [rvv.json](providers/weft/rvv.json)。`INTENT_WEFT_PROFILE` 可显式选择现有部署配置，不能把另一台机器的工具链路径直接套用。远端需要 SSH、profile 中的 clang 与运行库；本机生成 artifact，远端编译和执行。
+`i8_gemv_bias` 使用 ime.json（历史附件 ime.json） 的 IME/CPU3/VLEN256/`spacemit-ime1` 条件；普通 RVV 项使用 rvv.json（历史附件 rvv.json）。`INTENT_WEFT_PROFILE` 可显式选择现有部署配置，不能把另一台机器的工具链路径直接套用。远端需要 SSH、profile 中的 clang 与运行库；本机生成 artifact，远端编译和执行。

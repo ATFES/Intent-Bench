@@ -1,5 +1,7 @@
 # IntentDSL 编译基础复审
 
+> 历史记录。源码位置按当时的仓库或上游 checkout 表示，运行产物和环境名指归档附件。
+
 ## 1. 结论与适用范围
 
 当前 Intent 已有能承载复杂算法的可编程 DSL 骨架，而不只是一些独立数学 op 或按算子名称套模板的发射器。现有 `examples/kernels` 中的 FA、Mamba、Welford、MQA 和三角求解，分别保留了分段汇总、矩阵化计算、普通状态循环、自定义归约与顺序读写。编译器在这些作者程序之上形成 program mapping、fragments、blocking、访问和 accumulator，再交给 provider。当前工作的出发点应是改善和推进这套已有能力，不是先假定语言只能表达简单计算。
@@ -12,7 +14,7 @@
 
 调查基线为已提交的 `a11b80a`，工作区为 `comet/compiler-foundations-reassessment`。旧 cuTile change 继续暂停；原工作区未提交的 `StatefulPointwise` 和 metadata `ConstInt → int` 试验未纳入本轮编译器。没有修改生产实现、`doc/` 或 baseline CSV。
 
-本文位置约定：`C:` 表示本仓库；`R_T:` 表示 `${HOME}/phdworks/ref/triton`；`R_L:` 表示 `${HOME}/phdworks/ref/tilelang`；`R_C:` 表示本机 `${HOME}/.venvs/intentdsl-cutile/lib/python3.10/site-packages/cuda/tile`。`source/` 是 kernel corpus，与这些真实 compiler 实现分开使用。此前因仅在项目内寻找 `ref/` 而判断参考源码不存在，是定位错误。
+本文位置约定：`C:` 表示本仓库；`R_T:` 表示 `upstream/triton`；`R_L:` 表示 `upstream/tilelang`；`R_C:` 表示本机 `historical-environments/intentdsl-cutile/lib/python3.10/site-packages/cuda/tile`。`source/` 是 kernel corpus，与这些真实 compiler 实现分开使用。此前因仅在项目内寻找 `ref/` 而判断参考源码不存在，是定位错误。
 
 动态复现使用独立构建的本基线编译器、RTX 5090D、Torch `2.13.0+cu130`、Triton `3.7.1`、cuda-tile `1.5.0`。这是环境记录，不是引入版本管理。真实 ref checkout 用于设计和实现对照，不假定它与安装包逐行相同；下文明确区分实测结论和静态风险。
 
@@ -429,7 +431,7 @@ config 外置、transformation-group 后置条件、occupancy policy/legality �
 
 ```bash
 PYTHONPATH=$PWD/python:$PWD/examples:$PWD \
-  ${HOME}/.venvs/intentdsl-cutile/bin/python \
+  historical-environments/intentdsl-cutile/bin/python \
   /tmp/intentdsl-foundations-repro.h6uHVZ/numerics.py triton contract \
   --compiler /tmp/intentdsl-foundations-build.GePTCn/tools/intent-compile/intent-compile
 ```
@@ -540,7 +542,7 @@ def paired_batch(a: I.In[I.bf16, (2, 32, 64)], b: I.In[I.bf16, (2, 64, 32)],
 ```bash
 for form in dot gemv transpose multi batch; do
   PYTHONPATH=$PWD/python:$PWD/examples:$PWD \
-    ${HOME}/.venvs/intentdsl-cutile/bin/python \
+    historical-environments/intentdsl-cutile/bin/python \
     /tmp/intentdsl-foundations-repro.h6uHVZ/contract_forms.py "$form" \
     --compiler /tmp/intentdsl-foundations-build.GePTCn/tools/intent-compile/intent-compile \
     > /tmp/intentdsl-foundations-repro.h6uHVZ/contract-$form.log 2>&1

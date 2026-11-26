@@ -8,7 +8,7 @@
 - [h100-selected.json](results/h100-selected.json)：172 条测量、程序来源、容差、计时方式、配置 winner 和统计口径。
 - 这批是 2026-09-22 开发复测：Intent 98/100 数值通过；有效 GPU 算子 78/96 不慢于 ref；同精度的 agent Triton 配对中 39/69 不慢于对方。
 - 耗时比几何均值为 Intent/ref 0.6612（96 题）、Intent/agent Triton 0.9549（69 题）；不是全新一轮生成成绩，也不意味着逐题性能达标。
-- 题集保留 [suite.json](suite.json) 与 [suite-100.json](suite-100.json)。历史分析放在 `reports/`，不当作当前语言规格。
+- 题集保留 suite.json（历史附件 suite.json） 与 suite-100.json（历史附件 suite-100.json）。历史分析放在 `reports/`，不当作当前语言规格。
 
 原大批次产物仍由结果 JSON 的 `source_root` 和 `program` 定位；编译/JIT cache、隔离 Codex state 与 provider 凭据留在仓库外。
 

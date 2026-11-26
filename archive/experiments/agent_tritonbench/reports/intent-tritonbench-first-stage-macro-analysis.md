@@ -6,7 +6,7 @@
 
 分析日期：2026-09-12。代码改动统计截至 `995b166e`；完整定量分析使用已完成的第二批 `first-stage-validation` 及其开发复测。第三批仍在运行，仅引用明确标注的个案，不据此计算最终总体成绩。
 
-第二批记录的环境为 NVIDIA GeForce RTX 5090 D、PyTorch `2.10.0+cu130`、Triton `3.6.0`，模型为 `gpt-5.6-luna`、reasoning effort=`max`。下述数字只对既定 50 题的单个 profile 和该环境成立。[环境与输入合同](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/environment.json:6)
+第二批记录的环境为 NVIDIA GeForce RTX 5090 D、PyTorch `2.10.0+cu130`、Triton `3.6.0`，模型为 `gpt-5.6-luna`、reasoning effort=`max`。下述数字只对既定 50 题的单个 profile 和该环境成立。环境与输入合同（历史附件 environment.json:6）
 
 ## 1. 先把四个问题回答清楚
 
@@ -49,7 +49,7 @@ flowchart LR
 - 规则禁止独立测试/benchmark。shell 没有被完全禁用，现有 `agent.json` 也没有完整 shell 历史，因此能确认协议和 runner 的反馈边界，不能把它夸大成“逐条审计证明 agent 从未执行过额外命令”。
 - autotune 的多个配置和计时重复属于 evaluator 执行准备，不是多个 agent 答案。
 
-依据：[提交响应与执行入口](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/agent.py:97)、[提交后编译评测](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/__main__.py:54)、[作者规则](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/instructions.md:36)。
+依据：提交响应与执行入口（历史附件 agent.py:97）、提交后编译评测（历史附件 __main__.py:54）、作者规则（历史附件 instructions.md:36）。
 
 ### 2.2 三批实验不能混成一次，也不能挑每题最好结果
 
@@ -65,7 +65,7 @@ flowchart LR
 
 通常由 runner 直接载入外部 benchmark 函数，不由 Luna 生成。上游 `sub_gelu` 的非近似分支少了标准 GELU 中的 `1 +`；现有 suite 对它启用了 `sub_gelu_standard_gelu` 纠错，候选与 reference 都按标准 GELU 任务合同评估。这个 ref 的性能也是纠正版公式的时间，应明确披露，不能称为完全未改的上游 golden。
 
-依据：[reference 加载与纠错分支](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/tasks.py:78)、[纠错实现](${HOME}/phdworks/intentdsl/examples/repro/agent_study/reference_corrections.py:4)、[上游缺失项](${HOME}/phdworks/ref/tritonbench/data/TritonBench_T_v1/sub_gelu.py:20)。
+依据：reference 加载与纠错分支（历史附件 tasks.py:78）、纠错实现（历史附件 reference_corrections.py:4）、上游缺失项（历史附件 sub_gelu.py:20）。
 
 ref 是正确性与性能参照，不是性能最优证明。某些参考函数依赖高度优化的库 GEMM；另一些由多个 eager PyTorch 操作组成，候选融合后可以减少 kernel 和中间搬运。因此“快于 ref”与“快于最优实现”也不能混用。
 
@@ -92,7 +92,7 @@ ref 是正确性与性能参照，不是性能最优证明。某些参考函数�
 
 Graph 指标是捕获后的 GPU replay 时间：包含该算子的全部 GPU kernels 和中间 GPU 处理，排除 capture、Python 编排和捕获时的 allocation。Event 路径不是完整 CPU 墙钟计时，但 host 发射不及时造成的 GPU 空闲间隔可能进入 event 窗口。二者都不能直接冒充真实应用的冷启动或完整 host 端到端延迟。
 
-依据：[准备与计时阶段](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/benchmark.py:95)、[CUDA Graph/Event 窗口与 L2 flush](${HOME}/phdworks/intentdsl/experiments/_common/support.py:16)、[配对评测](${HOME}/phdworks/intentdsl/experiments/_common/measurement.py:277)。
+依据：准备与计时阶段（历史附件 benchmark.py:95）、CUDA Graph/Event 窗口与 L2 flush（历史附件 support.py:16）、配对评测（历史附件 measurement.py:277）。
 
 ### 3.2 配置来源
 
@@ -110,7 +110,7 @@ Graph 指标是捕获后的 GPU replay 时间：包含该算子的全部 GPU ker
 
 reference 侧显式关闭了 PyTorch matmul/cuDNN 的 TF32 开关以及 `cudnn.benchmark`；这不意味着底层库没有自己的实现选择，也不意味着 agent Triton 代码中的精度选项自动与 reference 相同。每题配对使用同一固定输入合同，dtype 由原 profile 决定；例如 matmul、asin 是 fp16，许多其它题为 fp32，并非全套统一 fp32。
 
-依据：[compile 不传覆盖文件](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/program.py:30)、[默认与 override 规则](${HOME}/phdworks/intentdsl/doc/compiler/physical-parameters.md:18)、[配置采样和调优计时](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/program.py:122)、[reference 后端设置](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/benchmark.py:65)。
+依据：compile 不传覆盖文件（历史附件 program.py:30）、默认与 override 规则（历史附件 physical-parameters.md:18）、配置采样和调优计时（历史附件 program.py:122）、reference 后端设置（历史附件 benchmark.py:65）。
 
 ## 4. 性能和 agent 成本目前实际说明什么
 
@@ -120,7 +120,7 @@ reference 侧显式关闭了 PyTorch matmul/cuDNN 的 TF32 开关以及 `cudnn.b
 
 这证明了具体系统缺陷被修复，以及这些原始程序现在能通过相应评测。它不能把首次成绩改写为 44/50，也不是“修复后在未见任务上的一次生成正确率”。
 
-**失败标签不能直接当作责任判定。** 例如第二批 Triton `max` 标为 `agent_program_error`，实际首先在 `candidate_load` 被 harness 的 Torch API 白名单拒绝，尚未执行 kernel。后来 `d6687246` 才允许 `torch.return_types.max/min` 返回容器。不过该候选还写了双参数构造 `torch.return_types.max(values, indices)`；第三批另一份使用相同构造形式的程序实际报过 `constructor requires a sequence`。因此既不能把第二批首次错误全归于 Triton 编程能力，也不能假定放开白名单就会通过；固定分母与原始记录应保留，最终复测需区分工具拦截和后续程序错误。[第二批首次诊断](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/max/triton/measurement.json:12)、[原始构造调用](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/max/triton/candidate.py:100)、[第三批构造错误](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-final-max-recovery/max/triton/measurement.json:12)
+**失败标签不能直接当作责任判定。** 例如第二批 Triton `max` 标为 `agent_program_error`，实际首先在 `candidate_load` 被 harness 的 Torch API 白名单拒绝，尚未执行 kernel。后来 `d6687246` 才允许 `torch.return_types.max/min` 返回容器。不过该候选还写了双参数构造 `torch.return_types.max(values, indices)`；第三批另一份使用相同构造形式的程序实际报过 `constructor requires a sequence`。因此既不能把第二批首次错误全归于 Triton 编程能力，也不能假定放开白名单就会通过；固定分母与原始记录应保留，最终复测需区分工具拦截和后续程序错误。第二批首次诊断（历史附件 measurement.json:12）、原始构造调用（历史附件 candidate.py:100）、第三批构造错误（历史附件 measurement.json:12）
 
 开发复测中双方共同通过的同一组 39 题，逐题计算耗时比后统计如下。小于 1 表示分子更快；ref 使用各组配对实测值。
 
@@ -132,7 +132,7 @@ reference 侧显式关闭了 PyTorch matmul/cuDNN 的 TF32 开关以及 `cudnn.b
 
 Intent 在 15/39 题更快，24/39 题不超过 Triton 耗时的 1.1 倍；另有 11/39 题超过 2 倍，其中 7 题超过 5 倍。中位数接近不能遮住这批严重慢项。
 
-数据：[第二批首次结果](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/results.csv)、[开发复测结果](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation-recheck/results.csv)。失败仍属于固定 50 题的正确性分母；性能表只使用双方均通过的对应项。
+数据：第二批首次结果（历史附件 results.csv）、开发复测结果（历史附件 results.csv）。失败仍属于固定 50 题的正确性分母；性能表只使用双方均通过的对应项。
 
 ### 4.2 按任务族看，比一个总均值更能定位问题
 
@@ -198,7 +198,7 @@ input token 数是多次请求累计的上下文输入，包含重复前缀和�
 
 shared 的“表示模型”与“pass 不够好”也不是同一个判断。多项修复是复用已有 typed carrier，正确保存或消费 shape、坐标、effect 和 def-use；另一些是在事实已经存在时选择了错误的分块或 replay。现有证据不足以宣布整个 shared IR 架构失败，更不支持靠增加一层或重命名目录解决问题。
 
-还存在**手册自身的责任**。本轮开发前 `ef99bb8b:doc/dsl/authoring.md` 的归约说明写着“没有 `keepdim`；需要保留一维时显式 reshape”，没有交代完整归约的 scalar 例外。第二批冻结材料已补“scalar 不能 reshape”，但直到后续 `7f1e73dc` 才明确写出“所有轴都被归约，结果是 scalar，而非零维 tensor”。所以早期相关失败存在资料歧义这一影响因素；不能只拿今天修正后的说明，倒推当时必然是 agent 没遵守清晰规则。具体候选是否受此影响还需结合当时读取的材料判断，不能反过来断言它们全由文档导致。[当前澄清位置](${HOME}/phdworks/intentdsl/doc/dsl/authoring.md:27)
+还存在**手册自身的责任**。本轮开发前 `ef99bb8b:doc/dsl/authoring.md` 的归约说明写着“没有 `keepdim`；需要保留一维时显式 reshape”，没有交代完整归约的 scalar 例外。第二批冻结材料已补“scalar 不能 reshape”，但直到后续 `7f1e73dc` 才明确写出“所有轴都被归约，结果是 scalar，而非零维 tensor”。所以早期相关失败存在资料歧义这一影响因素；不能只拿今天修正后的说明，倒推当时必然是 agent 没遵守清晰规则。具体候选是否受此影响还需结合当时读取的材料判断，不能反过来断言它们全由文档导致。当前澄清位置（历史附件 authoring.md:27）
 
 ### 5.1 如果 leaf 指完整手写 source corpus：它没有自动进入这条路径
 
@@ -206,23 +206,23 @@ Intent 的 `ProgramContext.compile` 调 `intent.generate`，frontend 生成 KIR�
 
 如果 leaf 指目标原语/数学实现，则 `tl.dot`、`libdevice.exp` 等确实参与最终执行。这些原语可以高效，但修复不了上游重复三次 GEMM、错误物理分块或不足的并行度。
 
-依据：[compile/load_source 边界](${HOME}/phdworks/intentdsl/experiments/agent_tritonbench/program.py:30)、[生成链路](${HOME}/phdworks/intentdsl/python/intent/compiler/pipeline.py:34)、[shared pass 顺序](${HOME}/phdworks/intentdsl/lib/Dialect/GPU/Transforms/Passes.cpp:164)。
+依据：compile/load_source 边界（历史附件 program.py:30）、生成链路（历史附件 pipeline.py:34）、shared pass 顺序（历史附件 Passes.cpp:164）。
 
 现行设计允许目标原语或 micro-kernel 承接已经闭合的语义与物理操作；它不要求通用 IR 重建所有机器细节。但包含 grid、循环、workspace 或多个 launches 的完整手写实现，不会因为叫 leaf 就自动成为合法替换。必须明确其粒度、数值、effects 和调用边界。
 
 ### 5.2 四个案例说明：不能全部怪 compiler，也不能全部怪 agent
 
-**静态大 K：明确的 shared blocking 缺口。** 第三批 Intent 作者已经写了 linear/relu 与 LayerNorm 两个 kernels，compiler 仍曾把完整静态 K=4096 当作一次巨型 dot 的片段，导致评测超时。修复后，原程序通过，完整算子 122.656 μs；agent Triton 为 106.144 μs，ref 两组为 67.056/65.680 μs。这里不应要求作者改为动态 shape 来迁就 compiler，也没有原始 kernel 时间可用于计算加速倍数。[分块修复](${HOME}/phdworks/intentdsl/lib/Dialect/GPU/Transforms/RealizeContractionBlocking.cpp:2516)、[开发实测](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-final-recheck/fused_layer_norm_relu_linear/intent/measurement.json)
+**静态大 K：明确的 shared blocking 缺口。** 第三批 Intent 作者已经写了 linear/relu 与 LayerNorm 两个 kernels，compiler 仍曾把完整静态 K=4096 当作一次巨型 dot 的片段，导致评测超时。修复后，原程序通过，完整算子 122.656 μs；agent Triton 为 106.144 μs，ref 两组为 67.056/65.680 μs。这里不应要求作者改为动态 shape 来迁就 compiler，也没有原始 kernel 时间可用于计算加速倍数。分块修复（历史附件 RealizeContractionBlocking.cpp:2516）、开发实测（历史附件 measurement.json）
 
-**旧单 kernel LayerNorm：compiler 缺陷与作者边界同时存在。** 同一个 matmul SSA 被 mean、variance 和最终输出消费，shared replay 曾重复生成三次 dot；保留昂贵 producer 是 compiler 应做的修复。但保留后旧程序仍约 1.653 ms，而该批直接 Triton 为 0.110 ms、ref 约 0.067 ms。旧 Intent 融合整个 GEMM 与行归约，直接 Triton 则分两阶段，剩余差距不能继续全按“leaf 没调好”解释。也不能把这个旧单 kernel 的判断套到后来已经分成两个 kernels 的候选上。[replay 策略](${HOME}/phdworks/intentdsl/lib/Dialect/GPU/Transforms/RealizePointwiseBlocking.cpp:1512)、[第一批复测数据](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-recheck/results.csv)
+**旧单 kernel LayerNorm：compiler 缺陷与作者边界同时存在。** 同一个 matmul SSA 被 mean、variance 和最终输出消费，shared replay 曾重复生成三次 dot；保留昂贵 producer 是 compiler 应做的修复。但保留后旧程序仍约 1.653 ms，而该批直接 Triton 为 0.110 ms、ref 约 0.067 ms。旧 Intent 融合整个 GEMM 与行归约，直接 Triton 则分两阶段，剩余差距不能继续全按“leaf 没调好”解释。也不能把这个旧单 kernel 的判断套到后来已经分成两个 kernels 的候选上。replay 策略（历史附件 RealizePointwiseBlocking.cpp:1512）、第一批复测数据（历史附件 results.csv）
 
-**全局 exp-mean：算法组织叠加当前物理映射。** 第三批固定输入为 1048576 个 f32 元素。Intent 一个 kernel、一个 program 内分块遍历并归约，124.592 μs；Triton 显式分配 partials、用两个 kernels 做 partial/combine，7.840 μs；两组 ref 为 14.288/14.352 μs。两者还有 `libdevice.exp` 与 `tl.exp` 数学路径差异。一个更快的局部 exp 原语不能代替缺少的全 GPU 并行组织；有限配置调优也不能把一份结构自动改成另一份 host 程序。[Intent 原程序](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-final-remaining/exp_mean/intent/candidate.py:7)、[生成的单 program](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-final-remaining/exp_mean/intent/exp_mean_kernel.py:42)、[直接 Triton 两阶段](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-final-remaining/exp_mean/triton/candidate.py:6)
+**全局 exp-mean：算法组织叠加当前物理映射。** 第三批固定输入为 1048576 个 f32 元素。Intent 一个 kernel、一个 program 内分块遍历并归约，124.592 μs；Triton 显式分配 partials、用两个 kernels 做 partial/combine，7.840 μs；两组 ref 为 14.288/14.352 μs。两者还有 `libdevice.exp` 与 `tl.exp` 数学路径差异。一个更快的局部 exp 原语不能代替缺少的全 GPU 并行组织；有限配置调优也不能把一份结构自动改成另一份 host 程序。Intent 原程序（历史附件 candidate.py:7）、生成的单 program（历史附件 exp_mean_kernel.py:42）、直接 Triton 两阶段（历史附件 candidate.py:6）
 
 这不是说任何单 kernel 归约都必然只能使用一个 CTA；这里确认的是当前候选的实际映射。跨 CTA 协作等机制是否可用，要另有语义、目标支持与完整执行证据，不能凭一个 `num_ctas` 参数或某段参考源码就当作本问题已经解决。
 
-**symmetric-mm + abs-sum：严重差距不能被一项平均数隐藏。** 第二批 Intent 为 8048.400 μs，直接 Triton 为 75.552 μs。候选在是否利用对称性、计算 workset、partial 与最终归约上不同；Intent 当前完整乘积加全局归约还导致很低的物理并行度。必须分别计算实际工作量和检查生成结构，不能把约 106.5 倍全叫 compiler 质量差，也不能以“作者算法不同”就宣布当前系统表现合格。[第二批 Intent](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/symmetric_mm_and_abs_sum/intent/candidate.py:19)、[第二批 Triton](${HOME}/.local/share/intentdsl/agent-evaluation/first-stage-validation/symmetric_mm_and_abs_sum/triton/candidate.py:50)
+**symmetric-mm + abs-sum：严重差距不能被一项平均数隐藏。** 第二批 Intent 为 8048.400 μs，直接 Triton 为 75.552 μs。候选在是否利用对称性、计算 workset、partial 与最终归约上不同；Intent 当前完整乘积加全局归约还导致很低的物理并行度。必须分别计算实际工作量和检查生成结构，不能把约 106.5 倍全叫 compiler 质量差，也不能以“作者算法不同”就宣布当前系统表现合格。第二批 Intent（历史附件 candidate.py:19）、第二批 Triton（历史附件 candidate.py:50）
 
-对照成熟实现时，Triton matmul 教程把 tile、K 循环、mask 和 accumulator 写进程序；Intent 需要由 shared passes 形成这些事实，再交给相同的下层 compiler。现行 Intent 规格同时要求一个作者 kernel 对应一次 launch，禁止暗中生成第二个 kernel。[Triton matmul](${HOME}/phdworks/ref/triton/python/tutorials/03-matrix-multiplication.py:233)、[Intent kernel/host 边界](${HOME}/phdworks/intentdsl/doc/programming-model/kernel-and-host.md:15)、[物理结构与参数的分工](${HOME}/phdworks/intentdsl/doc/compiler/physical-parameters.md:54)
+对照成熟实现时，Triton matmul 教程把 tile、K 循环、mask 和 accumulator 写进程序；Intent 需要由 shared passes 形成这些事实，再交给相同的下层 compiler。现行 Intent 规格同时要求一个作者 kernel 对应一次 launch，禁止暗中生成第二个 kernel。Triton matmul（历史附件 03-matrix-multiplication.py:233）、Intent kernel/host 边界（历史附件 kernel-and-host.md:15）、物理结构与参数的分工（历史附件 physical-parameters.md:54）
 
 ## 6. 从设计出发，为什么简单 DSL 没有自动赢
 

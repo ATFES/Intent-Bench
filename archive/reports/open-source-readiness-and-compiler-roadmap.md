@@ -18,13 +18,13 @@ v1 不依赖 agent 服务。实验性的“激进生成器 + agent 落地”保�
 
 | 已完成部分 | 当前事实及边界 |
 |---|---|
-| 标准 pass、阶段合同和独立 IR 工具 | [GPU Passes.td](../include/Intent/Dialect/GPU/Transforms/Passes.td)、[Registration](../lib/Compiler/Registration.cpp) 已连接标准注册、pipeline、intent-opt、optimize_ir 和 generate_from_ir。必要 lowering 与可选优化分责，不再建设第二套编排框架。 |
+| 标准 pass、阶段合同和独立 IR 工具 | GPU Passes.td（历史附件 Passes.td）、Registration（历史附件 Registration.cpp） 已连接标准注册、pipeline、intent-opt、optimize_ir 和 generate_from_ir。必要 lowering 与可选优化分责，不再建设第二套编排框架。 |
 | GPU/CPU/DSA 的职责组织 | GPU cleanup 与 hoist 已分开；CPU 已有 task/block、供数、存储与实现选择；BANG C 已有 LocalComposition、StorageReuse、SupplySynchronization、StorageBinding。目录和组件拆分已经有真实消费者，不再把整理文件本身列为里程碑。 |
-| 完成值与版本知识 | GPU [FragmentSnapshot](../include/Intent/Dialect/GPU/Transforms/Storage/FragmentSnapshot.h)、CPU [ProducerVersions](../include/Intent/Dialect/CPU/Transforms/Structure/ProducerVersions.h)、BANG C [CompletedSupply](../lib/Target/BangC/Transforms/CompletedSupply.cpp) 已形成各执行模型的复用路径。 |
-| 产品入口与完整配置 | [examples/use.py](../examples/use.py)、[examples/programs](../examples/programs)、[ConfigurationProfiles](../lib/Dialect/GPU/Transforms/Configuration/ConfigurationProfiles.cpp) 已有完整 program、host 编排、prepared 调用和完整经验行。Triton 原生 Config/autotune 及其它后端的候选选择已经存在。 |
-| GPU 遍历与访问合法性 | [IterationDependencies](../include/Intent/Dialect/GPU/Analysis/IterationDependencies.h)、ownership 容量、TMA 对齐和快照消费已经贯通；证明依据当前 IR，而非算子名。 |
+| 完成值与版本知识 | GPU FragmentSnapshot（历史附件 FragmentSnapshot.h）、CPU ProducerVersions（历史附件 ProducerVersions.h）、BANG C CompletedSupply（历史附件 CompletedSupply.cpp） 已形成各执行模型的复用路径。 |
+| 产品入口与完整配置 | examples/use.py（历史附件 use.py）、examples/programs（历史附件 programs）、ConfigurationProfiles（历史附件 ConfigurationProfiles.cpp） 已有完整 program、host 编排、prepared 调用和完整经验行。Triton 原生 Config/autotune 及其它后端的候选选择已经存在。 |
+| GPU 遍历与访问合法性 | IterationDependencies（历史附件 IterationDependencies.h）、ownership 容量、TMA 对齐和快照消费已经贯通；证明依据当前 IR，而非算子名。 |
 | 普通 prefix 消费的流式组织 | 原 Nonzero 的逐元素串行消费问题已解决。独立效果、typed count-prefix 活跃写入、无溢出、别名和读取 epoch 共同证明；不把这种证明推广成任意浮点 scan 可重排。 |
-| 归约 summary 与输出消费者共同组织 | [ReductionConsumers](../lib/Dialect/GPU/Analysis/ReductionConsumers.cpp)、[RealizeReductionConsumers](../lib/Dialect/GPU/Transforms/Reduction/RealizeReductionConsumers.cpp) 已连接共享 SSA 工作集分析、完整/有界遍历和紧凑 summary。旧 W2 的核心不再列为未实现；跨 region 和更多消费者组合仍需推进。 |
+| 归约 summary 与输出消费者共同组织 | ReductionConsumers（历史附件 ReductionConsumers.cpp）、RealizeReductionConsumers（历史附件 RealizeReductionConsumers.cpp） 已连接共享 SSA 工作集分析、完整/有界遍历和紧凑 summary。旧 W2 的核心不再列为未实现；跨 region 和更多消费者组合仍需推进。 |
 
 已有 canonical 产品记录中，Triton、H100 cuTile、Mojo、Weft 各有 30 个 executed program、35 个 artifacts；BANG C 有 30 个 generated program、35 个 artifacts。这是已有记录覆盖，不是本轮重新执行，也不是任意 shape、dtype 或硬件均已覆盖。BANG C 的 source 覆盖不能代替 CNCC、CNRT、设备数值和完整调用性能。
 
@@ -64,7 +64,7 @@ v1 不依赖 agent 服务。实验性的“激进生成器 + agent 落地”保�
 
 ### 3.3 当前测量的盲区必须先分清
 
-[use.py](../examples/use.py):71–106 的 GPU 完整 prepared 调用，以 CUDA events 包围 Python enqueue。它排除 InOut reset 和下载，包含作者 program 的 workspace 初始化；设备事件之间仍可能存在 host 提交造成的设备空档。旧实验的 [support.py](../experiments/_common/support.py):48–85 可选择 CUDA Graph，且每次 GPU sample 前显式执行 L2 flush，不能把两种结果直接算作 pass 倍率。
+use.py（历史附件 use.py）:71–106 的 GPU 完整 prepared 调用，以 CUDA events 包围 Python enqueue。它排除 InOut reset 和下载，包含作者 program 的 workspace 初始化；设备事件之间仍可能存在 host 提交造成的设备空档。旧实验的 support.py（历史附件 support.py）:48–85 可选择 CUDA Graph，且每次 GPU sample 前显式执行 L2 flush，不能把两种结果直接算作 pass 倍率。
 
 当前许多小程序完整调用约 16–20 μs。ReLU 只有 64×1024 个 F16 元素，必要读写共 256 KiB；GEMM 是 M128、N192、K256，约 12.58 MFLOP。这类规模先区分调用底噪、设备利用率不足和 kernel 内部低效。不能按大型 GEMM 峰值要求小 GEMM，也不能看到微秒级就认为小程序已经优秀。
 
@@ -109,9 +109,9 @@ GroupNorm 的旧 reference 还有 CUDA Graph 口径差异；MoE alignment 的旧
 
 当前明确缺口：
 
-- [ConfigurationProfiles.cpp](../lib/Dialect/GPU/Transforms/Configuration/ConfigurationProfiles.cpp):32 的 familyFor 从整个 kernel 的参数选择最高优先级 family；分支新增的 R/P 参数可能把原完整遍历的配置归类改变。
-- [Resources.cpp](../lib/Dialect/GPU/Analysis/Resources.cpp):740 收集的归约义务没有对应控制域；[ConfigurationConstraints.cpp](../lib/Dialect/GPU/Transforms/Configuration/ConfigurationConstraints.cpp):37 将义务共同约束。[UniformBranches.cpp](../lib/Dialect/GPU/Transforms/Mapping/UniformBranches.cpp):109 因缺少相应关联，保留了限制。
-- 现有 requirement.activation 只允许声明的 provider boolean，[PhysicalParameters.cpp](../lib/Dialect/GPU/Analysis/PhysicalParameters.cpp):116–122；不能把任意 scf.if 条件塞入它。
+- ConfigurationProfiles.cpp（历史附件 ConfigurationProfiles.cpp）:32 的 familyFor 从整个 kernel 的参数选择最高优先级 family；分支新增的 R/P 参数可能把原完整遍历的配置归类改变。
+- Resources.cpp（历史附件 Resources.cpp）:740 收集的归约义务没有对应控制域；ConfigurationConstraints.cpp（历史附件 ConfigurationConstraints.cpp）:37 将义务共同约束。UniformBranches.cpp（历史附件 UniformBranches.cpp）:109 因缺少相应关联，保留了限制。
+- 现有 requirement.activation 只允许声明的 provider boolean，PhysicalParameters.cpp（历史附件 PhysicalParameters.cpp）:116–122；不能把任意 scf.if 条件塞入它。
 - 现有 PhysicalExpr Select 的 C++/Python checked evaluator 会先计算两臂；未执行臂的缺值或溢出可能使整体 Unknown。launch 条件提取也只支持有限关系。不能只给收集器套一个 Select 就宣称问题闭合。
 
 连贯修改范围：
@@ -211,13 +211,13 @@ CPU/MLU 不同设备上的工作可独立推进，无需等待全部 GPU 优化�
 
 | 问题 | 本地成熟实现 | Intent 当前事实与行动 |
 |---|---|---|
-| 条件程序与 specialization | [Triton code_generator](../../ref/triton/python/triton/compiler/code_generator.py):1026–1055 区分 constexpr 分支与生成 SCF 的 tensor 条件；[TileLang simplify](../../ref/tilelang/src/transform/simplify.cc):454–465 只在条件可证明时消去分支。 | M0 区分绑定阶段、可达路径和义务。uniform runtime 条件不自动成为 specialization；当前 family/资源收集仍缺完整关联。 |
-| 完整配置与剪枝 | [Triton autotuner](../../ref/triton/python/triton/runtime/autotuner.py):284–313 对既有 configs 剪枝，:328–380 保留 kwargs、warps、stages 的关联。 | 继续既有完整经验行；不生成分支候选乘积。剪枝依据实际合法性，不能让已证明在 native 特化中消去的臂误过滤。 |
-| nominal 与机器资源 | [Triton compiler](../../ref/triton/python/triton/compiler/compiler.py):469–484 消费 native binary/shared metadata；[fused softmax](../../ref/triton/python/tutorials/02-fused-softmax.py):142 起利用 native 资源判断驻留。 | shared working set 是结构决策模型，native allocation 由下层决定。减少 nominal carry 不保证寄存器或完整调用改善。 |
-| Collective 与内存成本 | [Triton fused softmax](../../ref/triton/python/tutorials/02-fused-softmax.py):42 说明减少中间读写；[layer norm](../../ref/triton/python/tutorials/05-layer-norm.py):198 起形成块内累积和后续归约。 | M2 扩共同消费者，不重建 native collective；比较公式差异但仍校准同类成本。 |
-| Contraction 组织 | [Triton matmul](../../ref/triton/python/tutorials/03-matrix-multiplication.py):223、252 的经验配置和分组遍历；[block-scaled matmul](../../ref/triton/python/tutorials/10-block-scaled-matmul.py):258 起消费 scale/descriptor/native 构造。 | M3 优化供数与相邻生命周期，消费原生能力；不靠新增候选数量代替物理程序质量。 |
-| CPU 准备与计算边界 | [MAX packing](../../ref/modular/max/kernels/src/linalg/packing.mojo):193、1119，及 [accumulate](../../ref/modular/max/kernels/src/linalg/accumulate.mojo):122。 | MAX 提供保留存储类型、消费 packed view 的参照；Intent 的 [ImplementationInputs](../lib/Dialect/CPU/Transforms/Implementation/ImplementationInputs.cpp):121、134 和 [InputCopies](../lib/Dialect/CPU/Transforms/Implementation/InputCopies.cpp):31–38 也支持按实现需求准备及转换。M4 比较两种位置的总成本，不一律禁止预转换，不照搬 GPU carry。 |
-| Pipeline 与存储寿命 | [TileLang pipeline planning](../../ref/tilelang/src/transform/pipeline_planning.cc):406、702；[storage rewrite](../../ref/tilelang/src/transform/storage_rewrite.cc):1947。 | DSA 已有对应机制，下一步检查真实完成、关键路径和存活，不重复造框架。 |
+| 条件程序与 specialization | Triton code_generator（历史附件 code_generator.py）:1026–1055 区分 constexpr 分支与生成 SCF 的 tensor 条件；TileLang simplify（历史附件 simplify.cc）:454–465 只在条件可证明时消去分支。 | M0 区分绑定阶段、可达路径和义务。uniform runtime 条件不自动成为 specialization；当前 family/资源收集仍缺完整关联。 |
+| 完整配置与剪枝 | Triton autotuner（历史附件 autotuner.py）:284–313 对既有 configs 剪枝，:328–380 保留 kwargs、warps、stages 的关联。 | 继续既有完整经验行；不生成分支候选乘积。剪枝依据实际合法性，不能让已证明在 native 特化中消去的臂误过滤。 |
+| nominal 与机器资源 | Triton compiler（历史附件 compiler.py）:469–484 消费 native binary/shared metadata；fused softmax（历史附件 02-fused-softmax.py）:142 起利用 native 资源判断驻留。 | shared working set 是结构决策模型，native allocation 由下层决定。减少 nominal carry 不保证寄存器或完整调用改善。 |
+| Collective 与内存成本 | Triton fused softmax（历史附件 02-fused-softmax.py）:42 说明减少中间读写；layer norm（历史附件 05-layer-norm.py）:198 起形成块内累积和后续归约。 | M2 扩共同消费者，不重建 native collective；比较公式差异但仍校准同类成本。 |
+| Contraction 组织 | Triton matmul（历史附件 03-matrix-multiplication.py）:223、252 的经验配置和分组遍历；block-scaled matmul（历史附件 10-block-scaled-matmul.py）:258 起消费 scale/descriptor/native 构造。 | M3 优化供数与相邻生命周期，消费原生能力；不靠新增候选数量代替物理程序质量。 |
+| CPU 准备与计算边界 | MAX packing（历史附件 packing.mojo）:193、1119，及 accumulate（历史附件 accumulate.mojo）:122。 | MAX 提供保留存储类型、消费 packed view 的参照；Intent 的 ImplementationInputs（历史附件 ImplementationInputs.cpp）:121、134 和 InputCopies（历史附件 InputCopies.cpp）:31–38 也支持按实现需求准备及转换。M4 比较两种位置的总成本，不一律禁止预转换，不照搬 GPU carry。 |
+| Pipeline 与存储寿命 | TileLang pipeline planning（历史附件 pipeline_planning.cc）:406、702；storage rewrite（历史附件 storage_rewrite.cc）:1947。 | DSA 已有对应机制，下一步检查真实完成、关键路径和存活，不重复造框架。 |
 
 公开说明用于交叉核对：[Triton fused softmax](https://triton-lang.org/main/getting-started/tutorials/02-fused-softmax.html)、[Triton matrix multiplication](https://triton-lang.org/main/getting-started/tutorials/03-matrix-multiplication.html)。关键职责以上述本地源码为依据；参考的 surface、precision 和调用职责不能凭框架名称视为相同。
 

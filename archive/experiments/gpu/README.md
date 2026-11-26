@@ -2,7 +2,7 @@
 
 本组包含 Triton、cuTile 的现有生产实验。
 
-- [registry.py](registry.py)：Triton 54 项、cuTile 37 项，保持原生产输入与顺序。
+- [registry.py](../../../src/intent_bench/corpus/gpu/registry.py)：Triton 54 项、cuTile 37 项，保持原生产输入与顺序。
 - `providers/`：Intent 与公开 source 的完整 callable 适配。
 - `baselines/{triton,cutile,cuda}/`：原 provider source/runtime corpus；各上游子树整体保留。
 - `results/*-{5090,h100}.csv`：原机器上的历史结果。新 pass 或单点实验也输出到本目录下的 `results/`。

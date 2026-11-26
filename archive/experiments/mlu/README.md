@@ -2,7 +2,7 @@
 
 本组使用 KIR → DSA → BANG C → CNCC/CNRT。DSA dialect、lowering、serializer 和 runtime 保留在编译器目录，实验适配与记录放在这里。
 
-- [registry.py](registry.py)：13 个原生产 case，含显式多 kernel 序列。
+- [registry.py](../../../src/intent_bench/corpus/mlu/registry.py)：13 个原生产 case，含显式多 kernel 序列。
 - `providers/bangc/`：输入准备、编译、远端运行和数值比较。
 - [bangc-mlu370.csv](results/bangc-mlu370.csv)：原完整 13 项结果，全部 pass。
 - baseline 数值参考继续复用 GPU/CPU 组的既有 source，不复制成另一份算法。当前没有同机手写 MLU baseline 时间，`source_p50_ms`、`ratio` 留空；generated 时间是 CNRT notifier 的设备时间，不含传输与 CNCC 编译。

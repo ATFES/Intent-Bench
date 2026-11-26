@@ -1,5 +1,7 @@
 # CPU 编译器推进回顾：区域程序、IME 接入与量化优化
 
+> 历史记录。源码位置按当时的仓库或上游 checkout 表示，运行产物和环境名指归档附件。
+
 > 本文保留写作时的调查与测量快照；当前运行入口和结果见本实验组的 [README](../README.md)。
 
 这份报告从最初的 CPU 可编程 lowering 讨论开始，追踪区域程序、结构优化、IME 正式接入、量化横向覆盖和物理性能优化。它回答每轮具体改变了什么、这些改动由哪层编译器承担、已经有哪些运行证据，以及哪些能力和性能仍未完成。
@@ -32,7 +34,7 @@
 
 确定的方向是：保留完整的 CPU task/block program，由共同层负责外层遍历、访问、复用、资源和任务；由目标 implementation 提供适用条件、输入要求、参数和局部微程序，再展开为真实 IR。CPU shaped value 不必等于 SIMD 寄存器，Weft 也不必先消费 Mojo 风格的向量展开。
 
-依据是 [最初讨论](${HOME}/phdworks/intentdsl/experiments/cpu/reports/cpu-programmable-lowering-reassessment.md:7) 与 [现行 CPU 规格](${HOME}/phdworks/intentdsl/doc/compiler/cpu-program-ir.md:34)。前者记录当时的诊断，后者定义当前职责。
+依据是 最初讨论（历史附件 cpu-programmable-lowering-reassessment.md:7） 与 现行 CPU 规格（历史附件 cpu-program-ir.md:34）。前者记录当时的诊断，后者定义当前职责。
 
 ### 前置第一轮：实现机制、量化准备和区域程序成为可执行主链
 
@@ -47,7 +49,7 @@
 - `RegionProgram` 保存 source、identity、state、capture、output 和 summarize/combine/apply/emit 的关联。`RegionPartition` 分析可共同分段的轴，`RealizeRegions` 把决定写入实际循环、切片和状态程序。
 - 共享的 uniform/区域证明、准备结果复用和私有状态连接。复用依赖相同 producer、binding、合法作用域、alias、dominance 与读写顺序，不是按算子名缓存输入。
 
-代码入口：[实现接口](${HOME}/phdworks/intentdsl/include/Intent/Dialect/CPU/Transforms/Implementation.h:9)、[区域程序](${HOME}/phdworks/intentdsl/include/Intent/Dialect/CPU/IR/RegionProgram.h:8)、[准备结果复用](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/ReusePreparedInputs.cpp:90)。
+代码入口：实现接口（历史附件 Implementation.h:9）、区域程序（历史附件 RegionProgram.h:8）、准备结果复用（历史附件 ReusePreparedInputs.cpp:90）。
 
 这轮解决的是“算法区域、状态与局部实现能否共同形成可运行程序”。它没有完成 IME 接入，也没有让任意控制流、dtype 和访问形式都获得相同优化。
 
@@ -62,7 +64,7 @@
 - **只读供应复用。** 在合法作用域内复用输入供应，避免把子作用域的 SSA 值带到外层使用。
 - **保留二维计算块。** Weft contraction 主体保留绑定驱动的有界 M/N panel，当前 panel 上限为 4；真实 K=1 尾部仍有局部标量形式。
 
-关键依据：[区域证明](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Analysis/RegionPredicates.cpp:267)、[实际区域改写](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/RealizeRegions.cpp:227)、[私有写入融合](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/FuseStructuredComputations.cpp:283)。
+关键依据：区域证明（历史附件 RegionPredicates.cpp:267）、实际区域改写（历史附件 RealizeRegions.cpp:227）、私有写入融合（历史附件 FuseStructuredComputations.cpp:283）。
 
 局限也明确：`0 × unknown V` 不能单独证明整个浮点 summary 为 identity，未知 effects、依赖关系或贡献不能凭局部零值删除。这一轮没有承诺裁剪所有 mask-false 区域。
 
@@ -80,7 +82,7 @@ Intent `390150e3` 与 Weft `e73aaaac3` 完成这一步。原先“外部 Weft �
 
 当前局部硬件合同是 SpaceMIT IME1、VLEN256、signed i8×i8→i32、K8/N4、active M1/M4。Intent 的整数 implementation 有限参数允许 micro-M=1/4、micro-N=4/16，并检查外层块整除；较大局部块由多个硬件 atom 组成。
 
-入口：[Weft target](${HOME}/phdworks/intentdsl/python/intent/targets/weft.py:24)、[整数 implementation](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Implementations.cpp:208)、[artifact 检查](${HOME}/phdworks/intentdsl/python/intent/runtime/weft/compilation.py:19)、[IME capability](${HOME}/phdworks/TianchenRV/lib/Target/IME/FragmentContracts.cpp:9)。
+入口：Weft target（历史附件 weft.py:24）、整数 implementation（历史附件 Implementations.cpp:208）、artifact 检查（历史附件 compilation.py:19）、IME capability（历史附件 FragmentContracts.cpp:9）。
 
 这一步接入的是计算块内的矩阵实现。CPU 程序仍拥有任务、外层遍历、准备、资源和调用接口。
 
@@ -94,7 +96,7 @@ Intent `954e009b` 与 Weft `6b8fe3e77` 完成了第三步中一个具体的横�
 2. **Weft implementation：** 显式把 u4 数值扩大为 signed i8，保持 0..15；建立四个输出的矩阵轴关系，生成 Q4/Q8 numeric windows、K32/K8 局部循环、整数统计与浮点组合。
 3. **外部 Weft：** 完整 register update 保持原 carrier，IME accumulator 可跨完整更新留在寄存器中；补齐 encoded field、转换结果与 fragment 消费者之间的布局传播。
 
-关键入口：[GroupQuantizedDots](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/GroupQuantizedDots.cpp:35)、[真实 pass 顺序](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/Passes.cpp:152)、[量化展开](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Quantization.cpp)、[寄存器累加保留](${HOME}/phdworks/TianchenRV/lib/Target/IME/FragmentMaterialization.cpp:289)。
+关键入口：GroupQuantizedDots（历史附件 GroupQuantizedDots.cpp:35）、真实 pass 顺序（历史附件 Passes.cpp:152）、量化展开（历史附件 Quantization.cpp）、寄存器累加保留（历史附件 FragmentMaterialization.cpp:289）。
 
 Q4_K/Q8_K storage、record 内 i32 统计、`R32(d*S)`、`R32(dmin*T)`、`R32(ds*(p-n))` 及递增 record 的浮点累加顺序均保留。没有把预先合并 scale 并舍入到另一格式的外部 benchmark 当成同语义实现。
 
@@ -110,7 +112,7 @@ Weft `36393ad33` 实现优化，Intent `1c608f5c` 保存对应的最终实测。
 - full-valid packing 直接从首段初始化，随后插入其余行，并固定拼接 VL，减少多余清零、首段插入和 VL 切换；non-full 保留原有零填充与 active-prefix 语义。
 - 用真实 `IMEFragmentWindowLoadOp`、访问 verifier 和明确寄存器临时资源表达该局部读取。融合要求同 block、one-use、无 snapshot/跨写，且 field、record、axis、layer、shift、边界和目标 LMUL 全部成立。
 
-入口：[目标 pass](${HOME}/phdworks/TianchenRV/lib/Target/IME/FragmentSupply.cpp:13)、[访问合同](${HOME}/phdworks/TianchenRV/lib/Dialect/RISCV/IR/FragmentOps.cpp:161)、[窗口拼写](${HOME}/phdworks/TianchenRV/lib/Target/Emission/IME.cpp:153)、[packing 序列](${HOME}/phdworks/TianchenRV/lib/Target/Emission/IME.cpp:61)。
+入口：目标 pass（历史附件 FragmentSupply.cpp:13）、访问合同（历史附件 FragmentOps.cpp:161）、窗口拼写（历史附件 IME.cpp:153）、packing 序列（历史附件 IME.cpp:61）。
 
 读取字节数和四路窄读取没有减少；没有增加外围 workspace、持久 repack 或改变作者算法。此前没有带来收益的 K32 staging 已删除；ABI 只保证的对齐也不足以支持直接改用宽整数读取。
 
@@ -142,14 +144,14 @@ flowchart TD
 | 是否真正可运行 | 已有 native artifact、硬件/ABI 校验、调用内准备与资源、有限 tuning 和实际 benchmark | native pass 只证明已运行 case 的既定数值检查通过 |
 | 是否已经自动选到最佳实现 | 有限候选配置能够生成、计时、选择 winner | implementation 身份仍按注册顺序选择首个 applicable，未完成跨 RVV/IME 的实测竞争 |
 
-最后一项有直接证据：[`ImplementationRegistry::select`](${HOME}/phdworks/intentdsl/lib/Dialect/CPU/Transforms/Implementation.cpp:10) 返回首个适用实现；[量化注册顺序](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Implementations.cpp:195) 在 matrix capability 存在时优先选矩阵实现。因此目前能出现“IME 合法且数值通过，但比同机 RVV source 更慢”。已有 tuning 主要优化已选实现的有限参数，不能说成全面自动实现搜索。
+最后一项有直接证据：`ImplementationRegistry::select`（历史附件 Implementation.cpp:10） 返回首个适用实现；量化注册顺序（历史附件 Implementations.cpp:195） 在 matrix capability 存在时优先选矩阵实现。因此目前能出现“IME 合法且数值通过，但比同机 RVV source 更慢”。已有 tuning 主要优化已选实现的有限参数，不能说成全面自动实现搜索。
 
 与成熟实现的职责对照也支持这种分层：
 
 | 本地参考 | Intent/Weft 对应机制 | 差异与含义 |
 |---|---|---|
-| TileLang [GemmMMA 局部 PrimFunc](${HOME}/phdworks/ref/tilelang/tilelang/cuda/op/gemm/gemm_mma.py:109) 组织局部存储、K-loop 和 MMA；[GemmNode::Lower](${HOME}/phdworks/ref/tilelang/src/op/gemm.cc:198) 将其 body 插回 TIR | Intent [implementation 接口](${HOME}/phdworks/intentdsl/include/Intent/Dialect/CPU/Transforms/Implementation.h:21) 与 [Weft implementation](${HOME}/phdworks/intentdsl/lib/Target/Weft/Transforms/Implementations.cpp:195) 展开真实 IR | 专业微程序可以是正式编译期 lowering；Intent 当前接口和需求协调仍较有限，CPU 不采用其 SIMT 根模型 |
-| Triton [ConvertLayout lowering](${HOME}/phdworks/ref/triton/lib/Conversion/TritonGPUToLLVM/ConvertLayoutOpToLLVM.cpp:49) 根据 src/dst 坐标布局决定 shared-memory、shuffle 或寄存器重排 | Weft [layout pass](${HOME}/phdworks/TianchenRV/lib/Target/CanonicalizeRISCVLayouts.cpp:805) 选择有序 `lane_repack`，由 [局部 emitter](${HOME}/phdworks/TianchenRV/lib/Target/Emission/Layout.cpp:691) 拼写 | 两者都由明确布局关系驱动物理转换；Weft 处理普通 CPU 指令流中的 lane/replica，不照搬 warp/shared-memory 组织 |
+| TileLang GemmMMA 局部 PrimFunc（历史附件 gemm_mma.py:109） 组织局部存储、K-loop 和 MMA；GemmNode::Lower（历史附件 gemm.cc:198） 将其 body 插回 TIR | Intent implementation 接口（历史附件 Implementation.h:21） 与 Weft implementation（历史附件 Implementations.cpp:195） 展开真实 IR | 专业微程序可以是正式编译期 lowering；Intent 当前接口和需求协调仍较有限，CPU 不采用其 SIMT 根模型 |
+| Triton ConvertLayout lowering（历史附件 ConvertLayoutOpToLLVM.cpp:49） 根据 src/dst 坐标布局决定 shared-memory、shuffle 或寄存器重排 | Weft layout pass（历史附件 CanonicalizeRISCVLayouts.cpp:805） 选择有序 `lane_repack`，由 局部 emitter（历史附件 Layout.cpp:691） 拼写 | 两者都由明确布局关系驱动物理转换；Weft 处理普通 CPU 指令流中的 lane/replica，不照搬 warp/shared-memory 组织 |
 
 ## 4. 性能证据怎样阅读
 
@@ -205,9 +207,9 @@ IME 几轮结果可直接从 Git 中对应提交的 `report/baselinev2/weft-rvv.
 
 两次合并都没有冲突，没有 push 或改写历史。早期 CPU 区域/结构优化已经在 `c2726133` 合入，未重复合并。
 
-合并后的 Intent 编译器已从当前 main 完整构建，构建目录为 `${HOME}/.cache/intentdsl/cpu-weft-main-build`，使用 LLVM/MLIR 20、外部 Weft main 的源文件及匹配的 `weft-ime-build`。Weft 编译器沿用已合入该 main 的相同实现。
+合并后的 Intent 编译器已从当前 main 完整构建，构建目录为 `historical-cache/intentdsl/cpu-weft-main-build`，使用 LLVM/MLIR 20、外部 Weft main 的源文件及匹配的 `weft-ime-build`。Weft 编译器沿用已合入该 main 的相同实现。
 
-主线生产核对复用现有 Weft registry 的全部六个 case，准备并行、计时串行；六项均通过原有数值检查。完整结果已写入 [Weft 性能表](${HOME}/phdworks/intentdsl/experiments/cpu/results/weft-rvv.csv)：
+主线生产核对复用现有 Weft registry 的全部六个 case，准备并行、计时串行；六项均通过原有数值检查。完整结果已写入 [Weft 性能表](../results/weft-rvv.csv)：
 
 | 算子 | Generated / ms | Source / ms | G/S | 数值检查 |
 |---|---:|---:|---:|---|

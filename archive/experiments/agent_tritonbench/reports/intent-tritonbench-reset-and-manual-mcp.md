@@ -1,8 +1,10 @@
 # Intent 单次生成与编译器问题
 
+> 历史记录。源码位置按当时的仓库或上游 checkout 表示，运行产物和环境名指归档附件。
+
 > 本文保留写作时的调查与测量快照；当前运行入口和结果见本实验组的 [README](../README.md)。
 
-本文件只保留当前工作边界和 compiler 问题定位，不保存旧候选、旧正确率、性能数字或迭代结论。设计规格以 [doc/index.md](../../../doc/index.md) 为准。
+本文件只保留当前工作边界和 compiler 问题定位，不保存旧候选、旧正确率、性能数字或迭代结论。设计规格以 doc/index.md（历史附件 index.md） 为准。
 
 ## 单次生成口径
 
@@ -33,17 +35,17 @@
 
 ## 当前入口与接续位置
 
-- 工作目录：`${HOME}/phdworks/intentdsl`，分支 `main`。旧实验产物已删除；没有新的整体正确率或性能成绩。编译器未完成项仍见上节。
+- 工作目录：`Intent-v1`，分支 `main`。旧实验产物已删除；没有新的整体正确率或性能成绩。编译器未完成项仍见上节。
 - 不建独立测试目录。一次生成入口是 `examples/repro/agent_study/__main__.py`，生产 benchmark 是同目录 `benchmark.py`；任务/profile 在 `suite.json`，作者提示在 `instructions.md`，编译接线在 `program.py`。
 - 只读手册 MCP：`python/intent/tools/manual.py`，内容来自 `doc/` 与公开 API。
-- 独立评测环境：`${HOME}/.local/share/intentdsl/agent-evaluation/`；认证仅留该环境，不抄入本报告。被评测 agent 继续禁用历史 memory，与开发 Codex 的记忆设置分离。
-- 上游 Bench：`${HOME}/phdworks/ref/tritonbench`；Python 环境：`${HOME}/.venvs/intentdsl-mlir20`。当前可用编译器为 `/tmp/intentdsl-agent-build.tFX1vN/tools/intent-compile/intent-compile`，这是临时构建位置，不作为长期规范。
+- 独立评测环境：`historical-artifacts/agent-evaluation/`；认证仅留该环境，不抄入本报告。被评测 agent 继续禁用历史 memory，与开发 Codex 的记忆设置分离。
+- 上游 Bench：`upstream/tritonbench`；Python 环境：`historical-environments/intentdsl-mlir20`。当前可用编译器为 `/tmp/intentdsl-agent-build.tFX1vN/tools/intent-compile/intent-compile`，这是临时构建位置，不作为长期规范。
 
 ## 协作环境整理结果
 
 - 已卸载 IntentDSL、TianchenRV 和全局 Comet 接入，移除项目 hooks/skills/state/档案、全局数据、用户级与系统级安装包、dashboard 及代理服务。两个已合入 main 的 CPU worktree 和已合入的旧 Comet 分支已清理；有效代码与正式 `doc/` 未改。
-- 稳定原则已精简到 `${HOME}/.codex/AGENTS.md` 与项目 `AGENTS.md`，不搬运旧成绩或阶段门禁；CodeGraph/FastCtx 的命令与 MCP 保留，CodeGraph 索引已同步。
-- 用户级 `${HOME}/.codex/skills/todoskill/` 只包含 `SKILL.md` 和 UI 元数据，用单份短期记录保存长任务的已确认决定与剩余节点，不创建管理流程。当前任务沿用本报告。
+- 稳定原则已精简到 `historical-agent/AGENTS.md` 与项目 `AGENTS.md`，不搬运旧成绩或阶段门禁；CodeGraph/FastCtx 的命令与 MCP 保留，CodeGraph 索引已同步。
+- 用户级 `historical-agent/skills/todoskill/` 只包含 `SKILL.md` 和 UI 元数据，用单份短期记录保存长任务的已确认决定与剩余节点，不创建管理流程。当前任务沿用本报告。
 - 原生 memory 已通过 `memory/reset` 清空生成物、提取记录和生成任务。旧会话的记忆生成资格已关闭：当前存储格式用原生接口处理，旧格式只同步记忆元数据及索引标记；聊天内容、账号和其它配置保留。
 - 开发 Codex 的 memory feature、读取和生成已开启；TOML 已解析，CLI 已加载 enabled 标志，skill 结构检查通过。未运行模型、独立算子测试或新 benchmark，也未宣称新会话的后台记忆提取已验证。
 - 下一次开发工作应新开 Codex 任务，以两级 `AGENTS.md`、`doc/` 和本报告的入口接续；当前长会话的旧上下文不会因删除文件自动消失。被评测的 Luna 仍禁用 memory，不把开发经验注入一次生成实验。

@@ -38,7 +38,7 @@ cuTile 库另有 2 条 H100/source 不支持的记录：block-scaled GEMM 的 SM
 
 生产库仅剩 `softmax_backward` 的 cuTile 数值检查失败。当前证据是 f32 归约/融合后的误差超过原容差，尚未证明实现违反 Intent 数值合同；没有放宽容差或擅自改成 f64 累加。
 
-cuTile 来源的 2.451× 是相对这批固定 source 配置的结果，不能解释成“生成代码普遍比 cuTile 库快 2.4 倍”。例如 sparse MLA source 固定 `TILE_H=1, TILE_N=64`，本例产生 131072 个 blocks；生成程序采用已有的持久工作分配。原 source 308.889 ms 是这个具体入口的观测，不是最佳 cuTile 实现的证明。配置入口见 [attention.py](providers/cutile/attention.py)。
+cuTile 来源的 2.451× 是相对这批固定 source 配置的结果，不能解释成“生成代码普遍比 cuTile 库快 2.4 倍”。例如 sparse MLA source 固定 `TILE_H=1, TILE_N=64`，本例产生 131072 个 blocks；生成程序采用已有的持久工作分配。原 source 308.889 ms 是这个具体入口的观测，不是最佳 cuTile 实现的证明。配置入口见 attention.py（历史附件 attention.py）。
 
 ## 新生成的 TritonBench 100 题
 
@@ -81,10 +81,10 @@ cuTile 从 77 增加到 93 个 pass 后，几何加速比反而降低，主要�
 | cuTile 操作缺口 | 补动态均匀行提取、重复 Cartesian 坐标的显式投影、i64 常量类型，以及 erfc/i0 lowering。log-softmax-linear、masked-select、erfc、i0 原用例通过。 |
 | subregion 容量过大 | 容量分析保留常量与循环下界，避免把 k+1 到 257 的最多 256 个成员补齐到 512；solve 尾部从 256×512 收紧为 256×256。静态归约候选也按容量去重。 |
 | 写回分块与默认候选过大 | 将已有归约范围约束复用于逐点写回；全覆盖处理保留 `min(parameter, shape)` 的既有分块。cuTile 依据已导出的维度绑定，在合法候选中保留填充最少的 pointwise ownership 组合。normalize 默认配置 **Triton 0.009136、cuTile 0.009336 ms，均 pass**，reference 0.016984 ms；cuTile 比原定向结果 0.063112 ms 快 6.76 倍。 |
-| 资源估算与索引证明丢失 | 广播、splat、reshape 不再独立按展开后的 tile 计寄存器；参考 Triton 的 [view lowering](../../../ref/triton/lib/Conversion/TritonGPUToLLVM/ViewOpToLLVM.cpp)。cuTile 保留复合最小值和 atomic 活跃坐标边界，使已有运行时范围检查可以选择 32 位内部数组索引；不改变外部 ABI、逻辑 index 类型或数值精度。 |
+| 资源估算与索引证明丢失 | 广播、splat、reshape 不再独立按展开后的 tile 计寄存器；参考 Triton 的 view lowering（历史附件 ViewOpToLLVM.cpp）。cuTile 保留复合最小值和 atomic 活跃坐标边界，使已有运行时范围检查可以选择 32 位内部数组索引；不改变外部 ABI、逻辑 index 类型或数值精度。 |
 | cuTile worker warp 配置遗漏 | 原先仅矩阵计算声明该参数，生产 profile 又只保留自动推断。归约等已有 occupancy-sensitive 计算现在也使用同一个 provider 参数；生产保留自动推断和 8 两档，且保留自动推断下原有的访问方式组合。原 BN **0.092016 → 0.063184 ms**，FP8 **7.288080 → 6.746472 ms**，交叉熵 **1.665752 → 0.867944 ms**，均通过原容差。交叉熵使用 worker warps=8、occupancy=2、gather，54 个候选全部成功；其完整耗时现已低于同 DSL Triton 的 0.970696 ms，与 source 0.730696 ms 的比值为 1.188。这沿用 [cuTile 原生 hint](https://docs.nvidia.com/cuda/cutile-python/execution.html)，没有增加 kernel 或改变算法。 |
 
-这些改动没有自动增加 kernel，没有修改候选算法，也没有新增另一套 form/plan。主要实现位于 [GPU shared passes](../../lib/Dialect/GPU/Transforms/)、[Triton leaf](../../lib/Target/Triton/)、[cuTile leaf](../../lib/Target/CuTile/)。
+这些改动没有自动增加 kernel，没有修改候选算法，也没有新增另一套 form/plan。主要实现位于 GPU shared passes（历史附件 ）、Triton leaf（历史附件 ）、cuTile leaf（历史附件 ）。
 
 数学 helper 采用成熟算法：erfc 使用 [OpenLibm 分段算法](https://raw.githubusercontent.com/JuliaMath/openlibm/master/src/s_erf.c)，i0 使用 PyTorch/ATen 的 Cephes Chebyshev 形式。此次验证范围是原生产用例及其既定容差；未声称做过全定义域 ULP 验证，未实现的 f64 路径仍明确拒绝。
 
@@ -110,7 +110,7 @@ normalize 在范围/候选裁剪修复后，定点准备约 65.5 秒，两个 ke
 
 - `min`：提交将 min 的 identity 写成 -inf，运行得到非有限结果。
 - `combined_activation`：作者 reshape/broadcast 关系不合法。
-- `fused_cross_entropy_log_softmax`：把 domain 和 tensor index 混合后产生额外 Cartesian 轴，结果不能存入一维 losses。[现有索引合同](../../doc/dsl/authoring.md)明确了这一区别。
+- `fused_cross_entropy_log_softmax`：把 domain 和 tensor index 混合后产生额外 Cartesian 轴，结果不能存入一维 losses。现有索引合同（历史附件 authoring.md）明确了这一区别。
 - `fused_cross_entropy_softmax_layernorm`：数据产生的索引缺少当前合同要求的有效边界声明。
 - `solve_symmetric_ldl`：作者只实现 1×1 pivot，未覆盖 reference 的 2×2 pivot 行为。
 - `matrix_power_eig`：直接乘法与 reference 的 eig/reconstruction 路径在本例 f32 下超出既定容差。

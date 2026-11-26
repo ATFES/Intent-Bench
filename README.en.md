@@ -4,19 +4,18 @@ Independent operator correctness and performance comparisons. [中文](README.md
 
 Intent owns local JIT, target discovery, compilation, ABI binding and execution.
 Bench owns inputs, implementations, oracles, measurement and SSH transport.
-The installed intent.examples package owns the single author kernel/program source.
+V2 programs live in the installed `intentdsl.examples` package. `intent:*` selects the historical V1 implementation.
 
 ## Use
 
+Start in this checkout, using the GPU environment from the [IntentDSL source installation](https://github.com/Tianchen-ai/Intent#build-from-source).
+
 ```sh
-python -m pip install -e '.[mcp]'
-export INTENT_BENCH_OUTPUT_ROOT=/path/to/intentdsl_bench/output
-intent-bench list
+python -m pip install -e .
+export INTENT_BENCH_OUTPUT_ROOT="$PWD/output"
 intent-bench describe softmax
-intent-bench env list
-intent-bench run softmax --env local-gpu --case 64x1024-float16 \
-  --impl intent:triton,intent:cutile,triton --baseline triton
-intent-bench check --suite mainline --backend triton --env local-gpu
+intent-bench run softmax --env examples/environments/gpu.json --output-root "$PWD/output" --case 64x1024-float16 --impl intent-v2:triton,triton --baseline triton --check-only
+intent-bench run softmax --env examples/environments/gpu.json --output-root "$PWD/output" --case 64x1024-float16 --impl intent-v2:triton,triton --baseline triton
 ```
 
 Alternatively set output_root in ~/.config/intent-bench/config.json. Implementations
@@ -54,10 +53,7 @@ and shared storage. The oracle environment runs the original oracle and checker;
 it does not recreate inputs from a seed or supply a cross-device timing baseline.
 Python's `RunRequest.oracle_environment` and the MCP parameter use the same service.
 
-```bash
-intent-bench run program/softmax --env rvv-native --impl intent:weft \
-  --oracle-env local-cpu --check-only
-```
+For a remote target, pass its environment file and an oracle environment to `run --check-only`.
 
 ```text
 output/
@@ -97,8 +93,8 @@ Historical mixed timing scopes are not treated as performance changes.
 ```python
 from intent_bench import RunRequest, run, load_environment
 outcome = run(RunRequest(
-    "softmax", ("intent:triton", "triton"),
-    environment=load_environment("local-gpu"),
+    "softmax", ("intent-v2:triton", "triton"),
+    environment=load_environment("examples/environments/gpu.json"),
     cases=("64x1024-float16",), baseline="triton",
 ))
 ```

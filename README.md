@@ -3,20 +3,19 @@
 独立的算子正确性检查与性能比较工具。[English](README.en.md) · [第三方来源](THIRD_PARTY.md)
 
 Intent 负责本机 JIT、目标探测、编译、ABI 绑定与执行；Bench 负责选择输入、实现、
-数值对照、测量及 SSH 启动。作者算法和 30 个完整程序随 `intent.examples` 安装，
+数值对照、测量及 SSH 启动。V2 的作者程序随 `intentdsl.examples` 安装，`intent:*` 选择 V1，
 没有 Bench 时也能独立使用。
 
 ## 安装与选择
 
+在本仓根目录执行，沿用 [IntentDSL 源码安装](https://github.com/Tianchen-ai/Intent#build-from-source) 的 GPU 环境。
+
 ```sh
-python -m pip install -e '.[mcp]'
-export INTENT_BENCH_OUTPUT_ROOT=/path/to/intentdsl_bench/output
-intent-bench list
+python -m pip install -e .
+export INTENT_BENCH_OUTPUT_ROOT="$PWD/output"
 intent-bench describe softmax
-intent-bench env list
-intent-bench run softmax --env local-gpu --case 64x1024-float16 \
-  --impl intent:triton,intent:cutile,triton --baseline triton
-intent-bench check --suite mainline --backend triton --env local-gpu
+intent-bench run softmax --env examples/environments/gpu.json --output-root "$PWD/output" --case 64x1024-float16 --impl intent-v2:triton,triton --baseline triton --check-only
+intent-bench run softmax --env examples/environments/gpu.json --output-root "$PWD/output" --case 64x1024-float16 --impl intent-v2:triton,triton --baseline triton
 ```
 
 也可在 `~/.config/intent-bench/config.json` 设置 `{"output_root":"/absolute/path/output"}`。
@@ -71,10 +70,7 @@ oracle 和原检查器。传输保留 dtype、stride 和共享存储关系，不
 这不会把 oracle 环境变成性能 baseline；性能对照仍必须在同一执行设备上计时。
 Python 的 `RunRequest.oracle_environment` 与 MCP 的同名参数使用相同服务。
 
-```bash
-intent-bench run program/softmax --env rvv-native --impl intent:weft \
-  --oracle-env local-cpu --check-only
-```
+异机验数时，给 `run --check-only` 传入目标环境文件和 oracle 环境文件。
 
 `options.triton_ptxas` 和 `options.triton_ptxas_blackwell` 分别传给 Triton 的
 `TRITON_PTXAS_PATH` 与 `TRITON_PTXAS_BLACKWELL_PATH`，路径属于执行主机。
@@ -123,8 +119,8 @@ output/
 from intent_bench import RunRequest, run, load_environment
 
 outcome = run(RunRequest(
-    "softmax", ("intent:triton", "triton"),
-    environment=load_environment("local-gpu"),
+    "softmax", ("intent-v2:triton", "triton"),
+    environment=load_environment("examples/environments/gpu.json"),
     cases=("64x1024-float16",), baseline="triton",
 ))
 ```
@@ -136,11 +132,7 @@ reset、compile、synchronize、close、native_measure。
 参数绑定和输出分配在 prepare；编译在 compile；所有必需 kernel 在 launch。
 设备 SDK 由被选择的实现延迟导入。
 
-```sh
-intent-bench run examples/custom.py:bench --impl mine --scope host_call
-intent-bench compare output/daily/BEFORE output/latest/local-gpu/softmax
-intent-bench report output/latest/local-gpu/softmax
-```
+对比已有结果使用 `compare`，重建报告使用 `report`。
 
 ## 实验与插件
 
@@ -149,12 +141,7 @@ intent-bench report output/latest/local-gpu/softmax
 不继承日常默认协议，输出写入 experiments。原始论文表和 archive 保持不变。
 Agent 的 generate/evaluate 分离；首次交付与不反馈测试结果给生成过程的规则不变：
 
-```sh
-intent-bench experiment agent evaluate --reference /path/to/TritonBench \
-  --task abs --language intent --program /path/to/candidate.py \
-  --output /path/to/intentdsl_bench/output/experiments/agent-abs/current
-intent-bench plugin --output /path/to/intentdsl_bench/output/build/plugin
-```
+实验命令的参数和输入格式可通过 `intent-bench experiment --help` 查询。
 
 插件的 Intent 手册和编译 MCP 直接启动 Intent 包的入口；Bench 不生成手册副本。
 Bench MCP 的 run_benchmark/check_mainline 提交同一请求服务，run_status 查询后台结果。
