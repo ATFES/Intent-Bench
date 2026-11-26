@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 
 import pytest
 
@@ -683,6 +684,27 @@ def test_weft_ordered_tiled_contraction_extensions():
     library, Compiler = _require_compiler()
     from intentdsl import group7
 
+    def check_retained_scores(ir, tokens, batch):
+        # A complete private window keeps one score per key and query. The
+        # normalized value contraction reuses it without a second QK fold.
+        lines = ir.splitlines()
+        contracts = [line for line in lines if '"weft_host.task_contract"' in line]
+        assert len(contracts) == 2
+        assert "over = array<i64: 4>" in contracts[0]  # head dimension
+        assert "over = array<i64: 6>" in contracts[1]  # keys
+        buffers = [line.split("=")[0].strip() for line in lines
+                   if '"weft_host.task_local_alloc"' in line
+                   and f"elements = {tokens * batch} : i64" in line]
+        assert len(buffers) == 1
+        ptr = buffers[0]
+        replay = [i for i, line in enumerate(lines) if f'"weft_host.task_ptr_load"({ptr},' in line]
+        writes = [i for i, line in enumerate(lines) if f'"weft_host.task_ptr_store"({ptr},' in line]
+        weight = re.search(r'task_contract"\((%\w+),', contracts[1])[1]
+        weight_load = next(i for i in replay if lines[i].lstrip().startswith(f"{weight} = "))
+        assert lines.index(contracts[0]) < writes[0] < replay[0]
+        assert any(replay[0] < write < weight_load for write in writes)
+        assert weight_load < lines.index(contracts[1])
+
     base_opts = {
         "vector_bits": 512,
         "vector_registers": 32,
@@ -712,35 +734,38 @@ def test_weft_ordered_tiled_contraction_extensions():
         None,
         None,
     ]
-    with Compiler(library) as base:
-        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": attn_args}}}}) as cc:
-            unscaled_ir = cc.compile(
-                base.root_ir(group7.attention_unscaled_max.source),
-                exit="weft", through="weft@realized", text=True,
-            ).decode()
-        assert unscaled_ir.count("weft_host.task_contract") >= 4
-        assert 'engine = "auto"' in unscaled_ir
-        assert "!weft_kernel.value<bf16,[16,128],[3,4]>" in unscaled_ir
-        assert "elements = 2048 : i64" in unscaled_ir  # stack-budgeted scoreBuf (128*16) + tiledOutBuf (16*128)
+    def compile_tiles(base, program, arguments):
+        options = {**base_opts, "arguments": arguments}
+        with base.derive({"exits": {"weft": {"options": options}}}) as cc:
+            root = base.root_ir(program.source)
+            tasked = cc.compile(root, exit="weft", through="cpu@tasked", text=True).decode()
+            realized = cc.compile(root, exit="weft", through="weft@realized", text=True).decode()
+        batch = int(re.search(r"cpu\.owner_batch = (\d+)", tasked)[1])
+        panel = re.search(r"cpu\.vector_panel = \{([^}]+)\}", tasked)[1]
+        geometry = {key: int(value) for key, value in re.findall(r"(\w+) = (\d+)", panel)}
+        return realized, batch, geometry
 
-        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": alibi_args}}}}) as cc:
-            alibi_ir = cc.compile(
-                base.root_ir(group7.alibi_attention.source),
-                exit="weft", through="weft@realized", text=True,
-            ).decode()
-        assert alibi_ir.count("weft_host.task_contract") >= 4
+    with Compiler(library) as base:
+        unscaled_ir, batch, panel = compile_tiles(base, group7.attention_unscaled_max, attn_args)
+        assert panel["score_slots"] == attn_args[1]["shape"][2]
+        check_retained_scores(unscaled_ir, tokens=panel["score_slots"], batch=batch)
+        assert 'engine = "auto"' in unscaled_ir
+        assert f"!weft_kernel.value<bf16,[{batch},128],[3,4]>" in unscaled_ir
+        assert f"elements = {batch * 128} : i64" in unscaled_ir  # tiled output (batch * DV)
+
+        alibi_ir, batch, panel = compile_tiles(base, group7.alibi_attention, alibi_args)
+        assert panel["score_slots"] == alibi_args[1]["shape"][2]
+        check_retained_scores(alibi_ir, tokens=panel["score_slots"], batch=batch)
         assert 'lit = "-126.0"' in alibi_ir  # FTZ exp2 subnormal guard
         assert 'kind = "exp2"' in alibi_ir
 
-        with base.derive({"exits": {"weft": {"options": {**base_opts, "arguments": swa_args}}}}) as cc:
-            swa_ir = cc.compile(
-                base.root_ir(group7.sliding_window_attention.source),
-                exit="weft", through="weft@realized", text=True,
-            ).decode()
+        swa_ir, batch, panel = compile_tiles(base, group7.sliding_window_attention, swa_args)
         assert swa_ir.count("weft_host.task_contract") >= 4
-        assert "!weft_kernel.value<f16,[4,128],[2,4]>" in swa_ir
-        assert "!weft_kernel.value<f32,[4,32],[2,7]>" in swa_ir  # subDV=32 tiledOutBuf strips
-        assert "elements = 4608 : i64" in swa_ir  # 1152*4 <= 18 KiB scoreBuf leaving >44 KiB stack headroom
+        assert f"!weft_kernel.value<f16,[{batch},128],[2,4]>" in swa_ir
+        assert 0 < panel["value_width"] < 128
+        assert f"!weft_kernel.value<f32,[{batch},{panel['value_width']}],[2,7]>" in swa_ir
+        assert panel["token_tile"] <= panel["score_slots"] < swa_args[1]["shape"][2]
+        assert f"elements = {batch * panel['score_slots']} : i64" in swa_ir
 
 
 
