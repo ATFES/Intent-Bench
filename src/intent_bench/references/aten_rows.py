@@ -51,6 +51,25 @@ def weighted_rms(x, gain, inverse, epsilon):
     return (x * (x.square().sum(-1, keepdim=True) * inverse + epsilon).rsqrt()) * gain
 
 
+def bucketed_norm_backward(x, dy, gain, mean, inv, inverse_width):
+    import torch
+    dx = torch.empty_like(x)
+    buckets = 128
+    dw = x.new_zeros((buckets, x.shape[1]))
+    db = torch.zeros_like(dw)
+    for offset in range(0, x.shape[0], buckets):
+        rows = slice(offset, offset + buckets)
+        norm = (x[rows].float() - mean[rows, None]) * inv[rows, None]
+        grad = dy[rows].float()
+        weighted = gain.float() * grad
+        center = weighted.sum(-1, keepdim=True) * inverse_width
+        projection = (norm * weighted).sum(-1, keepdim=True) * inverse_width
+        dx[rows] = ((weighted - center - norm * projection) * inv[rows, None]).to(x.dtype)
+        dw = (dw.float() + (grad * norm).to(x.dtype).float()).to(x.dtype)
+        db = (db.float() + grad).to(x.dtype)
+    return dx, dw.float().sum(0), db.float().sum(0)
+
+
 def welford_norm(x, gain, bias, epsilon):
     import torch
     var, mean = torch.var_mean(x, dim=-1, keepdim=True, unbiased=False)
@@ -227,6 +246,7 @@ def flash_backward(q, k, v, out, dy, log2_lse, scale):
 def registrations(name):
     functions = {
         "corpus/weft/q4_k_projection": q4_projection,
+        "corpus/mojo/layer_norm_backward": bucketed_norm_backward,
         "softmax": softmax,
         "weighted_rms_norm": weighted_rms,
         "group7/layer_norm_welford": welford_norm,
@@ -290,7 +310,7 @@ def registrations(name):
             call.result = lambda: _tree(state["output"], lambda x: x.cpu())
         return call
 
-    if name in {"softmax", "weighted_rms_norm"} or name.startswith("group7/"):
+    if name in {"softmax", "weighted_rms_norm", "corpus/mojo/layer_norm_backward"} or name.startswith("group7/"):
         return {"aten:source": Implementation("aten:source", lambda case, data, env: prepare(env.device == "cpu" or env.device == "auto", case, data, env))}
     devices = (True, False)
     return {key: Implementation(key, partial(prepare, cpu))
