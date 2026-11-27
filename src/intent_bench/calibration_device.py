@@ -57,6 +57,9 @@ def mlu(root):
     assets = Path(library).parent / "intentdsl.assets/runtime/bangc/kernels" if library else None
     certified = assets is not None and (assets / "certified_div.mlu").is_file()
     flags = ["-DPROFILE_CERTIFIED_DIV", "-I", str(assets)] if certified else []
+    guarded = certified and (assets / "guarded_reciprocal.mlu").is_file()
+    if guarded:
+        flags.append("-DPROFILE_GUARDED_DIV")
     subprocess.run([cc,*flags,"--bang-mlu-arch=mtp_372","-O2","-shared","-fPIC",str(src),"-o",str(lib),"-lcnrt"],check=True)
     mod=ctypes.CDLL(str(lib));call=mod.enqueue;call_tasks=mod.enqueue_tasks
     call.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*4),ctypes.c_void_p]
@@ -103,6 +106,8 @@ def mlu(root):
     probes = [(6,"max"),(7,"sum"),(8,"exp"),(9,"div_rn_vv"),(13,"div_rn_vs"),(14,"div_rn_sv")]
     if certified:
         probes.extend([(15,"certified_div_vv"),(16,"certified_div_vs"),(17,"certified_div_sv")])
+    if guarded:
+        probes.extend([(18,"guarded_div_vv"), (19,"guarded_div_vs"), (20,"guarded_div_sv")])
     for mode,name in probes:
         for width in (64,512,2048):
             short=elapsed(width,1,mode,16)

@@ -150,7 +150,8 @@ def test_mlu370_supply_cost_prefers_single_step_batch_over_multi_step_double_buf
     assert large_cand == "double-buffer-shared-16-b4"
 
 
-def test_strict_quotient_narrowing_keeps_negative_zero_and_subnormals():
+@pytest.mark.parametrize("reciprocal", [False, True])
+def test_quotient_narrowing_keeps_negative_zero_and_subnormals(reciprocal):
     from types import SimpleNamespace
     torch = pytest.importorskip("torch")
     pytest.importorskip("torch_mlu")
@@ -163,9 +164,11 @@ def divide(x: I.In[I.f32, ("M","N")], y: I.In[I.f32, ("M","N")], out: I.Out[I.f1
     for i in I.parallel(x.dim(0)):
         out[i,:] = I.cast(x[i,:] / y[i,:], I.f16)
 """
+    if reciprocal:
+        source = source.replace(b"x[i,:] / y[i,:]", b"I.fdiv(x[i,:], y[i,:], approximate=True)")
     x = torch.tensor([-0.0, -(2.0**-26), -(2.0**-24), 2.0**-24] * 17).reshape(1, -1)
     divisor = torch.full_like(x, 1.25)
     kernel = intentdsl.jit(SimpleNamespace(source=source), backend="bangc",
-                           fpmath_mode="strict", denormal_fp_math="ieee")
+                           denormal_fp_math="ieee")
     result = kernel.run(x.to("mlu"), divisor.to("mlu")).cpu()
     assert torch.equal(result.view(torch.int16), (x / divisor).half().view(torch.int16))
