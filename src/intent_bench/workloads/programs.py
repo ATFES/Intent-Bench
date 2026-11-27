@@ -202,7 +202,20 @@ def _q4_reference(values, env, implementation):
         def compile(self, *args, **kwargs):
             return None
         def call(self, program, weights, activation):
-            if implementation == "ggml":
+            if implementation == "aten:source":
+                import torch
+                from ..references.aten_rows import q4_projection
+                from ..implementations.prepared import attach_device_timer
+                from ..corpus._common.measurement import functional_launch
+                device = _device(env, implementation)
+                if device.startswith("mlu"):
+                    import torch_mlu
+                args = tuple(torch.as_tensor(v.data, device=device) for v in (weights, activation))
+                call = functional_launch(lambda: q4_projection(*args))
+                call.device = device
+                call.metadata["library"] = "ATen Q4_K dot including Q8_K activation quantization"
+                self.invocation = attach_device_timer(call)
+            elif implementation == "ggml":
                 from dataclasses import replace
                 from ..implementations.native_libraries import ggml
                 call = ggml("q4_projection_packed", None, (weights.data, activation.data), env)
@@ -320,6 +333,13 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                 operation = "matmul" if name == "gemm" else name
                 call = cnnl(operation, None, tuple(value.numpy() for value in arguments), env)
                 return self.bind(call, arguments, mutable)
+            if name == "histogram" and implementation == "aten:source":
+                from ..references.aten_rows import histogram
+                from ..implementations.prepared import attach_device_timer
+                call = functional_launch(lambda: histogram(arguments[0], 256))
+                call.device = device
+                call.metadata["library"] = "ATen integer histogram with excluded bin"
+                return self.bind(attach_device_timer(call), arguments, mutable)
             if name == "histogram":
                 from ..implementations.cub import histogram
                 return self.bind(histogram(arguments[0], env), arguments, mutable)
@@ -384,6 +404,16 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                     lambda: module.bmm(*arguments, transpose_a=False, transpose_b=False,
                                        static_persistent=True, compiler_timeout=60))
                 source = "NVIDIA TileGym/"+path
+            elif implementation == "aten:source" and name == "layer_norm":
+                from ..references.aten_rows import raw_moment_norm
+                function = lambda: raw_moment_norm(*arguments)
+                source = "ATen FP32 raw moments and rsqrt"
+            elif implementation == "aten:source" and name == "softmax":
+                def function():
+                    v = x.float()
+                    weights = (v - v.amax(dim=-1, keepdim=True)).exp()
+                    return (weights / weights.sum(dim=-1, keepdim=True)).to(x.dtype)
+                source = "ATen FP32 exp, sum and div"
             elif name == "relu":
                 function = lambda: torch.relu(x)
             elif name == "softmax":
@@ -405,6 +435,9 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
             else:
                 raise NotImplementedError(name)
             call = functional_launch(function)
+            if device == "cpu" and implementation == "aten:source":
+                from ..implementations.prepared import attach_device_timer
+                call = attach_device_timer(call)
             call.device = device
             call.owners = arguments
             if device.startswith("mlu:"):
@@ -421,13 +454,16 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
     output = invoke_author(name, values, context)
     if context.invocation is None:
         raise ValueError("author program did not submit its complete call")
-    if device.startswith("mlu:") and implementation == "torch" and not context.invocation.native_measure:
+    if device.startswith("mlu:") and implementation in {"torch", "aten:source"} and not context.invocation.native_measure:
         from ..implementations.mlu_rows import timer
         stream = torch.mlu.current_stream(device)
         call = context.invocation
         call.synchronize = stream.synchronize
         call.native_measure = lambda settings: timer(call.launch, stream, settings, call.reset)
         call.timing = "cnrt_notifier"
+    if implementation == "aten:source" and device == "cpu":
+        from ..implementations.prepared import attach_device_timer
+        attach_device_timer(context.invocation)
     context.invocation.metadata.update(author_program=name, input_profile="installed author program")
     from dataclasses import replace
     def observe(value):
@@ -463,6 +499,11 @@ def build(name):
             allow_subnormal_ftz=bool(case.parameters.get("allow_subnormal_ftz"))),
         description)
         for baseline, description in BASELINES[name].items()}
+    if name in {"layer_norm", "softmax", "adamw", "histogram", "batch_norm",
+                "causal_convolution", "nonzero", "mamba_chunk_state", "ragged_gemm", "q4_projection",
+                "dropout", "jagged_mean", "moe_alignment", "csr_spmv", "paged_decode", "causal_linear_attention",
+                "attention", "gated_delta"}:
+        implementations["aten:source"] = Implementation("aten:source", lambda case, values, env: _reference(name, values, env, "aten:source"), "ATen composition at the author rounding points")
     for backend in backends():
         implementations["intent:"+backend] = Implementation("intent:"+backend,
             lambda case, values, env, backend=backend: _intent(name, backend, values, env))

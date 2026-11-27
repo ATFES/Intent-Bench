@@ -7,6 +7,7 @@ import math
 import numpy as np
 
 from ..implementations.context import IntegerTolerance, Tolerance
+from ..implementations.prepared import attach_device_timer
 from ..model import Case, EnvironmentUnavailable, Implementation, PreparedCall, Workload
 
 V2_EXITS = (
@@ -532,30 +533,6 @@ def _prepare_baseline(name, impl, case, data, env, device):
     raise KeyError((name, impl))
 
 
-def _attach_cpu_timer(prepared: PreparedCall) -> PreparedCall:
-    if prepared.device != "cpu" or prepared.native_measure is not None:
-        return prepared
-    import time
-    from ..implementations.native_sampling import sample_timer
-
-    class _HostTimer:
-        def __init__(self, fn):
-            self._fn = fn
-
-        def run(self):
-            t0 = time.perf_counter()
-            self._fn()
-            return (time.perf_counter() - t0) * 1000.0
-
-    timer = _HostTimer(prepared.launch)
-    noop = lambda: None
-    prepared.native_measure = lambda settings: sample_timer(
-        timer, settings, noop, metadata=prepared.metadata
-    )
-    prepared.timing = "cpu_monotonic"
-    return prepared
-
-
 def build(name):
     cases_map = {
         "embedding_bag": [
@@ -608,12 +585,15 @@ def build(name):
         if impl.startswith("intent-v2:"):
             backend = impl.partition(":")[2]
             return _prepare_v2(name, backend, _transfer(data, device), env, device)
-        return _attach_cpu_timer(_prepare_baseline(name, impl, case, data, env, device))
+        return attach_device_timer(_prepare_baseline(name, impl, case, data, env, device))
 
     impls = {
         impl: Implementation(impl, partial(prepare, impl))
         for impl in (*BASELINES[name], *V2_EXITS)
     }
+
+    from ..references.aten_rows import registrations
+    impls.update(registrations("group7/" + name))
 
     def check(actual, expected):
         import torch

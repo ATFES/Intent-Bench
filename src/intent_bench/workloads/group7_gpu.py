@@ -7,6 +7,7 @@ import math
 import numpy as np
 
 from ..implementations.context import IntegerTolerance, Tolerance
+from ..implementations.prepared import attach_device_timer
 from ..model import Case, EnvironmentUnavailable, Implementation, PreparedCall, Workload
 
 V2_EXITS = (
@@ -491,6 +492,9 @@ def _prepare_baseline(name, impl, case, data, env, device):
     if name == "qk_norm_rope":
         q, k, qw, kw, cos, sin, inv_d, eps = args
 
+        if inv_d != 1. / q.shape[-1]:
+            raise ValueError("native RMSNorm requires the reciprocal feature width")
+
         def eager_qk(q_in, k_in, qw_in, kw_in, cos_in, sin_in):
             qn = F.rms_norm(q_in.float(), (128,), qw_in.float(), eps)
             kn = F.rms_norm(k_in.float(), (128,), kw_in.float(), eps)
@@ -599,16 +603,15 @@ def build(name):
             backend = impl.partition(":")[2]
             return _prepare_v2(name, backend, _transfer(data, device), env, device)
         prepared = _prepare_baseline(name, impl, case, data, env, device)
-        if device == "cpu" and prepared.native_measure is None:
-            from .group7_cpu import _attach_cpu_timer
-
-            return _attach_cpu_timer(prepared)
-        return prepared
+        return attach_device_timer(prepared)
 
     impls = {
         impl: Implementation(impl, partial(prepare, impl))
         for impl in (*BASELINES[name], *V2_EXITS)
     }
+
+    from ..references.aten_rows import registrations
+    impls.update(registrations("group7/" + name))
 
     def check(actual, expected):
         import torch

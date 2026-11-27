@@ -113,6 +113,8 @@ def cpu_workload(row,factory):
     from .implementations.v2_program import CATALOG, registrations
     if row['kernel'] in CATALOG:
         implementations.update(registrations(row['kernel']))
+    from .references.aten_rows import registrations as aten_rows
+    implementations.update(aten_rows(row["name"]))
     from .catalog import ATEN_NATIVE_OPERATIONS
     if row['kernel'] in ATEN_NATIVE_OPERATIONS:
         def native_aten(case, data, env):

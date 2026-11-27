@@ -37,16 +37,32 @@ def philox_uniform(seed, counters):
 def dropout_residual_rms_norm(x, residual, weight, dnormalized, dresidual_out,
                               seed, keep_probability, inverse_keep_probability,
                               inverse_features, epsilon, weight_offset):
-    counters = np.arange(x.numel(), dtype=np.uint64).reshape(x.shape)
-    keep = (philox_uniform(seed, counters) < keep_probability).float()
-    summed = (x.float() * keep / keep_probability + residual.float()).to(x.dtype)
+    if x.device.type == "cpu":
+        counters = np.arange(x.numel(), dtype=np.uint64).reshape(x.shape)
+        uniform = philox_uniform(seed, counters)
+    else:
+        # Philox4x32-10, four output words per counter. Signed int64
+        # multiplication preserves the low 64 bits used by the round.
+        block = torch.arange((x.numel() + 3) // 4, dtype=torch.int64, device=x.device)
+        mask = 0xffffffff
+        a, b = block & mask, block >> 32
+        c, d = torch.zeros_like(a), torch.zeros_like(a)
+        k0, k1 = int(seed) & mask, (int(seed) >> 32) & mask
+        for _ in range(10):
+            p, q = a * 0xd2511f53, c * 0xcd9e8d57
+            a, b, c, d = ((q >> 32) & mask) ^ b ^ k0, q & mask, ((p >> 32) & mask) ^ d ^ k1, p & mask
+            k0, k1 = (k0 + 0x9e3779b9) & mask, (k1 + 0xbb67ae85) & mask
+        words = torch.stack((a, b, c, d), -1).flatten()[:x.numel()].view(x.shape)
+        uniform = (words >> 8).float() * (2. ** -24)
+    keep = (uniform < keep_probability).float()
+    summed = (x.float() * keep * inverse_keep_probability + residual.float()).to(x.dtype)
     values = summed.float()
     inverse_rms = torch.rsqrt(values.square().sum(dim=1, keepdim=True) * inverse_features + epsilon)
     normalized = (values * inverse_rms * (weight.float() + weight_offset)).to(x.dtype)
     gradient = dnormalized.float() * (weight.float() + weight_offset)
     projection = (gradient * values).sum(dim=1, keepdim=True) * inverse_features
-    summed_gradient = gradient * inverse_rms - values * inverse_rms.pow(3) * projection + dresidual_out.float()
-    dx = (summed_gradient * keep / keep_probability).to(x.dtype)
+    summed_gradient = gradient * inverse_rms - values * (inverse_rms * inverse_rms * inverse_rms) * projection + dresidual_out.float()
+    dx = (summed_gradient * keep * inverse_keep_probability).to(x.dtype)
     return normalized, summed, dx, summed_gradient.to(x.dtype)
 
 
@@ -924,7 +940,7 @@ def nested_jagged_mean_pool_indexed(document_offsets, sentence_offsets, document
 
 
 def selective_state_scan(x, decay, drive):
-    state = torch.zeros((x.shape[0],), dtype=x.dtype)
+    state = x.new_zeros((x.shape[0],))
     output = torch.empty_like(x)
     for position in range(x.shape[1]):
         state = decay[:, position] * state + drive[:, position] * x[:, position]
@@ -938,7 +954,7 @@ def streamed_online_softmax_f16(x):
 
 def recurrent_gated_delta_fwd(query, key, value, gate, beta, scale):
     batch, sequence, heads, dimension = query.shape
-    state = torch.zeros((batch, heads, dimension, value.shape[-1]), dtype=torch.float32)
+    state = torch.zeros((batch, heads, dimension, value.shape[-1]), dtype=torch.float32, device=value.device)
     output = torch.empty_like(value)
     for position in range(sequence):
         q = query[:, position].float() * scale
@@ -998,13 +1014,13 @@ def group_norm_backward(x, grad_y, weight, mean, rstd):
 
 
 def dropout(x, mixed_seed, drop_probability, inverse_keep_probability):
-    offsets = torch.arange(x.numel(), dtype=torch.int32).reshape(x.shape)
+    offsets = torch.arange(x.numel(), dtype=torch.int32, device=x.device).reshape(x.shape)
     hashed = offsets * 1103515245 + mixed_seed
     hashed = hashed ^ (hashed >> 16)
     hashed = hashed ^ (hashed << 8)
     hashed = hashed ^ (hashed >> 4)
     random = (hashed & 0x7FFFFFFF).float() / 2147483647.0
-    scaled = x * torch.tensor(inverse_keep_probability, dtype=x.dtype)
+    scaled = x * x.new_tensor(inverse_keep_probability)
     return torch.where(random > drop_probability, scaled, 0.0)
 
 
@@ -1101,11 +1117,11 @@ def moe_align_block_size(topk_ids, block_size, num_experts):
     flat = topk_ids.flatten()
     counts = torch.bincount(flat.long(), minlength=num_experts)
     padded = (counts + block_size - 1) // block_size * block_size
-    offsets = torch.cat((torch.zeros(1, dtype=torch.int64), padded.cumsum(0)))
+    offsets = torch.cat((flat.new_zeros(1, dtype=torch.int64), padded.cumsum(0)))
     routes = torch.argsort(flat, stable=True).to(torch.int32)
     capacity = flat.numel() + num_experts * (block_size - 1)
-    sorted_ids = torch.full((capacity,), flat.numel(), dtype=torch.int32)
-    expert_ids = torch.empty(((capacity + block_size - 1) // block_size,), dtype=torch.int32)
+    sorted_ids = torch.full((capacity,), flat.numel(), dtype=torch.int32, device=flat.device)
+    expert_ids = torch.empty(((capacity + block_size - 1) // block_size,), dtype=torch.int32, device=flat.device)
     source_offset = 0
     for expert in range(num_experts):
         begin, end = int(offsets[expert]), int(offsets[expert + 1])
@@ -1169,11 +1185,11 @@ def swiglu_float_intermediate(gate, up):
 def rotary_embedding_flat(values, cosine, sine):
     rows, dimension = values.shape
     half = dimension // 2
-    dimensions = torch.arange(dimension)
+    dimensions = torch.arange(dimension, device=values.device)
     paired = (dimensions - half) % dimension
     phase = dimensions % half
     sign = torch.where(dimensions < half, -1.0, 1.0).to(values.dtype)
-    tokens = torch.arange(rows) // (rows // cosine.shape[0])
+    tokens = torch.arange(rows, device=values.device) // (rows // cosine.shape[0])
     rotated = values * cosine[tokens][:, phase] + values[:, paired] * sine[tokens][:, phase] * sign
     return rotated.reshape(rows, 2, half)
 

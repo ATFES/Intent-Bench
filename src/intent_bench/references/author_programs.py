@@ -54,12 +54,21 @@ def prepare(name, implementation, arguments, environment):
         note = "Author mixed seed passed directly; same xorshift mask and f16 scale."
     elif name == "swiglu":
         run = lambda: (torch.nn.functional.silu(x.float()) * arguments[1].float()).to(x.dtype)
+    elif name == "jagged_mean" and implementation == "aten:source":
+        offsets = arguments[1]
+        def run():
+            lengths = offsets.diff()
+            rows = torch.arange(lengths.numel(), device=x.device)
+            indices = rows.repeat_interleave(lengths.long(), output_size=x.shape[0])
+            return x.new_zeros((lengths.numel(), x.shape[1])).index_add_(0, indices, x) / lengths[:, None]
+        library = "ATen segmented sum and quotient"
     elif name == "jagged_mean":
         run = lambda: torch.segment_reduce(x, "mean", offsets=arguments[1])
     elif name == "cumsum":
         run = lambda: torch.cumsum(x, dim=-1)
     elif name == "batch_norm":
-        if implementation == "oracle":
+        if implementation in {"aten:source", "oracle"}:
+            library = "ATen variance and mean, training state updates"
             run = lambda: cpu_runtime.batch_norm_training(*arguments)[2:]
         else:
             run = lambda: torch.ops.aten.native_batch_norm(*arguments[:5], True,
@@ -75,7 +84,8 @@ def prepare(name, implementation, arguments, environment):
                 mean.shape[1], [True, True, True])
             library = "ATen native_group_norm_backward"
     elif name == "adamw":
-        if implementation == "oracle":
+        if implementation in {"oracle", "aten:source"}:
+            library = "ATen FP32 AdamW, three source-order quotients"
             run = lambda: cpu_runtime.adamw(*arguments)
         else:
             gradient, parameter, first, second, lr, beta1, beta2, correction1, correction2, eps, decay = arguments
@@ -106,12 +116,15 @@ def prepare(name, implementation, arguments, environment):
             return arguments[:2]
         library = "Independent RoPE numerical oracle"
     elif name == "dropout":
-        run = lambda: cpu_runtime.dropout(x.cpu(), *arguments[1:]).to(x.device)
-        library = "Independent xorshift dropout numerical oracle"
+        run = lambda: cpu_runtime.dropout(x, *arguments[1:])
+        library = "ATen signed xorshift and FP16 scale"
     else:
         raise NotImplementedError((name, implementation))
     call = functional_launch(run)
     call.device = str(x.device)
+    if implementation == "aten:source" and call.device == "cpu":
+        from ..implementations.prepared import attach_device_timer
+        call = attach_device_timer(call)
     call.owners = arguments
     call.metadata.update(library=library, note=note)
     return call

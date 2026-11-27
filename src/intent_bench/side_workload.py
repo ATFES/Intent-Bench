@@ -132,6 +132,8 @@ def build(row,entries):
                 from .implementations.legacy_norms import prepare as legacy_call
                 from functools import partial
                 impls[legacy]=Implementation(legacy,partial(legacy_call,entries["v2_symbol"],backend))
+    from .references.aten_rows import registrations as aten_rows
+    impls.update(aten_rows(row["name"]))
     def inputs(case, seed):
         if factory is None:
             return seed

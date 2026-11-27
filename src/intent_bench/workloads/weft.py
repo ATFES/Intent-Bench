@@ -106,6 +106,8 @@ def build(row):
                 if device.startswith("mlu"):import torch_mlu
                 args=tuple(torch.from_numpy(v).to(device) for v in args)
             return bind("q4_projection",backend,args,env,device)
+        from ..references.aten_rows import registrations
+        implementations.update(registrations(row["name"]))
         for backend in ("triton","cutile","mojo","weft","bangc"):
             key="intent-v2:"+backend
             implementations[key]=Implementation(key,partial(projection_call,backend))

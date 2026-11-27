@@ -91,12 +91,42 @@ def author_arguments(values, device):
     return args
 
 
+def with_reciprocal_permission(kernel, division_count):
+    """Change only the registered division sites in a benchmark author variant."""
+    import ast
+    from types import SimpleNamespace
+
+    class ReciprocalPermission(ast.NodeTransformer):
+        def visit_BinOp(self, op):
+            self.generic_visit(op)
+            if isinstance(op.op, ast.Div):
+                return ast.copy_location(ast.Call(
+                    func=ast.Attribute(value=ast.Name(id="I", ctx=ast.Load()), attr="fdiv", ctx=ast.Load()),
+                    args=[op.left, op.right],
+                    keywords=[ast.keyword(arg="approximate", value=ast.Constant(True))]), op)
+            return op
+
+    module = ast.parse(kernel.source)
+    if sum(isinstance(op, ast.Div) for op in ast.walk(module)) != division_count:
+        raise ValueError("recheck the registered reference quotient sites")
+    return SimpleNamespace(source=ast.unparse(ast.fix_missing_locations(ReciprocalPermission().visit(module))).encode())
+
+
 def bind(name, backend, args, env, device):
     import intentdsl
     from intentdsl import examples
     options = env.options.get("compilerinfra", {})
     math_kwargs = {k: options[k] for k in ("fpmath_mode", "fast_math", "denormal_fp_math", "numerics") if k in options}
-    kernel = intentdsl.jit(getattr(examples, name), backend=backend,
+    definition = getattr(examples, name)
+    if options.get("reference_numerics") is not None:
+        contracts = {("adamw", "bangc", "torch_mlu_fused_adamw"): 3,
+                     ("softmax", "mojo", "aten_cpu_softmax"): 1,
+                     ("softmax", "weft", "aten_cpu_softmax"): 1}
+        count = contracts.get((name, backend, options["reference_numerics"]))
+        if count is None or math_kwargs or (options.get("configuration") or {}).get("numerical"):
+            raise ValueError("reference arithmetic requires its registered workload, backend and default environment")
+        definition = with_reciprocal_permission(definition, count)
+    kernel = intentdsl.jit(definition, backend=backend,
                            library=options.get("library"), configuration=options.get("configuration"),
                            **math_kwargs)
     mutable = {"adamw": (1,2,3), "rope":(0,1), "batch_norm":(3,4),"cholesky":(0,)}.get(name, ())

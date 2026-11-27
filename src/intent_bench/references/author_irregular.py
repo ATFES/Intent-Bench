@@ -9,7 +9,28 @@ def prepare(name, implementation, arguments, environment):
     device = str(arguments[0].device)
     owners = arguments
     note = ""
-    if implementation == "oracle":
+    if implementation == "aten:source" and name == "csr_spmv":
+        offsets, columns, values, vector = arguments
+        def run():
+            rows = torch.arange(offsets.numel() - 1, device=device)
+            indices = rows.repeat_interleave(offsets.diff().long(), output_size=values.numel())
+            return values.new_zeros(rows.numel()).index_add_(0, indices, values * vector[columns.long()])
+        library = "ATen CSR gather and segmented sum"
+    elif implementation == "aten:source" and name == "moe_alignment":
+        from intent.examples.kernels.routing.moe_align import BLOCK_SIZE, EXPERTS
+        run = lambda: cpu_runtime.moe_align_block_size(arguments[0], BLOCK_SIZE, EXPERTS)
+        library = "ATen stable route ordering and block padding"
+    elif implementation == "aten:source" and name == "ragged_gemm":
+        x, offsets, weights = arguments
+        def run():
+            parts = [x[offsets[i]:offsets[i+1]].float() @ w.float() for i, w in enumerate(weights)]
+            return torch.cat(parts).to(x.dtype)
+        library = "ATen grouped FP32 matmul including dynamic group bounds"
+    elif implementation == "aten:source" and name in {"causal_convolution", "nonzero"}:
+        fn = cpu_runtime.causal_conv1d if name == "causal_convolution" else cpu_runtime.compact_nonzero
+        run = lambda: fn(*arguments)
+        library = "ATen grouped convolution and SiLU" if name == "causal_convolution" else "ATen stable nonzero compaction"
+    elif implementation == "oracle":
         if name == "csr_spmv":
             offsets, columns, values, vector = arguments
             run = lambda: torch.segment_reduce(values * vector[columns.long()], "sum", offsets=offsets)

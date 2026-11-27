@@ -9,7 +9,28 @@ def prepare(name, implementation, arguments, environment):
 
     device = str(arguments[0].device)
     owners = arguments
-    if implementation == "oracle":
+    if implementation == "aten:source" and name == "attention":
+        from .aten_rows import row_attention
+        run = lambda: row_attention("causal", *arguments)
+        library = "ATen causal grouped attention with BF16 unnormalized weights"
+    elif implementation == "aten:source" and name == "gated_delta":
+        from ..corpus.cpu.baselines.pytorch import cpu_runtime
+        q, k, v, gate, beta, scale = arguments
+        group = v.shape[2] // q.shape[2]
+        def run():
+            return cpu_runtime.recurrent_gated_delta_fwd(q.repeat_interleave(group, dim=2),
+                k.repeat_interleave(group, dim=2), v, gate, beta, scale)
+        library = "ATen ordered gated delta including grouped heads and final state"
+    elif implementation == "aten:source" and name in {"paged_decode", "causal_linear_attention"}:
+        from .aten_rows import paged_gqa, ordered_linear_attention
+        fn = paged_gqa if name == "paged_decode" else ordered_linear_attention
+        run = lambda: fn(*arguments)
+        library = "ATen split-K paged GQA" if name == "paged_decode" else "ATen ordered FP32 state recurrence"
+    elif implementation == "aten:source" and name == "mamba_chunk_state":
+        from ..corpus.cpu.baselines.pytorch import cpu_runtime
+        run = lambda: cpu_runtime.mamba_chunk_state_bf16_fwd(*arguments)
+        library = "ATen BF16 chunk state with FP32 output"
+    elif implementation == "oracle":
         from ..corpus.cpu.baselines.pytorch import cpu_runtime
         if name == "attention":
             run = lambda: cpu_runtime.flash_attention_bf16_fwd(*arguments)

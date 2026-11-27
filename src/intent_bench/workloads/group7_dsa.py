@@ -7,6 +7,7 @@ import struct
 import numpy as np
 
 from ..implementations.context import Tolerance
+from ..implementations.prepared import attach_device_timer
 from ..model import Case, EnvironmentUnavailable, Implementation, PreparedCall, Workload
 
 V2_EXITS = (
@@ -544,44 +545,6 @@ def _prepare_baseline(name, impl, case, data, env, device):
     raise KeyError((name, impl))
 
 
-def _attach_device_timer(prepared: PreparedCall) -> PreparedCall:
-    if prepared.native_measure is not None:
-        return prepared
-    if prepared.device == "cpu":
-        import time
-        from ..implementations.native_sampling import sample_timer
-
-        class _HostTimer:
-            def __init__(self, fn):
-                self._fn = fn
-
-            def run(self):
-                t0 = time.perf_counter()
-                self._fn()
-                return (time.perf_counter() - t0) * 1000.0
-
-        timer = _HostTimer(prepared.launch)
-        noop = lambda: None
-        prepared.native_measure = lambda settings: sample_timer(
-            timer, settings, noop, metadata=prepared.metadata
-        )
-        prepared.timing = "cpu_monotonic"
-    elif prepared.device.startswith("mlu:"):
-        import torch
-        from ..implementations.mlu_rows import timer
-        from .programs import _tree
-
-        stream = torch.mlu.current_stream(prepared.device)
-        prepared.synchronize = stream.synchronize
-        prepared.native_measure = lambda settings: timer(
-            prepared.launch, stream, settings
-        )
-        prepared.timing = "cnrt_notifier"
-        orig_res = prepared.result
-        prepared.result = lambda: _tree(orig_res(), lambda v: v.cpu())
-    return prepared
-
-
 def build(name):
     cases_map = {
         "q6k_gemv": [Case("4096x4096-q6k", dict(n=4096, k=4096))],
@@ -613,7 +576,7 @@ def build(name):
         if impl.startswith("intent-v2:"):
             backend = impl.partition(":")[2]
             return _prepare_v2(name, backend, _transfer(data, device), env, device)
-        return _attach_device_timer(
+        return attach_device_timer(
             _prepare_baseline(name, impl, case, data, env, device)
         )
 

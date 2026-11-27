@@ -133,3 +133,43 @@ def intent_sequence(call, result, *, reset=None, host_run=None, host_result=None
                         native_measure=measure, timing='cpu_native_monotonic', close=close,
                         host_run=host_run or call.launch, host_result=host_result or result,
                         metadata=call_metadata, owners=call, compiler_observations=observations)
+
+
+def attach_device_timer(prepared):
+    if prepared.native_measure is not None:
+        return prepared
+    if prepared.device == "cpu":
+        import time
+        from ..implementations.native_sampling import sample_timer
+
+        class _HostTimer:
+            def __init__(self, fn):
+                self._fn = fn
+
+            def run(self):
+                t0 = time.perf_counter()
+                self._fn()
+                return (time.perf_counter() - t0) * 1000.0
+
+        timer = _HostTimer(prepared.launch)
+        def restore():
+            if prepared.reset is not None:
+                prepared.reset()
+        prepared.native_measure = lambda settings: sample_timer(
+            timer, settings, restore, metadata=prepared.metadata
+        )
+        prepared.timing = "cpu_monotonic"
+    elif prepared.device.startswith("mlu:"):
+        import torch
+        from ..implementations.mlu_rows import timer
+        from ..workloads.programs import _tree
+
+        stream = torch.mlu.current_stream(prepared.device)
+        prepared.synchronize = stream.synchronize
+        prepared.native_measure = lambda settings: timer(
+            prepared.launch, stream, settings, reset=prepared.reset
+        )
+        prepared.timing = "cnrt_notifier"
+        orig_res = prepared.result
+        prepared.result = lambda: _tree(orig_res(), lambda v: v.cpu())
+    return prepared

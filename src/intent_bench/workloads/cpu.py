@@ -66,6 +66,8 @@ def build(name):
         from functools import partial
         for backend in ("weft","mojo","triton","cutile","bangc"):
             key="intent-v2:"+backend;implementations[key]=Implementation(key,partial(prepare_bins,backend))
+    from ..references.aten_rows import registrations
+    implementations.update(registrations("cpu/" + name))
     return Workload("cpu/"+name,[Case("small",{"rows":16,"columns":32}),Case("large",{"rows":512,"columns":1024})],
                     lambda case,seed:inputs(name,case,seed),
                     implementations,
