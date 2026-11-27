@@ -154,8 +154,10 @@ class Result:
     baseline: str | None = None
     baseline_ms: float | None = None
     speedup: float | None = None
+
     stages_seconds: dict[str, float] = field(default_factory=dict)
     metrics: dict[str, float] = field(default_factory=dict)
     metadata: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
     traceback: str | None = None
+    latency_comparison: dict | None = None

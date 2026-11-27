@@ -91,3 +91,14 @@ def test_host_scope_uses_the_host_entry():
     bench=Workload('host',[Case('one')],lambda c,s:(),{'impl':Implementation('impl',prepare)},oracle=lambda c,a:np.ones(1))
     row,=benchmark(bench,measurement=Measurement(samples=2,warmup=0,scope='host_call'))
     assert row.status=='passed' and row.method=='host' and calls==['host']*3
+
+
+def test_latency_comparison_uses_dispersion_within_and_between_rounds():
+    from intent_bench.comparison import compare_latency
+
+    assert compare_latency([([10] * 5, [12] * 5)]).classification == "faster"
+    assert compare_latency([([8, 9, 10, 13, 16], [12] * 5)]).classification == "tie"
+    assert compare_latency([([9] * 5, [10] * 5), ([12] * 5, [10] * 5)]).classification == "tie"
+    assert compare_latency([([13] * 5, [10] * 5)]).classification == "slower"
+    assert compare_latency([([6] * 5, [8] * 5)], short_limit=8, resolution=2.1).classification == "tie"
+    assert compare_latency([([5], [10])]) is None

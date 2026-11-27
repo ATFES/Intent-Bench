@@ -5,6 +5,7 @@ import platform
 import time
 import traceback
 from dataclasses import asdict, replace
+
 from contextlib import nullcontext
 import sys
 from typing import Sequence
@@ -12,6 +13,7 @@ from typing import Sequence
 import numpy as np
 
 from .model import DeviceBusy, Environment, Implementation, Measurement, Result, Workload
+from .comparison import compare_latency
 from .measurement import device_window, measure, reset, synchronize
 from .trees import assert_close, clone
 
@@ -225,3 +227,7 @@ def assign_speedups(rows, baseline):
                 and row.metadata.get("timing_boundary") == anchor.metadata.get("timing_boundary")):
             row.baseline_ms = anchor.median_ms
             row.speedup = anchor.median_ms / row.median_ms
+            if all(math.isfinite(x) and x > 0 for group in (row.samples_ms, anchor.samples_ms) for x in group):
+                comparison = compare_latency([(row.samples_ms, anchor.samples_ms)])
+                if comparison is not None:
+                    row.latency_comparison = asdict(comparison)
