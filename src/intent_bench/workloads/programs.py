@@ -458,6 +458,13 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                 from ..implementations.mlu_rows import timer
                 import torch_mlu
                 stream = torch.mlu.current_stream(device)
+                if (name == "batched_gemm" and implementation == "torch" and
+                        "370" in torch.mlu.get_device_name(x.device.index)):
+                    call.metadata["numerical_contract"] = "allow_subnormal_ftz"
+                    call.metadata["scope_note"] = (
+                        "Native MLU370 BF16 bmm flushes subnormal inputs and products. "
+                        "Its latency is comparable to the explicit FTZ case. "
+                        "For the IEEE case it is a separate numerical contract.")
                 call.native_measure = lambda settings: timer(call.launch, stream, settings)
                 call.synchronize = stream.synchronize
                 call.timing = "cnrt_notifier"
