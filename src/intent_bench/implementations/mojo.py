@@ -60,10 +60,12 @@ def prepare(name, case, inputs, env):
         # Keep every allocation alive with the prepared call, including unused ABI slots.
         native.bench_run(op,*(x.ctypes.data for x in arrays),*shapes)
     def result():return tuple(outputs) if name=="adamw" else outputs[0]
+    metadata = {"artifact": str(build), "baseline": "independent Mojo", "workers": 1}
     def measure(settings):
-        for _ in range(settings.warmup):run()
-        pilot=timer.bench_time(native.bench_run,op,ptrs,shapes,1)
-        repeat=max(1,min(10000,int(2/max(pilot,1e-6))))
-        return [timer.bench_time(native.bench_run,op,ptrs,shapes,repeat) for _ in range(settings.samples)]
+        from .native_sampling import sample_native_call
+        return sample_native_call(
+            lambda: timer.bench_time(native.bench_run, op, ptrs, shapes, 1),
+            settings, lambda: None, metadata=metadata,
+        )
     return PreparedCall(run,result,native_measure=measure,timing="cpu_native_monotonic",
-                        metadata={"artifact":str(build),"baseline":"independent Mojo", "workers":1})
+                        metadata=metadata)
