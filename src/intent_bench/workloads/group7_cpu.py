@@ -445,16 +445,16 @@ def _prepare_baseline(name, impl, case, data, env, device):
         pos = torch.arange(t, device=device, dtype=torch.float32)
         diff = pos[:, None] - pos[None, :]
         causal = diff >= 0
-        # Precompute lower-triangular RetNet decay matrix D_{h, i, j} = gamma_h^{i - j} (i >= j)
-        log_g = torch.log(gamma)[:, None, None]
-        decay_mat = torch.where(
-            causal[None, :, :],
-            torch.exp(log_g * diff[None, :, :].clamp_min(0.0)),
-            torch.zeros((gamma.shape[0], t, t), device=device, dtype=torch.float32),
-        )
-        tail_decay = torch.exp(log_g[:, 0, 0][:, None] * (float(t - 1) - pos[None, :]))
 
-        def eager_retnet(q_in, k_in, v_in):
+        def eager_retnet(q_in, k_in, v_in, gamma_in):
+            # Decay depends on the input gamma, including on warm invocations.
+            log_g = torch.log(gamma_in)[:, None, None]
+            decay_mat = torch.where(
+                causal[None, :, :],
+                torch.exp(log_g * diff[None, :, :].clamp_min(0.0)),
+                torch.zeros((gamma_in.shape[0], t, t), device=device, dtype=torch.float32),
+            )
+            tail_decay = torch.exp(log_g[:, 0, 0][:, None] * (float(t - 1) - pos[None, :]))
             qf = q_in.float().permute(0, 2, 1, 3) * scale
             kf = k_in.float().permute(0, 2, 1, 3)
             vf = v_in.float().permute(0, 2, 1, 3)
@@ -467,13 +467,13 @@ def _prepare_baseline(name, impl, case, data, env, device):
         fn = torch.compile(eager_retnet) if impl == "inductor" else eager_retnet
 
         def launch():
-            state["out"] = fn(q, k, v)
+            state["out"] = fn(q, k, v, gamma)
 
         return PreparedCall(
             launch,
             lambda: state["out"],
             device=device,
-            owners=(args, decay_mat, tail_decay),
+            owners=(args, pos, diff, causal),
             metadata={
                 "library": f"PyTorch {'Inductor' if impl == 'inductor' else 'ATen BLAS'} RetNet retention ({device})"
             },

@@ -6,6 +6,22 @@ from intent_bench.measurement import _measure_python, measure
 from intent_bench.results import compare, table
 
 
+def test_retention_call_reads_gamma_at_launch():
+    torch = pytest.importorskip("torch")
+    from intent_bench.workloads.group7_cpu import _prepare_baseline
+
+    x = torch.ones((1, 3, 1, 1), dtype=torch.bfloat16)
+    gamma = torch.tensor([0.5])
+    call = _prepare_baseline("retention_recurrence", "aten:cpu", None,
+                             (x, x, x, gamma, 1.0), None, "cpu")
+    for decay, expected in ((0.5, 1.75), (0.25, 1.3125)):
+        gamma.fill_(decay)
+        call.launch()
+        sequence, final_state = call.result()
+        assert sequence[0, -1, 0, 0].item() == expected
+        assert final_state.item() == expected
+
+
 def test_cuda_reset_and_flush_are_outside_each_event_interval():
     log = []
     class Event:
