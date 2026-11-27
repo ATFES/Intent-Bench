@@ -404,15 +404,29 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                     lambda: module.bmm(*arguments, transpose_a=False, transpose_b=False,
                                        static_persistent=True, compiler_timeout=60))
                 source = "NVIDIA TileGym/"+path
+            elif implementation == "oracle" and name in {"layer_norm", "softmax"}:
+                import numpy as np
+                data = x.cpu().numpy().astype(np.float32)
+                if name == "layer_norm":
+                    gain, bias, inv, eps = arguments[1:]
+                    gain, bias = gain.cpu().numpy(), bias.cpu().numpy()
+                    def function():
+                        center = data.sum(-1, keepdims=True) * np.float32(inv)
+                        variance = (data * data).sum(-1, keepdims=True) * np.float32(inv) - center * center
+                        rstd = np.reciprocal(np.sqrt(variance + np.float32(eps)))
+                        return torch.from_numpy((data - center) * rstd * gain + bias).to(device)
+                else:
+                    def function():
+                        weights = np.exp(data - data.max(-1, keepdims=True))
+                        return torch.from_numpy(weights / weights.sum(-1, keepdims=True)).to(x)
+                source = "Independent NumPy FP32 author formula"
             elif implementation == "aten:source" and name == "layer_norm":
                 from ..references.aten_rows import raw_moment_norm
                 function = lambda: raw_moment_norm(*arguments)
                 source = "ATen FP32 raw moments and rsqrt"
             elif implementation == "aten:source" and name == "softmax":
-                def function():
-                    v = x.float()
-                    weights = (v - v.amax(dim=-1, keepdim=True)).exp()
-                    return (weights / weights.sum(dim=-1, keepdim=True)).to(x.dtype)
+                from ..references.aten_rows import softmax
+                function = lambda: softmax(x)
                 source = "ATen FP32 exp, sum and div"
             elif name == "relu":
                 function = lambda: torch.relu(x)
