@@ -29,13 +29,14 @@ def save(results, directory=None, *, command=None):
         "results": rows}, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
     temporary.replace(directory/'results.json')
     fields = ["workload", "case", "implementation", "status", "latency_ms", "baseline", "baseline_ms", "speedup", "throughput", "unit",
-              "device", "method", "scope", "cache"]
+              "device", "method", "scope", "cache", "iqr_ms", "classification", "ratio_low", "ratio_high"]
     with (directory / "results.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields)
         writer.writeheader()
         for row in rows:
             values = {key: row.get(key) for key in fields}
             values["latency_ms"] = row.get("median_ms")
+            values.update(row.get("latency_comparison") or {})
             values["throughput"], values["unit"] = throughput(row)
             values["cache"] = row.get("metadata", {}).get("cache_policy", "unspecified")
             writer.writerow(values)
@@ -76,10 +77,12 @@ def _groups(results):
 
 def _cells(row, with_throughput, with_baseline):
     values = [f"{row['workload']}/{row['case']}", row["implementation"], row["status"], _number(row.get("median_ms"))]
+    values.append(_number(row.get("iqr_ms")))
     if with_baseline:
         speedup = row.get("speedup")
         values.extend((row.get("baseline") or "—", _number(row.get("baseline_ms")),
-                       "—" if speedup is None else f"{speedup:.3f}x"))
+                       "—" if speedup is None else f"{speedup:.3f}x",
+                       (row.get("latency_comparison") or {}).get("classification", "—")))
     if with_throughput:
         value, unit = throughput(row)
         values.append(f"{_number(value)} {unit}".rstrip())
@@ -92,8 +95,8 @@ def table(results):
         with_throughput = any(throughput(row)[0] is not None for row in rows)
         with_baseline = any(row.get("baseline") for row in rows)
         lines.append(" / ".join(part for part in key if part))
-        lines.append("workload / case | implementation | status | latency ms"
-                     + (" | baseline | baseline ms | speedup" if with_baseline else "")
+        lines.append("workload / case | implementation | status | latency ms | IQR ms"
+                     + (" | baseline | baseline ms | speedup | classification" if with_baseline else "")
                      + (" | throughput" if with_throughput else ""))
         for row in rows:
             lines.append(" | ".join(_cells(row, with_throughput, with_baseline)))
@@ -146,9 +149,9 @@ def write_html(results, path, *, source=None):
     for key, rows in _groups(results).items():
         with_throughput = any(throughput(row)[0] is not None for row in rows)
         with_baseline = any(row.get("baseline") for row in rows)
-        columns = ["Workload / case", "Implementation", "Status", "Latency (ms)"]
+        columns = ["Workload / case", "Implementation", "Status", "Latency (ms)", "IQR (ms)"]
         if with_baseline:
-            columns.extend(("Baseline", "Baseline (ms)", "Speedup"))
+            columns.extend(("Baseline", "Baseline (ms)", "Speedup", "Classification"))
         if with_throughput:
             columns.append("Throughput")
         body = []

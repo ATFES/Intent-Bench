@@ -110,7 +110,7 @@ output/
 - 编译、首次调用/调优、热调用分别记录。默认按 25 ms 预热和 100 ms 采样预算估计次数，
   samples/warmup 可显式覆盖。原始毫秒样本保存在 JSON；CSV/HTML 是简表。
 - speedup=baseline_ms/implementation_ms，只比较设备、scope、计时边界和缓存策略匹配且
-  数值通过的结果。数值失败的诊断时间不作为性能胜出。
+  数值通过的结果。每侧至少有 3 个样本时，用候选与参照的中间 50% 样本计算倍率范围 `[Q1候选/Q3参照, Q3候选/Q1参照]`。整个范围低于 0.95 或高于 1.05 才判快或慢，其余判平。JSON 和 CSV 保存范围与四分位距（IQR）。多轮同口径采样可传给 `intent_bench.comparison.compare_latency`，各轮方向一致且超出阈值才判快慢。
 - 纯 Python 或 eager CPU 实现如实报告 host 时间，不能冒充原生 CPU timer。
 
 ## Python API 与扩展

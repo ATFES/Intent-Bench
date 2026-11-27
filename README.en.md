@@ -86,7 +86,7 @@ Compilation, initial invocation/tuning and warm measurements are separate. Defau
 are 25 ms warmup and 100 ms sampling; samples/warmup override counts. JSON retains raw
 milliseconds and diagnostics; CSV/HTML are summaries. Speedup is baseline_ms/implementation_ms
 only for numerically valid, matching devices, scopes, boundaries and cache policies.
-Historical mixed timing scopes are not treated as performance changes.
+With three or more samples on each side, the comparison spans candidate Q1 / baseline Q3 through candidate Q3 / baseline Q1. An interval wholly below 0.95 or above 1.05 counts as faster or slower. JSON and CSV retain the interval and the interquartile range. For repeated measurements, `intent_bench.comparison.compare_latency` takes matched rounds and requires agreement across all rounds.
 
 ## Python and custom implementations
 
