@@ -86,7 +86,11 @@ def prepare(name, implementation, arguments, environment):
     elif name == "adamw":
         if implementation in {"oracle", "aten:source"}:
             library = "ATen FP32 AdamW, three source-order quotients"
-            run = lambda: cpu_runtime.adamw(*arguments)
+            # Constants in this program are FP32. Keep them on device so
+            # (1 - beta) rounds in FP32 and TensorIterator does not turn a
+            # wrapped CPU scalar divisor into a host-computed reciprocal.
+            values = arguments[:4] + tuple(x.new_tensor(v) for v in arguments[4:])
+            run = lambda: cpu_runtime.adamw(*values)
         else:
             gradient, parameter, first, second, lr, beta1, beta2, correction1, correction2, eps, decay = arguments
             if correction1 != 1-beta1 or correction2 != 1-beta2:
