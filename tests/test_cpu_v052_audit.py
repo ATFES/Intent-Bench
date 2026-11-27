@@ -832,6 +832,43 @@ def test_weft_exp_ftz_preserves_small_normal_weights():
     torch.testing.assert_close(actual[0, 0, :, 0], expected, atol=0, rtol=0)
 
 
+@pytest.mark.parametrize("stage", ["input", "product"])
+def test_weft_native_and_explicit_ieee_bf16_dot(stage):
+    library, _ = _require_compiler()
+    torch = pytest.importorskip("torch")
+    pytest.importorskip("weft_core")
+    import intentdsl as I
+    from intentdsl import examples
 
-
-
+    q = torch.zeros((1, 4, 256, 128), dtype=torch.bfloat16)
+    k = torch.zeros((1, 1, 256, 128), dtype=q.dtype)
+    v = torch.zeros_like(k)
+    if stage == "input":
+        q.view(torch.int16)[..., 0] = 0x0040  # BF16 2^-127
+        k[:, :, ::2, 0] = 2.0**127
+        v[:, :, ::2, :] = 1
+        row, ieee, native = -1, 0x3F3B, 0x3F00
+    else:
+        q[..., 0] = 1
+        k[:, :, 1, 0] = -0.6953125
+        v[:, :, 1, :] = 2.0**-126
+        row, ieee, native = 1, 0x002B, 0
+    args = q, k, v, 1.0
+    for options, bits in [
+        ({}, native),
+        ({"denormal_fp_math": "ieee"}, ieee),
+        ({"float32_matmul_precision": "highest"}, ieee),
+    ]:
+        ker = I.jit(
+            examples.attention_unscaled_max, backend="weft", library=library, **options
+        )
+        values, _, device = ker.binding.bind(args, None)
+        caps = ker.target.options(ker.target.profile(device, values))
+        if not (caps.get("amx_bf16") and caps.get("weft_brgemm_bf16")):
+            pytest.skip("requires AMX BF16 and oneDNN BRGEMM")
+        assert int(ker.run(*args)[0, 0, row, 0].view(torch.int16)) == bits
+    reference = torch.nn.functional.scaled_dot_product_attention(
+        q, k.repeat_interleave(4, dim=1), v.repeat_interleave(4, dim=1),
+        is_causal=True, scale=1.0,
+    )
+    assert int(reference[0, 0, row, 0].view(torch.int16)) == native
