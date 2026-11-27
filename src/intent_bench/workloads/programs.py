@@ -463,8 +463,8 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                     call.metadata["numerical_contract"] = "allow_subnormal_ftz"
                     call.metadata["scope_note"] = (
                         "Native MLU370 BF16 bmm flushes subnormal inputs and products. "
-                        "Its latency is comparable to the explicit FTZ case. "
-                        "For the IEEE case it is a separate numerical contract.")
+                        "This matches the author-unspecified BF16 dot and explicit FTZ. "
+                        "Explicit IEEE or FP32-product is a separate contract.")
                 call.native_measure = lambda settings: timer(call.launch, stream, settings)
                 call.synchronize = stream.synchronize
                 call.timing = "cnrt_notifier"
