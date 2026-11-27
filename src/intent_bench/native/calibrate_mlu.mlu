@@ -1,5 +1,8 @@
 #include <bang.h>
 #include <cnrt.h>
+#ifdef PROFILE_CERTIFIED_DIV
+#include "certified_div.mlu"
+#endif
 __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips){
     __nram__ float local[2048];
     if(mode==0)return;
@@ -25,7 +28,7 @@ __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips)
     if(mode>=6){
         __nram__ float tmp[2048];
         __nram__ float divisor[2048];
-        if(mode==9) __bang_write_value(divisor,n,1.75f);
+        if(mode==9 || mode==15) __bang_write_value(divisor,n,1.75f);
         __memcpy(local,x+taskId*n,n*4,GDRAM2NRAM);
         for(int k=0;k<trips;k++) {
             if(mode==6) { __bang_argmax(tmp,local,n); __sync_compute(); }
@@ -34,6 +37,12 @@ __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips)
             if(mode==9) __cn_vector_div_f32_rn(n,tmp,local,divisor);
             if(mode==13) __cn_vector_div_scalar_f32_rn(n,tmp,local,1.75f);
             if(mode==14) __cn_scalar_div_vector_f32_rn(n,tmp,1.75f,local);
+#ifdef PROFILE_CERTIFIED_DIV
+            __nram__ float scratch[6 * 2048];
+            if(mode==15) certified_div_rn(tmp,local,divisor,scratch,n,n);
+            if(mode==16) certified_div_rn(tmp,local,1.75f,scratch,n,n);
+            if(mode==17) certified_div_rn(tmp,1.75f,local,scratch,n,n);
+#endif
             asm volatile("" ::: "memory");
         }
         __memcpy(y+taskId*n,tmp,n*4,NRAM2GDRAM);

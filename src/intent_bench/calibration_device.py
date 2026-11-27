@@ -53,7 +53,11 @@ def mlu(root):
     src=Path(__file__).with_name("native")/"calibrate_mlu.mlu"
     cc=os.path.join(os.environ["NEUWARE_HOME"],"bin","cncc")
     lib=root/"traffic.so"
-    subprocess.run([cc,"--bang-mlu-arch=mtp_372","-O2","-shared","-fPIC",str(src),"-o",str(lib),"-lcnrt"],check=True)
+    library = os.environ.get("INTENTDSL_LIBRARY")
+    assets = Path(library).parent / "intentdsl.assets/runtime/bangc/kernels" if library else None
+    certified = assets is not None and (assets / "certified_div.mlu").is_file()
+    flags = ["-DPROFILE_CERTIFIED_DIV", "-I", str(assets)] if certified else []
+    subprocess.run([cc,*flags,"--bang-mlu-arch=mtp_372","-O2","-shared","-fPIC",str(src),"-o",str(lib),"-lcnrt"],check=True)
     mod=ctypes.CDLL(str(lib));call=mod.enqueue;call_tasks=mod.enqueue_tasks
     call.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*4),ctypes.c_void_p]
     call_tasks.argtypes=[ctypes.c_void_p,ctypes.c_void_p,*([ctypes.c_int]*5),ctypes.c_void_p]
@@ -96,7 +100,10 @@ def mlu(root):
         data["dma_"+label+"_rmse"]=errors
     data["compute"]=[2048*512/v for v in elapsed(2048,1,4,512)]
     # Difference across trip counts removes launch, input DMA and final drain.
-    for mode,name in ((6,"max"),(7,"sum"),(8,"exp"),(9,"div_rn_vv"),(13,"div_rn_vs"),(14,"div_rn_sv")):
+    probes = [(6,"max"),(7,"sum"),(8,"exp"),(9,"div_rn_vv"),(13,"div_rn_vs"),(14,"div_rn_sv")]
+    if certified:
+        probes.extend([(15,"certified_div_vv"),(16,"certified_div_vs"),(17,"certified_div_sv")])
+    for mode,name in probes:
         for width in (64,512,2048):
             short=elapsed(width,1,mode,16)
             long=elapsed(width,1,mode,128)
