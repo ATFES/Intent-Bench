@@ -3,7 +3,7 @@
 __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips){
     __nram__ float local[2048];
     if(mode==0)return;
-    if(mode>=10){
+    if(mode>=10 && mode<=12){
         __nram__ float tmp[2048];
         if(mode==11||mode==12) __memcpy(local,x+taskId*n,n*4,GDRAM2NRAM);
         for(int k=0;k<trips;k++){
@@ -24,23 +24,16 @@ __mlu_global__ void traffic(float *x,float *y,int n,int step,int mode,int trips)
     }
     if(mode>=6){
         __nram__ float tmp[2048];
-        __nram__ half a[2048],b[2048];
+        __nram__ float divisor[2048];
+        if(mode==9) __bang_write_value(divisor,n,1.75f);
         __memcpy(local,x+taskId*n,n*4,GDRAM2NRAM);
         for(int k=0;k<trips;k++) {
             if(mode==6) { __bang_argmax(tmp,local,n); __sync_compute(); }
             if(mode==7) { __bang_sumpool(tmp,local,32,n/32,1,n/32,1,1,1); __bang_reduce_sum(tmp,tmp,32); __sync_compute(); }
             if(mode==8) { __bang_abs(tmp,local,n);__bang_argmax(tmp,tmp,n);__sync_compute();__bang_active_exphp(tmp,local,n); }
-            if(mode==9) {
-                __bang_mul_scalar(tmp,local,0.3125f,n);
-                __bang_add_scalar((int*)tmp,(int*)tmp,-4,n);
-                __bang_float2half_rn(a,tmp,n);
-                __bang_add_scalar((int*)tmp,(int*)tmp,8,n);
-                __bang_float2half_rn(b,tmp,n);
-                __bang_bxor((short*)a,(short*)a,(short*)b,n);
-                __bang_int162float(tmp,(short*)a,n,0);
-                volatile unsigned count=__bang_count(tmp,n);
-                (void)count;
-            }
+            if(mode==9) __cn_vector_div_f32_rn(n,tmp,local,divisor);
+            if(mode==13) __cn_vector_div_scalar_f32_rn(n,tmp,local,1.75f);
+            if(mode==14) __cn_scalar_div_vector_f32_rn(n,tmp,1.75f,local);
             asm volatile("" ::: "memory");
         }
         __memcpy(y+taskId*n,tmp,n*4,NRAM2GDRAM);

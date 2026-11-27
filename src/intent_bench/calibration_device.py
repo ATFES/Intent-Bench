@@ -96,7 +96,7 @@ def mlu(root):
         data["dma_"+label+"_rmse"]=errors
     data["compute"]=[2048*512/v for v in elapsed(2048,1,4,512)]
     # Difference across trip counts removes launch, input DMA and final drain.
-    for mode,name in ((6,"max"),(7,"sum"),(8,"exp"),(9,"quotient")):
+    for mode,name in ((6,"max"),(7,"sum"),(8,"exp"),(9,"div_rn_vv"),(13,"div_rn_vs"),(14,"div_rn_sv")):
         for width in (64,512,2048):
             short=elapsed(width,1,mode,16)
             long=elapsed(width,1,mode,128)
