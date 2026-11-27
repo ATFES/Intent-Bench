@@ -5,6 +5,21 @@ from ..model import EnvironmentUnavailable, Implementation, PreparedCall
 from ..implementations.prepared import attach_device_timer
 
 
+def ordered_retention(q, k, v, gamma, scale):
+    """Keep every FP32 time-step state and the author's BF16 output rounding."""
+    import torch
+
+    batch, steps, heads, width = k.shape
+    state = torch.zeros((batch, heads, width, v.size(-1)), dtype=torch.float32, device=q.device)
+    query, key, value = q.float() * scale, k.float(), v.float()
+    out = torch.empty_like(v)
+    decay = gamma.reshape(1, heads, 1, 1)
+    for t in range(steps):
+        state = state * decay + key[:, t].unsqueeze(-1) * value[:, t].unsqueeze(-2)
+        out[:, t] = (query[:, t].unsqueeze(-1) * state).sum(-2)
+    return out, state
+
+
 def histogram(indices, bins):
     import torch
     keys = indices.to(torch.int64)
@@ -252,6 +267,7 @@ def registrations(name):
         "group7/layer_norm_welford": welford_norm,
         "group7/log_softmax_kl": log_softmax_kl,
         "group7/cross_entropy": cross_entropy,
+        "group7/retention_recurrence": ordered_retention,
         "group7/alibi_attention": partial(row_attention, "alibi"),
         "group7/attention_unscaled_max": partial(row_attention, "unscaled"),
         "group7/sliding_window_attention": partial(row_attention, "window"),
