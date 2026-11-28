@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "intentdsl-bench"
-version = "0.2.0"
+version = "0.3.0"
 description = "Extensible operator correctness and performance comparisons"
 readme = "README.md"
 license = "Apache-2.0"

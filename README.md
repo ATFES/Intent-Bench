@@ -1,5 +1,7 @@
 # IntentDSL Bench
 
+0.3.0 版在三轮完整调用的离散度之外判断快慢。IntentDSL 2.1.0 里程碑有 336 项同设备对照，244 快、85 平、7 慢。[计分板](https://github.com/Tianchen-ai/Intent/blob/main/doc/plan/v0.6-semantics.md)
+
 独立的算子正确性检查与性能比较工具。[English](README.en.md) · [第三方来源](THIRD_PARTY.md)
 
 Intent 负责本机 JIT、目标探测、编译、ABI 绑定与执行；Bench 负责选择输入、实现、

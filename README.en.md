@@ -1,5 +1,7 @@
 # IntentDSL Bench
 
+Bench 0.3.0 compares the dispersion of complete calls. For IntentDSL 2.1.0, 244 matched calls were faster, 85 tied and 7 were slower across five exits. [Scoreboard](https://github.com/Tianchen-ai/Intent/blob/main/doc/plan/v0.6-semantics.md)
+
 Independent operator correctness and performance comparisons. [中文](README.md) · [Attribution](THIRD_PARTY.md)
 
 Intent owns local JIT, target discovery, compilation, ABI binding and execution.
