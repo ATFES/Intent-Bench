@@ -98,9 +98,11 @@ def _capture_results(value, getter, bindings):
 
 
 def _mutable_arguments(program):
-    from intent.language.annotations import ConstexprSpec, ViewKind, ViewSpec
     if not isinstance(program, _Definition):
-        return tuple(program.mutable_inputs)
+        return tuple(getattr(program, "mutable_inputs", ()))
+    if hasattr(program.definition, "mutable_inputs"):
+        return tuple(program.definition.mutable_inputs)
+    from intent.language.annotations import ConstexprSpec, ViewKind, ViewSpec
     parameters = [p.annotation for p in program.definition.signature.parameters.values()
                   if not isinstance(p.annotation, ConstexprSpec)
                   and not (isinstance(p.annotation, ViewSpec) and p.annotation.kind is ViewKind.OUT)]
@@ -146,7 +148,10 @@ def _intent(name, backend, values, env):
         if context.invocation is None:
             raise ValueError("author program did not submit its complete call")
         call = context.invocation
-        from intent.examples.programs.inputs import Array
+        try:
+            from intentdsl.programs.inputs import Array
+        except ImportError:
+            from intent.examples.programs.inputs import Array
         # Author returns can include original InOut arrays alongside Out values.
         # Resolve those arrays to the same resident buffers already bound above.
         output = _tree(output, lambda value: context.buffers.input(value, element=value.dtype)
@@ -243,7 +248,10 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
     if name == "q4_projection":
         return _q4_reference(values, env, implementation)
     import torch
-    from intent.examples.programs.inputs import Array
+    try:
+        from intentdsl.programs.inputs import Array
+    except ImportError:
+        from intent.examples.programs.inputs import Array
     from ..corpus._common.measurement import functional_launch
 
     device = _device(env, implementation)
@@ -314,7 +322,10 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                 return self.bind(prepare(name, arguments, env), arguments, mutable)
             if implementation == "vllm:cpu":
                 from ..implementations.aten_cpu import prepare
-                from intent.examples.kernels.routing.moe_align import EXPERTS, BLOCK_SIZE, PADDED_ROUTES
+                try:
+                    from intentdsl.programs import EXPERTS, BLOCK_SIZE, PADDED_ROUTES
+                except ImportError:
+                    from intent.examples.kernels.routing.moe_align import EXPERTS, BLOCK_SIZE, PADDED_ROUTES
                 return self.bind(prepare("vllm_moe_alignment",
                     (*arguments, EXPERTS, BLOCK_SIZE, PADDED_ROUTES), env), arguments, mutable)
             if implementation == "ggml":
