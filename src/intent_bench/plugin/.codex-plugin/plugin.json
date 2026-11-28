@@ -1,6 +1,6 @@
 {
   "name": "intentdsl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "IntentDSL operator development, GPU comparisons and native baselines",
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
