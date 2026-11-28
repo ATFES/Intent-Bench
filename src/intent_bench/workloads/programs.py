@@ -367,7 +367,7 @@ def _reference(name, values, env, implementation="torch", *, allow_subnormal_ftz
                             "reference_source": "corpus/cpu/baselines/mojo/modular/normalization/layer_norm/layer_norm.mojo"}
                 call = PreparedCall(native.launch, native.result, device=device,
                     timing="cpu_native_monotonic", owners=native, metadata=metadata,
-                    native_measure=lambda settings: sample_timer(native, settings, lambda: None, metadata=metadata))
+                    native_measure=lambda settings: sample_timer(native, settings, None, metadata=metadata))
                 return self.bind(call, arguments, mutable)
             from ..references.author_programs import prepare as prepare_additional
             if name in {"csr_spmv", "ragged_gemm", "int8_gemm", "causal_convolution", "moe_alignment", "nonzero"}:

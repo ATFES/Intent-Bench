@@ -175,13 +175,12 @@ def _prepare_v2(name, backend, args, env, device):
         from ..implementations.native_sequence import NativeSequence
 
         timer = None
-        noop = lambda: None
 
         def measure(settings):
             nonlocal timer
             if timer is None:
                 timer = NativeSequence((call,))
-            return sample_timer(timer, settings, noop, metadata=metadata)
+            return sample_timer(timer, settings, None, metadata=metadata)
 
         prepared.native_measure = measure
         prepared.close = lambda: timer and timer.close()

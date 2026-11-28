@@ -62,7 +62,7 @@ def prepare(name, impl, case, args, env):
             nonlocal timer
             if timer is None:
                 timer = NativeSequence((call,))
-            return sample_timer(timer, settings, lambda: None, metadata=metadata)
+            return sample_timer(timer, settings, None, metadata=metadata)
 
         return PreparedCall(
             getattr(call, "execute", call.launch),

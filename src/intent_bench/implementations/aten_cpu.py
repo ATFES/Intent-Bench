@@ -260,13 +260,16 @@ def prepare(name, arguments, environment, *, package=None):
         if not timers:
             timers.append(NativeSequence((call,)))
         timer = timers[0]
-        def interval():
-            elapsed = timer.run()
+        def interval(repeat=1):
+            elapsed = timer.run(repeat)
             # C++ exceptions are retained across the C ABI. Surface them after
             # every interval, including the final sample, outside its timing.
             checked()
             return elapsed
-        return sample_timer(SimpleNamespace(run=interval), settings,
-                            prepared.reset or (lambda: None), metadata=metadata)
+        wrapped = SimpleNamespace(run=interval, supports_repeat=True, _calibrated_repeat=timer._calibrated_repeat)
+        try:
+            return sample_timer(wrapped, settings, prepared.reset, metadata=metadata)
+        finally:
+            timer._calibrated_repeat = wrapped._calibrated_repeat
     prepared.native_measure = measure
     return prepared

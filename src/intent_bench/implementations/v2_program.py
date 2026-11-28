@@ -165,7 +165,7 @@ def bind(name, backend, args, env, device):
             nonlocal timer
             if timer is None:
                 timer = NativeSequence((call,))
-            return sample_timer(timer, settings, reset, metadata=metadata)
+            return sample_timer(timer, settings, reset if original else None, metadata=metadata)
         prepared.native_measure = measure
         prepared.close = lambda: timer and timer.close()
         prepared.timing = "cpu_native_monotonic"
